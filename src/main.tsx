@@ -7,7 +7,8 @@ import '@fontsource/cormorant-garamond/500.css';
 import '@fontsource/cormorant-garamond/500-italic.css';
 import './styles.css';
 import { Home } from './pages/Home';
-import { Checkin } from './pages/Checkin';
+import { Checkin, Validar } from './pages/Checkin';
+import { Cadastro, TextoPagina } from './pages/Cadastro';
 import { Votar } from './pages/Votar';
 import { TelaoCheckin, TelaoVotacao } from './pages/Telao';
 import { Admin } from './pages/Admin';
@@ -18,6 +19,10 @@ createRoot(document.getElementById('root')!).render(
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/checkin" element={<Checkin />} />
+      <Route path="/validar/:codigo" element={<Validar />} />
+      <Route path="/cadastro" element={<Cadastro />} />
+      <Route path="/regras" element={<TextoPagina tipo="regras" />} />
+      <Route path="/privacidade" element={<TextoPagina tipo="privacidade" />} />
       <Route path="/votar" element={<Votar />} />
       <Route path="/telao/checkin" element={<TelaoCheckin />} />
       <Route path="/telao/votacao" element={<TelaoVotacao />} />

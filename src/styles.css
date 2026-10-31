@@ -106,7 +106,34 @@ h3{font-size:22px;line-height:1.25;color:var(--wine)}
 .scale button.is-on{background:var(--wine);border-color:var(--wine);color:var(--white)}
 
 .pass{width:min(480px,100%);display:grid;gap:12px;justify-items:center;text-align:center;padding:30px 22px;border-radius:14px;background:var(--white)}
-.pass__mark{width:42px;height:42px}
+.pass__logo{width:130px;height:auto}
+.pass__qr{width:150px;height:150px;border-radius:7px}
+.choices{display:grid;gap:8px;margin:0;padding:0;border:0}
+.choices legend{padding:0;margin-bottom:8px;font-size:14px;font-weight:600}
+.form select,.answer,.field input{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--white);color:var(--ink);font:400 16px Inter,system-ui,sans-serif}
+.field{display:grid;gap:6px;font-size:14px;font-weight:600}
+.options{display:grid;gap:8px}
+.options button{min-height:50px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--white);color:var(--wine);font:600 16px Inter,system-ui,sans-serif;text-align:left;cursor:pointer}
+.options button.is-on{background:var(--wine);border-color:var(--wine);color:var(--white)}
+.legal{display:grid;gap:14px;max-width:720px;padding-top:32px;padding-bottom:48px}
+.legal img{height:72px;width:auto}
+.legal h1{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:40px;color:var(--wine)}
+.screen__logo{width:min(320px,70%);margin-bottom:8px}
+.screen--revealed{grid-template-columns:1fr}
+.results{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:end;gap:5vw;margin-top:4vh}
+.results .screen__numbers{margin-top:0}
+.bars{display:grid;grid-template-columns:repeat(11,1fr);align-items:end;gap:1vw;height:34vh}
+.bars div{display:grid;grid-template-rows:1fr auto;height:100%;gap:6px;text-align:center}
+.bars i{display:block;align-self:end;min-height:3px;border-radius:6px 6px 0 0;background:#E7CFA6}
+.bars span{font-size:clamp(14px,1.5vw,24px)}
+.bands{grid-column:1/-1;display:flex;gap:5vw}
+.bands p{font-size:clamp(18px,2vw,32px)}
+.bands strong{font-size:1.5em}
+.results--list{grid-template-columns:1fr;gap:2vh}
+.option-bar{position:relative;display:flex;justify-content:space-between;gap:20px;padding:14px 18px;border-radius:10px;background:rgba(255,255,255,.08);overflow:hidden;font-size:clamp(18px,2vw,32px)}
+.option-bar span,.option-bar strong{position:relative;z-index:1}
+.option-bar i{position:absolute;inset:0 auto 0 0;background:rgba(231,207,166,.3)}
+.quote{padding:12px 18px;border-radius:10px;background:rgba(255,255,255,.08);font-size:clamp(18px,1.8vw,28px)}
 .pass h1{font-size:32px;line-height:1.15;color:var(--wine)}
 .pass__lead{font-size:20px;font-weight:600}
 .pass__data{width:100%;display:grid;gap:10px;margin:8px 0;text-align:left}

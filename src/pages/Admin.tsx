@@ -6,12 +6,18 @@ import { supabase } from '../lib/supabase';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
+import { MembersPanel, PollsPanel, TextsPanel, exportPresencasCsv } from './AdminPrograma';
 import './admin.css';
 
-type Edition = { id: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
+type Edition = { id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
 type Photo = { id: string; url: string; legenda: string | null; no_carrossel: boolean };
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null; ativo: boolean; ordem: number };
-type Attendee = { id: string; checked_in_at: string; members: { nome: string; email: string; whatsapp: string | null; empresa: string | null; cargo: string | null; categoria: string; autoriza_imagem: boolean } };
+type Attendee = { id: string; checked_in_at: string; codigo: string; origem: string; members: { nome: string; email: string; whatsapp: string | null; empresa: string | null; cargo: string | null; categoria: string; autoriza_imagem: boolean } };
+
+const localTime = (iso: string) => {
+  const date = new Date(iso);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+};
 
 async function uploadImage(file: File, folder: string) {
   const name = file.name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '-').slice(-60);
@@ -98,7 +104,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
   );
 
   const loadPhotos = () => supabase.from('edition_photos').select('id,url,legenda,no_carrossel').eq('edition_id', edition.id).order('ordem').then(({ data }) => setPhotos((data || []) as Photo[]));
-  const loadPeople = () => supabase.from('checkins').select('id,checked_in_at,members(nome,email,whatsapp,empresa,cargo,categoria,autoriza_imagem)').eq('edition_id', edition.id).order('checked_in_at').then(({ data }) => setPeople((data || []) as unknown as Attendee[]));
+  const loadPeople = () => supabase.from('checkins').select('id,checked_in_at,codigo,origem,members(nome,email,whatsapp,empresa,cargo,categoria,autoriza_imagem)').eq('edition_id', edition.id).order('checked_in_at').then(({ data }) => setPeople((data || []) as unknown as Attendee[]));
   useEffect(() => { void loadPhotos(); void loadPeople(); }, []);
 
   async function save() {
@@ -149,6 +155,19 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
     await loadPeople();
   }
 
+  async function manualCheckin() {
+    const email = window.prompt('E-mail do membro para registrar a presença:');
+    if (!email || !window.confirm(`Registrar presença de ${email} em ${edition.titulo}? Soma 10 pontos se ainda não tiver presença.`)) return;
+    const { error } = await supabase.rpc('admin_checkin_manual', { p_edition: edition.id, p_email: email });
+    setNote(error ? error.message : 'Presença registrada.');
+    await loadPeople();
+  }
+
+  function exportCsv() {
+    exportPresencasCsv(edition.slug, [['Horário', 'Nome', 'E-mail', 'WhatsApp', 'Empresa', 'Cargo', 'Categoria', 'Código', 'Origem', 'Autoriza imagem'],
+      ...people.map((person) => [new Date(person.checked_in_at).toLocaleString('pt-BR'), person.members.nome, person.members.email, person.members.whatsapp || '', person.members.empresa || '', person.members.cargo || '', person.members.categoria, person.codigo, person.origem, person.members.autoriza_imagem ? 'Sim' : 'Não'])]);
+  }
+
   function exportPeople() {
     downloadXlsx(`communicali-${edition.slug}-presencas.xlsx`, 'Presenças', ['Horário', 'Nome', 'E-mail', 'WhatsApp', 'Empresa', 'Cargo', 'Categoria', 'Autoriza imagem'],
       people.map((person) => [new Date(person.checked_in_at).toLocaleString('pt-BR'), person.members.nome, person.members.email, person.members.whatsapp || '', person.members.empresa || '', person.members.cargo || '', person.members.categoria, person.members.autoriza_imagem ? 'Sim' : 'Não']));
@@ -169,6 +188,9 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           {text('local', 'Local')}
           {text('endereco', 'Endereço')}
           {text('cidade', 'Cidade')}
+          <label><span>Capacidade <em>opcional</em></span><input inputMode="numeric" value={draft.capacidade ?? ''} onChange={(event) => set({ capacidade: event.target.value ? Number(event.target.value) || null : null })} /></label>
+          <label><span>Check-in abre</span><input type="datetime-local" value={localTime(draft.checkin_abre)} onChange={(event) => set({ checkin_abre: new Date(event.target.value).toISOString() })} /></label>
+          <label><span>Check-in fecha</span><input type="datetime-local" value={localTime(draft.checkin_fecha)} onChange={(event) => set({ checkin_fecha: new Date(event.target.value).toISOString() })} /></label>
           {text('inscricao_url', 'Link de inscrição', 'vazio mostra inscrições encerradas')}
           {text('fotos_url', 'Link para baixar as fotos', 'por exemplo, a pasta do Drive')}
           <label className="v2-forms-check"><input type="checkbox" checked={draft.publica} onChange={(event) => set({ publica: event.target.checked })} /><span><strong>Mostrar no site</strong></span></label>
@@ -198,13 +220,15 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         <div className="adm-links">
           <a className="wf-secondary" href={`${origin}/telao/checkin?edicao=${edition.slug}`} target="_blank" rel="noopener noreferrer">Telão do check-in</a>
           <a className="wf-secondary" href={`${origin}/telao/votacao?edicao=${edition.slug}`} target="_blank" rel="noopener noreferrer">Telão da votação</a>
+          <button type="button" className="wf-secondary" onClick={() => void manualCheckin()}>Registrar presença</button>
+          <button type="button" className="wf-secondary" disabled={!people.length} onClick={exportCsv}>Exportar CSV</button>
           <button type="button" className="wf-secondary" disabled={!people.length} onClick={exportPeople}>Exportar Excel</button>
         </div>
         <div className="adm-list">
           {people.map((person) => (
             <div className="adm-row adm-row--static" key={person.id}>
               <strong>{person.members.nome}</strong>
-              <span>{person.members.email}{person.members.autoriza_imagem ? ' · autoriza imagem' : ' · sem autorização de imagem'}</span>
+              <span>{person.members.email} · {person.codigo}{person.members.autoriza_imagem ? ' · autoriza imagem' : ' · sem autorização de imagem'}</span>
               <button type="button" onClick={() => void removeCheckin(person)}>Tirar presença</button>
             </div>
           ))}
@@ -298,9 +322,12 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
         <img src="/brand/communicali-branco.png" alt="CommuniCALI" />
         <nav>
           <NavLink to="/admin/formularios">Formulários</NavLink>
+          <NavLink to="/admin/membros">Membros</NavLink>
           <NavLink to="/admin/edicoes">Edições</NavLink>
+          <NavLink to="/admin/votacoes">Votações</NavLink>
           <NavLink to="/admin/parceiros">Parceiros</NavLink>
           <NavLink to="/admin/contador">Contador</NavLink>
+          <NavLink to="/admin/textos">Cadastro e textos</NavLink>
           <a href="/" target="_blank" rel="noopener noreferrer">Ver o site</a>
         </nav>
         <div className="adm__user"><span>{session.user.email}</span><button type="button" onClick={() => void supabase.auth.signOut()}>Sair</button></div>
@@ -338,6 +365,9 @@ export function Admin() {
         <Route path="edicoes" element={<EditionsPanel />} />
         <Route path="parceiros" element={<PartnersPanel />} />
         <Route path="contador" element={<CounterPanel />} />
+        <Route path="membros" element={<MembersPanel />} />
+        <Route path="votacoes" element={<PollsPanel />} />
+        <Route path="textos" element={<TextsPanel />} />
       </Routes>
     </Frame>
   );

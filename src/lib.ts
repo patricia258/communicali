@@ -21,10 +21,18 @@ export type Edition = {
 };
 
 export type Poll = {
+  titulo: string;
   pergunta: string;
-  situacao: 'antes' | 'aberto' | 'encerrado';
+  tipo: 'nota' | 'multipla' | 'aberta';
+  opcoes: string[];
+  anonima: boolean;
+  situacao: 'rascunho' | 'ativa' | 'encerrada';
+  revelada: boolean;
   votos: number;
   media: number | null;
+  distribuicao: Record<string, number> | null;
+  por_opcao: Record<string, number> | null;
+  textos: string[] | null;
 };
 
 export const formatDate = (iso: string) => iso.split('-').reverse().join('/');

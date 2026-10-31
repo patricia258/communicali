@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { useSiteTexts } from './MemberFields';
 import { COMMUNITY_URL, PARTNER_DECK_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 
 type EditionRow = { id: string; slug: string; numero: number | null; titulo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null };
@@ -91,6 +92,7 @@ export function Home() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [members, setMembers] = useState(0);
+  const texts = useSiteTexts();
 
   useEffect(() => {
     QRCode.toDataURL(COMMUNITY_URL, { width: 360, margin: 1, color: { dark: '#5A1E2D', light: '#FFFFFF' } }).then(setQr);
@@ -134,6 +136,7 @@ export function Home() {
             <p>As conversas acontecem no grupo do WhatsApp. Aponte a câmera para o QR Code ou use o botão.</p>
             {qr && <img className="card__qr" src={qr} alt="QR Code do grupo da comunidade" />}
             <a className="button" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>
+            {texts?.cadastro_aberto && <a className="button button--ghost" href="/cadastro">Fazer meu cadastro</a>}
           </article>
           <article className="card">
             <h3>Encontros</h3>
@@ -210,7 +213,7 @@ export function Home() {
           <img src="/brand/communicali-bordo.png" alt="CommuniCALI" />
           <div>
             <p className="footer__faith">Toda honra a Deus!</p>
-            <p>Organização <a href="https://calirh.com" target="_blank" rel="noopener noreferrer">CALI RH</a> · <a href="mailto:contato@calirh.com">contato@calirh.com</a></p>
+            <p>Organização <a href="https://calirh.com" target="_blank" rel="noopener noreferrer">CALI RH</a> · <a href="mailto:contato@calirh.com">contato@calirh.com</a> · <a href="/privacidade">Privacidade</a></p>
           </div>
         </div>
       </footer>
