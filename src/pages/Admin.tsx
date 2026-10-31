@@ -318,8 +318,8 @@ function CounterPanel() {
 function Frame({ session, children }: { session: Session; children: ReactNode }) {
   return (
     <div className="adm">
-      <aside className="adm__side">
-        <img src="/brand/communicali-branco.png" alt="CommuniCALI" />
+      <header className="adm__top">
+        <NavLink to="/admin" className="adm__logo"><img src="/brand/communicali-bordo.png" alt="CommuniCALI" /></NavLink>
         <nav>
           <NavLink to="/admin/formularios">Formulários</NavLink>
           <NavLink to="/admin/membros">Membros</NavLink>
@@ -327,11 +327,11 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
           <NavLink to="/admin/votacoes">Votações</NavLink>
           <NavLink to="/admin/parceiros">Parceiros</NavLink>
           <NavLink to="/admin/contador">Contador</NavLink>
-          <NavLink to="/admin/textos">Cadastro e textos</NavLink>
+          <NavLink to="/admin/textos">Textos</NavLink>
           <a href="/" target="_blank" rel="noopener noreferrer">Ver o site</a>
         </nav>
         <div className="adm__user"><span>{session.user.email}</span><button type="button" onClick={() => void supabase.auth.signOut()}>Sair</button></div>
-      </aside>
+      </header>
       <main className="adm__main"><div className="wf">{children}</div></main>
     </div>
   );

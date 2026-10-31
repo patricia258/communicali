@@ -39,7 +39,7 @@ function Hero({ photos }: { photos: Photo[] }) {
         <a href="#parceiros">Parceiros</a>
       </nav>
       <div className="wrap hero__body">
-        <img className="hero__logo" src="/brand/communicali-branco.png" alt="CommuniCALI" />
+        <img className="hero__logo" src={photos.length ? '/brand/communicali-branco.png' : '/brand/communicali-bordo.png'} alt="CommuniCALI" />
         <p className="hero__sign">Café & Pessoas</p>
         <h1>Falar de pessoas <em>pode mudar o mundo.</em></h1>
         <a className="button button--light" href="#fazer-parte">Quero fazer parte</a>
@@ -67,7 +67,7 @@ function NextEdition({ edition }: { edition: EditionRow | null }) {
     <article className="next">
       <div className="next__cover" style={edition.capa_url ? { backgroundImage: `url(${edition.capa_url})` } : undefined}>
         <span className="next__date"><strong>{day}</strong>{month}</span>
-        {!edition.capa_url && <img src="/brand/communicali-branco.png" alt="" />}
+        {!edition.capa_url && <img src="/brand/communicali-bordo.png" alt="" />}
       </div>
       <div className="next__body">
         <p className="eyebrow">{edition.numero ? `${edition.numero}ª edição` : 'Próximo encontro'}</p>
@@ -120,7 +120,9 @@ export function Home() {
             <h3>De onde veio a ideia</h3>
             <p>Ela nasceu nos canais digitais, do cansaço com conversas superficiais, contatos de conveniência e grupos onde só se anunciam vagas. Foi dentro do próprio grupo que surgiu a vontade de sair da tela e se encontrar: escutar, aprender e debater assuntos difíceis com respeito, inclusive quando as opiniões não batem.</p>
             <h3>Como ela se liga à CALI RH</h3>
-            <p>Quem organiza é a CALI RH, fundada por Patrícia Lima, executiva de RH com mais de 15 anos de trajetória. O trabalho da CALI liga a gestão de pessoas às decisões do negócio sem perder a responsabilidade humana. A comunidade leva essa conversa para a mesa do café, e ali ninguém está vendendo nada.</p>
+            <p>Quem organiza é a CALI RH, fundada por Patrícia Lima, executiva de RH com mais de 15 anos de trajetória. O trabalho da CALI liga a gestão de pessoas às decisões do negócio sem perder a responsabilidade humana. A comunidade leva essa conversa para o dia a dia de quem participa.</p>
+            <h3>Quem está aqui</h3>
+            <p>A comunidade reúne pessoas do Brasil inteiro. Estagiário, analista, gestor ou alguém em transição de carreira: a visão e a participação de cada pessoa contam. Os encontros presenciais começam em Curitiba.</p>
           </div>
         </div>
       </section>
@@ -133,14 +135,14 @@ export function Home() {
         <div className="cards">
           <article className="card">
             <h3>Comunidade</h3>
-            <p>As conversas acontecem no grupo do WhatsApp. Aponte a câmera para o QR Code ou use o botão.</p>
+            <p>As conversas acontecem no grupo do WhatsApp, com pessoas de todo o Brasil. Aponte a câmera para o QR Code ou use o botão.</p>
             {qr && <img className="card__qr" src={qr} alt="QR Code do grupo da comunidade" />}
             <a className="button" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>
             {texts?.cadastro_aberto && <a className="button button--ghost" href="/cadastro">Fazer meu cadastro</a>}
           </article>
           <article className="card">
             <h3>Encontros</h3>
-            <p>Apresentações pessoais, rodas de conversa, troca de experiências e debates presenciais em Curitiba e região metropolitana.</p>
+            <p>Apresentações pessoais, rodas de conversa, troca de experiências e debates, começando pelos encontros presenciais em Curitiba.</p>
             <a className="button" href="#proximo">Ver o próximo encontro</a>
           </article>
           <article className="card">

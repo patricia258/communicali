@@ -7,7 +7,7 @@ import { ArrowDown, ArrowLeft, ArrowUp, Bold, Check, Copy, Italic, Paperclip, Pe
 import { Shell } from '../components/WorkspaceShell';
 import { supabase } from '../lib/supabase';
 import { downloadQrPng, downloadShareCard, downloadXlsx, qrDataUrl } from './formExports';
-import { type FormAudience, type FormQuestion, type FormRecord, type QuestionKind, AUDIENCE_LABELS, CATEGORY_SUGGESTIONS, KIND_LABELS, KIND_ORDER, PUBLIC_FORM_BASE, STATUS_LABELS, END_OF_FORM, choiceOptions, fileLabel, formatAnswer, isAnswerable, stripRichText, newQuestion, questionId, slugify } from './formModel';
+import { type FormAudience, type FormQuestion, type FormRecord, type QuestionKind, CATEGORY_SUGGESTIONS, KIND_LABELS, KIND_ORDER, PUBLIC_FORM_BASE, STATUS_LABELS, END_OF_FORM, choiceOptions, fileLabel, formatAnswer, isAnswerable, stripRichText, newQuestion, questionId, slugify } from './formModel';
 import './admin-forms.css';
 
 type Overview = Record<string, { responses: number; last: string | null }>;
@@ -109,7 +109,7 @@ export function AdminFormsPage() {
       <div className="wf-head"><div><small>ÁREA ADMINISTRATIVA</small><h1>Formulários</h1><p>Inscrições, parceiros e pesquisas da comunidade: crie o formulário, envie por link ou QR Code e veja as respostas reunidas aqui.</p></div>
         <div className="v2-head-actions"><button className="wf-secondary" type="button" onClick={() => void load()} disabled={loading}><RefreshCw size={15} /> {loading ? 'Atualizando…' : 'Atualizar'}</button><button className="wf-primary" type="button" onClick={() => setCreating({ title: '', category: '', audience: 'cali', busy: false, error: '' })}><Plus size={15} /> Novo formulário</button></div></div>
       {error && <div className="inline-notice" role="alert">{error}</div>}
-      <div className="wf-controls v2-forms-filter"><div className="wf-segments">{([['all', 'Todos'], ['cali', AUDIENCE_LABELS.cali], ['client', AUDIENCE_LABELS.client], ['trash', 'Lixeira']] as Array<['all' | FormAudience | 'trash', string]>).map(([key, label]) => <button type="button" key={key} className={audienceFilter === key ? 'on' : ''} onClick={() => setAudienceFilter(key)}>{label} <b>{key === 'all' ? forms.length : key === 'trash' ? trash.length : forms.filter((form) => form.audience === key).length}</b></button>)}</div></div>
+      <div className="wf-controls v2-forms-filter"><div className="wf-segments">{([['all', 'Todos'], ['trash', 'Lixeira']] as Array<['all' | FormAudience | 'trash', string]>).map(([key, label]) => <button type="button" key={key} className={audienceFilter === key ? 'on' : ''} onClick={() => setAudienceFilter(key)}>{label} <b>{key === 'all' ? forms.length : key === 'trash' ? trash.length : forms.filter((form) => form.audience === key).length}</b></button>)}</div></div>
       {audienceFilter === 'trash' ? <>
         <div className="wf-group-head"><div><span>LIXEIRA</span><strong>Excluídos nos últimos {TRASH_DAYS} dias</strong></div><b>{trash.length}</b></div>
         {loading ? <div className="data-loading">Carregando…</div> : trash.length ? <div className="wf-records v2-forms-list v2-forms-trash">
@@ -123,12 +123,11 @@ export function AdminFormsPage() {
           </div>)}
         </div> : <div className="wf-empty"><strong>A lixeira está vazia.</strong><p>Formulários e respostas excluídos ficam aqui por {TRASH_DAYS} dias e podem ser restaurados.</p></div>}
       </> : <>
-      <div className="wf-group-head"><div><span>FORMULÁRIOS</span><strong>{audienceFilter === 'all' ? 'Todos os formulários' : audienceFilter === 'cali' ? 'Formulários da CALI' : 'Formulários para clientes'}</strong></div><b>{visible.length}</b></div>
+      <div className="wf-group-head"><div><span>FORMULÁRIOS</span><strong>Todos os formulários</strong></div><b>{visible.length}</b></div>
       {loading ? <div className="data-loading">Carregando formulários…</div> : visible.length ? <div className="wf-records v2-forms-list">
-        <div className="wf-record-row header"><span>Formulário</span><span>Para quem</span><span>Situação</span><span>Respostas</span><span>Última resposta</span><span>Atualizado</span><span /></div>
+        <div className="wf-record-row header"><span>Formulário</span><span>Situação</span><span>Respostas</span><span>Última resposta</span><span>Atualizado</span><span /></div>
         {visible.map((form) => <div className="wf-record-row" key={form.id} role="button" tabIndex={0} onClick={() => go(form.id)} onKeyDown={(event) => { if (event.key === 'Enter') go(form.id); }}>
           <span className="v2-forms-name"><strong>{form.title}</strong><small>{PUBLIC_FORM_BASE.replace('https://', '')}{form.slug}</small></span>
-          <span><span className={`v2-forms-aud ${form.audience}`}>{form.audience === 'client' ? (companies.find((company) => company.id === form.company_id)?.name || 'Cliente') : 'CALI'}</span></span>
           <span><span className={`v2-forms-status ${form.status}`}>{STATUS_LABELS[form.status]}</span></span>
           <span className="v2-forms-count">{overview[form.id]?.responses || 0}</span>
           <span>{shortDate(overview[form.id]?.last)}</span>
@@ -141,9 +140,8 @@ export function AdminFormsPage() {
   </div></div>
   {creating && <div className="ap-pd-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !creating.busy) setCreating(null); }}><section className="ap-status-confirm" role="dialog" aria-modal="true" aria-label="Novo formulário">
     <div><small>FORMULÁRIOS</small><h2>Novo formulário</h2><p>Começa como rascunho, já com as perguntas de nome e e-mail. Você monta o resto em seguida.</p></div>
-    <label>Nome do formulário<input value={creating.title} maxLength={160} autoFocus placeholder="Ex.: Pesquisa de clima 2026" onChange={(event) => setCreating({ ...creating, title: event.target.value, error: '' })} onKeyDown={(event) => { if (event.key === 'Enter') void create(); }} /></label>
-    <label>Categoria (aparece para quem responde)<input list="cali-form-categories" value={creating.category} maxLength={40} placeholder="Ex.: Pesquisa de satisfação" onChange={(event) => setCreating({ ...creating, category: event.target.value })} /></label>
-    <label>Para quem<select value={creating.audience} onChange={(event) => setCreating({ ...creating, audience: event.target.value as FormAudience })}><option value="cali">Uso da CALI</option><option value="client">Clientes</option></select></label>
+    <label>Nome do formulário<input value={creating.title} maxLength={160} autoFocus placeholder="Ex.: Avaliação da 1ª edição" onChange={(event) => setCreating({ ...creating, title: event.target.value, error: '' })} onKeyDown={(event) => { if (event.key === 'Enter') void create(); }} /></label>
+    <label>Categoria (aparece para quem responde)<input list="cali-form-categories" value={creating.category} maxLength={40} placeholder="Ex.: Inscrição" onChange={(event) => setCreating({ ...creating, category: event.target.value })} /></label>
     <datalist id="cali-form-categories">{CATEGORY_SUGGESTIONS.map((item) => <option key={item} value={item} />)}</datalist>
     {creating.error && <p className="v2-forms-error" role="alert">{creating.error}</p>}
     <footer><button type="button" disabled={creating.busy} onClick={() => setCreating(null)}>Cancelar</button><button type="button" disabled={creating.busy} onClick={() => void create()}>{creating.busy ? 'Criando…' : 'Criar formulário'}</button></footer>
@@ -221,8 +219,7 @@ function FormDetail({ form, tab, companies, stats, onTab, onBack, onDuplicate, o
         <div className="v2-forms-grid">
           <label className="wide"><span>Nome do formulário</span><input value={draft.title} maxLength={160} onChange={(event) => patch({ title: event.target.value })} /></label>
           <label><span>Categoria <em>aparece para quem responde, acima do título</em></span><input list="cali-form-categories-edit" value={draft.category} maxLength={40} placeholder="Ex.: Questionário" onChange={(event) => patch({ category: event.target.value })} /><datalist id="cali-form-categories-edit">{CATEGORY_SUGGESTIONS.map((item) => <option key={item} value={item} />)}</datalist></label>
-          <label><span>Para quem</span><select value={draft.audience} onChange={(event) => patch({ audience: event.target.value as FormAudience })}><option value="cali">Uso da CALI</option><option value="client">Clientes</option></select></label>
-          <div className="wide v2-forms-field"><span>Introdução <em>opcional · aparece na primeira tela, antes das perguntas</em></span><RichTextarea value={draft.description} maxLength={1200} rows={5} placeholder="Ex.: Queremos entender como foi sua experiência. A participação é voluntária e leva cerca de 3 minutos." onChange={(value) => patch({ description: value })} /></div>
+          <div className="wide v2-forms-field"><span>Introdução <em>opcional · aparece na primeira tela, antes das perguntas</em></span><RichTextarea value={draft.description} maxLength={1200} rows={5} placeholder="Ex.: Conte como foi o encontro. Leva cerca de 3 minutos." onChange={(value) => patch({ description: value })} /></div>
           <label><span>Link</span><div className="v2-forms-slug"><b>comuni.calirh.com/f/</b><input value={draft.slug} maxLength={60} onChange={(event) => patch({ slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-{2,}/g, '-') })} /></div></label>
           <span />
           <label><span>Texto do botão final <em>opcional · padrão “Enviar”</em></span><input value={draft.submit_label || ''} maxLength={60} placeholder="Enviar" onChange={(event) => patch({ submit_label: event.target.value })} /></label>

@@ -27,7 +27,7 @@ export type FormAudience = 'cali' | 'client';
 
 export const AUDIENCE_LABELS: Record<FormAudience, string> = { cali: 'Comunidade', client: 'Parceiros' };
 
-export const CATEGORY_SUGGESTIONS = ['Questionário', 'Pesquisa de satisfação', 'Pesquisa de clima', 'NPS', 'Diagnóstico', 'Avaliação', 'Inscrição', 'Levantamento', 'Cadastro', 'Feedback'];
+export const CATEGORY_SUGGESTIONS = ['Inscrição', 'Parceria', 'Avaliação do encontro', 'Pesquisa', 'Cadastro', 'Feedback'];
 
 export type FormRecord = {
   id: string;
