@@ -1,14 +1,12 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './lib/supabase';
 
-export const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_KEY, {
-  auth: { persistSession: false },
-});
+export { supabase };
 
 /** Edição em andamento; `?edicao=teste` usa a edição de teste, que não aparece no site. */
 export const editionSlug = () => new URLSearchParams(window.location.search).get('edicao') || 'fundadora';
 
 export const COMMUNITY_URL = 'https://chat.whatsapp.com/Lu9uzReUxAlJZcQaU1is01';
-export const PARTNER_FORM_URL = 'https://app.calirh.com/f/parceiros-communicali';
+export const PARTNER_FORM_URL = '/f/parceiros-communicali';
 export const PARTNER_DECK_URL = 'https://app.calirh.com/communicali/seja-parceiro.pdf';
 
 export type Edition = {
