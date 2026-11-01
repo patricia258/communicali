@@ -2,7 +2,6 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import QRCode from 'qrcode';
 import { ArrowRight, CalendarDays, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_DECK_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
-import { useSiteTexts } from './MemberFields';
 import { SiteFooter } from '../components/SiteFooter';
 import { EDITION_FIELDS, EditionCard, Share, type EditionRow } from './Edicao';
 
@@ -21,7 +20,7 @@ const FAQ = [
   ['Preciso ser de RH para participar?', 'Não. A base da comunidade é de profissionais de RH e administrativos, e líderes, empreendedores e especialistas de qualquer área são bem-vindos, do estágio à transição de carreira.'],
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
-  ['Como participo de um encontro?', 'Entre na comunidade e faça seu cadastro. Cada encontro é divulgado no grupo, com data, local e forma de participar.'],
+  ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
@@ -96,7 +95,6 @@ export function Home() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [members, setMembers] = useState(0);
-  const texts = useSiteTexts();
 
   useEffect(() => {
     QRCode.toDataURL(COMMUNITY_URL, { width: 360, margin: 1, color: { dark: '#2B1A20', light: '#FFFFFF' } }).then(setQr);
@@ -109,7 +107,7 @@ export function Home() {
   const upcoming = editions.filter((edition) => edition.data_evento >= today());
   const next = upcoming[0] || null;
   const past = editions.filter((edition) => edition.data_evento < today()).reverse();
-  const joinHref = texts?.cadastro_aberto ? '/cadastro' : '#fazer-parte';
+  const joinHref = '#fazer-parte';
 
   return (
     <div className="home">
@@ -162,7 +160,7 @@ export function Home() {
             <p className="eyebrow">Como fazer parte</p>
             <h2>Escolha como <em>participar.</em></h2>
           </div>
-          <p>O grupo é onde a conversa acontece todo dia. O cadastro guarda seu histórico em cada edição.</p>
+          <p>O grupo é onde a conversa acontece todo dia. Quem participa de um encontro presencial se torna membro.</p>
         </div>
         <div className="doors">
           <article className="door">
@@ -177,9 +175,9 @@ export function Home() {
           <article className="door">
             <span className="door__icon"><UserPlus size={20} aria-hidden="true" /></span>
             <div>
-              <h3>Cadastro de membro</h3>
-              <p>Registre sua participação para acumular presenças e pontos e acompanhar sua categoria na comunidade.</p>
-              <a className="link" href={joinHref}>Fazer meu cadastro</a>
+              <h3>Encontros presenciais</h3>
+              <p>Inscreva-se no próximo encontro. A presença no dia registra você como membro da comunidade.</p>
+              <a className="link" href="#proximo">Ver o próximo encontro</a>
             </div>
           </article>
         </div>
