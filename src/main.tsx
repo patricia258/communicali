@@ -16,14 +16,19 @@ import { Convidar, Convite } from './pages/Convidados';
 import { TelaoCheckin, TelaoVotacao } from './pages/Telao';
 import { Admin } from './pages/Admin';
 import { StaffForm } from './pages/Staff';
+import { EdicaoPage, InscricaoPage } from './pages/Edicao';
+import { ErrorBoundary, reportError } from './components/ErrorBoundary';
 import { PublicFormPage } from './forms/PublicFormPage';
 import { SiteFooter } from './components/SiteFooter';
 import type { ReactNode } from 'react';
 
 const Page = ({ children }: { children: ReactNode }) => <>{children}<SiteFooter /></>;
 
+window.addEventListener('error', (event) => { if (event.message) reportError(event.message); });
+window.addEventListener('unhandledrejection', (event) => reportError(String(event.reason?.message || event.reason).slice(0, 300)));
+
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
+  <ErrorBoundary><BrowserRouter>
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/checkin" element={<Page><Checkin /></Page>} />
@@ -32,6 +37,8 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/regras" element={<Page><TextoPagina tipo="regras" /></Page>} />
       <Route path="/privacidade" element={<Page><TextoPagina tipo="privacidade" /></Page>} />
       <Route path="/staff" element={<StaffForm />} />
+      <Route path="/e/:slug" element={<EdicaoPage />} />
+      <Route path="/inscricao/:slug" element={<InscricaoPage />} />
       <Route path="/votar" element={<Page><Votar /></Page>} />
       <Route path="/convidar" element={<Convidar />} />
       <Route path="/convite/:token" element={<Page><Convite /></Page>} />
@@ -41,5 +48,5 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/admin/*" element={<Admin />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  </BrowserRouter>,
+  </BrowserRouter></ErrorBoundary>,
 );

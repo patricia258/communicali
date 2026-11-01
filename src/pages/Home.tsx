@@ -1,11 +1,11 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import QRCode from 'qrcode';
-import { ArrowRight, CalendarDays, Handshake, Link2, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_DECK_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 import { useSiteTexts } from './MemberFields';
-import { Instagram, SiteFooter } from '../components/SiteFooter';
+import { SiteFooter } from '../components/SiteFooter';
+import { EDITION_FIELDS, EditionCard, Share, type EditionRow } from './Edicao';
 
-type EditionRow = { id: string; slug: string; numero: number | null; titulo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null };
 type Photo = { id: string; url: string; legenda: string | null };
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null };
 
@@ -28,7 +28,6 @@ const FAQ = [
 const TILES = ['Rodas de conversa', 'Café', 'Mini pitch', 'Pessoas', 'Debates', 'Conexões'];
 
 const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
-const longDate = (iso: string) => new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`));
 
 function Arches({ photos }: { photos: Photo[] }) {
   const items = photos.length ? photos : TILES.map((label) => ({ id: label, url: '', legenda: label }));
@@ -44,26 +43,6 @@ function Arches({ photos }: { photos: Photo[] }) {
           ))}
         </div>
       ))}
-    </div>
-  );
-}
-
-const Linkedin = ({ size }: { size: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.5 8.5H3V21h3.5V8.5ZM4.75 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM21 13.6c0-3.3-1.8-5.4-4.6-5.4-1.5 0-2.7.7-3.4 1.8V8.5H9.7V21h3.5v-6.6c0-1.9.9-3 2.4-3 1.4 0 2 .9 2 2.8V21H21v-7.4Z" /></svg>
-);
-
-function Share({ edition }: { edition: EditionRow }) {
-  const [copied, setCopied] = useState(false);
-  const url = `${window.location.origin}/#${edition.slug}`;
-  const text = `${edition.titulo} | CommuniCALI, ${formatDate(edition.data_evento)}, ${edition.local}`;
-  const copy = () => navigator.clipboard.writeText(`${text} ${url}`).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 2000); });
-  return (
-    <div className="share">
-      <span>Compartilhar</span>
-      <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer" aria-label="Compartilhar no LinkedIn"><Linkedin size={16} /></a>
-      <button type="button" aria-label="Copiar para o Instagram" title="Copia o texto e abre o Instagram" onClick={() => { void copy(); window.open('https://www.instagram.com/', '_blank', 'noopener'); }}><Instagram size={16} /></button>
-      <button type="button" aria-label="Copiar o link" onClick={() => void copy()}><Link2 size={16} /></button>
-      {copied && <em>Link copiado</em>}
     </div>
   );
 }
@@ -92,7 +71,6 @@ function People({ joinHref }: { joinHref: string }) {
             <p className="tag">Embaixadores</p>
             <h3>Faça parte desse ecossistema</h3>
             <p>Quem participa, contribui e conecta pessoas pode aparecer aqui como embaixador da comunidade.</p>
-            <a className="outline" href={joinHref}>Quero participar</a>
           </div>
         </article>
         <article className={`person person--text${current === 2 ? ' is-on' : ''}`}>
@@ -121,7 +99,7 @@ export function Home() {
 
   useEffect(() => {
     QRCode.toDataURL(COMMUNITY_URL, { width: 360, margin: 1, color: { dark: '#2B1A20', light: '#FFFFFF' } }).then(setQr);
-    supabase.from('editions').select('id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,resumo,fotos_url,inscricao_url').eq('publica', true).order('data_evento').then(({ data }) => setEditions((data || []) as EditionRow[]));
+    supabase.from('editions').select(EDITION_FIELDS).eq('publica', true).order('data_evento').then(({ data }) => setEditions((data || []) as EditionRow[]));
     supabase.from('edition_photos').select('id,url,legenda').eq('no_carrossel', true).order('ordem').then(({ data }) => setPhotos((data || []) as Photo[]));
     supabase.from('partners').select('id,nome,logo_url,site_url').eq('ativo', true).order('ordem').then(({ data }) => setPartners((data || []) as Partner[]));
     supabase.rpc('communicali_membros').then(({ data }) => setMembers(Number(data) || 0));
@@ -173,7 +151,6 @@ export function Home() {
           <p>A CommuniCALI é uma comunidade para quem se interessa por gente: profissionais de RH, lideranças, empresários, empreendedores e todas as pessoas que querem falar de gestão e desenvolvimento humano.</p>
           <p>Ela nasceu nos canais digitais, do cansaço com conversas superficiais e grupos feitos só para repassar informação. Dentro do próprio grupo surgiu a vontade de sair da tela e se encontrar para escutar, aprender e debater assuntos difíceis com respeito.</p>
           <p>Quem organiza é a CALI RH, que liga a gestão de pessoas às decisões do negócio sem perder a responsabilidade humana.</p>
-          <a className="pill" href={joinHref}>Quero participar</a>
         </div>
         <People joinHref={joinHref} />
       </section>
@@ -214,27 +191,7 @@ export function Home() {
             <h2>Encontros para <em>sair da tela.</em></h2>
           </div>
         </div>
-        {next ? (
-          <article className="event" id={next.slug}>
-            <div className="event__cover">
-              {next.capa_url ? <img src={next.capa_url} alt={`Fachada do ${next.local}`} /> : <img className="event__logo" src="/brand/communicali-branco.png" alt="" />}
-              <span className="event__badge">Próximo encontro</span>
-            </div>
-            <div className="event__body">
-              <p className="event__date">{longDate(next.data_evento)} · {next.cidade}</p>
-              <h3>{next.titulo}</h3>
-              <dl>
-                <div><dt>Horário</dt><dd>{next.horario}</dd></div>
-                <div><dt>Local</dt><dd>{next.local}</dd></div>
-                <div className="wide"><dt>Endereço</dt><dd>{[next.endereco, next.cidade].filter(Boolean).join(', ')}</dd></div>
-              </dl>
-              {next.inscricao_url
-                ? <a className="pill" href={next.inscricao_url}>Quero me inscrever</a>
-                : <p className="muted">Inscrições desta edição encerradas. Entre na comunidade para saber da próxima.</p>}
-              <Share edition={next} />
-            </div>
-          </article>
-        ) : <p className="muted">A próxima data sai em breve. Quem está no grupo da comunidade fica sabendo primeiro.</p>}
+        {next ? <EditionCard edition={next} badge="Próximo encontro" /> : <p className="muted">A próxima data sai em breve. Quem está no grupo da comunidade fica sabendo primeiro.</p>}
         {upcoming.length > 1 && (
           <div className="past">
             <h3>Próximas edições</h3>
@@ -306,11 +263,6 @@ export function Home() {
         <div className="faq">
           {FAQ.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}
         </div>
-      </section>
-
-      <section className="wrap closing">
-        <h2>Vem fazer parte dessa conversa.</h2>
-        <a className="pill pill--large" href={joinHref}>Quero participar</a>
       </section>
 
       <SiteFooter />

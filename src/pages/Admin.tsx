@@ -12,7 +12,7 @@ import { HomePanel, ProgramPanel } from './AdminInicio';
 import { StaffPanel } from './Staff';
 import './admin.css';
 
-type Edition = { id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
+type Edition = { inscricoes_abertas: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
 type Photo = { id: string; url: string; legenda: string | null; no_carrossel: boolean };
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null; ativo: boolean; ordem: number };
 type Attendee = { id: string; checked_in_at: string; codigo: string; origem: string; members: { nome: string; email: string; whatsapp: string | null; empresa: string | null; cargo: string | null; categoria: string; autoriza_imagem: boolean } };
@@ -106,6 +106,8 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
     <label><span>{label}{hint && <em> {hint}</em>}</span><input value={String(draft[key] ?? '')} onChange={(event) => set({ [key]: event.target.value } as Partial<Edition>)} /></label>
   );
 
+  const [signups, setSignups] = useState<Array<{ id: string; nome: string; email: string; whatsapp: string; status: string }>>([]);
+  useEffect(() => { supabase.from('registrations').select('id,nome,email,whatsapp,status').eq('edition_id', edition.id).order('created_at').then(({ data }) => setSignups(data || [])); }, [edition.id]);
   const loadPhotos = () => supabase.from('edition_photos').select('id,url,legenda,no_carrossel').eq('edition_id', edition.id).order('ordem').then(({ data }) => setPhotos((data || []) as Photo[]));
   const loadPeople = () => supabase.from('checkins').select('id,checked_in_at,codigo,origem,members(nome,email,whatsapp,empresa,cargo,categoria,autoriza_imagem)').eq('edition_id', edition.id).order('checked_in_at').then(({ data }) => setPeople((data || []) as unknown as Attendee[]));
   useEffect(() => { void loadPhotos(); void loadPeople(); }, []);
@@ -194,7 +196,8 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           <label><span>Capacidade <em>opcional</em></span><input inputMode="numeric" value={draft.capacidade ?? ''} onChange={(event) => set({ capacidade: event.target.value ? Number(event.target.value) || null : null })} /></label>
           <label><span>Check-in abre</span><input type="datetime-local" value={localTime(draft.checkin_abre)} onChange={(event) => set({ checkin_abre: new Date(event.target.value).toISOString() })} /></label>
           <label><span>Check-in fecha</span><input type="datetime-local" value={localTime(draft.checkin_fecha)} onChange={(event) => set({ checkin_fecha: new Date(event.target.value).toISOString() })} /></label>
-          {text('inscricao_url', 'Link de inscrição', 'vazio mostra inscrições encerradas')}
+          <label className="v2-forms-check"><input type="checkbox" checked={draft.inscricoes_abertas} onChange={(event) => set({ inscricoes_abertas: event.target.checked })} /><span><strong>Inscrições abertas</strong><small>O site mostra "Quero me inscrever". Não precisa criar formulário.</small></span></label>
+          {text('inscricao_url', 'Link externo de inscrição', 'opcional, só se quiser usar outro formulário')}
           {text('fotos_url', 'Link para baixar as fotos', 'por exemplo, a pasta do Drive')}
           <label className="v2-forms-check"><input type="checkbox" checked={draft.publica} onChange={(event) => set({ publica: event.target.checked })} /><span><strong>Mostrar no site</strong></span></label>
           <label className="wide"><span>Resumo do encontro</span><textarea rows={5} value={draft.resumo || ''} onChange={(event) => set({ resumo: event.target.value })} /></label>
@@ -217,6 +220,14 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
             </figure>
           ))}
         </div>
+      </section>
+      <section className="v2-forms-card">
+        <header><small>INSCRIÇÕES PELO SITE</small><h2>{signups.filter((item) => item.status === 'inscrito').length} {signups.filter((item) => item.status === 'inscrito').length === 1 ? 'inscrito' : 'inscritos'}{signups.some((item) => item.status === 'espera') ? `, ${signups.filter((item) => item.status === 'espera').length} na lista de espera` : ''}</h2></header>
+        <div className="adm-links">
+          <input readOnly aria-label="Link da página da edição" value={`https://comuni.calirh.com/e/${edition.slug}`} onFocus={(event) => event.target.select()} />
+          <button type="button" className="wf-secondary" disabled={!signups.length} onClick={() => downloadXlsx(`communicali-${edition.slug}-inscritos.xlsx`, 'Inscritos', ['Nome', 'E-mail', 'WhatsApp', 'Situação'], signups.map((item) => [item.nome, item.email, item.whatsapp, item.status]))}>Exportar Excel</button>
+        </div>
+        <div className="adm-list">{signups.map((item) => <div className="adm-row adm-row--static" key={item.id}><strong>{item.nome}</strong><span>{item.email} · {item.whatsapp}</span><em>{item.status === 'espera' ? 'Lista de espera' : item.status === 'cancelado' ? 'Cancelado' : 'Inscrito'}</em></div>)}</div>
       </section>
       <section className="v2-forms-card">
         <header><small>PRESENÇAS</small><h2>{people.length} {people.length === 1 ? 'check-in' : 'check-ins'}</h2></header>

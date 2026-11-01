@@ -5,10 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#1F0E14" />
     <title>CommuniCALI | Café & Pessoas</title>
-    <meta name="description" content="Encontros presenciais da CALI RH em Curitiba e região. Falar de pessoas pode mudar o mundo." />
+    <style>html,body{background:#1F0E14}</style>
+    <script>
+      // Página antiga aberta depois de uma publicação: recarrega uma vez para buscar os arquivos novos.
+      addEventListener('error', function (event) {
+        var tag = event.target && event.target.tagName;
+        if ((tag === 'SCRIPT' || tag === 'LINK') && !sessionStorage.getItem('comuni-reload')) {
+          sessionStorage.setItem('comuni-reload', '1');
+          location.reload();
+        }
+      }, true);
+    </script>
+    <meta name="description" content="Comunidade de pessoas interessadas em gente, gestão e desenvolvimento humano. Falar de pessoas pode mudar o mundo." />
     <meta property="og:title" content="CommuniCALI | Café & Pessoas" />
-    <meta property="og:description" content="Falar de pessoas pode mudar o mundo." />
-    <meta property="og:image" content="https://comuni.calirh.com/fotos/legacy-coffee.jpg" />
+    <meta property="og:description" content="Comunidade de pessoas interessadas em gente, gestão e desenvolvimento humano." />
+    <meta property="og:image" content="https://comuni.calirh.com/og-comunidade.jpg" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta property="og:url" content="https://comuni.calirh.com" />
     <link rel="icon" href="/brand/cali-favicon.svg" />
   </head>
