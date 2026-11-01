@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/funnel-display": "^5.3.0",
     "@fontsource/inter": "^5.2.5",
     "@supabase/supabase-js": "^2.57.4",
     "fflate": "^0.8.3",

@@ -1,8 +1,9 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { editionSlug, errorMessage, formatDate, supabase, type Edition } from '../lib';
-import { MemberFields, emptyMember, memberArgs, useSiteTexts } from './MemberFields';
+import { answerArgs, memberQuestions, useSiteTexts } from './MemberFields';
+import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 
 type Done = { nome: string; categoria: string; edicao: string; selo: string; codigo: string; repetido: boolean };
 type Step = 'email' | 'novo' | 'codigo';
@@ -41,10 +42,6 @@ export function Checkin() {
   const [loadError, setLoadError] = useState('');
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
-  const [codigo, setCodigo] = useState('');
-  const [form, setForm] = useState(emptyMember());
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState('');
   const [done, setDone] = useState<Done | null>(null);
 
   useEffect(() => {
@@ -54,47 +51,52 @@ export function Checkin() {
     });
   }, [slug]);
 
-  async function checkEmail(event: FormEvent) {
-    event.preventDefault();
-    setSending(true); setError('');
-    const clean = email.trim().toLowerCase();
-    const { data, error: failure } = await supabase.rpc('communicali_situacao_email', { p_slug: slug, p_email: clean });
-    if (failure) { setSending(false); setError(errorMessage(failure)); return; }
-    if ((data as { membro: boolean }).membro) {
-      const { error: sendFailure } = await supabase.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } });
-      setSending(false);
-      if (sendFailure) setError('Não conseguimos enviar o código agora. Procure a organização na recepção para registrar sua presença.');
-      else setStep('codigo');
-      return;
-    }
-    setSending(false);
-    setForm(emptyMember(clean));
-    setStep('novo');
-  }
+  const meta = edition ? `${edition.titulo} · ${formatDate(edition.data_evento)} · ${edition.local}` : '';
 
-  async function verify(event: FormEvent) {
-    event.preventDefault();
-    setSending(true); setError('');
-    const { error: failure } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: codigo.trim(), type: 'email' });
-    if (failure) { setSending(false); setError('Código inválido ou vencido. Confira o e-mail e tente de novo.'); return; }
-    const { data, error: checkinFailure } = await supabase.rpc('communicali_checkin_membro', { p_slug: slug });
-    await supabase.auth.signOut();
-    setSending(false);
-    if (checkinFailure) setError(errorMessage(checkinFailure));
-    else setDone(data as Done);
-  }
-
-  async function register(event: FormEvent) {
-    event.preventDefault();
-    if (sending) return;
-    setSending(true); setError('');
-    const { data, error: failure } = await supabase.rpc('communicali_checkin_novo', { p_slug: slug, ...memberArgs(form), p_imagem: form.imagem });
-    setSending(false);
-    if (failure) setError(errorMessage(failure));
-    else setDone(data as Done);
-  }
+  const preset = useMemo<FormPreset | null>(() => {
+    if (step === 'email') return {
+      title: 'Check-in', category: 'CommuniCALI', skipWelcome: true, submitLabel: 'Continuar',
+      questions: [{ id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', help: meta, required: true }],
+      submit: async (answers) => {
+        const clean = String(answers.email).trim().toLowerCase();
+        const { data, error } = await supabase.rpc('communicali_situacao_email', { p_slug: slug, p_email: clean });
+        if (error) return errorMessage(error);
+        setEmail(clean);
+        if (!(data as { membro: boolean }).membro) { setStep('novo'); return ''; }
+        const { error: sendFailure } = await supabase.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } });
+        if (sendFailure) return 'Não conseguimos enviar o código agora. Procure a organização na recepção para registrar sua presença.';
+        setStep('codigo');
+        return '';
+      },
+    };
+    if (step === 'codigo') return {
+      title: 'Check-in', category: 'CommuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
+      questions: [{ id: 'codigo', kind: 'short_text', label: 'Digite o código que enviamos', help: `Confira o e-mail ${email}.`, required: true }],
+      submit: async (answers) => {
+        const { error } = await supabase.auth.verifyOtp({ email, token: String(answers.codigo).trim(), type: 'email' });
+        if (error) return 'Código inválido ou vencido. Confira o e-mail e tente de novo.';
+        const { data, error: checkinFailure } = await supabase.rpc('communicali_checkin_membro', { p_slug: slug });
+        await supabase.auth.signOut({ scope: 'local' });
+        if (checkinFailure) return errorMessage(checkinFailure);
+        setDone(data as Done);
+        return '';
+      },
+    };
+    if (!texts) return null;
+    return {
+      title: 'Check-in', category: 'CommuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
+      questions: memberQuestions(texts, { imagem: true }),
+      submit: async (answers) => {
+        const { data, error } = await supabase.rpc('communicali_checkin_novo', { p_slug: slug, ...answerArgs(answers, email), p_imagem: answers.imagem === 'Sim' });
+        if (error) return errorMessage(error);
+        setDone(data as Done);
+        return '';
+      },
+    };
+  }, [step, email, slug, meta, texts]);
 
   if (done) return <Success done={done} />;
+  if (edition?.situacao === 'aberto' && preset) return <PublicFormPage key={step} preset={preset} />;
 
   return (
     <main className="event-page">
@@ -102,32 +104,9 @@ export function Checkin() {
         <p className="eyebrow">CommuniCALI</p>
         <h1>Check-in</h1>
         {loadError && <p className="notice notice--alert">{loadError}</p>}
-        {edition && <p className="event-card__meta">{edition.titulo} · {formatDate(edition.data_evento)} · {edition.local}</p>}
+        {edition && <p className="event-card__meta">{meta}</p>}
         {edition?.situacao === 'antes' && <p className="notice">O check-in abre no dia do encontro.</p>}
         {edition?.situacao === 'encerrado' && <p className="notice">O check-in desta edição foi encerrado.</p>}
-        {edition?.situacao === 'aberto' && step === 'email' && (
-          <form className="form" onSubmit={checkEmail}>
-            <label>Qual é o seu e-mail?<input required type="email" inputMode="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
-            {error && <p className="notice notice--alert">{error}</p>}
-            <button className="button" type="submit" disabled={sending}>{sending ? 'Verificando...' : 'Continuar'}</button>
-          </form>
-        )}
-        {edition?.situacao === 'aberto' && step === 'codigo' && (
-          <form className="form" onSubmit={verify}>
-            <p>Enviamos um código para {email}. Digite aqui para confirmar sua presença.</p>
-            <label>Código<input required inputMode="numeric" autoComplete="one-time-code" value={codigo} onChange={(event) => setCodigo(event.target.value)} /></label>
-            {error && <p className="notice notice--alert">{error}</p>}
-            <button className="button" type="submit" disabled={sending}>{sending ? 'Confirmando...' : 'Confirmar presença'}</button>
-          </form>
-        )}
-        {edition?.situacao === 'aberto' && step === 'novo' && texts && (
-          <form className="form" onSubmit={register}>
-            <p>Primeira vez por aqui? Faça seu cadastro para concluir o check-in.</p>
-            <MemberFields value={form} onChange={setForm} texts={texts} withImage lockEmail />
-            {error && <p className="notice notice--alert">{error}</p>}
-            <button className="button" type="submit" disabled={sending}>{sending ? 'Enviando...' : 'Confirmar presença'}</button>
-          </form>
-        )}
       </section>
     </main>
   );

@@ -1,51 +1,30 @@
-import { useState, type FormEvent } from 'react';
+import { useMemo } from 'react';
 import { errorMessage, supabase } from '../lib';
-import { MemberFields, emptyMember, memberArgs, useSiteTexts } from './MemberFields';
+import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
+import { answerArgs, memberQuestions, useSiteTexts } from './MemberFields';
 
 export function Cadastro() {
   const texts = useSiteTexts();
-  const [form, setForm] = useState(emptyMember());
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState('');
-  const [done, setDone] = useState(false);
+  const preset = useMemo<FormPreset | null>(() => texts?.cadastro_aberto ? {
+    title: 'Cadastro de membro',
+    category: 'CommuniCALI | Café & Pessoas',
+    description: 'Falar de pessoas pode mudar o mundo. Faça seu cadastro para participar da comunidade.',
+    questions: memberQuestions(texts, { email: true }),
+    submitLabel: 'Fazer meu cadastro',
+    successText: 'Bem-vindo à CommuniCALI! Seu cadastro foi realizado com sucesso. Falar de pessoas pode mudar o mundo.',
+    submit: async (answers) => {
+      const { error } = await supabase.rpc('communicali_cadastrar', answerArgs(answers));
+      return error ? errorMessage(error) : '';
+    },
+  } : null, [texts]);
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    if (sending) return;
-    setSending(true); setError('');
-    const { error: failure } = await supabase.rpc('communicali_cadastrar', memberArgs(form));
-    setSending(false);
-    if (failure) setError(errorMessage(failure));
-    else setDone(true);
-  }
-
-  if (done) {
-    return (
-      <main className="event-page event-page--wine">
-        <section className="pass">
-          <img className="pass__logo" src="/brand/communicali-bordo.png" alt="CommuniCALI" />
-          <h1>Bem-vindo à CommuniCALI!</h1>
-          <p className="pass__lead">Seu cadastro foi realizado com sucesso.</p>
-          <p className="pass__hint">Falar de pessoas pode mudar o mundo.</p>
-          <a className="button" href="/">Voltar ao site</a>
-        </section>
-      </main>
-    );
-  }
-
+  if (preset) return <PublicFormPage preset={preset} />;
   return (
     <main className="event-page">
       <section className="event-card">
         <p className="eyebrow">CommuniCALI</p>
         <h1>Cadastro de membro</h1>
-        {texts && !texts.cadastro_aberto && <p className="notice">O cadastro abre em breve. Enquanto isso, entre no grupo da comunidade pelo site.</p>}
-        {texts?.cadastro_aberto && (
-          <form className="form" onSubmit={submit}>
-            <MemberFields value={form} onChange={setForm} texts={texts} />
-            {error && <p className="notice notice--alert">{error}</p>}
-            <button className="button" type="submit" disabled={sending}>{sending ? 'Enviando...' : 'Fazer meu cadastro'}</button>
-          </form>
-        )}
+        {texts && <p className="notice">O cadastro abre em breve. Enquanto isso, entre no grupo da comunidade pelo site.</p>}
       </section>
     </main>
   );

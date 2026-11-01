@@ -1,86 +1,59 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 import { useParams } from 'react-router-dom';
 import { editionSlug, errorMessage, formatDate, supabase, type Edition } from '../lib';
 
-type Step = 'email' | 'codigo' | 'dados' | 'pronto';
+type Step = 'email' | 'codigo' | 'dados';
 
 export function Convidar() {
   const slug = editionSlug();
   const [edition, setEdition] = useState<Edition | null>(null);
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
-  const [codigo, setCodigo] = useState('');
-  const [nome, setNome] = useState('');
-  const [convidado, setConvidado] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     supabase.rpc('communicali_edicao', { p_slug: slug }).then(({ data }) => setEdition(data as Edition | null));
-    return () => { void supabase.auth.signOut({ scope: 'local' }); };
   }, [slug]);
 
-  async function send(event: FormEvent) {
-    event.preventDefault();
-    setBusy(true); setError('');
-    const { error: failure } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: true } });
-    setBusy(false);
-    if (failure) setError('Não conseguimos enviar o código agora. Tente de novo em alguns minutos.');
-    else setStep('codigo');
-  }
+  const meta = edition ? `${edition.titulo} · ${formatDate(edition.data_evento)} · ${edition.local}` : '';
+  const preset = useMemo<FormPreset>(() => {
+    const base = { title: 'Indicar um convidado', category: 'CommuniCALI', skipWelcome: true };
+    if (step === 'email') return {
+      ...base, submitLabel: 'Receber código',
+      questions: [{ id: 'email', kind: 'email', label: 'Qual é o seu e-mail de membro?', help: `${meta}\nA indicação não garante vaga. A organização confirma conforme a disponibilidade do encontro.`, required: true }],
+      submit: async (answers) => {
+        const clean = String(answers.email).trim().toLowerCase();
+        const { error } = await supabase.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } });
+        if (error) return 'Não conseguimos enviar o código agora. Tente de novo em alguns minutos.';
+        setEmail(clean); setStep('codigo');
+        return '';
+      },
+    };
+    if (step === 'codigo') return {
+      ...base, submitLabel: 'Continuar',
+      questions: [{ id: 'codigo', kind: 'short_text', label: 'Digite o código que enviamos', help: `Confira o e-mail ${email}.`, required: true }],
+      submit: async (answers) => {
+        const { error } = await supabase.auth.verifyOtp({ email, token: String(answers.codigo).trim(), type: 'email' });
+        if (error) return 'Código inválido ou vencido. Confira o e-mail e tente de novo.';
+        setStep('dados');
+        return '';
+      },
+    };
+    return {
+      ...base, submitLabel: 'Enviar indicação', successText: 'Indicação recebida. A organização vai avaliar e, se houver vaga, enviar o convite à pessoa.',
+      questions: [
+        { id: 'nome', kind: 'name', label: 'Qual é o nome do convidado?', required: true },
+        { id: 'email', kind: 'email', label: 'Qual é o e-mail do convidado?', required: true },
+      ],
+      submit: async (answers) => {
+        const { error } = await supabase.rpc('communicali_indicar', { p_slug: slug, p_nome: answers.nome, p_email: answers.email });
+        await supabase.auth.signOut({ scope: 'local' });
+        return error ? errorMessage(error) : '';
+      },
+    };
+  }, [step, email, slug, meta]);
 
-  async function verify(event: FormEvent) {
-    event.preventDefault();
-    setBusy(true); setError('');
-    const { error: failure } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: codigo.trim(), type: 'email' });
-    setBusy(false);
-    if (failure) setError('Código inválido ou vencido. Confira o e-mail e tente de novo.');
-    else setStep('dados');
-  }
-
-  async function indicate(event: FormEvent) {
-    event.preventDefault();
-    setBusy(true); setError('');
-    const { error: failure } = await supabase.rpc('communicali_indicar', { p_slug: slug, p_nome: nome, p_email: convidado });
-    setBusy(false);
-    if (failure) setError(errorMessage(failure));
-    else { await supabase.auth.signOut({ scope: 'local' }); setStep('pronto'); }
-  }
-
-  return (
-    <main className="event-page">
-      <section className="event-card">
-        <p className="eyebrow">CommuniCALI</p>
-        <h1>Indicar um convidado</h1>
-        {edition && <p className="event-card__meta">{edition.titulo} · {formatDate(edition.data_evento)} · {edition.local}</p>}
-        {step === 'email' && (
-          <form className="form" onSubmit={send}>
-            <p>A indicação não garante vaga. A organização confirma conforme a disponibilidade do encontro.</p>
-            <label>Seu e-mail de membro<input required type="email" inputMode="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
-            {error && <p className="notice notice--alert">{error}</p>}
-            <button className="button" type="submit" disabled={busy}>{busy ? 'Enviando...' : 'Receber código'}</button>
-          </form>
-        )}
-        {step === 'codigo' && (
-          <form className="form" onSubmit={verify}>
-            <p>Enviamos um código para {email}.</p>
-            <label>Código<input required inputMode="numeric" autoComplete="one-time-code" value={codigo} onChange={(event) => setCodigo(event.target.value)} /></label>
-            {error && <p className="notice notice--alert">{error}</p>}
-            <button className="button" type="submit" disabled={busy}>{busy ? 'Confirmando...' : 'Continuar'}</button>
-          </form>
-        )}
-        {step === 'dados' && (
-          <form className="form" onSubmit={indicate}>
-            <label>Nome do convidado<input required minLength={2} value={nome} onChange={(event) => setNome(event.target.value)} /></label>
-            <label>E-mail do convidado<input required type="email" inputMode="email" value={convidado} onChange={(event) => setConvidado(event.target.value)} /></label>
-            {error && <p className="notice notice--alert">{error}</p>}
-            <button className="button" type="submit" disabled={busy}>{busy ? 'Enviando...' : 'Enviar indicação'}</button>
-          </form>
-        )}
-        {step === 'pronto' && <p className="notice">Indicação recebida. A organização vai avaliar e, se houver vaga, enviar o convite à pessoa.</p>}
-      </section>
-    </main>
-  );
+  return <PublicFormPage key={step} preset={preset} />;
 }
 
 type Invite = { nome: string; status: string; edicao: string; data_evento: string; horario: string; local: string; cidade: string; condicoes: string };

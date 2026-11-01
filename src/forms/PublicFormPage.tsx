@@ -12,7 +12,20 @@ type Phase = 'loading' | 'missing' | 'closed' | 'welcome' | 'questions' | 'sendi
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-export function PublicFormPage() {
+/** Cadastro, check-in e indicação usam este mesmo fluxo, com perguntas fixas e envio próprio. */
+export type FormPreset = {
+  title: string;
+  category?: string;
+  description?: string;
+  questions: FormQuestion[];
+  submitLabel?: string;
+  successText?: string;
+  skipWelcome?: boolean;
+  /** Devolve a mensagem de erro, ou vazio quando deu certo. */
+  submit: (answers: Record<string, FormAnswer>) => Promise<string>;
+};
+
+export function PublicFormPage({ preset }: { preset?: FormPreset }) {
   const { slug = '' } = useParams();
   const preview = useSearchParams()[0].get('previa') === '1';
   const [form, setForm] = useState<PublicForm | null>(null);
@@ -30,6 +43,11 @@ export function PublicFormPage() {
 
   useEffect(() => {
     document.title = 'CommuniCALI';
+    if (preset) {
+      setForm({ id: 'preset', slug: 'preset', title: preset.title, category: preset.category, description: preset.description || '', thank_you: '', status: 'open', confirm_email: false, questions: preset.questions, submit_label: preset.submitLabel, success_text: preset.successText });
+      setPhase(preset.skipWelcome ? 'questions' : 'welcome');
+      return;
+    }
     let alive = true;
     void anonPublicRpc<PublicForm | null>('cali_form_public', { p_slug: slug }).then(async ({ data: published }) => {
       let data = published;
@@ -65,11 +83,17 @@ export function PublicFormPage() {
     setPhase('sending'); setSendError('');
     const visited = [...trail, index].map((position) => questions[position]?.id).filter(Boolean) as string[];
     const sent: Record<string, unknown> = Object.fromEntries(Object.entries(answers).filter(([id]) => visited.includes(id)));
+    if (preset) {
+      const problem = await preset.submit(sent as Record<string, FormAnswer>);
+      if (problem) { setSendError(problem); setPhase('questions'); return; }
+      if (preset.successText) setPhase('done');
+      return;
+    }
     sent.__visited = visited;
     const { data, error: rpcError } = await anonPublicRpc<{ ok: boolean; confirmation: boolean }>('cali_form_submit', { p_slug: form.slug, p_answers: sent });
     if (rpcError || !data?.ok) { setSendError(rpcError?.message || 'Não foi possível enviar agora.'); setPhase('questions'); return; }
     setConfirmation(Boolean(data.confirmation)); setPhase('done');
-  }, [answers, form, preview, trail, index, questions]);
+  }, [answers, form, preset, preview, trail, index, questions]);
 
   const goNext = useCallback(() => {
     if (!question) return;
@@ -240,7 +264,7 @@ export function PublicFormPage() {
         })()}
       </div>}
     </main>
-    {phase === 'questions' && <nav className="cf-nav" aria-label="Navegar entre perguntas">
+    {phase === 'questions' && questions.length > 1 && <nav className="cf-nav" aria-label="Navegar entre perguntas">
       <span>{index + 1} de {questions.length}</span>
       <button type="button" aria-label="Pergunta anterior" disabled={!trail.length} onClick={goBack}><ArrowUp size={18} /></button>
       <button type="button" aria-label="Próxima pergunta" disabled={isLast} onClick={goNext}><ArrowDown size={18} /></button>

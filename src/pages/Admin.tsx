@@ -334,7 +334,7 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
         </nav>
         <div className="adm__user"><span>{session.user.email}</span><button type="button" onClick={() => void supabase.auth.signOut()}>Sair</button></div>
       </header>
-      <main className="adm__main"><div className="wf">{children}</div></main>
+      <main className="adm__main ap-app v2-admin-page v2-forms v2-client-module"><div className="ap-content"><div className="wf">{children}</div></div></main>
     </div>
   );
 }
@@ -342,6 +342,12 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
 export function Admin() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [allowed, setAllowed] = useState<boolean | null>(null);
+
+  // As regras copiadas do CALI Forms só valem com esta marca, a mesma que a moldura do app coloca na página.
+  useEffect(() => {
+    document.documentElement.dataset.workspaceUi = 'v2';
+    return () => { delete document.documentElement.dataset.workspaceUi; };
+  }, []);
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => setSession(data.session));

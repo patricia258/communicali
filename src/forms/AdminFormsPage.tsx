@@ -8,6 +8,7 @@ import { Shell } from '../components/WorkspaceShell';
 import { supabase } from '../lib/supabase';
 import { downloadQrPng, downloadShareCard, downloadXlsx, qrDataUrl } from './formExports';
 import { type FormAudience, type FormQuestion, type FormRecord, type QuestionKind, CATEGORY_SUGGESTIONS, KIND_LABELS, KIND_ORDER, PUBLIC_FORM_BASE, STATUS_LABELS, END_OF_FORM, choiceOptions, fileLabel, formatAnswer, isAnswerable, stripRichText, newQuestion, questionId, slugify } from './formModel';
+import './app-forms.css';
 import './admin-forms.css';
 
 type Overview = Record<string, { responses: number; last: string | null }>;
@@ -101,7 +102,7 @@ export function AdminFormsPage() {
     setForms((current) => [data as FormRecord, ...current]); go((data as FormRecord).id);
   }
 
-  return <Shell role="admin"><div className="ap-app v2-admin-page v2-forms v2-client-module"><div className="ap-content"><div className="wf">
+  return <Shell role="admin"><div><div>
     {open ? <FormDetail key={open.id} form={open} tab={tab} companies={companies} stats={overview[open.id]} onTab={(next) => go(open.id, next)} onBack={() => { go(null); void load(); }} onDuplicate={() => void duplicate(open)}
       onSaved={(saved) => setForms((current) => current.map((item) => item.id === saved.id ? saved : item))}
       onDeleted={() => { setForms((current) => current.filter((item) => item.id !== open.id)); go(null); }} />
@@ -137,7 +138,7 @@ export function AdminFormsPage() {
       </div> : <div className="wf-empty"><strong>Nenhum formulário ainda.</strong><p>Clique em “Novo formulário” para criar o primeiro. Ele começa como rascunho: só recebe respostas depois que você abrir.</p></div>}
       </>}
     </>}
-  </div></div>
+  </div>
   {creating && <div className="ap-pd-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !creating.busy) setCreating(null); }}><section className="ap-status-confirm" role="dialog" aria-modal="true" aria-label="Novo formulário">
     <div><small>FORMULÁRIOS</small><h2>Novo formulário</h2><p>Começa como rascunho, já com as perguntas de nome e e-mail. Você monta o resto em seguida.</p></div>
     <label>Nome do formulário<input value={creating.title} maxLength={160} autoFocus placeholder="Ex.: Avaliação da 1ª edição" onChange={(event) => setCreating({ ...creating, title: event.target.value, error: '' })} onKeyDown={(event) => { if (event.key === 'Enter') void create(); }} /></label>
