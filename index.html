@@ -7,7 +7,7 @@
     <title>CommuniCALI | Café & Pessoas</title>
     <style>html,body{background:#1F0E14}#boot{min-height:100vh;display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;color:#F7F0EA;font:15px system-ui,sans-serif;text-align:center}#boot button{padding:12px 22px;border:0;border-radius:999px;background:#C9973B;color:#22100F;font:600 15px system-ui,sans-serif}</style>
     <script>
-      // Logo após uma publicação, um arquivo pode demorar alguns segundos para chegar: tenta de novo e, se não vier, oferece recarregar.
+      // Se um arquivo da página não chegar, tenta de novo e, se continuar sem vir, oferece recarregar.
       addEventListener('error', function (event) {
         var tag = event.target && event.target.tagName;
         if (tag !== 'SCRIPT' && tag !== 'LINK') return;
