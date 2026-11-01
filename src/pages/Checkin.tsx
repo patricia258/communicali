@@ -9,7 +9,7 @@ import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 type Done = { nome: string; categoria: string; edicao: string; selo: string; codigo: string; repetido: boolean };
 type Step = 'email' | 'novo' | 'codigo' | 'inscrito';
 
-export const CATEGORIAS: Record<string, string> = { membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organizador', kids: 'Kids' };
+export const CATEGORIAS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organizador', kids: 'Kids' };
 
 function Success({ done }: { done: Done }) {
   const [qr, setQr] = useState('');

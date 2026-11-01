@@ -110,7 +110,8 @@ export function CodigoConvite() {
 
 export function InscricaoPage() {
   const { slug = '' } = useParams();
-  const edition = useEdition(slug);
+  const [edition, setEdition] = useState<EditionRow | null | undefined>(undefined);
+  useEffect(() => { supabase.rpc('communicali_edicao_inscricao', { p_slug: slug }).then(({ data }) => setEdition((data as EditionRow | null) || null)); }, [slug]);
   const texts = useSiteTexts();
   const [params] = useSearchParams();
   const codigo = params.get('c') || '';

@@ -23,7 +23,7 @@ type Pessoa = { id: string; nome: string; foto_url: string | null; categoria: st
 type Parceiro = { id: string; nome: string; logo_url: string | null; site_url: string | null };
 
 const ABAS: Array<[Aba, string]> = [['inicio', 'Início'], ['edicoes', 'Edições'], ['missoes', 'Missões'], ['rede', 'Rede'], ['indicar', 'Indicar'], ['programa', 'Programa']];
-const NIVEIS: Record<string, string> = { membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organização', kids: 'Kids' };
+const NIVEIS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organização', kids: 'Kids' };
 const META: Record<string, { nome: string; pontos: number; encontros: number; nivel: string }> = {
   membro: { nome: 'Conector', pontos: 100, encontros: 3, nivel: 'conector' },
   conector: { nome: 'Embaixador', pontos: 250, encontros: 6, nivel: 'embaixador' },
@@ -209,7 +209,7 @@ function Missoes({ espaco, recarregar }: { espaco: Espaco; recarregar: () => voi
     <>
       <h1>Missões</h1>
       <p>Cada missão cumprida acende um selo.</p>
-      {espaco.missoes.map((missao) => <CartaoMissao key={missao.slug} missao={missao} recarregar={recarregar} liberada={missao.nivel !== 'embaixador' || categoria === 'conector' || categoria === 'embaixador'} />)}
+      {espaco.missoes.map((missao) => <CartaoMissao key={missao.slug} missao={missao} recarregar={recarregar} liberada={missao.nivel !== 'embaixador' || categoria === 'conector' || categoria === 'embaixador' || categoria === 'fundadora'} />)}
     </>
   );
 }
@@ -386,7 +386,7 @@ function Perfil({ espaco, recarregar, voltar }: { espaco: Espaco; recarregar: ()
         </section>
         <Chips titulo="O que eu faço" opcoes={ATUACAO} marcados={temas} alternar={alternar(temas, setTemas)} />
         <Chips titulo="Meus interesses" opcoes={INTERESSES_REDE} marcados={interesses} alternar={alternar(interesses, setInteresses)} />
-        <label className="passe__marca"><input type="checkbox" checked={naRede} onChange={(event) => setNaRede(event.target.checked)} /><span><strong>Quero aparecer na Rede.</strong> Membros veem sua foto, o que você faz e seus interesses. Seus contatos ficam visíveis só para Conectores, Embaixadores e organização.</span></label>
+        <label className="passe__marca"><input type="checkbox" checked={naRede} onChange={(event) => setNaRede(event.target.checked)} /><span><strong>Aparecer na Rede.</strong> Membros veem sua foto, o que você faz e seus interesses. Seus contatos ficam visíveis só para Conectores, Embaixadores e organização. Desmarque para sair.</span></label>
         <label className="passe__marca passe__marca--oliva"><input type="checkbox" checked={presta} onChange={(event) => setPresta(event.target.checked)} /><span><strong>Ofereço serviços.</strong> Você também aparece em Parceiros e prestadores, se estiver na Rede.</span></label>
         <label className="passe__marca passe__marca--areia"><input type="checkbox" checked={palestras} onChange={(event) => setPalestras(event.target.checked)} /><span><strong>Quero contribuir com palestras.</strong> A organização vê seu perfil e faz o convite quando fizer sentido.</span></label>
         {aviso && <p className="passe__ok" role="status">{aviso}</p>}
@@ -460,7 +460,7 @@ function Rede() {
           </button>
         ))}
       </div>
-      {rede && !pessoas.length && (frente === 'pessoas' || !parceiros.length) && <p className="passe__aviso">Ninguém por aqui ainda. Quem escolhe aparecer na Rede entra nesta lista.</p>}
+      {rede && !pessoas.length && (frente === 'pessoas' || !parceiros.length) && <p className="passe__aviso">Ninguém por aqui ainda. As pessoas entram na Rede depois do primeiro encontro.</p>}
     </>
   );
 }

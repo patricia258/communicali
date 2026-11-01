@@ -1,9 +1,27 @@
+import { useEffect, useState, type ReactNode } from 'react';
 import { supabase } from './lib/supabase';
 
 export { supabase };
 
 /** Edição em andamento; `?edicao=teste` usa a edição de teste, que não aparece no site. */
 export const editionSlug = () => new URLSearchParams(window.location.search).get('edicao') || 'fundadora';
+
+/** Link permanente sem edição: descobre a edição do momento e só então mostra a tela. */
+export function ComEdicao({ children }: { children: ReactNode }) {
+  const [pronta, setPronta] = useState(() => new URLSearchParams(window.location.search).has('edicao'));
+  useEffect(() => {
+    if (pronta) return;
+    void supabase.rpc('communicali_edicao_atual').then(({ data }) => {
+      if (data) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('edicao', String(data));
+        window.history.replaceState(null, '', url);
+      }
+      setPronta(true);
+    });
+  }, [pronta]);
+  return pronta ? children : null;
+}
 
 export const COMMUNITY_URL = 'https://chat.whatsapp.com/Lu9uzReUxAlJZcQaU1is01';
 export const PARTNER_FORM_URL = '/f/parceiros-communicali';
