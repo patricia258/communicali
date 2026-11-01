@@ -1,7 +1,7 @@
 /* Início do painel: números do dia e roteiro do encontro. Programa: regras de pontos e categorias, com quem está em cada faixa. */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarCheck, ClipboardList, Gift, Handshake, MonitorPlay, Trophy, UserCheck, Users, Vote } from 'lucide-react';
+import { CalendarCheck, ClipboardList, Gift, Handshake, IdCard, MonitorPlay, Trophy, UserCheck, Users, Vote } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export const FAIXAS = [
@@ -33,8 +33,9 @@ export function HomePanel() {
 
   const slug = edition?.slug || 'fundadora';
   const steps: Array<[typeof MonitorPlay, string, string, string, boolean]> = [
-    [MonitorPlay, 'Abra o telão do check-in', 'É o primeiro QR Code. Deixe na tela enquanto as pessoas chegam e se acomodam.', `/telao/checkin?edicao=${slug}`, true],
-    [UserCheck, 'Inscritos e novos fazem o check-in', 'Quem se inscreveu só confirma os aceites. Quem é novo faz o cadastro. Cada um mostra a tela final na recepção e retira o crachá.', '/admin/edicoes', false],
+    [MonitorPlay, 'Abra o telão do check-in', 'É o primeiro QR Code. Na chegada, a recepção confirma o nome na lista, pede para a pessoa se acomodar e avisa do QR Code. Ainda não entrega crachá.', `/telao/checkin?edicao=${slug}`, true],
+    [UserCheck, 'Check-in com todos sentados', 'Na abertura, reserve cerca de 5 minutos. Quem se inscreveu só confirma os aceites; quem é novo faz o cadastro.', '/admin/edicoes', false],
+    [IdCard, 'Crachás por mesa', 'A recepção chama uma mesa de cada vez. A pessoa mostra a tela final e retira o crachá. Quem chegar depois faz o check-in e já retira.', '/admin/edicoes', false],
     [Vote, 'Ative a votação na hora da dinâmica', 'Em Votações, abra a dinâmica e clique em Ativar votação.', '/admin/votacoes', false],
     [MonitorPlay, 'Troque o telão para a votação', 'O QR Code muda e a contagem de respostas sobe sozinha.', `/telao/votacao?edicao=${slug}`, true],
     [Trophy, 'Revele o resultado', 'Em Votações, clique em Revelar no telão para mostrar média e gráfico.', '/admin/votacoes', false],
