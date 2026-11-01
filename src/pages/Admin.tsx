@@ -1,6 +1,6 @@
 /* Área administrativa: login por link no e-mail. Quem não está em public.admins não entra; o banco repete essa regra. */
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
+import { NavLink, Route, Routes } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
@@ -8,6 +8,8 @@ import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
 import { MembersPanel, PollsPanel, TextsPanel, exportPresencasCsv } from './AdminPrograma';
 import { GuestsPanel } from './Convidados';
+import { HomePanel, ProgramPanel } from './AdminInicio';
+import { StaffPanel } from './Staff';
 import './admin.css';
 
 type Edition = { id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
@@ -46,7 +48,7 @@ function Login() {
   return (
     <main className="event-page">
       <section className="event-card">
-        <img className="login__logo" src="/brand/communicali-bordo.png" alt="CommuniCALI" />
+        <img className="login__logo" src="/brand/communicali-branco.png" alt="CommuniCALI" />
         <h1>Área administrativa</h1>
         {sent ? <p className="notice">Enviamos um link de acesso para {email}. Abra pelo e-mail neste mesmo navegador.</p> : (
           <form className="form" onSubmit={submit}>
@@ -78,7 +80,7 @@ function EditionsPanel() {
   if (open) return <EditionEditor key={open.id} edition={open} onBack={() => { setOpen(null); void load(); }} />;
   return (
     <>
-      <div className="wf-head"><div><small>ÁREA ADMINISTRATIVA</small><h1>Edições</h1><p>Dados do encontro, capa, resumo, fotos e lista de presença.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void create()}>Nova edição</button></div></div>
+      <div className="wf-head"><div><small>EDIÇÕES</small><h1>Encontros</h1><p>Abra uma edição para ajustar data e local, enviar capa e fotos, abrir os telões e ver quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void create()}>Nova edição</button></div></div>
       {error && <p className="inline-notice">{error}</p>}
       <div className="adm-list">
         {list.map((item) => (
@@ -262,25 +264,28 @@ function PartnersPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>ÁREA ADMINISTRATIVA</small><h1>Parceiros</h1><p>Cadastre aqui só parceiros confirmados: tudo o que estiver ativo aparece no site.</p></div></div>
+      <div className="wf-head"><div><small>PARCEIROS</small><h1>Logos na faixa do site</h1><p>Cada parceiro cadastrado aqui entra na faixa "Quem apoia a CommuniCALI". Sem parceiros, o site mostra os espaços "Sua marca aqui". As propostas recebidas ficam em Formulários, no formulário de parceiros.</p></div></div>
       {error && <p className="inline-notice">{error}</p>}
       <section className="v2-forms-card">
+        <header><small>NOVO PARCEIRO</small><h2>Cadastre só parceiros confirmados</h2></header>
         <form className="v2-forms-grid" onSubmit={(event) => void add(event)}>
           <label><span>Nome</span><input required value={nome} onChange={(event) => setNome(event.target.value)} /></label>
           <label><span>Site <em>opcional</em></span><input value={site} placeholder="https://" onChange={(event) => setSite(event.target.value)} /></label>
-          <label><span>Logo</span><input type="file" accept="image/*" onChange={(event) => setLogo(event.target.files?.[0])} /></label>
+          <label><span>Logo <em>PNG com fundo transparente fica melhor</em></span><input type="file" accept="image/*" onChange={(event) => setLogo(event.target.files?.[0])} /></label>
           <div className="adm-submit"><button type="submit" className="wf-primary">Adicionar parceiro</button></div>
         </form>
       </section>
-      <div className="adm-list">
+      <div className="adm-partners">
         {list.map((partner) => (
-          <div className="adm-row adm-row--static" key={partner.id}>
+          <article key={partner.id}>
+            <div className="adm-partners__logo">{partner.logo_url ? <img src={partner.logo_url} alt={partner.nome} /> : <span>Sem logo</span>}</div>
             <strong>{partner.nome}</strong>
-            <span>{partner.ativo ? 'No site' : 'Fora do site'}</span>
-            <button type="button" onClick={() => void supabase.from('partners').update({ ativo: !partner.ativo }).eq('id', partner.id).then(load)}>{partner.ativo ? 'Tirar do site' : 'Voltar ao site'}</button>
-          </div>
+            <small>{partner.ativo ? 'Aparece no site' : 'Fora do site'}</small>
+            <button type="button" className="wf-secondary" onClick={() => void supabase.from('partners').update({ ativo: !partner.ativo }).eq('id', partner.id).then(load)}>{partner.ativo ? 'Tirar do site' : 'Voltar ao site'}</button>
+          </article>
         ))}
       </div>
+      {!list.length && <p className="adm-hint">Nenhum parceiro cadastrado ainda.</p>}
     </>
   );
 }
@@ -303,7 +308,7 @@ function CounterPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>ÁREA ADMINISTRATIVA</small><h1>Contador de membros</h1><p>Com o campo vazio, o site conta quem fez check-in em edições públicas. Com um número, mostra esse número. Em zero, o contador some.</p></div></div>
+      <div className="wf-head"><div><small>CONTADOR</small><h1>Contador de membros</h1><p>Com o campo vazio, o site conta quem fez check-in em edições públicas. Com um número, mostra esse número. Em zero, o contador some.</p></div></div>
       <section className="v2-forms-card">
         <div className="v2-forms-grid">
           <label><span>Número no site</span><input inputMode="numeric" value={value} onChange={(event) => { setValue(event.target.value); setNote(''); }} /></label>
@@ -320,13 +325,16 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
   return (
     <div className="adm">
       <header className="adm__top">
-        <NavLink to="/admin" className="adm__logo"><img src="/brand/communicali-bordo.png" alt="CommuniCALI" /></NavLink>
+        <NavLink to="/admin" className="adm__logo"><img src="/brand/communicali-branco.png" alt="CommuniCALI" /></NavLink>
         <nav>
-          <NavLink to="/admin/formularios">Formulários</NavLink>
+          <NavLink to="/admin" end>Início</NavLink>
           <NavLink to="/admin/membros">Membros</NavLink>
+          <NavLink to="/admin/programa">Programa</NavLink>
           <NavLink to="/admin/edicoes">Edições</NavLink>
           <NavLink to="/admin/convidados">Convidados</NavLink>
           <NavLink to="/admin/votacoes">Votações</NavLink>
+          <NavLink to="/admin/formularios">Formulários</NavLink>
+          <NavLink to="/admin/staff">Staff</NavLink>
           <NavLink to="/admin/parceiros">Parceiros</NavLink>
           <NavLink to="/admin/contador">Contador</NavLink>
           <NavLink to="/admin/textos">Textos</NavLink>
@@ -368,7 +376,9 @@ export function Admin() {
   return (
     <Frame session={session}>
       <Routes>
-        <Route index element={<Navigate to="formularios" replace />} />
+        <Route index element={<HomePanel />} />
+        <Route path="programa" element={<ProgramPanel />} />
+        <Route path="staff" element={<StaffPanel />} />
         <Route path="formularios" element={<AdminFormsPage />} />
         <Route path="edicoes" element={<EditionsPanel />} />
         <Route path="parceiros" element={<PartnersPanel />} />

@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { editionSlug, errorMessage, formatDate, supabase, type Edition } from '../lib';
-import { answerArgs, memberQuestions, useSiteTexts } from './MemberFields';
+import { answerArgs, confirmQuestions, memberQuestions, useSiteTexts } from './MemberFields';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 
 type Done = { nome: string; categoria: string; edicao: string; selo: string; codigo: string; repetido: boolean };
-type Step = 'email' | 'novo' | 'codigo';
+type Step = 'email' | 'novo' | 'codigo' | 'inscrito';
 
 export const CATEGORIAS: Record<string, string> = { membro: 'Membro', participante_ativo: 'Participante Ativo', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organizador', kids: 'Kids' };
 
@@ -18,7 +18,7 @@ function Success({ done }: { done: Done }) {
   return (
     <main className="event-page event-page--wine">
       <section className="pass">
-        <img className="pass__logo" src="/brand/communicali-bordo.png" alt="CommuniCALI" />
+        <img className="pass__logo" src="/brand/communicali-branco.png" alt="CommuniCALI" />
         <h1>Presença confirmada!</h1>
         <p className="pass__lead">Parabéns! Você faz parte da CommuniCALI.</p>
         {done.repetido ? <p className="pass__hint">Sua presença neste encontro já estava registrada.</p> : <p className="pass__hint">Você conquistou 10 pontos pela participação neste encontro.</p>}
@@ -42,6 +42,7 @@ export function Checkin() {
   const [loadError, setLoadError] = useState('');
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
+  const [inscritoNome, setInscritoNome] = useState('');
   const [done, setDone] = useState<Done | null>(null);
 
   useEffect(() => {
@@ -62,7 +63,9 @@ export function Checkin() {
         const { data, error } = await supabase.rpc('communicali_situacao_email', { p_slug: slug, p_email: clean });
         if (error) return errorMessage(error);
         setEmail(clean);
-        if (!(data as { membro: boolean }).membro) { setStep('novo'); return ''; }
+        const situacao = data as { membro: boolean; inscrito: boolean; nome?: string };
+        if (situacao.inscrito) { setInscritoNome(situacao.nome || ''); setStep('inscrito'); return ''; }
+        if (!situacao.membro) { setStep('novo'); return ''; }
         const { error: sendFailure } = await supabase.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } });
         if (sendFailure) return 'Não conseguimos enviar o código agora. Procure a organização na recepção para registrar sua presença.';
         setStep('codigo');
@@ -83,6 +86,16 @@ export function Checkin() {
       },
     };
     if (!texts) return null;
+    if (step === 'inscrito') return {
+      title: 'Check-in', category: 'CommuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
+      questions: confirmQuestions(texts, inscritoNome),
+      submit: async (answers) => {
+        const { data, error } = await supabase.rpc('communicali_checkin_inscrito', { p_slug: slug, p_email: email, p_privacidade: answers.privacidade === 'Li e aceito', p_regras: answers.regras === 'Li e aceito', p_comunicacoes: answers.comunicacoes === 'Sim', p_imagem: answers.imagem === 'Sim' });
+        if (error) return errorMessage(error);
+        setDone(data as Done);
+        return '';
+      },
+    };
     return {
       title: 'Check-in', category: 'CommuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
       questions: memberQuestions(texts, { imagem: true }),
@@ -93,7 +106,7 @@ export function Checkin() {
         return '';
       },
     };
-  }, [step, email, slug, meta, texts]);
+  }, [step, email, slug, meta, texts, inscritoNome]);
 
   if (done) return <Success done={done} />;
   if (edition?.situacao === 'aberto' && preset) return <PublicFormPage key={step} preset={preset} />;

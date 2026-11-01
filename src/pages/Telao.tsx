@@ -83,6 +83,7 @@ export function TelaoVotacao() {
   return (
     <main className={`screen screen--poll${poll?.revelada ? ' screen--revealed' : ''}`}>
       <div className="screen__text">
+        <img className="screen__logo" src="/brand/communicali-branco.png" alt="CommuniCALI" />
         <p className="eyebrow">Percepção de quem está nesta sala</p>
         <h1>{poll?.pergunta}</h1>
         {poll?.revelada ? <Results poll={poll} /> : (

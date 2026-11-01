@@ -15,6 +15,7 @@ import { Votar } from './pages/Votar';
 import { Convidar, Convite } from './pages/Convidados';
 import { TelaoCheckin, TelaoVotacao } from './pages/Telao';
 import { Admin } from './pages/Admin';
+import { StaffForm } from './pages/Staff';
 import { PublicFormPage } from './forms/PublicFormPage';
 
 createRoot(document.getElementById('root')!).render(
@@ -26,6 +27,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/cadastro" element={<Cadastro />} />
       <Route path="/regras" element={<TextoPagina tipo="regras" />} />
       <Route path="/privacidade" element={<TextoPagina tipo="privacidade" />} />
+      <Route path="/staff" element={<StaffForm />} />
       <Route path="/votar" element={<Votar />} />
       <Route path="/convidar" element={<Convidar />} />
       <Route path="/convite/:token" element={<Convite />} />

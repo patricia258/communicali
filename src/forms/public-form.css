@@ -157,3 +157,19 @@
 .cali-form-page.cali-form-page.cali-form-page small{color:var(--cf-mustard-2)}
 .cali-form-page.cali-form-page.cali-form-page .cf-leaf{background:linear-gradient(200deg,rgba(201,151,59,.26) 0%,rgba(90,30,45,.12) 55%,rgba(201,151,59,.08) 100%)}
 .cali-form-page.cali-form-page.cali-form-page :is(.cf-primary,.cf-nav button,.cf-done-mark,.cf-options button.on,.cf-scale button.on){--cf-wine:#C9973B;--cf-wine-2:#B5852E;background-color:#C9973B!important;color:#22100F!important}
+
+/* Mesmo bordô escuro da página principal, em todas as telas. */
+.cali-form-page.cali-form-page.cali-form-page{--cf-paper:#1F0E14;--cf-ink:#F7F0EA;--cf-muted:#CBB9B1;--cf-line:rgba(255,255,255,.14);color-scheme:dark;background:#1F0E14;color:#F7F0EA}
+.cali-form-page.cali-form-page.cali-form-page :is(h1,h2){color:#F7F0EA}
+.cali-form-page.cali-form-page.cali-form-page .cf-text{color:#F7F0EA;border-bottom-color:rgba(255,255,255,.25);background:transparent}
+.cali-form-page.cali-form-page.cali-form-page .cf-text::placeholder{color:rgba(247,240,234,.45)}
+.cali-form-page.cali-form-page.cali-form-page :is(.cf-options button,.cf-scale button,.cf-file-drop,.cf-file-chosen){background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.18);color:#F7F0EA}
+.cali-form-page.cali-form-page.cali-form-page .cf-options kbd{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#F7F0EA}
+.cali-form-page.cali-form-page.cali-form-page :is(.cf-help,.cf-desc,.cf-meta,.cf-hint,.cf-enter-hint,.cf-foot,.cf-foot a,.cf-nav span,.cf-center p){color:#CBB9B1}
+.cali-form-page.cali-form-page.cali-form-page .cf-help a,.cali-form-page.cali-form-page.cali-form-page .cf-desc a{color:#DDB160}
+.cali-form-page.cali-form-page.cali-form-page b,.cali-form-page.cali-form-page.cali-form-page .cf-desc strong{color:#F7F0EA}
+.cali-form-page.cali-form-page.cali-form-page .cf-optional{background:rgba(255,255,255,.08);color:#CBB9B1}
+.cali-form-page.cali-form-page.cali-form-page .cf-progress{background:rgba(255,255,255,.08)}
+.cali-form-page.cali-form-page.cali-form-page .cf-leaf{background:linear-gradient(200deg,rgba(201,151,59,.2) 0%,rgba(122,31,61,.3) 55%,rgba(201,151,59,.06) 100%)}
+.cali-form-page.cali-form-page.cali-form-page .cf-text:-webkit-autofill{-webkit-text-fill-color:#F7F0EA;-webkit-box-shadow:0 0 0 40px #1F0E14 inset}
+.cali-form-page.cali-form-page.cali-form-page h1,.cali-form-page.cali-form-page.cali-form-page h2{color:#F7F0EA!important}

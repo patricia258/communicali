@@ -35,7 +35,7 @@ export function TextoPagina({ tipo }: { tipo: 'regras' | 'privacidade' }) {
   const body = tipo === 'regras' ? texts?.regras_texto : texts?.privacidade_texto;
   return (
     <main className="wrap legal">
-      <a href="/"><img src="/brand/communicali-bordo.png" alt="CommuniCALI" /></a>
+      <a href="/"><img src="/brand/communicali-branco.png" alt="CommuniCALI" /></a>
       <h1>{tipo === 'regras' ? 'Regras de participação' : 'Política de privacidade'}</h1>
       {texts && !body && <p>Este texto será publicado em breve.</p>}
       {body?.split(/\n{2,}/).map((paragraph, index) => paragraph.startsWith('## ') ? <h2 key={index}>{paragraph.slice(3)}</h2> : <p key={index}>{paragraph}</p>)}
