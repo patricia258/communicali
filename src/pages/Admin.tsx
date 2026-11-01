@@ -7,6 +7,7 @@ import { AdminFormsPage } from '../forms/AdminFormsPage';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
 import { MembersPanel, PollsPanel, TextsPanel, exportPresencasCsv } from './AdminPrograma';
+import { GuestsPanel } from './Convidados';
 import './admin.css';
 
 type Edition = { id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
@@ -324,6 +325,7 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
           <NavLink to="/admin/formularios">Formulários</NavLink>
           <NavLink to="/admin/membros">Membros</NavLink>
           <NavLink to="/admin/edicoes">Edições</NavLink>
+          <NavLink to="/admin/convidados">Convidados</NavLink>
           <NavLink to="/admin/votacoes">Votações</NavLink>
           <NavLink to="/admin/parceiros">Parceiros</NavLink>
           <NavLink to="/admin/contador">Contador</NavLink>
@@ -366,6 +368,7 @@ export function Admin() {
         <Route path="parceiros" element={<PartnersPanel />} />
         <Route path="contador" element={<CounterPanel />} />
         <Route path="membros" element={<MembersPanel />} />
+        <Route path="convidados" element={<GuestsPanel />} />
         <Route path="votacoes" element={<PollsPanel />} />
         <Route path="textos" element={<TextsPanel />} />
       </Routes>

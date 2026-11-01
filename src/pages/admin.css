@@ -56,6 +56,10 @@
 .adm-photos figure{display:grid;gap:6px;margin:0;font-size:13px}
 .adm-photos img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:7px}
 .adm-photos button{justify-self:start;border:0;background:none;color:#B42318;font:600 13px Inter,system-ui,sans-serif;cursor:pointer;padding:0}
+.adm-stats{display:flex;gap:28px;flex-wrap:wrap}
+.adm-stats p{color:var(--muted)}
+.adm-stats strong{font-size:18px;color:var(--ink)}
+.adm-row select.adm-status{width:auto;flex:none}
 .adm-links{display:flex;gap:10px;flex-wrap:wrap}
 .adm-submit{display:flex;align-items:flex-end}
 
