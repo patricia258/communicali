@@ -21,6 +21,7 @@ const FAQ = [
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
   ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
+  ['Como acompanho minha participação?', 'Depois do primeiro encontro presencial, você entra no seu espaço online com o e-mail do check-in e acompanha carimbos, pontos, missões, indicações e fotos.'],
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
@@ -46,6 +47,13 @@ function Arches({ photos }: { photos: Photo[] }) {
     </div>
   );
 }
+
+const TRILHA = [
+  ['visitante', 'Visitante', 'Quem chega pelo grupo ou pela inscrição em um encontro.'],
+  ['membro', 'Membro', 'Quem esteve presencialmente e começa a somar pontos.'],
+  ['conector', 'Conector', 'Quem aproxima pessoas e cumpre as missões de conexão.'],
+  ['embaixador', 'Embaixador', 'Quem traz parceiros e representa a comunidade.'],
+];
 
 const PEOPLE_CARDS = ['fundadora', 'embaixadores'] as const;
 
@@ -169,11 +177,30 @@ export function Home() {
             <span className="door__icon"><UserPlus size={20} aria-hidden="true" /></span>
             <div>
               <h3>Encontros presenciais</h3>
-              <p>Inscreva-se no próximo encontro. A presença no dia registra você como membro da comunidade.</p>
+              <p>Inscreva-se no próximo encontro. A presença no dia torna você membro e abre seu passaporte online.</p>
               <a className="link" href="#proximo">Ver o próximo encontro</a>
             </div>
           </article>
         </div>
+      </section>
+
+      <section className="wrap block" id="programa">
+        <div className="block__head">
+          <div>
+            <p className="eyebrow">Programa de membros</p>
+            <h2>Seu passaporte, <em>sempre online.</em></h2>
+          </div>
+          <p>Cada membro acompanha tudo pelo celular: carimbos das edições, pontos, missões, indicações e fotos dos encontros.</p>
+        </div>
+        <div className="trilha">
+          {TRILHA.map(([id, nome, texto]) => (
+            <article key={id}>
+              <img src={`/selos/postal-${id}.png`} alt={`Selo ${nome}`} />
+              <p>{texto}</p>
+            </article>
+          ))}
+        </div>
+        <a className="link" href="/meu-espaco">Já sou membro, quero entrar</a>
       </section>
 
       <section className="wrap block" id="proximo">
