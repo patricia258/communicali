@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import QRCode from 'qrcode';
+import { IdCard } from 'lucide-react';
 import { editionSlug, errorMessage, formatDate, supabase, type Edition } from '../lib';
 import { answerArgs, confirmQuestions, memberQuestions, useSiteTexts } from './MemberFields';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
@@ -29,7 +30,10 @@ function Success({ done }: { done: Done }) {
           <div><dt>Código</dt><dd>{done.codigo}</dd></div>
         </dl>
         {qr && <img className="pass__qr" src={qr} alt="QR Code para a organização validar sua presença" />}
-        <p className="pass__hint">Apresente esta tela à organização para retirar seu crachá de membro.</p>
+        <div className="pass__badge">
+          <IdCard size={26} aria-hidden="true" />
+          <p><strong>Obrigada pelas confirmações!</strong> Mostre esta tela na recepção e retire seu crachá de membro.</p>
+        </div>
       </section>
     </main>
   );

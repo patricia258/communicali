@@ -116,3 +116,5 @@ html:has(.legal),body:has(.legal){background:#1F0E14}
 .screen__logo{display:block;width:min(240px,50%);height:auto;margin-bottom:18px}
 .screen__numbers strong{color:#DDB160}
 .screen .screen__qr{box-shadow:0 0 0 1px rgba(201,151,59,.4)}
+.pass__badge{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:10px;background:rgba(201,151,59,.16);text-align:left;font-size:15px}
+.pass__badge svg{flex:none;color:#DDB160}
