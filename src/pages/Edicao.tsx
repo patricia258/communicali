@@ -119,8 +119,8 @@ export function InscricaoPage() {
     title: edition.titulo,
     category: 'Inscrição CommuniCALI',
     description: `${longDate(edition.data_evento)}, ${edition.horario}, ${edition.local}, ${edition.cidade}.`,
-    submitLabel: 'Confirmar inscrição',
-    successText: 'Inscrição recebida! Se a edição já estiver lotada, seu nome entra na lista de espera e avisaremos você.',
+    submitLabel: 'Enviar inscrição',
+    successText: 'Recebemos sua intenção de participar! A equipe vai analisar e você recebe a confirmação por e-mail.',
     questions: [
       { id: 'nome', kind: 'name', label: 'Qual é o seu nome completo?', required: true },
       { id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', required: true },

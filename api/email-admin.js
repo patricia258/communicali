@@ -15,19 +15,31 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
   const email = await administrador(req);
   if (!email) return res.status(401).json({ error: 'Entre novamente no painel.' });
-  const { acao, edicao, publico, tipo } = req.body || {};
+  const { acao, edicao, publico, tipo, registro, status } = req.body || {};
   const found = await banco(`editions?id=eq.${String(edicao).replace(/[^a-f0-9-]/g, '')}&select=${EDITION_FIELDS}`);
   const edition = found.ok ? (await found.json())[0] : null;
   if (!edition) return res.status(404).json({ error: 'Edição não encontrada.' });
 
   if (acao === 'teste') {
-    const tipos = tipo === 'todos' ? ['confirmacao', 'espera', 'lembrete', 'convite'] : [tipo];
+    const tipos = tipo === 'todos' ? ['recebido', 'confirmacao', 'espera', 'lembrete', 'convite'] : [tipo];
     for (const item of tipos) {
       const result = await enviar(email, montar(item, edition, { nome: 'Patrícia', email }));
       if (result.erro) return res.status(502).json({ error: result.erro });
       await pausa();
     }
     return res.status(200).json({ para: email, enviados: tipos.length });
+  }
+
+  if (acao === 'decidir') {
+    if (!['inscrito', 'espera', 'cancelado'].includes(status)) return res.status(400).json({ error: 'Situação inválida.' });
+    const id = String(registro).replace(/[^a-f0-9-]/g, '');
+    const achou = await banco(`registrations?id=eq.${id}&edition_id=eq.${edition.id}&select=id,nome,email,status`);
+    const pessoa = achou.ok ? (await achou.json())[0] : null;
+    if (!pessoa) return res.status(404).json({ error: 'Inscrição não encontrada.' });
+    const mudou = await banco(`registrations?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+    if (!mudou.ok) return res.status(502).json({ error: 'Não foi possível salvar.' });
+    if (status === 'cancelado') return res.status(200).json({ email: null });
+    return res.status(200).json({ email: await enviarUmaVez(status === 'inscrito' ? 'confirmacao' : 'espera', edition, pessoa) });
   }
 
   const pessoas = await destinatarios(edition.id);

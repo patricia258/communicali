@@ -10,7 +10,7 @@ import { MembersPanel, PollsPanel, TextsPanel, exportPresencasCsv } from './Admi
 import { GuestsPanel } from './Convidados';
 import { HomePanel, ProgramPanel } from './AdminInicio';
 import { StaffPanel } from './Staff';
-import { EmailsCard } from './AdminEmails';
+import { EmailsCard, chamar } from './AdminEmails';
 import { RecommendationsPanel } from './AdminRecomendacoes';
 import './admin.css';
 
@@ -109,7 +109,14 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
   );
 
   const [signups, setSignups] = useState<Array<{ id: string; nome: string; email: string; whatsapp: string; status: string }>>([]);
-  useEffect(() => { supabase.from('registrations').select('id,nome,email,whatsapp,status').eq('edition_id', edition.id).order('created_at').then(({ data }) => setSignups(data || [])); }, [edition.id]);
+  const loadSignups = () => supabase.from('registrations').select('id,nome,email,whatsapp,status').eq('edition_id', edition.id).order('created_at').then(({ data }) => setSignups(data || []));
+  useEffect(() => { void loadSignups(); }, [edition.id]);
+  async function decidir(item: { id: string; nome: string }, status: 'inscrito' | 'espera' | 'cancelado') {
+    const pergunta = { inscrito: `Aprovar ${item.nome}? A pessoa recebe a confirmação por e-mail.`, espera: `Colocar ${item.nome} na lista de espera? A pessoa recebe um aviso por e-mail.`, cancelado: `Recusar a inscrição de ${item.nome}? Nenhum e-mail é enviado.` }[status];
+    if (!window.confirm(pergunta)) return;
+    try { await chamar({ acao: 'decidir', edicao: edition.id, registro: item.id, status }); setNote('Inscrição atualizada.'); } catch (error) { setNote((error as Error).message); }
+    await loadSignups();
+  }
   const loadPhotos = () => supabase.from('edition_photos').select('id,url,legenda,no_carrossel').eq('edition_id', edition.id).order('ordem').then(({ data }) => setPhotos((data || []) as Photo[]));
   const loadPeople = () => supabase.from('checkins').select('id,checked_in_at,codigo,origem,members(nome,email,whatsapp,empresa,cargo,categoria,autoriza_imagem)').eq('edition_id', edition.id).order('checked_in_at').then(({ data }) => setPeople((data || []) as unknown as Attendee[]));
   useEffect(() => { void loadPhotos(); void loadPeople(); }, []);
@@ -224,12 +231,14 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         </div>
       </section>
       <section className="v2-forms-card">
-        <header><small>INSCRIÇÕES PELO SITE</small><h2>{signups.filter((item) => item.status === 'inscrito').length} {signups.filter((item) => item.status === 'inscrito').length === 1 ? 'inscrito' : 'inscritos'}{signups.some((item) => item.status === 'espera') ? `, ${signups.filter((item) => item.status === 'espera').length} na lista de espera` : ''}</h2></header>
+        <header><small>INSCRIÇÕES PELO SITE</small><h2>{signups.filter((item) => item.status === 'analise').length} para aprovar, {signups.filter((item) => item.status === 'inscrito').length} {signups.filter((item) => item.status === 'inscrito').length === 1 ? 'aprovado' : 'aprovados'}{signups.some((item) => item.status === 'espera') ? `, ${signups.filter((item) => item.status === 'espera').length} na lista de espera` : ''}</h2></header>
         <div className="adm-links">
           <input readOnly aria-label="Link da página da edição" value={`https://comuni.calirh.com/e/${edition.slug}`} onFocus={(event) => event.target.select()} />
           <button type="button" className="wf-secondary" disabled={!signups.length} onClick={() => downloadXlsx(`communicali-${edition.slug}-inscritos.xlsx`, 'Inscritos', ['Nome', 'E-mail', 'WhatsApp', 'Situação'], signups.map((item) => [item.nome, item.email, item.whatsapp, item.status]))}>Exportar Excel</button>
         </div>
-        <div className="adm-list">{signups.map((item) => <div className="adm-row adm-row--static" key={item.id}><strong>{item.nome}</strong><span>{item.email} · {item.whatsapp}</span><em>{item.status === 'espera' ? 'Lista de espera' : item.status === 'cancelado' ? 'Cancelado' : 'Inscrito'}</em></div>)}</div>
+        <div className="adm-list">{signups.map((item) => <div className="adm-row adm-row--static" key={item.id}><strong>{item.nome}</strong><span>{item.email} · {item.whatsapp}</span>{item.status === 'analise' || item.status === 'espera'
+            ? <span><button type="button" onClick={() => void decidir(item, 'inscrito')}>Aprovar</button>{item.status === 'analise' && <> <button type="button" onClick={() => void decidir(item, 'espera')}>Lista de espera</button></>} <button type="button" onClick={() => void decidir(item, 'cancelado')}>Recusar</button></span>
+            : <em>{item.status === 'cancelado' ? 'Recusado' : 'Aprovado'}</em>}</div>)}</div>
       </section>
       <EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} />
       <section className="v2-forms-card">

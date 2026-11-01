@@ -9,6 +9,7 @@ export const EDITION_FIELDS = 'id,slug,titulo,data_evento,horario,local,cidade,e
 // Página branca, sem moldura. A cor de cada tipo aparece na etiqueta e no botão; os blocos têm cantos arredondados.
 const COR = { tinta: '#22100F', bordo: '#5A1E2D', vivo: '#7A1F3D', mostarda: '#C9973B', clara: '#DDB160', suave: '#CBB9B1', marfim: '#F7F0EA', rose: '#FBF1EC', oliva: '#5F6238', terra: '#A9502E' };
 const FAIXA = {
+  recebido: { etiqueta: COR.clara, etiquetaTexto: COR.tinta },
   confirmacao: { etiqueta: COR.oliva, etiquetaTexto: COR.marfim, botao: COR.vivo, botaoTexto: COR.marfim },
   espera: { etiqueta: COR.suave, etiquetaTexto: COR.tinta },
   lembrete: { etiqueta: COR.terra, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
@@ -109,7 +110,8 @@ export function montar(tipo, edition, pessoa) {
   const agenda = { texto: '📅 Colocar na minha agenda', href: linkGoogle(edition) };
   const responder = 'Se não puder ir, responda este e-mail para liberarmos o seu lugar.';
   const textos = {
-    confirmacao: { assunto: `🎉 Reserva confirmada: ${edition.titulo}`, previa: 'Sua vaga está reservada.', titulo: '🎉 Reserva confirmada!', saudacao, paragrafos: [`Ficamos muito felizes com a sua inscrição. Sua vaga no encontro <strong>${titulo}</strong> está reservada.`], botao: agenda, depois: `Para Outlook ou celular, use o convite anexo. ${responder}`, anexo: true },
+    recebido: { assunto: `💌 Recebemos sua inscrição: ${edition.titulo}`, previa: 'A equipe vai analisar e você recebe a confirmação por e-mail.', titulo: '💌 Inscrição recebida', saudacao, paragrafos: [`Ficamos muito felizes com o seu interesse. Recebemos sua intenção de participar do encontro <strong>${titulo}</strong>.`, 'A equipe vai analisar e você recebe a confirmação por e-mail.'], anexo: false },
+    confirmacao: { assunto: `🎉 Reserva confirmada: ${edition.titulo}`, previa: 'Sua vaga está reservada.', titulo: '🎉 Reserva confirmada!', saudacao, paragrafos: [`Boa notícia: sua vaga no encontro <strong>${titulo}</strong> está reservada.`], botao: agenda, depois: `Para Outlook ou celular, use o convite anexo. ${responder}`, anexo: true },
     espera: { assunto: `⏳ Lista de espera: ${edition.titulo}`, previa: 'Avisaremos você se abrir um lugar.', titulo: '⏳ Lista de espera', saudacao, paragrafos: [`Ficamos muito felizes com o seu interesse. As vagas do encontro <strong>${titulo}</strong> estão preenchidas, e seu nome entrou na lista de espera.`, 'A equipe avisa você por e-mail se abrir um lugar.'], anexo: false },
     lembrete: { assunto: `⏰ Faltam 2 dias: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: '⏰ Faltam 2 dias', saudacao, paragrafos: ['Na chegada, a recepção confirma o seu nome e indica a sua mesa. 🤝', 'Depois de sentar, é só fazer o check-in pelo QR Code. 📲'], botao: agenda, depois: responder, anexo: true },
     convite: { assunto: `🗓️ Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: '🗓️ Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },

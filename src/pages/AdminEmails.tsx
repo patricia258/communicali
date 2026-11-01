@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 
 type Resumo = { todos: number; acionados: number; confirmacoes: number; lembretes: number; convites: number; erros: number };
 
-async function chamar(body: Record<string, string>) {
+export async function chamar(body: Record<string, string>) {
   const { data } = await supabase.auth.getSession();
   const response = await fetch('/api/email-admin', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session?.access_token || ''}` }, body: JSON.stringify(body) });
   const result = await response.json().catch(() => ({}));
@@ -50,7 +50,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
   return (
     <section className="v2-forms-card">
       <header><small>E-MAILS</small><h2>Confirmação, lembrete e agenda</h2></header>
-      <label className="v2-forms-check"><input type="checkbox" checked={lembrete} onChange={(event) => onLembrete(event.target.checked)} /><span><strong>Lembrete automático em {diaLembrete}</strong><small>Vai 2 dias antes, pela manhã, para todas as pessoas inscritas. Lembre de salvar as alterações.</small></span></label>
+      <label className="v2-forms-check"><input type="checkbox" checked={lembrete} onChange={(event) => onLembrete(event.target.checked)} /><span><strong>Lembrete automático em {diaLembrete}</strong><small>Vai 2 dias antes, pela manhã, para todas as pessoas inscritas. Vai para quem foi aprovado e para os inscritos do formulário. Lembre de salvar as alterações.</small></span></label>
       {resumo && <p className="adm-hint">{resumo.todos} inscritos, {resumo.acionados} acionados. Enviados: {resumo.confirmacoes} confirmações, {resumo.lembretes} lembretes e {resumo.convites} convites.{resumo.erros ? ` ${resumo.erros} com erro.` : ''}</p>}
       <div className="adm-links">
         <select aria-label="Quem recebe o convite" value={publico} onChange={(event) => setPublico(event.target.value)}>

@@ -8,9 +8,9 @@ export default async function handler(req, res) {
   const found = await banco(`editions?slug=eq.${slug}&select=${EDITION_FIELDS}`);
   const edition = found.ok ? (await found.json())[0] : null;
   if (!edition) return res.status(404).json({ ok: false });
-  const signup = await banco(`registrations?edition_id=eq.${edition.id}&email=eq.${encodeURIComponent(email)}&status=in.(inscrito,espera)&select=nome,email,status`);
+  const signup = await banco(`registrations?edition_id=eq.${edition.id}&email=eq.${encodeURIComponent(email)}&status=in.(analise,inscrito,espera)&select=nome,email,status`);
   const pessoa = signup.ok ? (await signup.json())[0] : null;
   if (!pessoa) return res.status(404).json({ ok: false });
-  const situacao = await enviarUmaVez(pessoa.status === 'espera' ? 'espera' : 'confirmacao', edition, pessoa);
+  const situacao = await enviarUmaVez(({ analise: 'recebido', espera: 'espera', inscrito: 'confirmacao' })[pessoa.status], edition, pessoa);
   res.status(situacao === 'erro' ? 502 : 200).json({ ok: situacao !== 'erro' });
 }
