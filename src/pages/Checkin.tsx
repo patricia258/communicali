@@ -114,6 +114,7 @@ export function Checkin() {
 
   if (done) return <Success done={done} />;
   if (edition?.situacao === 'aberto' && preset) return <PublicFormPage key={step} preset={preset} />;
+  if (!edition && !loadError) return <main className="event-page" aria-busy="true" />;
 
   return (
     <main className="event-page">

@@ -115,6 +115,8 @@ export function InscricaoPage() {
   } : null, [edition, texts, slug]);
 
   if (preset) return <PublicFormPage preset={preset} />;
+  // Só decide que está encerrado depois de ter a edição e os textos; antes disso, mantém a tela limpa.
+  if (edition === undefined || (edition?.inscricoes_abertas && !texts)) return <main className="event-page" aria-busy="true" />;
   return (
     <>
       <main className="event-page">
@@ -122,7 +124,7 @@ export function InscricaoPage() {
           <p className="eyebrow">CommuniCALI</p>
           <h1>{edition?.titulo || 'Inscrição'}</h1>
           {edition && <p className="event-card__meta">{formatDate(edition.data_evento)} · {edition.local}</p>}
-          {edition !== undefined && <p className="notice">As inscrições desta edição estão encerradas. No dia do encontro, quem for participar faz o check-in pelo QR Code do telão.</p>}
+          <p className="notice">As inscrições desta edição estão encerradas. No dia do encontro, quem for participar faz o check-in pelo QR Code do telão.</p>
         </section>
       </main>
       <SiteFooter />

@@ -34,7 +34,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/" element={<Home />} />
       <Route path="/checkin" element={<Page><Checkin /></Page>} />
       <Route path="/validar/:codigo" element={<Page><Validar /></Page>} />
-      <Route path="/cadastro" element={<Page><Cadastro /></Page>} />
+      <Route path="/cadastro" element={<Cadastro />} />
       <Route path="/regras" element={<Page><TextoPagina tipo="regras" /></Page>} />
       <Route path="/privacidade" element={<Page><TextoPagina tipo="privacidade" /></Page>} />
       <Route path="/staff" element={<StaffForm />} />

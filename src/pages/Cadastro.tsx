@@ -19,12 +19,13 @@ export function Cadastro() {
   } : null, [texts]);
 
   if (preset) return <PublicFormPage preset={preset} />;
+  if (!texts) return <main className="event-page" aria-busy="true" />;
   return (
     <main className="event-page">
       <section className="event-card">
         <p className="eyebrow">CommuniCALI</p>
         <h1>Cadastro de membro</h1>
-        {texts && <p className="notice">O cadastro abre em breve. Enquanto isso, entre no grupo da comunidade pelo site.</p>}
+        <p className="notice">O cadastro abre em breve. Enquanto isso, entre no grupo da comunidade pelo site.</p>
       </section>
     </main>
   );
