@@ -6,7 +6,7 @@ import { slugify } from '../forms/formModel';
 import { CATEGORIAS } from './Checkin';
 import { FAIXAS, PONTOS } from './AdminInicio';
 
-type Member = { codigo: string | null; temas: string[]; interesse_palestras: boolean; foto_url: string | null; id: string; status: string; nome: string; apelido: string | null; email: string; whatsapp: string | null; cidade_uf: string | null; empresa: string | null; cargo: string | null; linkedin: string | null; interesses: string[]; como_conheceu: string | null; categoria: string; cracha_status: string; autoriza_imagem: boolean; autoriza_comunicacoes: boolean; created_at: string };
+type Member = { na_rede: boolean; presta_servicos: boolean; instagram: string | null; codigo: string | null; temas: string[]; interesse_palestras: boolean; foto_url: string | null; id: string; status: string; nome: string; apelido: string | null; email: string; whatsapp: string | null; cidade_uf: string | null; empresa: string | null; cargo: string | null; linkedin: string | null; interesses: string[]; como_conheceu: string | null; categoria: string; cracha_status: string; autoriza_imagem: boolean; autoriza_comunicacoes: boolean; created_at: string };
 type History = { id: string; checked_in_at: string; codigo: string; editions: { titulo: string } };
 type Point = { id: string; acao: string; pontos: number; created_at: string; motivo: string | null };
 type Poll = { id: string; slug: string; titulo: string; pergunta: string; tipo: 'nota' | 'multipla' | 'aberta'; opcoes: string[]; anonima: boolean; status: 'rascunho' | 'ativa' | 'encerrada'; revelada: boolean; edition_id: string };
@@ -77,7 +77,7 @@ function MemberEditor({ member, onBack }: { member: Member; onBack: () => void }
         <section className="v2-forms-card">
           <header><small>ESPAÇO DO MEMBRO</small><h2>{member.interesse_palestras ? 'Quer contribuir com palestras' : 'Perfil'}</h2></header>
           {member.foto_url && <img src={member.foto_url} alt={`Foto de ${member.nome}`} style={{ width: 96, height: 120, objectFit: 'cover' }} />}
-          <p className="adm-hint">Código: {member.codigo || 'ainda não gerado'}. Temas: {member.temas?.length ? member.temas.join(', ') : 'não informados'}.</p>
+          <p className="adm-hint">Código: {member.codigo || 'ainda não gerado'}. O que faz: {member.temas?.length ? member.temas.join(', ') : 'não informado'}. {member.na_rede ? 'Aparece na Rede.' : 'Fora da Rede.'}{member.presta_servicos ? ' Oferece serviços.' : ''}{member.instagram ? ` Instagram: ${member.instagram}.` : ''}</p>
         </section>
       )}
       <section className="v2-forms-card">

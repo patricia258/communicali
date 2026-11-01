@@ -18,9 +18,11 @@ type Espaco = {
   indicacoes: Array<{ nome: string; compareceu: boolean }>;
   recomendacoes: Array<{ nome: string; tipo: string; status: string }>;
 };
-type Aba = 'inicio' | 'edicoes' | 'missoes' | 'indicar' | 'programa' | 'perfil';
+type Aba = 'inicio' | 'edicoes' | 'missoes' | 'rede' | 'indicar' | 'programa' | 'perfil';
+type Pessoa = { id: string; nome: string; foto_url: string | null; categoria: string; cidade_uf: string | null; empresa: string | null; cargo: string | null; temas: string[]; interesses: string[]; presta_servicos: boolean; whatsapp?: string | null; email?: string; instagram?: string | null; linkedin?: string | null };
+type Parceiro = { id: string; nome: string; logo_url: string | null; site_url: string | null };
 
-const ABAS: Array<[Aba, string]> = [['inicio', 'Início'], ['edicoes', 'Edições'], ['missoes', 'Missões'], ['indicar', 'Indicar'], ['programa', 'Programa']];
+const ABAS: Array<[Aba, string]> = [['inicio', 'Início'], ['edicoes', 'Edições'], ['missoes', 'Missões'], ['rede', 'Rede'], ['indicar', 'Indicar'], ['programa', 'Programa']];
 const NIVEIS: Record<string, string> = { membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organização', kids: 'Kids' };
 const META: Record<string, { nome: string; pontos: number; encontros: number; nivel: string }> = {
   membro: { nome: 'Conector', pontos: 100, encontros: 3, nivel: 'conector' },
@@ -29,6 +31,9 @@ const META: Record<string, { nome: string; pontos: number; encontros: number; ni
 const SELO: Record<string, string> = { convidados: 'postal-indicacao', conexao: 'postal-conector', lugar: 'postal-lugar', palestra: 'postal-palestra', parceiro: 'postal-embaixador', representar: 'postal-embaixador' };
 const SITUACAO: Record<string, string> = { concluida: 'Concluída', enviada: 'Em análise', recusada: 'Pode reenviar', aberta: 'Em aberto' };
 const PONTOS: Array<[string, number]> = [['Presença em encontro', 10], ['Visitante indicado que compareceu', 5], ['Recomendação validada', 10], ['Contribuição aprovada', 15], ['Parceiro que contribuiu', 20], ['Palestra a convite da organização', 30]];
+
+const ATUACAO = ['Recrutamento e seleção', 'Departamento pessoal', 'Treinamento e desenvolvimento', 'Cultura e clima', 'Remuneração e benefícios', 'Liderança', 'Coaching e mentoria', 'Consultoria', 'Palestras', 'Jurídico trabalhista', 'Marketing', 'Tecnologia', 'Inteligência artificial', 'Gestão de negócios', 'Saúde e bem-estar'];
+const INTERESSES_REDE = ['RH', 'Liderança', 'Gestão de pessoas', 'Desenvolvimento humano', 'Empreendedorismo', 'Networking', 'Inteligência artificial', 'Carreira', 'Parcerias', 'Vagas', 'Mentoria', 'Palestras'];
 
 const inviteUrl = (codigo: string) => `https://comuni.calirh.com/c/${codigo}`;
 const primeiroNome = (espaco: Espaco) => (espaco.membro?.apelido || espaco.membro?.nome || '').trim().split(/\s+/)[0];
@@ -106,7 +111,7 @@ function Inicio({ espaco, abrir }: { espaco: Espaco; abrir: (aba: Aba) => void }
     <>
       <header className="passe__topo"><img className="passe__logo" src="/brand/communicali-horizontal.png" alt="CommuniCALI" /><span>PASSAPORTE</span></header>
       <h1>Olá, <em>{primeiroNome(espaco)}</em></h1>
-      <section className="passe__dados">
+      <section className="passe__dados passe__cartao passe__dados--cartao">
         <div className="passe__foto">{m.foto_url ? <img src={m.foto_url} alt="Sua foto" /> : <button type="button" onClick={() => abrir('perfil')}>Colocar foto</button>}</div>
         <dl>
           <div><dt>NOME</dt><dd className="grande">{m.nome}</dd></div>
@@ -308,16 +313,40 @@ function Programa({ espaco }: { espaco: Espaco }) {
   );
 }
 
+function Chips({ titulo, opcoes, marcados, alternar }: { titulo: string; opcoes: string[]; marcados: string[]; alternar: (item: string) => void }) {
+  return (
+    <section className="passe__cartao">
+      <h2>{titulo}</h2>
+      <div className="passe__temas">{[...new Set([...opcoes, ...marcados])].map((item) => <button key={item} type="button" className={marcados.includes(item) ? 'is-on' : ''} aria-pressed={marcados.includes(item)} onClick={() => alternar(item)}>{item}</button>)}</div>
+    </section>
+  );
+}
+
 function Perfil({ espaco, recarregar, voltar }: { espaco: Espaco; recarregar: () => void; voltar: () => void }) {
   const m = espaco.membro!;
   const [foto, setFoto] = useState(m.foto_url || '');
   const [temas, setTemas] = useState<string[]>(m.temas);
-  const [tema, setTema] = useState('');
-  const [interesse, setInteresse] = useState(m.interesse_palestras);
+  const [interesses, setInteresses] = useState<string[]>([]);
+  const [palestras, setPalestras] = useState(m.interesse_palestras);
   const [linkedin, setLinkedin] = useState(m.linkedin || '');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [naRede, setNaRede] = useState(false);
+  const [presta, setPresta] = useState(false);
   const [aviso, setAviso] = useState('');
   const [erro, setErro] = useState('');
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    supabase.rpc('communicali_meus_contatos').then(({ data }) => {
+      const dados = data as { whatsapp: string | null; instagram: string | null; cidade_uf: string | null; interesses: string[]; na_rede: boolean; presta_servicos: boolean } | null;
+      if (!dados) return;
+      setWhatsapp(dados.whatsapp || ''); setInstagram(dados.instagram || ''); setCidade(dados.cidade_uf || ''); setInteresses(dados.interesses || []); setNaRede(dados.na_rede); setPresta(dados.presta_servicos);
+    });
+  }, []);
+
+  const alternar = (lista: string[], definir: (nova: string[]) => void) => (item: string) => definir(lista.includes(item) ? lista.filter((atual) => atual !== item) : [...lista, item]);
 
   async function enviarFoto(event: ChangeEvent<HTMLInputElement>) {
     const arquivo = event.target.files?.[0];
@@ -331,16 +360,10 @@ function Perfil({ espaco, recarregar, voltar }: { espaco: Espaco; recarregar: ()
     setBusy(false);
   }
 
-  function adicionar() {
-    const novo = tema.trim();
-    if (novo && !temas.includes(novo) && temas.length < 12) setTemas([...temas, novo]);
-    setTema('');
-  }
-
   async function salvar(event: FormEvent) {
     event.preventDefault();
     setBusy(true); setErro(''); setAviso('');
-    const { error } = await supabase.rpc('communicali_salvar_perfil', { p_foto_url: foto, p_temas: temas, p_interesse: interesse, p_linkedin: linkedin });
+    const { error } = await supabase.rpc('communicali_salvar_perfil', { p_foto_url: foto, p_temas: temas, p_interesses: interesses, p_interesse: palestras, p_linkedin: linkedin, p_whatsapp: whatsapp, p_instagram: instagram, p_cidade_uf: cidade, p_na_rede: naRede, p_presta: presta });
     if (error) setErro(errorMessage(error)); else { setAviso('Perfil salvo.'); recarregar(); }
     setBusy(false);
   }
@@ -348,23 +371,96 @@ function Perfil({ espaco, recarregar, voltar }: { espaco: Espaco; recarregar: ()
   return (
     <>
       <button type="button" className="passe__link" onClick={voltar}>Voltar</button>
-      <section className="passe__dados">
+      <section className="passe__dados passe__cartao passe__dados--cartao">
         <div className="passe__foto">{foto ? <img src={foto} alt="Sua foto" /> : <span>Sem foto</span>}</div>
         <div><h1>Meu perfil</h1><label className="passe__link">Trocar foto<input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(event) => void enviarFoto(event)} /></label></div>
       </section>
       <form className="passe__form" onSubmit={(event) => void salvar(event)}>
         <section className="passe__cartao">
-          <h2>Temas que domino</h2>
-          <div className="passe__temas">{temas.map((item, indice) => <button key={item} type="button" className={`t${indice % 3}`} aria-label={`Remover ${item}`} onClick={() => setTemas(temas.filter((tema2) => tema2 !== item))}>{item} ×</button>)}</div>
-          <label>Adicionar tema<input value={tema} onChange={(event) => setTema(event.target.value)} onBlur={adicionar} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); adicionar(); } }} /></label>
+          <h2>Onde me encontrar</h2>
+          <label>WhatsApp<input inputMode="tel" autoComplete="tel" value={whatsapp} onChange={(event) => setWhatsapp(event.target.value)} /></label>
+          <label>E-mail<input value={m.email} readOnly /></label>
+          <label>Instagram<input value={instagram} onChange={(event) => setInstagram(event.target.value)} /></label>
+          <label>LinkedIn<input value={linkedin} onChange={(event) => setLinkedin(event.target.value)} /></label>
+          <label>Cidade e estado<input value={cidade} onChange={(event) => setCidade(event.target.value)} /></label>
         </section>
-        <label className="passe__marca"><input type="checkbox" checked={interesse} onChange={(event) => setInteresse(event.target.checked)} /><span><strong>Quero contribuir com palestras.</strong> A organização vê seus temas e faz o convite quando fizer sentido.</span></label>
-        <label>LinkedIn<input value={linkedin} onChange={(event) => setLinkedin(event.target.value)} /></label>
+        <Chips titulo="O que eu faço" opcoes={ATUACAO} marcados={temas} alternar={alternar(temas, setTemas)} />
+        <Chips titulo="Meus interesses" opcoes={INTERESSES_REDE} marcados={interesses} alternar={alternar(interesses, setInteresses)} />
+        <label className="passe__marca"><input type="checkbox" checked={naRede} onChange={(event) => setNaRede(event.target.checked)} /><span><strong>Quero aparecer na Rede.</strong> Membros veem sua foto, o que você faz e seus interesses. Seus contatos ficam visíveis só para Conectores, Embaixadores e organização.</span></label>
+        <label className="passe__marca passe__marca--oliva"><input type="checkbox" checked={presta} onChange={(event) => setPresta(event.target.checked)} /><span><strong>Ofereço serviços.</strong> Você também aparece em Parceiros e prestadores, se estiver na Rede.</span></label>
+        <label className="passe__marca passe__marca--areia"><input type="checkbox" checked={palestras} onChange={(event) => setPalestras(event.target.checked)} /><span><strong>Quero contribuir com palestras.</strong> A organização vê seu perfil e faz o convite quando fizer sentido.</span></label>
         {aviso && <p className="passe__ok" role="status">{aviso}</p>}
         {erro && <p className="passe__erro" role="alert">{erro}</p>}
         <button type="submit" className="passe__botao" disabled={busy}>{busy ? 'Aguarde...' : 'Salvar perfil'}</button>
       </form>
       <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
+    </>
+  );
+}
+
+function FichaPessoa({ pessoa, contatos, voltar }: { pessoa: Pessoa; contatos: boolean; voltar: () => void }) {
+  const whatsapp = pessoa.whatsapp?.replace(/\D/g, '');
+  return (
+    <>
+      <button type="button" className="passe__link" onClick={voltar}>Voltar para a Rede</button>
+      <section className="passe__dados passe__cartao passe__dados--cartao">
+        <div className="passe__foto">{pessoa.foto_url ? <img src={pessoa.foto_url} alt={`Foto de ${pessoa.nome}`} /> : <span>Sem foto</span>}</div>
+        <div><h1 className="menor">{pessoa.nome}</h1><p className="passe__data">{NIVEIS[pessoa.categoria] || pessoa.categoria}</p>{pessoa.cidade_uf && <p>{pessoa.cidade_uf}</p>}{(pessoa.cargo || pessoa.empresa) && <p>{[pessoa.cargo, pessoa.empresa].filter(Boolean).join(', ')}</p>}</div>
+      </section>
+      {!!pessoa.temas.length && <section className="passe__cartao"><h2>O que faz</h2><div className="passe__temas">{pessoa.temas.map((item) => <span key={item} className="is-on">{item}</span>)}</div></section>}
+      {!!pessoa.interesses.length && <section className="passe__cartao"><h2>Interesses</h2><div className="passe__temas">{pessoa.interesses.map((item) => <span key={item}>{item}</span>)}</div></section>}
+      <section className="passe__cartao">
+        <h2>Onde encontrar</h2>
+        {contatos ? (
+          <div className="passe__contatos">
+            {whatsapp && <a href={`https://wa.me/${whatsapp.length <= 11 ? `55${whatsapp}` : whatsapp}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>}
+            {pessoa.email && <a href={`mailto:${pessoa.email}`}>E-mail</a>}
+            {pessoa.instagram && <a href={`https://www.instagram.com/${pessoa.instagram.replace(/^.*instagram\.com\//, '').replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer">Instagram</a>}
+            {pessoa.linkedin && <a href={/^https?:/.test(pessoa.linkedin) ? pessoa.linkedin : `https://${pessoa.linkedin}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
+          </div>
+        ) : <p>Os contatos abrem quando você chega a Conector.</p>}
+      </section>
+    </>
+  );
+}
+
+function Rede() {
+  const [rede, setRede] = useState<{ pode_ver_contatos: boolean; pessoas: Pessoa[]; parceiros: Parceiro[] } | null>(null);
+  const [frente, setFrente] = useState<'pessoas' | 'parceiros'>('pessoas');
+  const [busca, setBusca] = useState('');
+  const [aberta, setAberta] = useState<Pessoa | null>(null);
+  useEffect(() => { supabase.rpc('communicali_rede').then(({ data }) => setRede(data as typeof rede)); }, []);
+  if (aberta) return <FichaPessoa pessoa={aberta} contatos={Boolean(rede?.pode_ver_contatos)} voltar={() => setAberta(null)} />;
+  const termo = busca.trim().toLowerCase();
+  const confere = (pessoa: Pessoa) => !termo || [pessoa.nome, pessoa.cidade_uf, pessoa.empresa, ...pessoa.temas, ...pessoa.interesses].join(' ').toLowerCase().includes(termo);
+  const pessoas = (rede?.pessoas || []).filter((pessoa) => confere(pessoa) && (frente === 'pessoas' || pessoa.presta_servicos));
+  const parceiros = (rede?.parceiros || []).filter((item) => !termo || item.nome.toLowerCase().includes(termo));
+  return (
+    <>
+      <h1>Rede</h1>
+      <p>{rede?.pode_ver_contatos ? 'Conheça quem faz parte e crie conexões.' : 'Veja quem faz parte. Os contatos abrem quando você chega a Conector.'}</p>
+      <div className="passe__seg passe__seg--dois" role="group" aria-label="Quem ver">
+        <button type="button" className={frente === 'pessoas' ? 'is-on' : ''} aria-pressed={frente === 'pessoas'} onClick={() => setFrente('pessoas')}>Pessoas</button>
+        <button type="button" className={frente === 'parceiros' ? 'is-on' : ''} aria-pressed={frente === 'parceiros'} onClick={() => setFrente('parceiros')}>Parceiros e prestadores</button>
+      </div>
+      <div className="passe__form"><label>Buscar por nome, cidade ou tema<input value={busca} onChange={(event) => setBusca(event.target.value)} /></label></div>
+      {frente === 'parceiros' && parceiros.map((item) => (
+        <article className="passe__linha passe__linha--parceiro" key={item.id}>
+          {item.logo_url && <img src={item.logo_url} alt="" />}
+          <strong>{item.nome}</strong>
+          {item.site_url && <a className="passe__link" href={item.site_url} target="_blank" rel="noopener noreferrer">Visitar</a>}
+        </article>
+      ))}
+      <div className="passe__pessoas">
+        {pessoas.map((pessoa) => (
+          <button type="button" className="passe__pessoa" key={pessoa.id} onClick={() => { setAberta(pessoa); window.scrollTo(0, 0); }}>
+            <span className="passe__pessoa-foto">{pessoa.foto_url ? <img src={pessoa.foto_url} alt="" /> : pessoa.nome.charAt(0)}</span>
+            <strong>{pessoa.nome}</strong>
+            <span>{pessoa.temas[0] || NIVEIS[pessoa.categoria] || pessoa.categoria}</span>
+          </button>
+        ))}
+      </div>
+      {rede && !pessoas.length && (frente === 'pessoas' || !parceiros.length) && <p className="passe__aviso">Ninguém por aqui ainda. Quem escolhe aparecer na Rede entra nesta lista.</p>}
     </>
   );
 }
@@ -377,9 +473,10 @@ export function MeuEspaco() {
   useEffect(() => {
     const anterior = document.documentElement.style.background;
     document.documentElement.style.background = '#F7F0EA';
+    document.documentElement.classList.add('passe-html');
     void supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
-    return () => { data.subscription.unsubscribe(); document.documentElement.style.background = anterior; };
+    return () => { data.subscription.unsubscribe(); document.documentElement.style.background = anterior; document.documentElement.classList.remove('passe-html'); };
   }, []);
 
   const carregar = () => { void supabase.rpc('communicali_meu_espaco').then(({ data }) => setEspaco(data as Espaco)); };
@@ -403,6 +500,7 @@ export function MeuEspaco() {
       {aba === 'inicio' && <Inicio espaco={espaco} abrir={setAba} />}
       {aba === 'edicoes' && <Edicoes espaco={espaco} />}
       {aba === 'missoes' && <Missoes espaco={espaco} recarregar={carregar} />}
+      {aba === 'rede' && <Rede />}
       {aba === 'indicar' && <Indicar espaco={espaco} recarregar={carregar} />}
       {aba === 'programa' && <Programa espaco={espaco} />}
       {aba === 'perfil' && <Perfil espaco={espaco} recarregar={carregar} voltar={() => setAba('inicio')} />}
