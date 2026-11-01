@@ -5,28 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#1F0E14" />
     <title>CommuniCALI | Café & Pessoas</title>
-    <style>html,body{background:#1F0E14}</style>
+    <style>html,body{background:#1F0E14}#boot{min-height:100vh;display:grid;place-content:center;justify-items:center;gap:14px;padding:24px;color:#F7F0EA;font:15px system-ui,sans-serif;text-align:center}#boot button{padding:12px 22px;border:0;border-radius:999px;background:#C9973B;color:#22100F;font:600 15px system-ui,sans-serif}</style>
     <script>
-      // Página antiga aberta depois de uma publicação: recarrega uma vez para buscar os arquivos novos.
+      // Logo após uma publicação, um arquivo pode demorar alguns segundos para chegar: tenta de novo e, se não vier, oferece recarregar.
       addEventListener('error', function (event) {
         var tag = event.target && event.target.tagName;
-        if ((tag === 'SCRIPT' || tag === 'LINK') && !sessionStorage.getItem('comuni-reload')) {
-          sessionStorage.setItem('comuni-reload', '1');
-          location.reload();
+        if (tag !== 'SCRIPT' && tag !== 'LINK') return;
+        var tries = Number(sessionStorage.getItem('comuni-reload') || 0);
+        if (tries < 4) {
+          sessionStorage.setItem('comuni-reload', String(tries + 1));
+          setTimeout(function () { location.reload(); }, 1500 + tries * 1500);
+        } else {
+          sessionStorage.removeItem('comuni-reload');
+          document.getElementById('boot-text').textContent = 'Não foi possível abrir agora. Toque para tentar de novo.';
+          document.getElementById('boot-button').hidden = false;
         }
       }, true);
     </script>
-    <meta name="description" content="Comunidade de pessoas interessadas em gente, gestão e desenvolvimento humano. Falar de pessoas pode mudar o mundo." />
-    <meta property="og:title" content="CommuniCALI | Café & Pessoas" />
-    <meta property="og:description" content="Comunidade de pessoas interessadas em gente, gestão e desenvolvimento humano." />
-    <meta property="og:image" content="https://comuni.calirh.com/og-comunidade.jpg" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta property="og:url" content="https://comuni.calirh.com" />
-    <link rel="icon" href="/brand/cali-favicon.svg" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>

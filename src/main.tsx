@@ -24,6 +24,7 @@ import type { ReactNode } from 'react';
 
 const Page = ({ children }: { children: ReactNode }) => <>{children}<SiteFooter /></>;
 
+sessionStorage.removeItem('comuni-reload');
 window.addEventListener('error', (event) => { if (event.message) reportError(event.message); });
 window.addEventListener('unhandledrejection', (event) => reportError(String(event.reason?.message || event.reason).slice(0, 300)));
 
