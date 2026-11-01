@@ -6,13 +6,13 @@ const FROM = 'CommuniCALI <comuni@calirh.com>';
 const REPLY_TO = 'contato@calirh.com';
 export const EDITION_FIELDS = 'id,slug,titulo,data_evento,horario,local,cidade,endereco,capa_url,lembrete_ativo,publica';
 
-// Cada tipo de e-mail tem a própria faixa de cor, sobre fundo marfim. O bordô fica no texto e nos detalhes.
-const COR = { fundo: '#F7F0EA', cartao: '#FFFFFF', tinta: '#22100F', bordo: '#5A1E2D', vivo: '#7A1F3D', mostarda: '#C9973B', clara: '#DDB160', suave: '#CBB9B1', marfim: '#F7F0EA' };
+// Página branca, sem moldura. A cor de cada tipo aparece na etiqueta e no botão; os blocos têm cantos arredondados.
+const COR = { tinta: '#22100F', bordo: '#5A1E2D', vivo: '#7A1F3D', mostarda: '#C9973B', clara: '#DDB160', suave: '#CBB9B1', marfim: '#F7F0EA', rose: '#FBF1EC', oliva: '#5F6238', terra: '#A9502E' };
 const FAIXA = {
-  confirmacao: { fundo: COR.mostarda, texto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
-  espera: { fundo: COR.suave, texto: COR.tinta },
-  lembrete: { fundo: COR.vivo, texto: COR.marfim, botao: COR.mostarda, botaoTexto: COR.tinta },
-  convite: { fundo: COR.clara, texto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
+  confirmacao: { etiqueta: COR.oliva, etiquetaTexto: COR.marfim, botao: COR.vivo, botaoTexto: COR.marfim },
+  espera: { etiqueta: COR.suave, etiquetaTexto: COR.tinta },
+  lembrete: { etiqueta: COR.terra, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
+  convite: { etiqueta: COR.mostarda, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
 };
 const TITULO = "'Funnel Display',Helvetica,Arial,sans-serif";
 const TEXTO = 'Inter,Helvetica,Arial,sans-serif';
@@ -71,49 +71,48 @@ function linkGoogle(edition) {
 const absoluta = (url) => (url ? new URL(url, SITE).href : '');
 
 function detalhe(rotulo, valor) {
-  return `<tr><td style="padding:0 0 12px;font-family:${TEXTO};font-size:13px;font-weight:600;color:${COR.vivo}">${rotulo}<div style="padding-top:3px;font-size:15px;font-weight:400;line-height:22px;color:${COR.tinta}">${escape(valor)}</div></td></tr>`;
+  return `<tr><td style="padding:0 0 12px;font-family:${TEXTO};font-size:13px;font-weight:600;color:${COR.vivo}">${rotulo}<div style="padding-top:3px;font-size:16px;font-weight:400;line-height:23px;color:${COR.tinta}">${escape(valor)}</div></td></tr>`;
 }
 
 // A foto entra como fundo da célula para qualquer formato virar uma faixa recortada; sem capa, o espaço some.
 function foto(edition) {
   const capa = absoluta(edition.capa_url);
-  return capa ? `<tr><td height="230" bgcolor="${COR.suave}" background="${escape(capa)}" style="height:230px;background-color:${COR.suave};background-image:url('${escape(capa)}');background-position:center;background-size:cover;background-repeat:no-repeat;font-size:1px;line-height:1px">&nbsp;</td></tr>` : '';
+  return capa ? `<tr><td style="padding:0 0 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td height="220" bgcolor="${COR.rose}" background="${escape(capa)}" style="height:220px;border-radius:20px;background-color:${COR.rose};background-image:url('${escape(capa)}');background-position:center 62%;background-size:cover;background-repeat:no-repeat;font-size:1px;line-height:1px">&nbsp;</td></tr></table></td></tr>` : '';
 }
 
-function layout({ previa, titulo, paragrafos, edition, botao, depois, cor }) {
-  const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:16px;line-height:25px;color:${COR.tinta}">${item}</p>`).join('');
+function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, cor }) {
+  const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:17px;line-height:27px;color:${COR.tinta}">${item}</p>`).join('');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${escape(titulo)}</title></head>
-<body style="margin:0;padding:0;background:${COR.fundo}" bgcolor="${COR.fundo}">
+<body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escape(previa)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="${COR.fundo}" style="background:${COR.fundo}"><tr><td align="center" style="padding:24px 16px 32px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="background:#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
-<tr><td align="center" style="padding:0 0 18px"><img src="${SITE}/brand/communicali-bordo.png" width="136" height="78" alt="CommuniCALI" style="display:block;border:0"></td></tr>
-<tr><td bgcolor="${cor.fundo}" style="background:${cor.fundo};padding:24px 28px;font-family:${TITULO};font-size:28px;line-height:33px;font-weight:700;letter-spacing:-.01em;color:${cor.texto}">${escape(titulo)}</td></tr>
+<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="CommuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
 ${foto(edition)}
-<tr><td bgcolor="${COR.cartao}" style="background:${COR.cartao};padding:26px 28px 28px">
-${texto}
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px"><tr><td bgcolor="${COR.fundo}" style="background:${COR.fundo};padding:18px 20px 8px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+<tr><td style="padding:0 0 12px"><span style="display:inline-block;padding:7px 16px;border-radius:999px;background:${cor.etiqueta};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
+<tr><td style="padding:0 0 14px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.vivo}">${saudacao}</td></tr>
+<tr><td style="padding:0 0 8px">${texto}</td></tr>
+<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:22px 24px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 ${detalhe('📅 Quando', `${longDate(edition.data_evento)}, ${edition.horario}`)}${detalhe('📍 Onde', endereco(edition))}
-</table></td></tr></table>
-${botao ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:22px"><tr><td><a href="${escape(botao.href)}" style="display:inline-block;padding:15px 28px;border-radius:999px;background:${cor.botao};font-family:${TITULO};font-size:15px;font-weight:600;color:${cor.botaoTexto};text-decoration:none">${escape(botao.texto)}</a></td></tr></table>` : ''}
-${depois ? `<p style="margin:18px 0 0;font-family:${TEXTO};font-size:14px;line-height:22px;color:${COR.bordo}">${depois}</p>` : ''}
-</td></tr>
-<tr><td align="center" style="padding:24px 0 0;font-family:${TITULO};font-size:16px;line-height:22px;color:${COR.bordo}">Falar de pessoas pode mudar o mundo.</td></tr>
-<tr><td align="center" style="padding:8px 0 0;font-family:${TEXTO};font-size:13px;line-height:20px;color:${COR.bordo}">Toda honra a Deus! 🙏<br>CommuniCALI, uma comunidade organizada pela CALI RH<br><a href="${SITE}" style="color:${COR.vivo}">comuni.calirh.com</a> · <a href="https://www.instagram.com/calirh_/" style="color:${COR.vivo}">@calirh_</a></td></tr>
+</table></td></tr>
+${botao ? `<tr><td align="center" style="padding:24px 0 4px"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${cor.botao};font-family:${TITULO};font-size:16px;font-weight:600;color:${cor.botaoTexto};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
+${depois ? `<tr><td align="center" style="padding:16px 0 0;font-family:${TEXTO};font-size:14px;line-height:22px;color:${COR.bordo}">${depois}</td></tr>` : ''}
+<tr><td align="center" style="padding:32px 0 0;font-family:${TITULO};font-size:17px;line-height:24px;color:${COR.vivo}">Falar de pessoas pode mudar o mundo.</td></tr>
+<tr><td align="center" style="padding:6px 0 0;font-family:${TEXTO};font-size:13px;line-height:20px;color:${COR.bordo}">Toda honra a Deus! 🙏<br><a href="${SITE}" style="color:${COR.vivo}">comuni.calirh.com</a> · <a href="https://www.instagram.com/calirh_/" style="color:${COR.vivo}">@calirh_</a></td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 export function montar(tipo, edition, pessoa) {
   const nome = escape(primeiroNome(pessoa.nome));
-  const oi = nome ? `Oi, ${nome}.` : 'Oi.';
+  const saudacao = nome ? `Oi, ${nome}!` : 'Oi!';
   const titulo = escape(edition.titulo);
   const agenda = { texto: '📅 Colocar na minha agenda', href: linkGoogle(edition) };
   const responder = 'Se não puder ir, responda este e-mail para liberarmos o seu lugar.';
   const textos = {
-    confirmacao: { assunto: `🎉 Inscrição confirmada: ${edition.titulo}`, previa: 'Seu lugar está guardado.', titulo: '🎉 Seu lugar está guardado', paragrafos: [`${oi} Recebemos sua inscrição para o encontro <strong>${titulo}</strong>.`], botao: agenda, depois: `O botão abre o Google Agenda. Para Outlook ou celular, use o convite anexo. ${responder}`, anexo: true },
-    espera: { assunto: `⏳ Lista de espera: ${edition.titulo}`, previa: 'Avisaremos você se abrir um lugar.', titulo: '⏳ Você está na lista de espera', paragrafos: [`${oi} As vagas do encontro <strong>${titulo}</strong> estão preenchidas, e seu nome entrou na lista de espera.`, 'Avisaremos você por e-mail se abrir um lugar.'], anexo: false },
-    lembrete: { assunto: `⏰ Faltam 2 dias: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: '⏰ Faltam 2 dias para o nosso encontro', paragrafos: [`${oi} Na chegada, a recepção confirma o seu nome e indica a sua mesa. 🤝`, 'Depois de sentar, você faz o check-in pelo QR Code do telão. 📲'], botao: agenda, depois: responder, anexo: true },
-    convite: { assunto: `🗓️ Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: '🗓️ Coloque o encontro na sua agenda', paragrafos: [`${oi} Este e-mail traz o convite do encontro <strong>${titulo}</strong>. Aceite o convite no seu e-mail para ele entrar na agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
+    confirmacao: { assunto: `🎉 Reserva confirmada: ${edition.titulo}`, previa: 'Sua vaga está reservada.', titulo: '🎉 Reserva confirmada!', saudacao, paragrafos: [`Ficamos muito felizes com a sua inscrição. Sua vaga no encontro <strong>${titulo}</strong> está reservada.`], botao: agenda, depois: `Para Outlook ou celular, use o convite anexo. ${responder}`, anexo: true },
+    espera: { assunto: `⏳ Lista de espera: ${edition.titulo}`, previa: 'Avisaremos você se abrir um lugar.', titulo: '⏳ Lista de espera', saudacao, paragrafos: [`Ficamos muito felizes com o seu interesse. As vagas do encontro <strong>${titulo}</strong> estão preenchidas, e seu nome entrou na lista de espera.`, 'A equipe avisa você por e-mail se abrir um lugar.'], anexo: false },
+    lembrete: { assunto: `⏰ Faltam 2 dias: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: '⏰ Faltam 2 dias', saudacao, paragrafos: ['Na chegada, a recepção confirma o seu nome e indica a sua mesa. 🤝', 'Depois de sentar, é só fazer o check-in pelo QR Code. 📲'], botao: agenda, depois: responder, anexo: true },
+    convite: { assunto: `🗓️ Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: '🗓️ Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
   }[tipo];
   return { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null };
 }

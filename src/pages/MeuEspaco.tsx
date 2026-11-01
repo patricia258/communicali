@@ -35,6 +35,23 @@ const PONTOS: Array<[string, number]> = [['Presença em encontro', 10], ['Visita
 const ATUACAO = ['Recrutamento e seleção', 'Departamento pessoal', 'Treinamento e desenvolvimento', 'Cultura e clima', 'Remuneração e benefícios', 'Liderança', 'Coaching e mentoria', 'Consultoria', 'Palestras', 'Jurídico trabalhista', 'Marketing', 'Tecnologia', 'Inteligência artificial', 'Gestão de negócios', 'Saúde e bem-estar'];
 const INTERESSES_REDE = ['RH', 'Liderança', 'Gestão de pessoas', 'Desenvolvimento humano', 'Empreendedorismo', 'Networking', 'Inteligência artificial', 'Carreira', 'Parcerias', 'Vagas', 'Mentoria', 'Palestras'];
 
+type CampoMissao = { id: string; rotulo: string; obrigatorio?: boolean; tipo?: string; opcoes?: string[] };
+const FORMULARIOS: Record<string, CampoMissao[]> = {
+  conexao: [
+    { id: 'quem', rotulo: 'Quem você apresentou', obrigatorio: true },
+    { id: 'para', rotulo: 'Para quem você apresentou', obrigatorio: true },
+    { id: 'quando', rotulo: 'Quando aconteceu', obrigatorio: true, tipo: 'date' },
+    { id: 'resultado', rotulo: 'O que resultou', obrigatorio: true, opcoes: ['Parceria', 'Contratação', 'Negócio fechado', 'Mentoria', 'Palestra ou conteúdo', 'Outro'] },
+    { id: 'contato', rotulo: 'Contato de quem pode confirmar', obrigatorio: true },
+  ],
+  representar: [
+    { id: 'onde', rotulo: 'Onde você representou a comunidade', obrigatorio: true },
+    { id: 'quando', rotulo: 'Quando aconteceu', obrigatorio: true, tipo: 'date' },
+    { id: 'como', rotulo: 'Como foi', obrigatorio: true, opcoes: ['Evento presencial', 'Evento online', 'Empresa ou faculdade', 'Publicação ou podcast', 'Outro'] },
+    { id: 'link', rotulo: 'Link da publicação ou do evento' },
+  ],
+};
+
 const inviteUrl = (codigo: string) => `https://comuni.calirh.com/c/${codigo}`;
 const primeiroNome = (espaco: Espaco) => (espaco.membro?.apelido || espaco.membro?.nome || '').trim().split(/\s+/)[0];
 
@@ -72,18 +89,30 @@ function Entrar() {
   }
 
   return (
-    <Pagina>
-      <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="CommuniCALI" />
-      <h1>Meu passaporte</h1>
-      <p>{enviado ? `Enviamos um código para ${email.trim()}.` : 'Entre com o e-mail que você usou no check-in do encontro.'}</p>
-      <form className="passe__form" onSubmit={(event) => void enviar(event)}>
-        {enviado
-          ? <label>Código recebido<input required inputMode="numeric" autoComplete="one-time-code" value={codigo} onChange={(event) => setCodigo(event.target.value)} /></label>
-          : <label>E-mail<input required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>}
-        {erro && <p className="passe__erro" role="alert">{erro}</p>}
-        <button className="passe__botao" type="submit" disabled={busy}>{busy ? 'Aguarde...' : enviado ? 'Entrar' : 'Receber código'}</button>
-      </form>
-    </Pagina>
+    <div className="passe passe--entrada">
+      <div className="passe__faixa" aria-hidden="true"><span /><span /><span /><span /></div>
+      <main className="passe__entrada">
+        <div className="passe__colagem" aria-hidden="true">
+          <img src="/selos/postal-membro.png" alt="" />
+          <img src="/selos/postal-conector.png" alt="" />
+          <img src="/selos/postal-embaixador.png" alt="" />
+          <img src="/selos/carimbo-fundadora.png" alt="" />
+        </div>
+        <section className="passe__acesso">
+          <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="CommuniCALI" />
+          <h1>Seu passaporte está <em>te esperando</em></h1>
+          <p>{enviado ? `Enviamos um código para ${email.trim()}. Ele chega em instantes.` : 'Carimbos, pontos, missões e conexões da comunidade em um só lugar.'}</p>
+          <form className="passe__form" onSubmit={(event) => void enviar(event)}>
+            {enviado
+              ? <label>Código recebido<input required inputMode="numeric" autoComplete="one-time-code" autoFocus value={codigo} onChange={(event) => setCodigo(event.target.value)} /></label>
+              : <label>Seu e-mail<input required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>}
+            {erro && <p className="passe__erro" role="alert">{erro}</p>}
+            <button className="passe__botao" type="submit" disabled={busy}>{busy ? 'Aguarde...' : enviado ? 'Abrir meu passaporte' : 'Receber meu código'}</button>
+          </form>
+          {enviado ? <button type="button" className="passe__link" onClick={() => { setEnviado(false); setCodigo(''); setErro(''); }}>Usar outro e-mail</button> : <p className="passe__aviso">Use o e-mail do seu check-in. Ainda não foi a um encontro? <a href="/#proximo">Veja o próximo</a>.</p>}
+        </section>
+      </main>
+    </div>
   );
 }
 
@@ -170,13 +199,15 @@ function Edicoes({ espaco }: { espaco: Espaco }) {
 
 function CartaoMissao({ missao, recarregar, liberada }: { missao: Missao; recarregar: () => void; liberada: boolean }) {
   const [abrindo, setAbrindo] = useState(false);
-  const [relato, setRelato] = useState('');
+  const [campos, setCampos] = useState<Record<string, string>>({});
   const [erro, setErro] = useState('');
   const feita = missao.status === 'concluida';
   const podeEnviar = liberada && missao.modo === 'analise' && (missao.status === 'aberta' || missao.status === 'recusada');
+  const formulario = FORMULARIOS[missao.slug] || [];
 
   async function enviar(event: FormEvent) {
     event.preventDefault();
+    const relato = formulario.filter((item) => campos[item.id]).map((item) => `${item.rotulo}: ${campos[item.id]}`).join(' · ');
     const { error } = await supabase.rpc('communicali_enviar_missao', { p_slug: missao.slug, p_relato: relato });
     if (error) setErro(errorMessage(error)); else recarregar();
   }
@@ -194,7 +225,13 @@ function CartaoMissao({ missao, recarregar, liberada }: { missao: Missao; recarr
       {podeEnviar && !abrindo && <button type="button" className="passe__botao passe__botao--terra" onClick={() => setAbrindo(true)}>Enviar para análise</button>}
       {abrindo && (
         <form className="passe__form" onSubmit={(event) => void enviar(event)}>
-          <label>Conte o que aconteceu<textarea required minLength={10} rows={4} value={relato} onChange={(event) => setRelato(event.target.value)} /></label>
+          {formulario.map((item) => (
+            <label key={item.id}>{item.rotulo}
+              {item.opcoes
+                ? <select required={item.obrigatorio} value={campos[item.id] || ''} onChange={(event) => setCampos({ ...campos, [item.id]: event.target.value })}><option value="">Escolha</option>{item.opcoes.map((opcao) => <option key={opcao}>{opcao}</option>)}</select>
+                : <input required={item.obrigatorio} type={item.tipo || 'text'} value={campos[item.id] || ''} onChange={(event) => setCampos({ ...campos, [item.id]: event.target.value })} />}
+            </label>
+          ))}
           {erro && <p className="passe__erro" role="alert">{erro}</p>}
           <button type="submit" className="passe__botao passe__botao--terra">Enviar</button>
         </form>
