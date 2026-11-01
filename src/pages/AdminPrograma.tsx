@@ -6,7 +6,7 @@ import { slugify } from '../forms/formModel';
 import { CATEGORIAS } from './Checkin';
 import { FAIXAS, PONTOS } from './AdminInicio';
 
-type Member = { id: string; status: string; nome: string; apelido: string | null; email: string; whatsapp: string | null; cidade_uf: string | null; empresa: string | null; cargo: string | null; linkedin: string | null; interesses: string[]; como_conheceu: string | null; categoria: string; cracha_status: string; autoriza_imagem: boolean; autoriza_comunicacoes: boolean; created_at: string };
+type Member = { codigo: string | null; temas: string[]; interesse_palestras: boolean; foto_url: string | null; id: string; status: string; nome: string; apelido: string | null; email: string; whatsapp: string | null; cidade_uf: string | null; empresa: string | null; cargo: string | null; linkedin: string | null; interesses: string[]; como_conheceu: string | null; categoria: string; cracha_status: string; autoriza_imagem: boolean; autoriza_comunicacoes: boolean; created_at: string };
 type History = { id: string; checked_in_at: string; codigo: string; editions: { titulo: string } };
 type Point = { id: string; acao: string; pontos: number; created_at: string; motivo: string | null };
 type Poll = { id: string; slug: string; titulo: string; pergunta: string; tipo: 'nota' | 'multipla' | 'aberta'; opcoes: string[]; anonima: boolean; status: 'rascunho' | 'ativa' | 'encerrada'; revelada: boolean; edition_id: string };
@@ -42,7 +42,7 @@ function MemberEditor({ member, onBack }: { member: Member; onBack: () => void }
 
   const total = points.reduce((sum, item) => sum + item.pontos, 0);
   const faixa = FAIXAS.find((band) => total >= band.de && total <= band.ate)?.nome;
-  const label = (acao: string) => acao === 'presenca' ? 'Presença em encontro' : acao.startsWith('convidado:') ? 'Convidado compareceu' : acao.startsWith('contribuicao') ? 'Contribuição aprovada' : acao.startsWith('parceiro') ? 'Indicação de parceiro' : 'Ajuste';
+  const label = (acao: string) => acao === 'presenca' ? 'Presença em encontro' : acao.startsWith('convidado:') ? 'Convidado compareceu' : acao.startsWith('contribuicao') ? 'Contribuição aprovada' : acao.startsWith('parceiro') ? 'Indicação de parceiro' : acao.startsWith('palestra') ? 'Palestra a convite' : acao.startsWith('recomendacao') ? 'Recomendação validada' : acao.startsWith('indicacao') ? 'Visitante indicado compareceu' : 'Ajuste';
 
   async function addPoints() {
     const valor = PONTOS.find(([key]) => key === kind)?.[2] || 0;
@@ -73,12 +73,19 @@ function MemberEditor({ member, onBack }: { member: Member; onBack: () => void }
           <label><span>Crachá</span><select value={draft.cracha_status} onChange={(event) => setDraft({ ...draft, cracha_status: event.target.value })}>{Object.entries(CRACHA).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
         </div>
       </section>
+      {(member.codigo || member.temas?.length || member.interesse_palestras || member.foto_url) && (
+        <section className="v2-forms-card">
+          <header><small>ESPAÇO DO MEMBRO</small><h2>{member.interesse_palestras ? 'Quer contribuir com palestras' : 'Perfil'}</h2></header>
+          {member.foto_url && <img src={member.foto_url} alt={`Foto de ${member.nome}`} style={{ width: 96, height: 120, objectFit: 'cover' }} />}
+          <p className="adm-hint">Código: {member.codigo || 'ainda não gerado'}. Temas: {member.temas?.length ? member.temas.join(', ') : 'não informados'}.</p>
+        </section>
+      )}
       <section className="v2-forms-card">
         <header><small>PONTOS</small><h2>Extrato: {total} pontos</h2></header>
         <div className="adm-list">{points.map((item) => <div className="adm-row adm-row--static" key={item.id}><strong>+{item.pontos}</strong><span>{label(item.acao)}{item.motivo ? ` · ${item.motivo}` : ''}</span><em>{new Date(item.created_at).toLocaleDateString('pt-BR')}</em></div>)}</div>
         {!points.length && <p className="adm-hint">Nenhum ponto ainda. O cadastro não gera pontos; a primeira presença soma 10.</p>}
         <div className="v2-forms-grid">
-          <label><span>Lançar pontos</span><select value={kind} onChange={(event) => setKind(event.target.value)}>{PONTOS.filter(([key]) => key === 'contribuicao' || key === 'parceiro').map(([key, text, value]) => <option key={key} value={key}>+{value} {text}</option>)}</select></label>
+          <label><span>Lançar pontos</span><select value={kind} onChange={(event) => setKind(event.target.value)}>{PONTOS.filter(([key]) => key === 'contribuicao' || key === 'parceiro' || key === 'palestra').map(([key, text, value]) => <option key={key} value={key}>+{value} {text}</option>)}</select></label>
           <label><span>Motivo</span><input value={motivo} onChange={(event) => setMotivo(event.target.value)} /></label>
           <div className="adm-submit"><button type="button" className="wf-secondary" onClick={() => void addPoints()}>Lançar pontos</button></div>
         </div>

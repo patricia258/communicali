@@ -11,6 +11,7 @@ import { GuestsPanel } from './Convidados';
 import { HomePanel, ProgramPanel } from './AdminInicio';
 import { StaffPanel } from './Staff';
 import { EmailsCard } from './AdminEmails';
+import { RecommendationsPanel } from './AdminRecomendacoes';
 import './admin.css';
 
 type Edition = { inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
@@ -343,6 +344,7 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
           <NavLink to="/admin" end>Início</NavLink>
           <NavLink to="/admin/membros">Membros</NavLink>
           <NavLink to="/admin/programa">Programa</NavLink>
+          <NavLink to="/admin/missoes">Missões</NavLink>
           <NavLink to="/admin/edicoes">Edições</NavLink>
           <NavLink to="/admin/convidados">Convidados</NavLink>
           <NavLink to="/admin/votacoes">Votações</NavLink>
@@ -391,6 +393,7 @@ export function Admin() {
       <Routes>
         <Route index element={<HomePanel />} />
         <Route path="programa" element={<ProgramPanel />} />
+        <Route path="missoes" element={<RecommendationsPanel />} />
         <Route path="staff" element={<StaffPanel />} />
         <Route path="formularios" element={<AdminFormsPage />} />
         <Route path="edicoes" element={<EditionsPanel />} />

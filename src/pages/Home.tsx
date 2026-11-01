@@ -47,7 +47,7 @@ function Arches({ photos }: { photos: Photo[] }) {
   );
 }
 
-const PEOPLE_CARDS = ['fundadora', 'embaixadores', 'honorarios'] as const;
+const PEOPLE_CARDS = ['fundadora', 'embaixadores'] as const;
 
 function People({ joinHref }: { joinHref: string }) {
   const [current, setCurrent] = useState(0);
@@ -71,13 +71,6 @@ function People({ joinHref }: { joinHref: string }) {
             <p className="tag">Embaixadores</p>
             <h3>Faça parte desse ecossistema</h3>
             <p>Quem participa, contribui e conecta pessoas pode aparecer aqui como embaixador da comunidade.</p>
-          </div>
-        </article>
-        <article className={`person person--text${current === 2 ? ' is-on' : ''}`}>
-          <div className="person__body">
-            <p className="tag">Membros honorários</p>
-            <h3>Quem constrói a CommuniCALI</h3>
-            <p>Este espaço vai reconhecer as pessoas que marcaram a história da comunidade.</p>
           </div>
         </article>
       </div>

@@ -5,17 +5,18 @@ import { CalendarCheck, ClipboardList, Gift, Handshake, IdCard, MonitorPlay, Tro
 import { supabase } from '../lib/supabase';
 
 export const FAIXAS = [
-  { nome: 'Membro', de: 0, ate: 19 },
-  { nome: 'Participante Ativo', de: 20, ate: 49 },
-  { nome: 'Conector', de: 50, ate: 99 },
-  { nome: 'Embaixador', de: 100, ate: Infinity },
+  { nome: 'Membro', de: 0, ate: 99 },
+  { nome: 'Conector', de: 100, ate: 249 },
+  { nome: 'Embaixador', de: 250, ate: Infinity },
 ];
 
 export const PONTOS: Array<[string, string, number]> = [
   ['presenca', 'Presença validada em um encontro', 10],
   ['convidado', 'Convidado indicado que compareceu', 5],
+  ['recomendacao', 'Recomendação validada', 10],
   ['contribuicao', 'Contribuição de conteúdo ou experiência aprovada', 15],
   ['parceiro', 'Indicação de parceiro que contribuiu de fato', 20],
+  ['palestra', 'Palestra a convite da organização', 30],
 ];
 
 type Edition = { slug: string; titulo: string; data_evento: string };
@@ -104,7 +105,7 @@ export function ProgramPanel() {
       <section className="v2-forms-card">
         <header><small>PONTUAÇÃO</small><h2>O que vale ponto</h2></header>
         <div className="adm-list">
-          {PONTOS.map(([key, label, value]) => <div className="adm-row adm-row--static" key={key}><strong>+{value}</strong><span>{label}</span><em>{key === 'presenca' || key === 'convidado' ? 'Automático' : 'Lançado em Membros'}</em></div>)}
+          {PONTOS.map(([key, label, value]) => <div className="adm-row adm-row--static" key={key}><strong>+{value}</strong><span>{label}</span><em>{key === 'presenca' || key === 'convidado' ? 'Automático' : key === 'recomendacao' ? 'Validado em Missões' : 'Lançado em Membros'}</em></div>)}
         </div>
       </section>
       <section className="v2-forms-card">

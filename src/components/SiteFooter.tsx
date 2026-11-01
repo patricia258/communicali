@@ -11,6 +11,7 @@ export function FooterLinks() {
       <a href="https://www.instagram.com/calirh_/" target="_blank" rel="noopener noreferrer"><Instagram size={15} /> @calirh_</a>
       <a href="https://calirh.com" target="_blank" rel="noopener noreferrer"><Globe size={15} aria-hidden="true" /> calirh.com</a>
       <a href="https://wa.me/554187879244" target="_blank" rel="noopener noreferrer"><MessageCircle size={15} aria-hidden="true" /> WhatsApp</a>
+      <a href="/meu-espaco">Meu espaço</a>
       <a href="/regras">Regras</a>
       <a href="/privacidade">Privacidade</a>
     </div>

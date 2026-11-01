@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { Link2 } from 'lucide-react';
 import { COMMUNITY_URL, errorMessage, formatDate, supabase } from '../lib';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
@@ -88,10 +88,32 @@ export function EdicaoPage() {
   );
 }
 
+/** Link de convite do membro: leva à inscrição do próximo encontro com o código guardado. */
+export function CodigoConvite() {
+  const { codigo = '' } = useParams();
+  const [invalido, setInvalido] = useState(false);
+  useEffect(() => {
+    supabase.rpc('communicali_codigo', { p_codigo: codigo }).then(({ data }) => {
+      const convite = data as { slug: string | null } | null;
+      if (convite?.slug) window.location.replace(`/inscricao/${convite.slug}?c=${encodeURIComponent(codigo)}`);
+      else setInvalido(true);
+    });
+  }, [codigo]);
+  if (!invalido) return <main className="event-page" aria-busy="true" />;
+  return (
+    <>
+      <main className="event-page"><section className="event-card"><p className="eyebrow">CommuniCALI</p><h1>Sem inscrições abertas agora</h1><p className="notice">Este convite não encontrou um encontro aberto. Veja a agenda no site ou entre no <a className="link" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">grupo da comunidade</a>.</p></section></main>
+      <SiteFooter />
+    </>
+  );
+}
+
 export function InscricaoPage() {
   const { slug = '' } = useParams();
   const edition = useEdition(slug);
   const texts = useSiteTexts();
+  const [params] = useSearchParams();
+  const codigo = params.get('c') || '';
   const preset = useMemo<FormPreset | null>(() => edition?.inscricoes_abertas && texts ? {
     title: edition.titulo,
     category: 'Inscrição CommuniCALI',
@@ -111,10 +133,11 @@ export function InscricaoPage() {
       const value = (key: string) => String(answers[key] ?? '');
       const { error } = await supabase.rpc('communicali_inscrever', { p_slug: slug, p_nome: value('nome'), p_email: value('email'), p_whatsapp: value('whatsapp'), p_cidade: value('cidade'), p_empresa: value('empresa'), p_cargo: value('cargo'), p_privacidade: answers.privacidade === 'Li e aceito' });
       if (error) return errorMessage(error);
+      if (codigo) await supabase.rpc('communicali_vincular_indicacao', { p_slug: slug, p_email: value('email'), p_codigo: codigo });
       void fetch('/api/email-confirmacao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, email: value('email') }) });
       return '';
     },
-  } : null, [edition, texts, slug]);
+  } : null, [edition, texts, slug, codigo]);
 
   if (preset) return <PublicFormPage preset={preset} />;
   // Só decide que está encerrado depois de ter a edição e os textos; antes disso, mantém a tela limpa.

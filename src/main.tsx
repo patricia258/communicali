@@ -11,6 +11,8 @@ import './home.css';
 import { Home } from './pages/Home';
 import { Checkin, Validar } from './pages/Checkin';
 import { TextoPagina } from './pages/Cadastro';
+import { MeuEspaco } from './pages/MeuEspaco';
+import { CodigoConvite } from './pages/Edicao';
 import { Votar } from './pages/Votar';
 import { Convidar, Convite } from './pages/Convidados';
 import { TelaoCheckin, TelaoVotacao } from './pages/Telao';
@@ -35,6 +37,8 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/checkin" element={<Page><Checkin /></Page>} />
       <Route path="/validar/:codigo" element={<Page><Validar /></Page>} />
       <Route path="/cadastro" element={<Navigate to="/#fazer-parte" replace />} />
+      <Route path="/meu-espaco" element={<MeuEspaco />} />
+      <Route path="/c/:codigo" element={<CodigoConvite />} />
       <Route path="/regras" element={<Page><TextoPagina tipo="regras" /></Page>} />
       <Route path="/privacidade" element={<Page><TextoPagina tipo="privacidade" /></Page>} />
       <Route path="/staff" element={<StaffForm />} />
