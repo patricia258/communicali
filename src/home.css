@@ -147,3 +147,7 @@
 .social a{display:inline-flex;align-items:center;gap:6px;text-decoration:none}
 .event,.post{scroll-margin-top:84px}
 .home .site-footer{margin-top:40px}
+.frames--neutras .frame img{filter:sepia(.28) saturate(.82) brightness(.78)}
+.frame{position:relative}
+.frames--neutras .frame::after{content:"";position:absolute;inset:0;background:rgba(74,26,39,.28)}
+@media (max-width:900px){.frames{opacity:.34}}

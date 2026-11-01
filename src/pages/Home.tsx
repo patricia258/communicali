@@ -25,20 +25,21 @@ const FAQ = [
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
-const TILES = ['Rodas de conversa', 'Café', 'Mini pitch', 'Pessoas', 'Debates', 'Conexões'];
+// Fotos de banco, sem rostos, até as edições terem fotos próprias.
+const NEUTRAS = [1, 2, 3, 4, 5].map((index) => ({ id: `neutra-${index}`, url: `/fotos/neutras/${index}.jpg`, legenda: null }));
 
 const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 
 function Arches({ photos }: { photos: Photo[] }) {
-  const items = photos.length ? photos : TILES.map((label) => ({ id: label, url: '', legenda: label }));
+  const items = photos.length ? photos : NEUTRAS;
   const columns = [0, 1].map((column) => items.filter((_, index) => index % 2 === column));
   return (
-    <div className="frames" aria-hidden="true">
+    <div className={`frames${photos.length ? '' : ' frames--neutras'}`} aria-hidden="true">
       {columns.map((column, index) => (
         <div className={`frames__col frames__col--${index}`} key={index}>
           {[...column, ...column, ...column].map((item, position) => (
             <div className="frame" key={`${item.id}-${position}`}>
-              {item.url ? <img src={item.url} alt="" /> : <span>{item.legenda}</span>}
+              <img src={item.url} alt="" />
             </div>
           ))}
         </div>
