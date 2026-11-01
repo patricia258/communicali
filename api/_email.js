@@ -103,6 +103,18 @@ ${depois ? `<tr><td align="center" style="padding:16px 0 0;font-family:${TEXTO};
 </table></td></tr></table></body></html>`;
 }
 
+export function layoutSimples({ titulo, saudacao, texto, botao }) {
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${escape(titulo)}</title></head>
+<body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
+<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="CommuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
+<tr><td align="center" style="padding:0 0 12px"><span style="display:inline-block;padding:7px 16px;border-radius:999px;background:${COR.mostarda};font-family:${TEXTO};font-size:14px;font-weight:600;color:${COR.tinta}">${escape(titulo)}</span></td></tr>
+<tr><td align="center" style="padding:0 0 12px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;color:${COR.vivo}">${escape(saudacao)}</td></tr>
+<tr><td align="center" style="padding:0 0 22px;font-family:${TEXTO};font-size:17px;line-height:27px;color:${COR.tinta}">${escape(texto)}</td></tr>
+<tr><td align="center"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.vivo};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>
+<tr><td align="center" style="padding:32px 0 0;font-family:${TITULO};font-size:17px;line-height:24px;color:${COR.vivo}">Falar de pessoas pode mudar o mundo.</td></tr>
+</table></td></tr></table></body></html>`;
+}
+
 export function montar(tipo, edition, pessoa) {
   const nome = escape(primeiroNome(pessoa.nome));
   const saudacao = nome ? `Oi, ${nome}!` : 'Oi!';

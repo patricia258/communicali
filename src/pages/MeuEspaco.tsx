@@ -3,6 +3,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode }
 import type { Session } from '@supabase/supabase-js';
 import { errorMessage, supabase } from '../lib';
 import { longDate } from './Edicao';
+import { JanelaCartao } from './MembroCartao';
 import './membro.css';
 
 type Carimbo = { slug: string; titulo: string; selo: string; data_evento: string; local: string; cidade: string; capa_url: string | null; carimbo_url: string | null; fotos_url: string | null };
@@ -19,7 +20,8 @@ type Espaco = {
   recomendacoes: Array<{ nome: string; tipo: string; status: string }>;
 };
 type Aba = 'inicio' | 'edicoes' | 'missoes' | 'rede' | 'indicar' | 'programa' | 'perfil';
-type Pessoa = { id: string; nome: string; foto_url: string | null; categoria: string; cidade_uf: string | null; empresa: string | null; cargo: string | null; temas: string[]; interesses: string[]; presta_servicos: boolean; whatsapp?: string | null; email?: string; instagram?: string | null; linkedin?: string | null };
+type Pessoa = { id: string; nome: string; foto_url: string | null; categoria: string; cidade_uf: string | null; empresa: string | null; cargo: string | null; temas: string[]; interesses: string[]; presta_servicos: boolean; eu_conectei: boolean; me_conectou: boolean; whatsapp?: string | null; email?: string; instagram?: string | null; linkedin?: string | null };
+type Extra = { extrato: Array<{ acao: string; pontos: number; motivo: string | null; titulo: string | null; data: string }>; avisos: Array<{ id: string; tipo: string; texto: string; de: string | null; foto_url: string | null; pode_voltar: boolean }>; conexoes: number; nivel_novo: string | null };
 type Parceiro = { id: string; nome: string; logo_url: string | null; site_url: string | null };
 
 const ABAS: Array<[Aba, string]> = [['inicio', 'Início'], ['edicoes', 'Edições'], ['missoes', 'Missões'], ['rede', 'Rede'], ['indicar', 'Indicar'], ['programa', 'Programa']];
@@ -54,6 +56,26 @@ const FORMULARIOS: Record<string, CampoMissao[]> = {
 
 const inviteUrl = (codigo: string) => `https://comuni.calirh.com/c/${codigo}`;
 const primeiroNome = (espaco: Espaco) => (espaco.membro?.apelido || espaco.membro?.nome || '').trim().split(/\s+/)[0];
+
+async function conectar(para: string) {
+  const { data, error } = await supabase.rpc('communicali_conectar', { p_para: para });
+  if (error) throw new Error(errorMessage(error));
+  if ((data as { novo: boolean }).novo) {
+    const sessao = await supabase.auth.getSession();
+    void fetch('/api/email-conexao', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessao.data.session?.access_token || ''}` }, body: JSON.stringify({ para }) });
+  }
+}
+
+const RESUMO: Array<[string, string, string]> = [['presenca', 'Presenças', 'presenca'], ['indicacao', 'Indicações', 'indicacao:|convidado:'], ['recomendacao', 'Recomendações', 'recomendacao:'], ['contribuicao', 'Contribuições', 'contribuicao:'], ['parceiro', 'Parceiros', 'parceiro:'], ['palestra', 'Palestras', 'palestra:']];
+const ROTULO = (acao: string, titulo: string | null) => {
+  if (acao === 'presenca') return `Presença: ${titulo || 'encontro'}`;
+  if (/^(indicacao|convidado):/.test(acao)) return 'Pessoa indicada compareceu';
+  if (acao.startsWith('recomendacao:')) return 'Recomendação validada';
+  if (acao.startsWith('contribuicao:')) return 'Contribuição aprovada';
+  if (acao.startsWith('parceiro:')) return 'Parceiro que contribuiu';
+  if (acao.startsWith('palestra:')) return 'Palestra a convite';
+  return 'Ajuste da organização';
+};
 
 function Pagina({ children, aba, setAba }: { children: ReactNode; aba?: Aba; setAba?: (aba: Aba) => void }) {
   return (
@@ -131,7 +153,7 @@ function CarimboEdicao({ carimbo, indice }: { carimbo: Carimbo; indice: number }
   );
 }
 
-function Inicio({ espaco, abrir }: { espaco: Espaco; abrir: (aba: Aba) => void }) {
+function Inicio({ espaco, extra, abrir, atualizar, compartilhar }: { espaco: Espaco; extra: Extra | null; abrir: (aba: Aba) => void; atualizar: () => void; compartilhar: () => void }) {
   const m = espaco.membro!;
   const meta = META[m.categoria];
   const faltam = meta ? Math.max(meta.pontos - espaco.pontos, 0) : 0;
@@ -146,9 +168,18 @@ function Inicio({ espaco, abrir }: { espaco: Espaco; abrir: (aba: Aba) => void }
           <div><dt>NOME</dt><dd className="grande">{m.nome}</dd></div>
           <div><dt>NÍVEL</dt><dd>{NIVEIS[m.categoria] || m.categoria}</dd></div>
           <div><dt>CÓDIGO</dt><dd>{m.codigo}</dd></div>
-          <button type="button" className="passe__link" onClick={() => abrir('perfil')}>Editar meu perfil</button>
+          <div className="passe__acoes"><button type="button" className="passe__link" onClick={() => abrir('perfil')}>Editar meu perfil</button><button type="button" className="passe__link" onClick={compartilhar}>Compartilhar meu selo</button></div>
         </dl>
       </section>
+      {extra?.avisos.map((aviso) => (
+        <section className="passe__alerta" key={aviso.id}>
+          {aviso.foto_url ? <img src={aviso.foto_url} alt="" /> : <span aria-hidden="true">🎉</span>}
+          <p>{aviso.texto}</p>
+          {aviso.pode_voltar
+            ? <button type="button" className="passe__botao" onClick={() => void conectar(aviso.de!).then(atualizar)}>Conectar de volta</button>
+            : <button type="button" className="passe__link" onClick={() => void supabase.rpc('communicali_aviso_lido', { p_id: aviso.id }).then(atualizar)}>Ok</button>}
+        </section>
+      ))}
       <section className="passe__carimbos">
         <h2>Meus carimbos</h2>
         <div className="passe__rolagem">
@@ -322,9 +353,11 @@ function Indicar({ espaco, recarregar }: { espaco: Espaco; recarregar: () => voi
   );
 }
 
-function Programa({ espaco }: { espaco: Espaco }) {
+function Programa({ espaco, extra, compartilhar, comoMembro, setComoMembro, verParabens }: { espaco: Espaco; extra: Extra | null; compartilhar: () => void; comoMembro: boolean; setComoMembro: (valor: boolean) => void; verParabens: () => void }) {
   const categoria = espaco.membro!.categoria;
+  const extrato = extra?.extrato || [];
   const niveis: Array<[string, string, string, string]> = [
+    ...(categoria === 'fundadora' ? [['fundadora', 'Fundadora', 'Quem plantou esta comunidade.', 'rose'] as [string, string, string, string]] : []),
     ['visitante', 'Visitante', 'Inscrito no grupo ou em um encontro.', 'rose'],
     ['membro', 'Membro', 'Esteve em um encontro presencial.', 'branco'],
     ['conector', 'Conector', '100 pontos, 3 encontros e 2 missões. Vantagens a definir.', 'oliva'],
@@ -341,9 +374,33 @@ function Programa({ espaco }: { espaco: Espaco }) {
         </section>
       ))}
       <section className="passe__cartao">
+        <h2>Minha pontuação</h2>
+        <p className="passe__numero"><strong>{espaco.pontos}</strong> pontos no total</p>
+        <div className="passe__resumo">
+          {RESUMO.map(([id, nome, prefixos]) => {
+            const itens = extrato.filter((item) => prefixos.split('|').some((prefixo) => item.acao.startsWith(prefixo)));
+            return <div key={id}><strong>{itens.length}</strong><span>{nome}</span><em>+{itens.reduce((soma, item) => soma + item.pontos, 0)}</em></div>;
+          })}
+        </div>
+        <button type="button" className="passe__botao passe__botao--linha" onClick={compartilhar}>Compartilhar meu selo</button>
+      </section>
+      <section className="passe__cartao">
+        <h2>Meu histórico</h2>
+        {extrato.map((item, indice) => <div className="passe__ponto" key={`${item.acao}-${indice}`}><span><small>{item.data.split('-').reverse().join('/')}</small>{ROTULO(item.acao, item.titulo)}{item.motivo && item.motivo !== 'Demonstração' ? `: ${item.motivo}` : ''}</span><strong>+{item.pontos}</strong></div>)}
+        {!extrato.length && <p className="passe__aviso">Seus pontos aparecem aqui.</p>}
+      </section>
+      <section className="passe__cartao">
         <h2>Como ganhar pontos</h2>
         {PONTOS.map(([texto, valor]) => <div className="passe__ponto" key={texto}><span>{texto}</span><strong>+{valor}</strong></div>)}
       </section>
+      {categoria === 'fundadora' && (
+        <section className="passe__cartao passe__cartao--fundadora">
+          <h2>Visão da fundadora</h2>
+          <p>Veja como as telas aparecem para outras pessoas.</p>
+          <label className="passe__marca"><input type="checkbox" checked={comoMembro} onChange={(event) => setComoMembro(event.target.checked)} /><span><strong>Ver a Rede como Membro</strong>, com os contatos bloqueados.</span></label>
+          <button type="button" className="passe__botao passe__botao--linha" onClick={verParabens}>Ver o parabéns de novo nível</button>
+        </section>
+      )}
       <a className="passe__botao passe__botao--linha" href="/regras" target="_blank" rel="noopener noreferrer">Nossas regras</a>
       <p className="passe__aviso">Pontos sozinhos não mudam o nível: a organização confirma cada avanço. Os detalhes do programa entram aqui em breve.</p>
     </>
@@ -435,8 +492,11 @@ function Perfil({ espaco, recarregar, voltar }: { espaco: Espaco; recarregar: ()
   );
 }
 
-function FichaPessoa({ pessoa, contatos, voltar }: { pessoa: Pessoa; contatos: boolean; voltar: () => void }) {
+function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar }: { pessoa: Pessoa; contatos: boolean; eu: boolean; voltar: () => void; recarregar: () => void }) {
   const whatsapp = pessoa.whatsapp?.replace(/\D/g, '');
+  const [erro, setErro] = useState('');
+  const primeiro = pessoa.nome.split(' ')[0];
+  const conexao = pessoa.eu_conectei && pessoa.me_conectou ? 'Vocês estão conectados' : pessoa.eu_conectei ? 'Pedido de conexão enviado' : '';
   return (
     <>
       <button type="button" className="passe__link" onClick={voltar}>Voltar para a Rede</button>
@@ -444,10 +504,15 @@ function FichaPessoa({ pessoa, contatos, voltar }: { pessoa: Pessoa; contatos: b
         <div className="passe__foto">{pessoa.foto_url ? <img src={pessoa.foto_url} alt={`Foto de ${pessoa.nome}`} /> : <span>Sem foto</span>}</div>
         <div><h1 className="menor">{pessoa.nome}</h1><p className="passe__data">{NIVEIS[pessoa.categoria] || pessoa.categoria}</p>{pessoa.cidade_uf && <p>{pessoa.cidade_uf}</p>}{(pessoa.cargo || pessoa.empresa) && <p>{[pessoa.cargo, pessoa.empresa].filter(Boolean).join(', ')}</p>}</div>
       </section>
+      {!eu && (conexao
+        ? <p className="passe__ok" role="status">{conexao}</p>
+        : <button type="button" className="passe__botao" onClick={() => void conectar(pessoa.id).then(recarregar).catch((falha: Error) => setErro(falha.message))}>{pessoa.me_conectou ? `Conectar de volta com ${primeiro}` : `Conectar com ${primeiro}`}</button>)}
+      {erro && <p className="passe__erro" role="alert">{erro}</p>}
       {!!pessoa.temas.length && <section className="passe__cartao"><h2>O que faz</h2><div className="passe__temas">{pessoa.temas.map((item) => <span key={item} className="is-on">{item}</span>)}</div></section>}
       {!!pessoa.interesses.length && <section className="passe__cartao"><h2>Interesses</h2><div className="passe__temas">{pessoa.interesses.map((item) => <span key={item}>{item}</span>)}</div></section>}
       <section className="passe__cartao">
         <h2>Onde encontrar</h2>
+        {contatos ? <p>Mande uma mensagem, siga nas redes e continue a conversa fora da tela.</p> : null}
         {contatos ? (
           <div className="passe__contatos">
             {whatsapp && <a href={`https://wa.me/${whatsapp.length <= 11 ? `55${whatsapp}` : whatsapp}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>}
@@ -455,19 +520,22 @@ function FichaPessoa({ pessoa, contatos, voltar }: { pessoa: Pessoa; contatos: b
             {pessoa.instagram && <a href={`https://www.instagram.com/${pessoa.instagram.replace(/^.*instagram\.com\//, '').replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer">Instagram</a>}
             {pessoa.linkedin && <a href={/^https?:/.test(pessoa.linkedin) ? pessoa.linkedin : `https://${pessoa.linkedin}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
           </div>
-        ) : <p>Os contatos abrem quando você chega a Conector.</p>}
+        ) : <p>Quer falar com {primeiro}? Conecte-se aqui. Os contatos diretos abrem quando você chega a Conector.</p>}
       </section>
     </>
   );
 }
 
-function Rede() {
-  const [rede, setRede] = useState<{ pode_ver_contatos: boolean; pessoas: Pessoa[]; parceiros: Parceiro[] } | null>(null);
+function Rede({ comoMembro }: { comoMembro: boolean }) {
+  const [rede, setRede] = useState<{ eu: string; pode_ver_contatos: boolean; pessoas: Pessoa[]; parceiros: Parceiro[] } | null>(null);
   const [frente, setFrente] = useState<'pessoas' | 'parceiros'>('pessoas');
   const [busca, setBusca] = useState('');
-  const [aberta, setAberta] = useState<Pessoa | null>(null);
-  useEffect(() => { supabase.rpc('communicali_rede').then(({ data }) => setRede(data as typeof rede)); }, []);
-  if (aberta) return <FichaPessoa pessoa={aberta} contatos={Boolean(rede?.pode_ver_contatos)} voltar={() => setAberta(null)} />;
+  const [abertaId, setAbertaId] = useState('');
+  const carregarRede = () => { supabase.rpc('communicali_rede').then(({ data }) => setRede(data as typeof rede)); };
+  useEffect(carregarRede, []);
+  const contatos = Boolean(rede?.pode_ver_contatos) && !comoMembro;
+  const aberta = rede?.pessoas.find((pessoa) => pessoa.id === abertaId);
+  if (aberta) return <FichaPessoa pessoa={aberta} contatos={contatos} eu={aberta.id === rede?.eu} voltar={() => setAbertaId('')} recarregar={carregarRede} />;
   const termo = busca.trim().toLowerCase();
   const confere = (pessoa: Pessoa) => !termo || [pessoa.nome, pessoa.cidade_uf, pessoa.empresa, ...pessoa.temas, ...pessoa.interesses].join(' ').toLowerCase().includes(termo);
   const pessoas = (rede?.pessoas || []).filter((pessoa) => confere(pessoa) && (frente === 'pessoas' || pessoa.presta_servicos));
@@ -475,7 +543,8 @@ function Rede() {
   return (
     <>
       <h1>Rede</h1>
-      <p>{rede?.pode_ver_contatos ? 'Conheça quem faz parte e crie conexões.' : 'Veja quem faz parte. Os contatos abrem quando você chega a Conector.'}</p>
+      <p>{contatos ? 'Conheça quem faz parte e crie conexões.' : 'Veja quem faz parte e conecte-se. Os contatos diretos abrem quando você chega a Conector.'}</p>
+      {comoMembro && <p className="passe__ok" role="status">Você está vendo a Rede como um Membro.</p>}
       <div className="passe__seg passe__seg--dois" role="group" aria-label="Quem ver">
         <button type="button" className={frente === 'pessoas' ? 'is-on' : ''} aria-pressed={frente === 'pessoas'} onClick={() => setFrente('pessoas')}>Pessoas</button>
         <button type="button" className={frente === 'parceiros' ? 'is-on' : ''} aria-pressed={frente === 'parceiros'} onClick={() => setFrente('parceiros')}>Parceiros e prestadores</button>
@@ -490,7 +559,7 @@ function Rede() {
       ))}
       <div className="passe__pessoas">
         {pessoas.map((pessoa) => (
-          <button type="button" className="passe__pessoa" key={pessoa.id} onClick={() => { setAberta(pessoa); window.scrollTo(0, 0); }}>
+          <button type="button" className="passe__pessoa" key={pessoa.id} onClick={() => { setAbertaId(pessoa.id); window.scrollTo(0, 0); }}>
             <span className="passe__pessoa-foto">{pessoa.foto_url ? <img src={pessoa.foto_url} alt="" /> : pessoa.nome.charAt(0)}</span>
             <strong>{pessoa.nome}</strong>
             <span>{pessoa.temas[0] || NIVEIS[pessoa.categoria] || pessoa.categoria}</span>
@@ -506,6 +575,9 @@ export function MeuEspaco() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [espaco, setEspaco] = useState<Espaco | null>(null);
   const [aba, setAba] = useState<Aba>('inicio');
+  const [extra, setExtra] = useState<Extra | null>(null);
+  const [cartao, setCartao] = useState<{ categoria: string; novo: boolean } | null>(null);
+  const [comoMembro, setComoMembro] = useState(false);
 
   useEffect(() => {
     const anterior = document.documentElement.style.background;
@@ -516,7 +588,14 @@ export function MeuEspaco() {
     return () => { data.subscription.unsubscribe(); document.documentElement.style.background = anterior; document.documentElement.classList.remove('passe-html'); };
   }, []);
 
-  const carregar = () => { void supabase.rpc('communicali_meu_espaco').then(({ data }) => setEspaco(data as Espaco)); };
+  const carregar = () => {
+    void supabase.rpc('communicali_meu_espaco').then(({ data }) => setEspaco(data as Espaco));
+    void supabase.rpc('communicali_meu_extra').then(({ data }) => {
+      const dados = data as Extra | null;
+      setExtra(dados);
+      if (dados?.nivel_novo) { setCartao({ categoria: dados.nivel_novo, novo: true }); void supabase.rpc('communicali_nivel_visto'); }
+    });
+  };
   useEffect(() => { if (session) carregar(); else setEspaco(null); }, [session?.user.id]);
 
   if (session === undefined) return <div className="passe" aria-busy="true" />;
@@ -534,13 +613,14 @@ export function MeuEspaco() {
 
   return (
     <Pagina aba={aba} setAba={setAba}>
-      {aba === 'inicio' && <Inicio espaco={espaco} abrir={setAba} />}
+      {aba === 'inicio' && <Inicio espaco={espaco} extra={extra} abrir={setAba} atualizar={carregar} compartilhar={() => setCartao({ categoria: espaco.membro!.categoria, novo: false })} />}
       {aba === 'edicoes' && <Edicoes espaco={espaco} />}
       {aba === 'missoes' && <Missoes espaco={espaco} recarregar={carregar} />}
-      {aba === 'rede' && <Rede />}
+      {aba === 'rede' && <Rede comoMembro={comoMembro} />}
       {aba === 'indicar' && <Indicar espaco={espaco} recarregar={carregar} />}
-      {aba === 'programa' && <Programa espaco={espaco} />}
+      {aba === 'programa' && <Programa espaco={espaco} extra={extra} compartilhar={() => setCartao({ categoria: espaco.membro!.categoria, novo: false })} comoMembro={comoMembro} setComoMembro={setComoMembro} verParabens={() => setCartao({ categoria: 'conector', novo: true })} />}
       {aba === 'perfil' && <Perfil espaco={espaco} recarregar={carregar} voltar={() => setAba('inicio')} />}
+      {cartao && <JanelaCartao nome={espaco.membro.nome} nivel={NIVEIS[cartao.categoria] || cartao.categoria} categoria={cartao.categoria} foto={espaco.membro.foto_url} novo={cartao.novo} fechar={() => setCartao(null)} />}
     </Pagina>
   );
 }
