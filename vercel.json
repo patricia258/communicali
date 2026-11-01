@@ -1,4 +1,14 @@
 {
+  "crons": [
+    {
+      "path": "/api/email-lembretes",
+      "schedule": "0 12 * * *"
+    }
+  ],
+  "functions": {
+    "api/email-lembretes.js": { "maxDuration": 60 },
+    "api/email-admin.js": { "maxDuration": 60 }
+  },
   "rewrites": [
     {
       "source": "/e/:slug",

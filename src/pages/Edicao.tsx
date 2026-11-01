@@ -110,7 +110,9 @@ export function InscricaoPage() {
     submit: async (answers) => {
       const value = (key: string) => String(answers[key] ?? '');
       const { error } = await supabase.rpc('communicali_inscrever', { p_slug: slug, p_nome: value('nome'), p_email: value('email'), p_whatsapp: value('whatsapp'), p_cidade: value('cidade'), p_empresa: value('empresa'), p_cargo: value('cargo'), p_privacidade: answers.privacidade === 'Li e aceito' });
-      return error ? errorMessage(error) : '';
+      if (error) return errorMessage(error);
+      void fetch('/api/email-confirmacao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, email: value('email') }) });
+      return '';
     },
   } : null, [edition, texts, slug]);
 

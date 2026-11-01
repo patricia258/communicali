@@ -10,9 +10,10 @@ import { MembersPanel, PollsPanel, TextsPanel, exportPresencasCsv } from './Admi
 import { GuestsPanel } from './Convidados';
 import { HomePanel, ProgramPanel } from './AdminInicio';
 import { StaffPanel } from './Staff';
+import { EmailsCard } from './AdminEmails';
 import './admin.css';
 
-type Edition = { inscricoes_abertas: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
+type Edition = { inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
 type Photo = { id: string; url: string; legenda: string | null; no_carrossel: boolean };
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null; ativo: boolean; ordem: number };
 type Attendee = { id: string; checked_in_at: string; codigo: string; origem: string; members: { nome: string; email: string; whatsapp: string | null; empresa: string | null; cargo: string | null; categoria: string; autoriza_imagem: boolean } };
@@ -229,6 +230,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         </div>
         <div className="adm-list">{signups.map((item) => <div className="adm-row adm-row--static" key={item.id}><strong>{item.nome}</strong><span>{item.email} · {item.whatsapp}</span><em>{item.status === 'espera' ? 'Lista de espera' : item.status === 'cancelado' ? 'Cancelado' : 'Inscrito'}</em></div>)}</div>
       </section>
+      <EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} />
       <section className="v2-forms-card">
         <header><small>PRESENÇAS</small><h2>{people.length} {people.length === 1 ? 'check-in' : 'check-ins'}</h2></header>
         <div className="adm-links">

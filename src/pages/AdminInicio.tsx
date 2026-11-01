@@ -13,7 +13,7 @@ export const FAIXAS = [
 
 export const PONTOS: Array<[string, string, number]> = [
   ['presenca', 'Presença validada em um encontro', 10],
-  ['convidado', 'Convidado indicado que compareceu', 1],
+  ['convidado', 'Convidado indicado que compareceu', 5],
   ['contribuicao', 'Contribuição de conteúdo ou experiência aprovada', 15],
   ['parceiro', 'Indicação de parceiro que contribuiu de fato', 20],
 ];
