@@ -1,6 +1,7 @@
 /* Painel de validação: missões enviadas pelos membros e recomendações de lugares e parceiros. */
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { chamar } from './AdminEmails';
 
 type Envio = { id: string; mission_slug: string; relato: string; status: string; created_at: string; members: { id: string; nome: string; email: string } | null; missions: { titulo: string } | null };
 type Recomendacao = { id: string; tipo: string; nome: string; instagram: string | null; linkedin: string | null; telefone: string; pessoa_validar: string; status: string; created_at: string; member_id: string; members: { nome: string } | null };
@@ -64,6 +65,50 @@ export function RecommendationsPanel() {
           ))}
         </div>
         {!lista.length && <p className="adm-hint">Nenhuma recomendação enviada ainda.</p>}
+      </section>
+    </>
+  );
+}
+
+type Match = { id: string; motivo: string; cali: boolean; status: string; a: { nome: string; segmento: string | null } | null; b: { nome: string; segmento: string | null } | null };
+
+export function MatchesPanel() {
+  const [lista, setLista] = useState<Match[]>([]);
+  const [note, setNote] = useState('');
+  const load = () => { supabase.from('matches').select('id,motivo,cali,status,a:members!matches_a_fkey(nome,segmento),b:members!matches_b_fkey(nome,segmento)').order('cali', { ascending: false }).order('created_at', { ascending: false }).then(({ data }) => setLista((data || []) as unknown as Match[])); };
+  useEffect(load, []);
+
+  async function decidir(item: Match, status: 'liberado' | 'recusado') {
+    if (status === 'liberado' && !window.confirm(`Liberar a sugestão entre ${item.a?.nome} e ${item.b?.nome}? As duas pessoas recebem aviso e e-mail.`)) return;
+    try { await chamar({ acao: 'match', match: item.id, status }); setNote(status === 'liberado' ? 'Sugestão liberada.' : 'Sugestão descartada.'); } catch (error) { setNote((error as Error).message); }
+    load();
+  }
+
+  const linha = (item: Match) => (
+    <div className="adm-row adm-row--static" key={item.id}>
+      <strong>{item.a?.nome}{item.cali ? '' : ` e ${item.b?.nome}`}</strong>
+      <span>Busca: {item.motivo}{item.a?.segmento ? ` · ${item.a.segmento}` : ''}</span>
+      {item.status === 'sugerido'
+        ? <span><button type="button" onClick={() => void decidir(item, 'liberado')}>Liberar</button> <button type="button" onClick={() => void decidir(item, 'recusado')}>Descartar</button></span>
+        : <em>{item.status === 'liberado' ? 'Liberado' : 'Descartado'}</em>}
+    </div>
+  );
+  const cali = lista.filter((item) => item.cali);
+  const outros = lista.filter((item) => !item.cali);
+
+  return (
+    <>
+      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Matches</h1><p>Sugestões criadas pelo que cada pessoa busca e pelo que as outras fazem. Nada chega ao membro antes de você liberar.</p></div></div>
+      {note && <p className="v2-forms-ok" role="status">{note}</p>}
+      <section className="v2-forms-card">
+        <header><small>PRIORIDADE</small><h2>{cali.filter((item) => item.status === 'sugerido').length} para a CALI</h2></header>
+        <div className="adm-list">{cali.map(linha)}</div>
+        {!cali.length && <p className="adm-hint">Ninguém buscando serviços ligados à CALI por enquanto.</p>}
+      </section>
+      <section className="v2-forms-card">
+        <header><small>ENTRE MEMBROS</small><h2>{outros.filter((item) => item.status === 'sugerido').length} para analisar</h2></header>
+        <div className="adm-list">{outros.map(linha)}</div>
+        {!outros.length && <p className="adm-hint">Nenhuma sugestão entre membros ainda.</p>}
       </section>
     </>
   );

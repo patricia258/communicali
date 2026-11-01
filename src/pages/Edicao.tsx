@@ -135,6 +135,7 @@ export function InscricaoPage() {
       const { error } = await supabase.rpc('communicali_inscrever', { p_slug: slug, p_nome: value('nome'), p_email: value('email'), p_whatsapp: value('whatsapp'), p_cidade: value('cidade'), p_empresa: value('empresa'), p_cargo: value('cargo'), p_privacidade: answers.privacidade === 'Li e aceito' });
       if (error) return errorMessage(error);
       if (codigo) await supabase.rpc('communicali_vincular_indicacao', { p_slug: slug, p_email: value('email'), p_codigo: codigo });
+      if (codigo) void fetch('/api/email-indicacao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, email: value('email') }) });
       void fetch('/api/email-confirmacao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, email: value('email') }) });
       return '';
     },
