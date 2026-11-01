@@ -145,3 +145,14 @@
    (workspace-system-v61.css) força 14 px em todo campo; aqui o campo volta ao tamanho do desenho, nunca abaixo de 16 px. */
 .cali-form-page.cali-form-page :is(input,textarea,select){font-size:16px!important}
 .cali-form-page.cali-form-page .cf-text{font-size:max(16px,clamp(20px,3vw,26px))!important}
+
+/* CommuniCALI: o bordô fica nos títulos e o destaque passa para o mostarda da página principal. */
+.cali-form-page{--cf-mustard:#C9973B;--cf-mustard-2:#B5852E}
+.cali-form-page.cali-form-page .cf-primary,.cali-form-page.cali-form-page .cf-nav button,.cali-form-page.cali-form-page .cf-done-mark{background:var(--cf-mustard)!important;color:#22100F!important}
+.cali-form-page.cali-form-page .cf-primary:hover{background:var(--cf-mustard-2)!important}
+.cali-form-page.cali-form-page .cf-progress i{background:var(--cf-mustard)}
+.cali-form-page.cali-form-page .cf-options button.on,.cali-form-page.cali-form-page .cf-scale button.on{background:var(--cf-mustard)!important;border-color:var(--cf-mustard)!important;color:#22100F!important}
+.cali-form-page.cali-form-page .cf-options button:hover,.cali-form-page.cali-form-page .cf-scale button:hover,.cali-form-page.cali-form-page .cf-text:focus{border-color:var(--cf-mustard)}
+.cali-form-page.cali-form-page .cf-num,.cali-form-page.cali-form-page .cf-req{color:var(--cf-mustard-2)}
+.cali-form-page.cali-form-page small{color:var(--cf-mustard-2)}
+.cali-form-page.cali-form-page .cf-leaf{background:linear-gradient(200deg,rgba(201,151,59,.26) 0%,rgba(90,30,45,.12) 55%,rgba(201,151,59,.08) 100%)}

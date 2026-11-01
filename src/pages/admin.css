@@ -1,5 +1,5 @@
 /* Moldura da área administrativa. Telas e campos vêm do CALI Forms (forms/app-forms.css); aqui ficam só os ajustes do site. */
-.adm{--wine:#2B2024;--accent:#8A6A3A;min-height:100dvh;background:#FBF8F4;font-size:13px}
+.adm{--wine:#2B2024;--accent:#C9973B;min-height:100dvh;background:#FBF8F4;font-size:13px}
 .adm__top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:20px;min-height:56px;padding:6px clamp(14px,3vw,32px);background:var(--white);border-bottom:1px solid var(--line)}
 .adm__logo{display:flex;flex:none}
 .adm__logo img{height:40px;width:auto}
@@ -33,7 +33,7 @@
 .adm .v2-forms-card{margin-bottom:14px}
 .adm__main.ap-app{display:block;min-height:0;padding:24px clamp(14px,3vw,32px);background:#FBF8F4}
 .adm .ap-content{padding:0;max-width:1180px;margin:0 auto}
-.adm .wf-primary{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--white)!important}
+.adm .wf-primary{background:var(--accent)!important;border-color:var(--accent)!important;color:#22100F!important}
 @media (min-width:901px){html[data-workspace-ui='v2'] .adm .v2-forms-list .wf-record-row{grid-template-columns:minmax(260px,2.6fr) minmax(170px,1fr) 100px 130px 120px 140px}}
 @media (max-width:760px){
   .adm__top{flex-wrap:wrap;gap:8px}

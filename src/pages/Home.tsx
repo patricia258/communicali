@@ -22,25 +22,68 @@ const FAQ = [
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
-const TILES = ['Rodas de conversa', 'Café', 'Mini pitch', 'Pessoas', 'Debates', 'Conexões', 'Troca de experiências', 'Liderança', 'Escuta'];
+const TILES = ['Rodas de conversa', 'Café', 'Mini pitch', 'Pessoas', 'Debates', 'Conexões'];
 
 const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 const longDate = (iso: string) => new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`));
 
-function Mosaic({ photos }: { photos: Photo[] }) {
+function Arches({ photos }: { photos: Photo[] }) {
   const items = photos.length ? photos : TILES.map((label) => ({ id: label, url: '', legenda: label }));
-  const columns = [0, 1, 2].map((column) => items.filter((_, index) => index % 3 === column));
+  const columns = [0, 1].map((column) => items.filter((_, index) => index % 2 === column));
   return (
-    <div className="mosaic" aria-hidden="true">
+    <div className="arches" aria-hidden="true">
       {columns.map((column, index) => (
-        <div className={`mosaic__col mosaic__col--${index}`} key={index}>
+        <div className={`arches__col arches__col--${index}`} key={index}>
           {[...column, ...column, ...column].map((item, position) => (
-            <div className="tile" key={`${item.id}-${position}`}>
+            <div className="arch" key={`${item.id}-${position}`}>
               {item.url ? <img src={item.url} alt="" /> : <span>{item.legenda}</span>}
             </div>
           ))}
         </div>
       ))}
+    </div>
+  );
+}
+
+const PEOPLE_CARDS = ['fundadora', 'embaixadores', 'honorarios'] as const;
+
+function People({ joinHref }: { joinHref: string }) {
+  const [current, setCurrent] = useState(0);
+  return (
+    <div className="people">
+      <div className="people__track" style={{ transform: `translateX(calc(${current} * (-100% - 16px)))` }}>
+        <article className={`person${current === 0 ? ' is-on' : ''}`}>
+          <div className="person__photo">
+            <img src="/fotos/patricia-lima.jpg" alt="Patrícia Lima" />
+            <div className="person__tags"><span>Idealizadora</span><span className="line">CALI RH</span></div>
+          </div>
+          <div className="person__body">
+            <h3>Patrícia Lima</h3>
+            <p className="muted">People Advisory Executive, fundadora da CALI RH</p>
+            <p>Mais de 15 anos em RH, ao lado de lideranças e equipes. Criou a comunidade para que a conversa sobre pessoas saísse dos grupos de repasse e virasse relacionamento.</p>
+            <a className="outline" href="https://www.linkedin.com/in/patriciaazumi/" target="_blank" rel="noopener noreferrer">Conhecer no LinkedIn</a>
+          </div>
+        </article>
+        <article className={`person person--text${current === 1 ? ' is-on' : ''}`}>
+          <div className="person__body">
+            <p className="tag">Embaixadores</p>
+            <h3>Faça parte desse ecossistema</h3>
+            <p>Quem participa, contribui e conecta pessoas pode aparecer aqui como embaixador da comunidade.</p>
+            <a className="outline" href={joinHref}>Quero participar</a>
+          </div>
+        </article>
+        <article className={`person person--text${current === 2 ? ' is-on' : ''}`}>
+          <div className="person__body">
+            <p className="tag">Membros honorários</p>
+            <h3>Quem constrói a CommuniCALI</h3>
+            <p>Este espaço vai reconhecer as pessoas que marcaram a história da comunidade.</p>
+          </div>
+        </article>
+      </div>
+      <div className="people__nav">
+        {PEOPLE_CARDS.map((card, index) => <button key={card} type="button" aria-label={`Ver cartão ${index + 1}`} className={index === current ? 'is-on' : ''} onClick={() => setCurrent(index)} />)}
+        <button type="button" className="people__next" aria-label="Próximo cartão" onClick={() => setCurrent((current + 1) % PEOPLE_CARDS.length)}>→</button>
+      </div>
     </div>
   );
 }
@@ -72,8 +115,8 @@ export function Home() {
           <a href="/" className="nav__logo"><img src="/brand/communicali-branco.png" alt="CommuniCALI" /></a>
           <div className="nav__links">
             <a href="#comunidade">Comunidade</a>
-            <a href="#proximo">Próximo encontro</a>
-            <a href="#edicoes">Edições</a>
+            <a href="#fazer-parte">Como entrar</a>
+            <a href="#proximo">Agenda</a>
             <a href="#parceiros">Parceiros</a>
           </div>
           <a className="pill" href={joinHref}>Quero participar</a>
@@ -81,14 +124,14 @@ export function Home() {
       </nav>
 
       <header className="hero">
-        <Mosaic photos={photos} />
+        <Arches photos={photos} />
         <div className="wrap hero__body">
           <p className="hero__sign">Café & Pessoas</p>
           <h1>Falar de pessoas <em>pode mudar o mundo.</em></h1>
           <p className="hero__text">Uma comunidade para quem se interessa por gente, gestão e desenvolvimento humano, com pessoas do Brasil inteiro e encontros presenciais.</p>
           <div className="hero__actions">
             <a className="pill pill--large" href={joinHref}>Quero participar</a>
-            <a className="link" href="#proximo">Ver o próximo encontro</a>
+            <a className="link" href="#proximo">Ver a agenda</a>
           </div>
         </div>
       </header>
@@ -99,105 +142,123 @@ export function Home() {
         <article className="stat"><strong>Brasil</strong><h3>Inteiro</h3><p>Pessoas de vários estados no grupo</p></article>
       </section>
 
-      <section className="wrap split" id="comunidade">
-        <h2>Relações que continuam depois do café</h2>
-        <div className="split__text">
-          <p className="split__lead">A CommuniCALI é uma comunidade para quem se interessa por gente: profissionais de RH, lideranças, empresários, empreendedores e todas as pessoas que querem falar de gestão e desenvolvimento humano.</p>
-          <h3>De onde veio a ideia</h3>
-          <p>Ela nasceu nos canais digitais, do cansaço com conversas superficiais, contatos de conveniência e grupos feitos só para repassar informação. Foi dentro do próprio grupo que surgiu a vontade de sair da tela e se encontrar: escutar, aprender e debater assuntos difíceis com respeito, inclusive quando as opiniões não batem.</p>
-          <h3>Como ela se liga à CALI RH</h3>
-          <p>Quem organiza é a CALI RH, fundada por Patrícia Lima, executiva de RH com mais de 15 anos de trajetória. O trabalho da CALI liga a gestão de pessoas às decisões do negócio sem perder a responsabilidade humana, e a comunidade leva essa conversa para o dia a dia de quem participa.</p>
+      <section className="wrap founder" id="comunidade">
+        <div className="founder__text">
+          <p className="eyebrow">A comunidade</p>
+          <h2>Relações que continuam <em>depois do café.</em></h2>
+          <p>A CommuniCALI é uma comunidade para quem se interessa por gente: profissionais de RH, lideranças, empresários, empreendedores e todas as pessoas que querem falar de gestão e desenvolvimento humano.</p>
+          <p>Ela nasceu nos canais digitais, do cansaço com conversas superficiais e grupos feitos só para repassar informação. Dentro do próprio grupo surgiu a vontade de sair da tela e se encontrar para escutar, aprender e debater assuntos difíceis com respeito.</p>
+          <p>Quem organiza é a CALI RH, que liga a gestão de pessoas às decisões do negócio sem perder a responsabilidade humana.</p>
+          <a className="pill" href={joinHref}>Quero participar</a>
         </div>
+        <People joinHref={joinHref} />
       </section>
 
       <section className="wrap block" id="fazer-parte">
-        <h2>Escolha por onde entrar</h2>
-        <div className="cards">
-          <article className="card">
-            <h3>Comunidade</h3>
-            <p>As conversas acontecem no grupo do WhatsApp. Aponte a câmera para o QR Code ou use o botão.</p>
-            {qr && <img className="card__qr" src={qr} alt="QR Code do grupo da comunidade" />}
-            <a className="pill" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>
+        <div className="block__head">
+          <div>
+            <p className="eyebrow">Como fazer parte</p>
+            <h2>Escolha por onde <em>entrar.</em></h2>
+          </div>
+          <p>O grupo é onde a conversa acontece todo dia. O cadastro guarda seu histórico em cada edição.</p>
+        </div>
+        <div className="doors">
+          <article className="door">
+            <span className="door__arrow">↗</span>
+            <div>
+              <h3>Grupo da comunidade</h3>
+              <p>Pessoas do Brasil inteiro no WhatsApp, trocando vagas, contatos, dúvidas e experiências.</p>
+              <a className="link" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>
+            </div>
+            {qr && <img className="door__qr" src={qr} alt="QR Code do grupo da comunidade" />}
           </article>
-          <article className="card">
-            <h3>Cadastro de membro</h3>
-            <p>Seu cadastro guarda presenças, pontos e histórico em todas as edições.</p>
-            <a className="pill" href={joinHref}>Fazer meu cadastro</a>
-          </article>
-          <article className="card">
-            <h3>Parceiros</h3>
-            <p>Cada parceiro oferece o que faz bem, com condições combinadas caso a caso.</p>
-            <a className="pill" href="#parceiros">Quero ser parceiro</a>
+          <article className="door">
+            <span className="door__arrow">↗</span>
+            <div>
+              <h3>Cadastro de membro</h3>
+              <p>Registre sua participação para acumular presenças e pontos e acompanhar sua categoria na comunidade.</p>
+              <a className="link" href={joinHref}>Fazer meu cadastro</a>
+            </div>
           </article>
         </div>
       </section>
 
       <section className="wrap block" id="proximo">
-        <h2>Próximo encontro</h2>
+        <div className="block__head">
+          <div>
+            <p className="eyebrow">Agenda</p>
+            <h2>Encontros para <em>sair da tela.</em></h2>
+          </div>
+        </div>
         {next ? (
           <article className="event">
-            <div className="event__cover" style={next.capa_url ? { backgroundImage: `url(${next.capa_url})` } : undefined}>
-              {!next.capa_url && <img src="/brand/communicali-branco.png" alt="" />}
+            <div className="event__cover">
+              {next.capa_url ? <img src={next.capa_url} alt={`Fachada do ${next.local}`} /> : <img className="event__logo" src="/brand/communicali-branco.png" alt="" />}
+              <span className="event__badge">Próximo encontro</span>
             </div>
             <div className="event__body">
-              <p className="tag">{next.numero ? `${next.numero}ª edição` : 'Encontro'}</p>
+              <p className="event__date">{longDate(next.data_evento)} · {next.cidade}</p>
               <h3>{next.titulo}</h3>
               <dl>
-                <div><dt>Data</dt><dd>{longDate(next.data_evento)}</dd></div>
                 <div><dt>Horário</dt><dd>{next.horario}</dd></div>
                 <div><dt>Local</dt><dd>{next.local}</dd></div>
-                <div><dt>Endereço</dt><dd>{[next.endereco, next.cidade].filter(Boolean).join(', ')}</dd></div>
+                <div className="wide"><dt>Endereço</dt><dd>{[next.endereco, next.cidade].filter(Boolean).join(', ')}</dd></div>
               </dl>
               {next.inscricao_url
                 ? <a className="pill" href={next.inscricao_url}>Quero me inscrever</a>
-                : <p className="muted">As inscrições desta edição estão encerradas. Entre na comunidade para saber da próxima.</p>}
+                : <p className="muted">Inscrições desta edição encerradas. Entre na comunidade para saber da próxima.</p>}
             </div>
           </article>
         ) : <p className="muted">A próxima data sai em breve. Quem está no grupo da comunidade fica sabendo primeiro.</p>}
-      </section>
-
-      <section className="wrap block" id="edicoes">
-        <h2>Como foram os encontros</h2>
-        {past.length ? (
-          <div className="posts">
-            {past.map((edition) => (
-              <article className="post" key={edition.id}>
-                <div className="post__image" style={edition.capa_url ? { backgroundImage: `url(${edition.capa_url})` } : undefined} />
-                <h3>{edition.titulo}</h3>
-                <p className="muted">{formatDate(edition.data_evento)} · {edition.local}, {edition.cidade}</p>
-                {edition.resumo && <p>{edition.resumo}</p>}
-                {edition.fotos_url && <a className="link" href={edition.fotos_url} target="_blank" rel="noopener noreferrer">Baixar as fotos</a>}
-              </article>
-            ))}
-          </div>
-        ) : <p className="muted">O resumo e as fotos de cada edição ficam aqui. A primeira entra depois de 14 de novembro.</p>}
-      </section>
-
-      <section className="wrap block" id="parceiros">
-        <h2>Há muitas formas de somar</h2>
-        <p className="block__lead">Nem toda contribuição é financeira. Cada parceiro oferece o que faz bem, e a proposta é combinada individualmente.</p>
-        <div className="modes">
-          {MODALIDADES.map(([title, text]) => <div className="mode" key={title}><h3>{title}</h3><p>{text}</p></div>)}
-        </div>
-        {partners.length > 0 && (
-          <div className="logos" aria-label="Parceiros da CommuniCALI">
-            <div className="logos__track">
-              {[...partners, ...partners].map((partner, index) => (
-                <a key={`${partner.id}-${index}`} href={partner.site_url || undefined} target="_blank" rel="noopener noreferrer" aria-hidden={index >= partners.length} title={partner.nome}>
-                  {partner.logo_url ? <img src={partner.logo_url} alt={partner.nome} /> : <span>{partner.nome}</span>}
-                </a>
+        <div id="edicoes" className="past">
+          <h3>Como foram os encontros</h3>
+          {past.length ? (
+            <div className="posts">
+              {past.map((edition) => (
+                <article className="post" key={edition.id}>
+                  <div className="post__image" style={edition.capa_url ? { backgroundImage: `url(${edition.capa_url})` } : undefined}><span>Realizado</span></div>
+                  <div className="post__body">
+                    <p className="event__date">{formatDate(edition.data_evento)} · {edition.cidade}</p>
+                    <h3>{edition.titulo}</h3>
+                    {edition.resumo && <p className="muted">{edition.resumo}</p>}
+                    {edition.fotos_url && <a className="link" href={edition.fotos_url} target="_blank" rel="noopener noreferrer">Baixar as fotos</a>}
+                  </div>
+                </article>
               ))}
             </div>
+          ) : <p className="muted">O resumo e as fotos de cada edição ficam aqui depois de cada encontro.</p>}
+        </div>
+      </section>
+
+      <section className="sponsors" id="parceiros">
+        <p className="sponsors__label">Quem apoia a CommuniCALI</p>
+        <div className="logos" aria-label="Parceiros da CommuniCALI">
+          <div className="logos__track">
+            {(partners.length ? [...partners, ...partners, ...partners] : Array.from({ length: 12 }, (_, index) => ({ id: String(index), nome: '', logo_url: null, site_url: null }))).map((partner, index) => (
+              partner.nome
+                ? <a key={`${partner.id}-${index}`} className="logo" href={partner.site_url || undefined} target="_blank" rel="noopener noreferrer" title={partner.nome}>{partner.logo_url ? <img src={partner.logo_url} alt={partner.nome} /> : <span>{partner.nome}</span>}</a>
+                : <a key={index} className="logo logo--empty" href={PARTNER_FORM_URL}>Sua marca aqui</a>
+            ))}
           </div>
-        )}
-        <div className="hero__actions">
-          <a className="pill" href={PARTNER_FORM_URL}>Enviar proposta de parceria</a>
-          <a className="link" href={PARTNER_DECK_URL} target="_blank" rel="noopener noreferrer">Ver a apresentação</a>
+        </div>
+        <div className="wrap sponsors__body">
+          <div>
+            <p className="eyebrow">Para empresas e profissionais</p>
+            <h2>Apoie este encontro. <em>Seja um parceiro.</em></h2>
+            <p className="muted">Nem toda contribuição é financeira: cada parceiro oferece o que faz bem, e a proposta é combinada individualmente.</p>
+            <div className="hero__actions">
+              <a className="pill" href={PARTNER_FORM_URL}>Quero ser parceiro</a>
+              <a className="link" href={PARTNER_DECK_URL} target="_blank" rel="noopener noreferrer">Ver apresentação para parceiros</a>
+            </div>
+          </div>
+          <ul className="modes">
+            {MODALIDADES.map(([title, text]) => <li key={title}><strong>{title}</strong><span>{text}</span></li>)}
+          </ul>
         </div>
       </section>
 
       <section className="wrap block">
-        <h2>Perguntas frequentes</h2>
+        <div className="block__head"><div><p className="eyebrow">Dúvidas</p><h2>Perguntas <em>frequentes.</em></h2></div></div>
         <div className="faq">
           {FAQ.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}
         </div>
