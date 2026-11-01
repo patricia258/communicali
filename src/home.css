@@ -146,3 +146,4 @@
 .social{display:flex;gap:16px;flex-wrap:wrap}
 .social a{display:inline-flex;align-items:center;gap:6px;text-decoration:none}
 .event,.post{scroll-margin-top:84px}
+.home .site-footer{margin-top:40px}

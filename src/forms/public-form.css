@@ -173,3 +173,16 @@
 .cali-form-page.cali-form-page.cali-form-page .cf-leaf{background:linear-gradient(200deg,rgba(201,151,59,.2) 0%,rgba(122,31,61,.3) 55%,rgba(201,151,59,.06) 100%)}
 .cali-form-page.cali-form-page.cali-form-page .cf-text:-webkit-autofill{-webkit-text-fill-color:#F7F0EA;-webkit-box-shadow:0 0 0 40px #1F0E14 inset}
 .cali-form-page.cali-form-page.cali-form-page h1,.cali-form-page.cali-form-page.cali-form-page h2{color:#F7F0EA!important}
+
+/* Rodapé distribuído: centralizado no celular, com a navegação logo acima. */
+.cali-form-page.cali-form-page.cali-form-page .cf-foot{left:clamp(20px,5vw,56px);right:clamp(20px,5vw,56px);bottom:20px;justify-content:center;pointer-events:none}
+.cali-form-page.cali-form-page.cali-form-page .cf-foot a{pointer-events:auto;color:#CBB9B1}
+.cali-form-page .site-links{justify-content:center;font-size:12px}
+@media (max-width:640px){
+  .cali-form-page.cali-form-page.cali-form-page .cf-foot{left:12px;right:12px;bottom:12px}
+  .cali-form-page.cali-form-page.cali-form-page .cf-nav{bottom:44px}
+  .cali-form-page.cali-form-page.cali-form-page .cf-stage{padding-bottom:96px}
+}
+.cali-form-page.cali-form-page.cali-form-page .cf-text::placeholder{color:#CBB9B1!important;opacity:.75!important}
+.cali-form-page.cali-form-page.cali-form-page :is(.cf-num,.cf-req){color:#DDB160!important}
+.cali-form-page.cali-form-page.cali-form-page .cf-num svg{color:#DDB160}

@@ -1,8 +1,9 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import QRCode from 'qrcode';
-import { ArrowRight, CalendarDays, Globe, Handshake, Link2, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, Handshake, Link2, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_DECK_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 import { useSiteTexts } from './MemberFields';
+import { Instagram, SiteFooter } from '../components/SiteFooter';
 
 type EditionRow = { id: string; slug: string; numero: number | null; titulo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null };
 type Photo = { id: string; url: string; legenda: string | null };
@@ -47,9 +48,6 @@ function Arches({ photos }: { photos: Photo[] }) {
   );
 }
 
-const Instagram = ({ size }: { size: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
-);
 const Linkedin = ({ size }: { size: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.5 8.5H3V21h3.5V8.5ZM4.75 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM21 13.6c0-3.3-1.8-5.4-4.6-5.4-1.5 0-2.7.7-3.4 1.8V8.5H9.7V21h3.5v-6.6c0-1.9.9-3 2.4-3 1.4 0 2 .9 2 2.8V21H21v-7.4Z" /></svg>
 );
@@ -315,17 +313,7 @@ export function Home() {
         <a className="pill pill--large" href={joinHref}>Quero participar</a>
       </section>
 
-      <footer className="footer">
-        <div className="wrap footer__row">
-          <img src="/brand/communicali-branco.png" alt="CommuniCALI" />
-          <p className="footer__faith">Toda honra a Deus!</p>
-          <div className="social">
-            <a href="https://www.instagram.com/calirh_/" target="_blank" rel="noopener noreferrer"><Instagram size={16} aria-hidden="true" /> @calirh_</a>
-            <a href="https://calirh.com" target="_blank" rel="noopener noreferrer"><Globe size={16} aria-hidden="true" /> calirh.com</a>
-          </div>
-          <p><a href="/regras">Regras</a> · <a href="/privacidade">Privacidade</a></p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

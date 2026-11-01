@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { ArrowDown, ArrowRight, ArrowUp, Check, CornerDownLeft, Paperclip, X } from 'lucide-react';
 import { anonPublicRpc, anonStorage, supabase } from '../lib/supabase';
 import { type FormAnswer, type FormQuestion, FILE_ACCEPT, FILE_HINT, fileLabel, isAnswerable, nextQuestionIndex, richTextHtml, scaleRange, validateAnswer } from './formModel';
+import { FooterLinks } from '../components/SiteFooter';
 import './public-form.css';
 
 type PublicForm = { id: string; submit_label?: string | null; success_text?: string | null; slug: string; title: string; category?: string; description: string; thank_you: string; status: 'open' | 'closed'; confirm_email: boolean; questions: FormQuestion[] };
@@ -269,6 +270,6 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
       <button type="button" aria-label="Pergunta anterior" disabled={!trail.length} onClick={goBack}><ArrowUp size={18} /></button>
       <button type="button" aria-label="Próxima pergunta" disabled={isLast} onClick={goNext}><ArrowDown size={18} /></button>
     </nav>}
-    <footer className="cf-foot"><a href="https://calirh.com" target="_blank" rel="noopener noreferrer">CALI RH</a><span>·</span><a href="/">CommuniCALI</a></footer>
+    <footer className="cf-foot"><FooterLinks /></footer>
   </div>;
 }

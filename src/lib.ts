@@ -7,7 +7,7 @@ export const editionSlug = () => new URLSearchParams(window.location.search).get
 
 export const COMMUNITY_URL = 'https://chat.whatsapp.com/Lu9uzReUxAlJZcQaU1is01';
 export const PARTNER_FORM_URL = '/f/parceiros-communicali';
-export const PARTNER_DECK_URL = 'https://app.calirh.com/communicali/seja-parceiro.pdf';
+export const PARTNER_DECK_URL = '/communicali/seja-parceiro.pdf';
 
 export type Edition = {
   slug: string;
