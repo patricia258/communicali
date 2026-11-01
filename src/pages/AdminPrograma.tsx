@@ -198,7 +198,7 @@ export function TextsPanel() {
         <div className="v2-forms-grid">
           <label className="v2-forms-check wide"><input type="checkbox" checked={form.cadastro_aberto} onChange={(event) => setForm({ ...form, cadastro_aberto: event.target.checked })} /><span><strong>Cadastro aberto ao público</strong></span></label>
           <label className="wide"><span>Regras de participação</span><textarea rows={10} value={form.regras_texto} onChange={(event) => setForm({ ...form, regras_texto: event.target.value })} /></label>
-          <label className="wide"><span>Política de privacidade <em>rascunho para sua revisão</em></span><textarea rows={12} value={form.privacidade_texto} onChange={(event) => setForm({ ...form, privacidade_texto: event.target.value })} /></label>
+          <label className="wide"><span>Política de privacidade</span><textarea rows={12} value={form.privacidade_texto} onChange={(event) => setForm({ ...form, privacidade_texto: event.target.value })} /></label>
           <label className="wide"><span>Opções de “Como conheceu”, uma por linha</span><textarea rows={6} value={form.opcoes} onChange={(event) => setForm({ ...form, opcoes: event.target.value })} /></label>
         </div>
       </section>
