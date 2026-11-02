@@ -156,3 +156,4 @@
 .frame{position:relative}
 .frames--neutras .frame::after{content:"";position:absolute;inset:0;background:rgba(74,26,39,.28)}
 @media (max-width:900px){.frames{opacity:.34}}
+.logos__track img{filter:brightness(0) invert(1)}

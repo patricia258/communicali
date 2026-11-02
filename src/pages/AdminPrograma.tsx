@@ -5,8 +5,9 @@ import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
 import { CATEGORIAS } from './Checkin';
 import { FAIXAS, PONTOS } from './AdminInicio';
+import { Categoria, Email, Rede, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 
-type Member = { na_rede: boolean; presta_servicos: boolean; instagram: string | null; codigo: string | null; temas: string[]; interesse_palestras: boolean; foto_url: string | null; id: string; status: string; nome: string; apelido: string | null; email: string; whatsapp: string | null; cidade_uf: string | null; empresa: string | null; cargo: string | null; linkedin: string | null; interesses: string[]; como_conheceu: string | null; categoria: string; cracha_status: string; autoriza_imagem: boolean; autoriza_comunicacoes: boolean; created_at: string };
+type Member = { segmento: string | null; regiao: string | null; busca: string[]; aberto_trabalho: boolean; recrutador: boolean; curriculo_path: string | null; na_rede: boolean; presta_servicos: boolean; instagram: string | null; codigo: string | null; temas: string[]; interesse_palestras: boolean; foto_url: string | null; id: string; status: string; nome: string; apelido: string | null; email: string; whatsapp: string | null; cidade_uf: string | null; empresa: string | null; cargo: string | null; linkedin: string | null; interesses: string[]; como_conheceu: string | null; categoria: string; cracha_status: string; autoriza_imagem: boolean; autoriza_comunicacoes: boolean; created_at: string };
 type History = { id: string; checked_in_at: string; codigo: string; editions: { titulo: string } };
 type Point = { id: string; acao: string; pontos: number; created_at: string; motivo: string | null };
 type Poll = { id: string; slug: string; titulo: string; pergunta: string; tipo: 'nota' | 'multipla' | 'aberta'; opcoes: string[]; anonima: boolean; status: 'rascunho' | 'ativa' | 'encerrada'; revelada: boolean; edition_id: string };
@@ -24,7 +25,7 @@ export function exportPresencasCsv(slug: string, rows: Array<Array<string | numb
   csv(`communicali-${slug}-presencas.csv`, rows);
 }
 
-function MemberEditor({ member, onBack }: { member: Member; onBack: () => void }) {
+function MemberEditor({ member, onBack, alternar, excluir }: { member: Member; onBack: () => void; alternar: () => void; excluir: () => void }) {
   const [draft, setDraft] = useState(member);
   const [history, setHistory] = useState<History[]>([]);
   const [points, setPoints] = useState<Point[]>([]);
@@ -64,7 +65,16 @@ function MemberEditor({ member, onBack }: { member: Member; onBack: () => void }
   return (
     <>
       <button type="button" className="v2-forms-back" onClick={onBack}>Voltar para membros</button>
-      <div className="wf-head"><div><small>MEMBRO · {member.email}</small><h1>{member.nome}</h1><p>{total} pontos · faixa de pontos: {faixa} · categoria atual: {CATEGORIAS[draft.categoria]}{draft.status === 'suspenso' ? ' · suspenso' : ''}</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void save()}>Salvar alterações</button></div></div>
+      <section className="adm-ficha">
+        {member.foto_url ? <img src={member.foto_url} alt={`Foto de ${member.nome}`} /> : <span className="adm-ficha__foto">{member.nome.charAt(0)}</span>}
+        <div className="adm-ficha__dados">
+          <div className="adm-ficha__titulo"><h1>{member.nome}</h1><Categoria id={draft.categoria} nome={CATEGORIAS[draft.categoria]} />{member.status === 'suspenso' && <Categoria id="suspenso" nome="Suspenso" />}{member.aberto_trabalho && <Categoria id="trabalho" nome="Open to work" />}{member.recrutador && <Categoria id="recrutador" nome="Recruta" />}</div>
+          <p>{[member.cargo, member.empresa].filter(Boolean).join(', ') || 'Cargo não informado'} · {member.cidade_uf || member.regiao || 'Cidade não informada'}{member.segmento ? ` · ${member.segmento}` : ''}</p>
+          <div className="adm-ficha__numeros"><p><strong>{total}</strong> pontos</p><p><strong>{history.length}</strong> encontros</p><p><strong>{dataBr(member.created_at)}</strong> desde</p><p><strong>{faixa}</strong> pela pontuação</p></div>
+          <div className="adm-ficha__contatos"><Telefone numero={member.whatsapp} /><Email email={member.email} /><Rede valor={member.instagram} tipo="instagram" /><Rede valor={member.linkedin} tipo="linkedin" />{member.curriculo_path && <button type="button" className="adm-copiar" onClick={() => void supabase.storage.from('curriculos').createSignedUrl(member.curriculo_path!, 300).then(({ data }) => { if (data) window.open(data.signedUrl, '_blank', 'noopener'); })}>Abrir currículo</button>}</div>
+        </div>
+        <div className="adm-ficha__acoes"><button type="button" className="wf-primary" onClick={() => void save()}>Salvar alterações</button><button type="button" className="wf-secondary" onClick={alternar}>{member.status === 'suspenso' ? 'Reativar' : 'Suspender'}</button><button type="button" className="wf-secondary adm-danger" onClick={excluir}>Excluir</button></div>
+      </section>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <section className="v2-forms-card">
         <div className="v2-forms-grid">
@@ -73,13 +83,17 @@ function MemberEditor({ member, onBack }: { member: Member; onBack: () => void }
           <label><span>Crachá</span><select value={draft.cracha_status} onChange={(event) => setDraft({ ...draft, cracha_status: event.target.value })}>{Object.entries(CRACHA).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label>
         </div>
       </section>
-      {(member.codigo || member.temas?.length || member.interesse_palestras || member.foto_url) && (
-        <section className="v2-forms-card">
-          <header><small>ESPAÇO DO MEMBRO</small><h2>{member.interesse_palestras ? 'Quer contribuir com palestras' : 'Perfil'}</h2></header>
-          {member.foto_url && <img src={member.foto_url} alt={`Foto de ${member.nome}`} style={{ width: 96, height: 120, objectFit: 'cover' }} />}
-          <p className="adm-hint">Código: {member.codigo || 'ainda não gerado'}. O que faz: {member.temas?.length ? member.temas.join(', ') : 'não informado'}. {member.na_rede ? 'Aparece na Rede.' : 'Fora da Rede.'}{member.presta_servicos ? ' Oferece serviços.' : ''}{member.instagram ? ` Instagram: ${member.instagram}.` : ''}</p>
-        </section>
-      )}
+      <section className="v2-forms-card">
+        <header><small>NO ESPAÇO DO MEMBRO</small><h2>Perfil</h2></header>
+        <div className="adm-perfil">
+          <div><strong>Código</strong><p>{member.codigo || 'Ainda não gerado'}</p></div>
+          <div><strong>O que faz</strong><p>{member.temas?.join(', ') || 'Não informado'}</p></div>
+          <div><strong>O que busca</strong><p>{member.busca?.join(', ') || 'Não informado'}</p></div>
+          <div><strong>Interesses</strong><p>{member.interesses?.join(', ') || 'Não informado'}</p></div>
+          <div><strong>Palestras</strong><p>{member.interesse_palestras ? 'Quer contribuir' : 'Não marcou'}</p></div>
+          <div><strong>Rede</strong><p>{member.na_rede ? 'Aparece' : 'Fora da Rede'}{member.presta_servicos ? ', oferece serviços' : ''}</p></div>
+        </div>
+      </section>
       <section className="v2-forms-card">
         <header><small>PONTOS</small><h2>Extrato: {total} pontos</h2></header>
         <div className="adm-list">{points.map((item) => <div className="adm-row adm-row--static" key={item.id}><strong>+{item.pontos}</strong><span>{label(item.acao)}{item.motivo ? ` · ${item.motivo}` : ''}</span><em>{new Date(item.created_at).toLocaleDateString('pt-BR')}</em></div>)}</div>
@@ -101,10 +115,12 @@ function MemberEditor({ member, onBack }: { member: Member; onBack: () => void }
 export function MembersPanel() {
   const [list, setList] = useState<Member[]>([]);
   const [points, setPoints] = useState<Record<string, number>>({});
+  const [encontros, setEncontros] = useState<Record<string, { total: number }>>({});
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState<Member | null>(null);
   const load = () => {
     supabase.from('members').select('*').order('created_at', { ascending: false }).then(({ data }) => setList((data || []) as Member[]));
+    supabase.from('checkins').select('member_id').then(({ data }) => { const totais: Record<string, { total: number }> = {}; for (const row of data || []) totais[row.member_id] = { total: (totais[row.member_id]?.total || 0) + 1 }; setEncontros(totais); });
     supabase.from('point_events').select('member_id,pontos').then(({ data }) => {
       const totals: Record<string, number> = {};
       for (const row of data || []) totals[row.member_id] = (totals[row.member_id] || 0) + row.pontos;
@@ -135,24 +151,28 @@ export function MembersPanel() {
     load();
   }
 
-  if (open) return <MemberEditor key={open.id} member={open} onBack={() => { setOpen(null); load(); }} />;
+  if (open) return <MemberEditor key={open.id} member={open} onBack={() => { setOpen(null); load(); }} alternar={() => void toggleStatus(open).then(() => setOpen(null))} excluir={() => void remove(open).then(() => setOpen(null))} />;
+  const categoriaDe = (item: Member) => (item.status === 'suspenso' ? 'Suspenso' : CATEGORIAS[item.categoria] || item.categoria);
+  const dias = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  const tempo = (iso: string) => { const total = dias(iso); return total < 30 ? `${total} dias` : total < 365 ? `${Math.floor(total / 30)} meses` : `${Math.floor(total / 365)} anos`; };
+  const colunas: Array<Coluna<Member>> = [
+    { id: 'nome', titulo: 'Nome', valor: (item) => item.nome, render: (item) => <button type="button" className="adm-nome" onClick={() => setOpen(item)}>{item.foto_url ? <img src={item.foto_url} alt="" /> : <span>{item.nome.charAt(0)}</span>}{item.nome}</button> },
+    { id: 'categoria', titulo: 'Categoria', valor: categoriaDe, render: (item) => <Categoria id={item.status === 'suspenso' ? 'suspenso' : item.categoria} nome={categoriaDe(item)} /> },
+    { id: 'pontos', titulo: 'Pontos', valor: (item) => points[item.id] || 0 },
+    { id: 'encontros', titulo: 'Encontros', valor: (item) => encontros[item.id]?.total || 0 },
+    { id: 'desde', titulo: 'Desde', valor: (item) => item.created_at, render: (item) => dataBr(item.created_at) },
+    { id: 'tempo', titulo: 'Tempo de casa', valor: (item) => dias(item.created_at), render: (item) => tempo(item.created_at) },
+    { id: 'segmento', titulo: 'Segmento', valor: (item) => item.segmento || '' },
+    { id: 'regiao', titulo: 'Região', valor: (item) => item.regiao || item.cidade_uf || '' },
+    { id: 'whatsapp', titulo: 'WhatsApp', valor: (item) => item.whatsapp || '', render: (item) => <Telefone numero={item.whatsapp} /> },
+    { id: 'email', titulo: 'E-mail', valor: (item) => item.email, render: (item) => <Email email={item.email} /> },
+    { id: 'instagram', titulo: 'Instagram', valor: (item) => item.instagram || '', render: (item) => <Rede valor={item.instagram} tipo="instagram" /> },
+    { id: 'mercado', titulo: 'Mercado', valor: (item) => (item.aberto_trabalho ? 'Open to work' : item.recrutador ? 'Recruta' : ''), },
+  ];
   return (
     <>
-      <div className="wf-head"><div><small>MEMBROS</small><h1>Quem faz parte da comunidade</h1><p>{list.length} {list.length === 1 ? 'cadastro' : 'cadastros'}. Abra um membro para ver dados, pontos e presenças. Toda alteração fica registrada.</p></div><div className="v2-head-actions"><button type="button" className="wf-secondary" disabled={!visible.length} onClick={exportAll}>Exportar Excel</button></div></div>
-      <div className="wf-controls"><input aria-label="Buscar membro" placeholder="Buscar por nome, e-mail ou empresa" value={query} onChange={(event) => setQuery(event.target.value)} /></div>
-      <div className="adm-list">
-        {visible.map((item) => (
-          <div className="adm-row adm-row--static" key={item.id}>
-            <strong>{item.nome}</strong>
-            <span>{item.email}</span>
-            <em>{item.status === 'suspenso' ? 'Suspenso' : CATEGORIAS[item.categoria]} · {points[item.id] || 0} pts</em>
-            <button type="button" onClick={() => setOpen(item)}>Editar</button>
-            <button type="button" onClick={() => void toggleStatus(item)}>{item.status === 'suspenso' ? 'Reativar' : 'Suspender'}</button>
-            <button type="button" className="adm-danger" onClick={() => void remove(item)}>Excluir</button>
-          </div>
-        ))}
-        {!visible.length && <p className="adm-hint">Nenhum membro encontrado.</p>}
-      </div>
+      <div className="wf-head"><div><small>MEMBROS</small><h1>Quem faz parte da comunidade</h1><p>Clique no título da coluna para ordenar e no nome para abrir a ficha. Toda alteração fica registrada.</p></div><div className="v2-head-actions"><button type="button" className="wf-secondary" disabled={!visible.length} onClick={exportAll}>Exportar Excel</button></div></div>
+      <Tabela colunas={colunas} linhas={list} chave={(item) => item.id} vazio="Nenhum membro encontrado." filtros={[{ id: 'categoria', titulo: 'Categoria', valor: categoriaDe }, { id: 'segmento', titulo: 'Segmento', valor: (item) => item.segmento || '' }, { id: 'regiao', titulo: 'Região', valor: (item) => item.regiao || '' }, { id: 'mercado', titulo: 'Mercado', valor: (item) => (item.aberto_trabalho ? 'Open to work' : item.recrutador ? 'Recruta' : '') }]} />
     </>
   );
 }

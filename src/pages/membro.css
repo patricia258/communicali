@@ -191,3 +191,5 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__borrado i{display:block;height:12px;margin:0 12px;background:#E4D6CE}
 .passe__bloqueio-texto{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px;width:min(320px,88%);padding:24px;border-radius:24px;background:#fff;box-shadow:0 24px 50px rgba(34,16,15,.18);text-align:center}
 .passe .passe__tela .passe__bloqueio-texto h2{color:#7A1F3D;text-align:center}
+.passe__marca--rose{background:#EFD9D2}
+.passe__segmento--trabalho{background:#A9502E;color:#fff}

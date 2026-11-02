@@ -11,7 +11,8 @@ import { GuestsPanel } from './Convidados';
 import { HomePanel, ProgramPanel } from './AdminInicio';
 import { StaffPanel } from './Staff';
 import { EmailsCard, chamar } from './AdminEmails';
-import { MatchesPanel, RecommendationsPanel } from './AdminRecomendacoes';
+import { ImpactosPanel, IndicacoesPanel, MatchesPanel, RecommendationsPanel } from './AdminRecomendacoes';
+import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 import './admin.css';
 
 type Edition = { inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
@@ -69,6 +70,16 @@ function EditionsPanel() {
   const [open, setOpen] = useState<Edition | null>(null);
   const [error, setError] = useState('');
   const load = () => supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data, error: failure }) => { if (failure) setError(failure.message); else setList((data || []) as Edition[]); });
+  const [contagens, setContagens] = useState<Record<string, Record<string, number>>>({});
+  useEffect(() => {
+    void Promise.all([supabase.from('registrations').select('edition_id,status'), supabase.from('checkins').select('edition_id')]).then(([inscricoes, presencas]) => {
+      const totais: Record<string, Record<string, number>> = {};
+      const somar = (id: string, chave: string) => { totais[id] = { ...totais[id], [chave]: (totais[id]?.[chave] || 0) + 1 }; };
+      for (const row of inscricoes.data || []) somar(row.edition_id, row.status);
+      for (const row of presencas.data || []) somar(row.edition_id, 'checkins');
+      setContagens(totais);
+    });
+  }, []);
   useEffect(() => { void load(); }, []);
 
   async function create() {
@@ -79,23 +90,29 @@ function EditionsPanel() {
     if (failure) setError(failure.message); else { await load(); setOpen(data as Edition); }
   }
 
+  const colunasEdicoes: Array<Coluna<Edition>> = [
+    { id: 'titulo', titulo: 'Edição', valor: (item) => item.titulo, render: (item) => <button type="button" className="adm-nome" onClick={() => setOpen(item)}>{item.titulo}</button> },
+    { id: 'data', titulo: 'Data', valor: (item) => item.data_evento, render: (item) => dataBr(item.data_evento) },
+    { id: 'horario', titulo: 'Horário', valor: (item) => item.horario },
+    { id: 'local', titulo: 'Local', valor: (item) => `${item.local}, ${item.cidade}` },
+    { id: 'capacidade', titulo: 'Vagas', valor: (item) => item.capacidade ?? 0, render: (item) => item.capacidade ?? '-' },
+    { id: 'analise', titulo: 'Para aprovar', valor: (item) => contagens[item.id]?.analise || 0 },
+    { id: 'aprovados', titulo: 'Aprovados', valor: (item) => contagens[item.id]?.inscrito || 0 },
+    { id: 'checkins', titulo: 'Check-ins', valor: (item) => contagens[item.id]?.checkins || 0 },
+    { id: 'inscricoes', titulo: 'Inscrições', valor: (item) => (item.inscricoes_abertas ? 'Abertas' : 'Fechadas') },
+    { id: 'site', titulo: 'No site', valor: (item) => (item.publica ? 'Sim' : 'Não') },
+  ];
   if (open) return <EditionEditor key={open.id} edition={open} onBack={() => { setOpen(null); void load(); }} />;
   return (
     <>
       <div className="wf-head"><div><small>EDIÇÕES</small><h1>Encontros</h1><p>Abra uma edição para ajustar data e local, enviar capa e fotos, abrir os telões e ver quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void create()}>Nova edição</button></div></div>
       {error && <p className="inline-notice">{error}</p>}
-      <div className="adm-list">
-        {list.map((item) => (
-          <button type="button" className="adm-row" key={item.id} onClick={() => setOpen(item)}>
-            <strong>{item.titulo}</strong>
-            <span>{item.data_evento.split('-').reverse().join('/')} · {item.local}</span>
-            <em>{item.publica ? 'No site' : 'Fora do site'}</em>
-          </button>
-        ))}
-      </div>
+      <Tabela colunas={colunasEdicoes} linhas={list} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhuma edição cadastrada." filtros={[{ id: 'site', titulo: 'No site', valor: (item) => (item.publica ? 'No site' : 'Fora do site') }, { id: 'inscricoes', titulo: 'Inscrições', valor: (item) => (item.inscricoes_abertas ? 'Abertas' : 'Fechadas') }]} />
     </>
   );
 }
+
+const SITUACAO_INSCRICAO: Record<string, string> = { analise: 'Para aprovar', inscrito: 'Aprovado', espera: 'Lista de espera', cancelado: 'Recusado' };
 
 function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => void }) {
   const [draft, setDraft] = useState(edition);
@@ -187,6 +204,15 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       people.map((person) => [new Date(person.checked_in_at).toLocaleString('pt-BR'), person.members.nome, person.members.email, person.members.whatsapp || '', person.members.empresa || '', person.members.cargo || '', person.members.categoria, person.members.autoriza_imagem ? 'Sim' : 'Não']));
   }
 
+  type Inscricao = (typeof signups)[number];
+  const colunasInscritos: Array<Coluna<Inscricao>> = [
+    { id: 'nome', titulo: 'Nome', valor: (item) => item.nome },
+    { id: 'whatsapp', titulo: 'WhatsApp', valor: (item) => item.whatsapp, render: (item) => <Telefone numero={item.whatsapp} /> },
+    { id: 'email', titulo: 'E-mail', valor: (item) => item.email, render: (item) => <Email email={item.email} /> },
+    { id: 'situacao', titulo: 'Situação', valor: (item) => SITUACAO_INSCRICAO[item.status] || item.status },
+    { id: 'acoes', titulo: 'Decisão', valor: (item) => item.status, render: (item) => (item.status === 'analise' || item.status === 'espera'
+      ? <span className="adm-acoes"><button type="button" onClick={() => void decidir(item, 'inscrito')}>Aprovar</button>{item.status === 'analise' && <button type="button" onClick={() => void decidir(item, 'espera')}>Espera</button>}<button type="button" onClick={() => void decidir(item, 'cancelado')}>Recusar</button></span> : '-') },
+  ];
   const origin = window.location.origin;
   return (
     <>
@@ -236,9 +262,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           <input readOnly aria-label="Link da página da edição" value={`https://comuni.calirh.com/e/${edition.slug}`} onFocus={(event) => event.target.select()} />
           <button type="button" className="wf-secondary" disabled={!signups.length} onClick={() => downloadXlsx(`communicali-${edition.slug}-inscritos.xlsx`, 'Inscritos', ['Nome', 'E-mail', 'WhatsApp', 'Situação'], signups.map((item) => [item.nome, item.email, item.whatsapp, item.status]))}>Exportar Excel</button>
         </div>
-        <div className="adm-list">{signups.map((item) => <div className="adm-row adm-row--static" key={item.id}><strong>{item.nome}</strong><span>{item.email} · {item.whatsapp}</span>{item.status === 'analise' || item.status === 'espera'
-            ? <span><button type="button" onClick={() => void decidir(item, 'inscrito')}>Aprovar</button>{item.status === 'analise' && <> <button type="button" onClick={() => void decidir(item, 'espera')}>Lista de espera</button></>} <button type="button" onClick={() => void decidir(item, 'cancelado')}>Recusar</button></span>
-            : <em>{item.status === 'cancelado' ? 'Recusado' : 'Aprovado'}</em>}</div>)}</div>
+        <Tabela colunas={colunasInscritos} linhas={signups} chave={(item) => item.id} vazio="Nenhuma inscrição pelo site." filtros={[{ id: 'situacao', titulo: 'Situação', valor: (item) => SITUACAO_INSCRICAO[item.status] || item.status }]} />
       </section>
       <EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} />
       <section className="v2-forms-card">
@@ -287,7 +311,7 @@ function PartnersPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>PARCEIROS</small><h1>Logos na faixa do site</h1><p>Cada parceiro cadastrado aqui entra na faixa "Quem apoia a CommuniCALI". Sem parceiros, o site mostra os espaços "Sua marca aqui". As propostas recebidas ficam em Formulários, no formulário de parceiros.</p></div></div>
+      <div className="wf-head"><div><small>PARCEIROS</small><h1>Logos na faixa do site</h1><p>Cada parceiro cadastrado aqui entra na faixa, com o logo em branco, "Quem apoia a CommuniCALI". Sem parceiros, o site mostra os espaços "Sua marca aqui". As propostas recebidas ficam em Formulários, no formulário de parceiros.</p></div></div>
       {error && <p className="inline-notice">{error}</p>}
       <section className="v2-forms-card">
         <header><small>NOVO PARCEIRO</small><h2>Cadastre só parceiros confirmados</h2></header>
@@ -356,7 +380,8 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
           <NavLink to="/admin/missoes">Missões</NavLink>
           <NavLink to="/admin/matches">Matches</NavLink>
           <NavLink to="/admin/edicoes">Edições</NavLink>
-          <NavLink to="/admin/convidados">Convidados</NavLink>
+          <NavLink to="/admin/indicacoes">Indicações</NavLink>
+          <NavLink to="/admin/impacto">Impacto</NavLink>
           <NavLink to="/admin/votacoes">Votações</NavLink>
           <NavLink to="/admin/formularios">Formulários</NavLink>
           <NavLink to="/admin/staff">Staff</NavLink>
@@ -405,6 +430,8 @@ export function Admin() {
         <Route path="programa" element={<ProgramPanel />} />
         <Route path="missoes" element={<RecommendationsPanel />} />
         <Route path="matches" element={<MatchesPanel />} />
+        <Route path="indicacoes" element={<IndicacoesPanel />} />
+        <Route path="impacto" element={<ImpactosPanel />} />
         <Route path="staff" element={<StaffPanel />} />
         <Route path="formularios" element={<AdminFormsPage />} />
         <Route path="edicoes" element={<EditionsPanel />} />
