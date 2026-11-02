@@ -25,6 +25,31 @@ const localTime = (iso: string) => {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
 
+/** Recorta o fundo pela cor dos cantos e devolve o logo branco e transparente, como na faixa do site. */
+async function logoBranco(file: File) {
+  const imagem = await createImageBitmap(file);
+  const tela = document.createElement('canvas');
+  tela.width = imagem.width;
+  tela.height = imagem.height;
+  const contexto = tela.getContext('2d', { willReadFrequently: true })!;
+  contexto.drawImage(imagem, 0, 0);
+  const quadro = contexto.getImageData(0, 0, tela.width, tela.height);
+  const pixels = quadro.data;
+  const canto = (x: number, y: number) => { const i = (y * tela.width + x) * 4; return [pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3]]; };
+  const cantos = [canto(4, 4), canto(tela.width - 5, 4), canto(4, tela.height - 5), canto(tela.width - 5, tela.height - 5)];
+  const transparente = cantos.every((item) => item[3] < 20);
+  const escuro = cantos.reduce((soma, item) => soma + item[0] + item[1] + item[2], 0) / 12 < 128;
+  const [inicio, fim] = escuro ? [95, 170] : [30, 110];
+  for (let i = 0; i < pixels.length; i += 4) {
+    const distancia = Math.min(...cantos.map((item) => Math.hypot(pixels[i] - item[0], pixels[i + 1] - item[1], pixels[i + 2] - item[2])));
+    const alfa = transparente ? pixels[i + 3] : Math.max(0, Math.min(1, (distancia - inicio) / (fim - inicio))) * 255;
+    pixels[i] = 255; pixels[i + 1] = 255; pixels[i + 2] = 255; pixels[i + 3] = alfa;
+  }
+  contexto.putImageData(quadro, 0, 0);
+  const blob = await new Promise<Blob>((resolve, reject) => tela.toBlob((item) => (item ? resolve(item) : reject(new Error('logo'))), 'image/png'));
+  return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.png`, { type: 'image/png' });
+}
+
 async function uploadImage(file: File, folder: string) {
   const name = file.name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '-').slice(-60);
   const path = `${folder}/${crypto.randomUUID()}-${name}`;
@@ -301,7 +326,7 @@ function PartnersPanel() {
     event.preventDefault();
     setError('');
     try {
-      const logo_url = logo ? await uploadImage(logo, 'parceiros') : null;
+      const logo_url = logo ? await uploadImage(await logoBranco(logo), 'parceiros') : null;
       const { error: failure } = await supabase.from('partners').insert({ nome: nome.trim(), site_url: site.trim() || null, logo_url, ordem: list.length });
       if (failure) throw failure;
       setNome(''); setSite(''); setLogo(undefined); (event.target as HTMLFormElement).reset();
@@ -311,14 +336,14 @@ function PartnersPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>PARCEIROS</small><h1>Logos na faixa do site</h1><p>Cada parceiro cadastrado aqui entra na faixa, com o logo em branco, "Quem apoia a CommuniCALI". Sem parceiros, o site mostra os espaços "Sua marca aqui". As propostas recebidas ficam em Formulários, no formulário de parceiros.</p></div></div>
+      <div className="wf-head"><div><small>PARCEIROS</small><h1>Logos na faixa do site</h1><p>Cada parceiro cadastrado aqui entra na faixa, com o logo convertido para branco e sem fundo, "Quem apoia a CommuniCALI". Sem parceiros, o site mostra os espaços "Sua marca aqui". As propostas recebidas ficam em Formulários, no formulário de parceiros.</p></div></div>
       {error && <p className="inline-notice">{error}</p>}
       <section className="v2-forms-card">
         <header><small>NOVO PARCEIRO</small><h2>Cadastre só parceiros confirmados</h2></header>
         <form className="v2-forms-grid" onSubmit={(event) => void add(event)}>
           <label><span>Nome</span><input required value={nome} onChange={(event) => setNome(event.target.value)} /></label>
           <label><span>Site <em>opcional</em></span><input value={site} placeholder="https://" onChange={(event) => setSite(event.target.value)} /></label>
-          <label><span>Logo <em>PNG com fundo transparente fica melhor</em></span><input type="file" accept="image/*" onChange={(event) => setLogo(event.target.files?.[0])} /></label>
+          <label><span>Logo <em>o site converte para branco e tira o fundo</em></span><input type="file" accept="image/*" onChange={(event) => setLogo(event.target.files?.[0])} /></label>
           <div className="adm-submit"><button type="submit" className="wf-primary">Adicionar parceiro</button></div>
         </form>
       </section>

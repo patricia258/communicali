@@ -1,7 +1,7 @@
 /* Tabela do painel: ordena pelas colunas, filtra e busca. Contatos viram links com botão de copiar. */
 import { useMemo, useState, type ReactNode } from 'react';
 
-export type Coluna<T> = { id: string; titulo: string; valor: (linha: T) => string | number; render?: (linha: T) => ReactNode };
+export type Coluna<T> = { id: string; titulo: string; valor: (linha: T) => string | number; render?: (linha: T) => ReactNode; longo?: boolean };
 export type Filtro<T> = { id: string; titulo: string; valor: (linha: T) => string };
 
 export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio }: { colunas: Array<Coluna<T>>; linhas: T[]; chave: (linha: T) => string; filtros?: Array<Filtro<T>>; inicial?: { id: string; desc?: boolean }; vazio: string }) {
@@ -44,7 +44,7 @@ export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio
             </th>
           ))}</tr></thead>
           <tbody>
-            {visiveis.map((linha) => <tr key={chave(linha)}>{colunas.map((coluna) => <td key={coluna.id}>{coluna.render ? coluna.render(linha) : coluna.valor(linha)}</td>)}</tr>)}
+            {visiveis.map((linha) => <tr key={chave(linha)}>{colunas.map((coluna) => <td key={coluna.id} className={coluna.longo ? 'longo' : undefined}>{coluna.render ? coluna.render(linha) : coluna.valor(linha)}</td>)}</tr>)}
             {!visiveis.length && <tr><td colSpan={colunas.length} className="adm-vazio">{vazio}</td></tr>}
           </tbody>
         </table>
@@ -55,7 +55,7 @@ export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio
 
 export function Copiar({ texto }: { texto: string }) {
   const [feito, setFeito] = useState(false);
-  return <button type="button" className="adm-copiar" aria-label={`Copiar ${texto}`} onClick={() => void navigator.clipboard.writeText(texto).then(() => { setFeito(true); window.setTimeout(() => setFeito(false), 1500); })}>{feito ? 'Copiado' : 'Copiar'}</button>;
+  return <button type="button" className="adm-copiar" aria-label={`Copiar ${texto}`} title={feito ? 'Copiado' : 'Copiar'} onClick={() => void navigator.clipboard.writeText(texto).then(() => { setFeito(true); window.setTimeout(() => setFeito(false), 1500); })}>{feito ? '✓' : <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" /></svg>}</button>;
 }
 
 export function Telefone({ numero }: { numero: string | null }) {

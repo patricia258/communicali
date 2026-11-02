@@ -47,13 +47,13 @@ export function RecommendationsPanel() {
   const colunasMissoes: Array<Coluna<Envio>> = [
     { id: 'data', titulo: 'Enviada em', valor: (item) => item.created_at, render: (item) => dataBr(item.created_at) },
     { id: 'quem', titulo: 'Quem enviou', valor: (item) => item.members?.nome || '' },
-    { id: 'missao', titulo: 'Missão', valor: (item) => item.missions?.titulo || '' },
-    { id: 'detalhes', titulo: 'Detalhes', valor: (item) => item.relato },
+    { id: 'missao', titulo: 'Missão', valor: (item) => item.missions?.titulo || '', longo: true },
+    { id: 'detalhes', titulo: 'Detalhes', valor: (item) => item.relato, longo: true },
     { id: 'situacao', titulo: 'Situação', valor: (item) => SITUACAO[item.status] || item.status, render: (item) => <Categoria id={item.status} nome={SITUACAO[item.status] || item.status} /> },
     { id: 'decisao', titulo: 'Decisão', valor: (item) => item.decidido_em || '', render: (item) => (item.status === 'enviada'
       ? <span className="adm-acoes"><button type="button" onClick={() => void decidirMissao(item, 'concluida')}>Aprovar</button><button type="button" onClick={() => void decidirMissao(item, 'recusada')}>Recusar</button></span>
       : `${dataBr(item.decidido_em)}${item.decidido_por ? ` · ${item.decidido_por}` : ''}`) },
-    { id: 'justificativa', titulo: 'Justificativa', valor: (item) => item.justificativa || '' },
+    { id: 'justificativa', titulo: 'Justificativa', valor: (item) => item.justificativa || '', longo: true },
   ];
 
   const colunasRecomendacoes: Array<Coluna<Recomendacao>> = [
@@ -69,7 +69,7 @@ export function RecommendationsPanel() {
     { id: 'decisao', titulo: 'Decisão', valor: (item) => item.decidido_em || '', render: (item) => (item.status === 'pendente'
       ? <span className="adm-acoes"><button type="button" onClick={() => void decidirRecomendacao(item, 'validada')}>Validar</button><button type="button" onClick={() => void decidirRecomendacao(item, 'recusada')}>Recusar</button></span>
       : `${dataBr(item.decidido_em)}${item.decidido_por ? ` · ${item.decidido_por}` : ''}`) },
-    { id: 'justificativa', titulo: 'Justificativa', valor: (item) => item.justificativa || '' },
+    { id: 'justificativa', titulo: 'Justificativa', valor: (item) => item.justificativa || '', longo: true },
   ];
 
   return (
@@ -122,7 +122,7 @@ export function ImpactosPanel() {
     { id: 'quem', titulo: 'Membro', valor: (item) => item.members?.nome || '' },
     { id: 'tipo', titulo: 'O que aconteceu', valor: (item) => item.tipo },
     { id: 'com', titulo: 'Com quem', valor: (item) => item.com_quem || '' },
-    { id: 'relato', titulo: 'Relato', valor: (item) => item.relato },
+    { id: 'relato', titulo: 'Relato', valor: (item) => item.relato, longo: true },
   ];
   return (
     <>

@@ -93,8 +93,8 @@
 .sponsors__label{text-align:center;color:var(--text);font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase}
 .logos{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
 .logos__track{display:flex;align-items:center;gap:18px;width:max-content;animation:logos 40s linear infinite}
-.logo{display:flex;align-items:center;justify-content:center;min-width:180px;height:72px;padding:0 20px;border-radius:12px;background:#fff;color:#2B2024;font-weight:600;text-decoration:none}
-.logo img{height:44px;width:auto;max-width:150px;object-fit:contain}
+.logo{display:flex;align-items:center;justify-content:center;min-width:170px;height:72px;padding:0 20px;color:var(--text);font-weight:600;text-decoration:none}
+.logo img{height:52px;width:auto;max-width:170px;object-fit:contain}
 .logo--empty{background:transparent;border:1px dashed rgba(201,151,59,.6);color:var(--gold-2);font-size:13px}
 @keyframes logos{to{transform:translateX(-50%)}}
 .sponsors__body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center;margin-top:18px}
@@ -156,4 +156,3 @@
 .frame{position:relative}
 .frames--neutras .frame::after{content:"";position:absolute;inset:0;background:rgba(74,26,39,.28)}
 @media (max-width:900px){.frames{opacity:.34}}
-.logos__track img{filter:brightness(0) invert(1)}
