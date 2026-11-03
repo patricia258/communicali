@@ -97,7 +97,7 @@
 .logo img{height:52px;width:auto;max-width:170px;object-fit:contain}
 .logo--empty{background:transparent;border:1px dashed rgba(201,151,59,.6);color:var(--gold-2);font-size:13px}
 @keyframes logos{to{transform:translateX(-50%)}}
-.sponsors__body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center;margin-top:18px}
+.sponsors__body{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:40px;align-items:center;margin-top:18px}
 .sponsors__body>div{display:grid;justify-items:start;gap:12px}
 .modes{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0;padding:0;list-style:none}
 .modes svg{color:var(--gold-2)}
