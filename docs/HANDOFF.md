@@ -91,7 +91,7 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 **Programa**
 - Trilha: Visitante, Membro, Conector, Embaixador. Participante Ativo e Membros honorários foram retirados. Convidado, Kids e Organização ficam fora da trilha. contato@ e patricia@ entram como Fundadora.
 - Só é membro quem esteve presencialmente. Não existe cadastro público de membro.
-- Conector: 100 pontos, 3 encontros e 2 missões. Embaixador: 250 pontos, 6 encontros, parceiro trazido, missões e aprovação. Pontos sozinhos não promovem; a organização muda a categoria.
+- Conector: 60 pontos no ciclo de 12 meses, 4 encontros e 1 contribuição de conexão. Embaixador: 180 pontos, 6 encontros, 2 contribuições diferentes e 12 meses como Conector (v21, confirmada em 03/11). Pontos sozinhos não promovem; a organização muda a categoria.
 - Pontos: presença +10, indicado que compareceu +5, recomendação validada +10, contribuição +15, parceiro +20, palestra a convite +30.
 - Rede só a partir de Conector. Abaixo disso fica borrada, e o servidor envia apenas a contagem. Conexão não libera contatos.
 - A aceitação da política de privacidade inclui a Rede, com saída pelo perfil.
@@ -128,6 +128,17 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 ## Registro de mudanças
 
 Acrescente entradas no topo.
+
+### 03/11/2026, Claude Code — decisões de Patrícia publicadas
+- Decisões novas ficam no Google Doc "CommuniCALI — Decisões após a v21 (atualizar sempre)", na mesma pasta do Documento Mestre: https://docs.google.com/document/d/1SYHtmoAL0-AyaTV7EMbRR_ECkcjinya-Jsyhs3gTWhU/edit . Ele prevalece sobre a v21 em caso de conflito. Acrescente decisões no topo.
+- Publicado (`dpl_AJuFkGBTPAL1a5h57im5kzq8AKzh`, commit em `main`):
+  - Home: "Fazer parte da CommuniCALI é gratuito" (sem citar planos), terceira porta "Cadastro de Membro" → `/f/quero-ser-membro`, visitante em até dois encontros abertos, FAQ de gratuidade, categorias de parceria só com nome, em linha.
+  - Formulário `quero-ser-membro` (migração `20261103120000`), respostas no painel Formulários com etapas Novo, Em análise, Aprovado, Lista de espera, Não aprovado. Não cria Membro sozinho.
+  - Convidados: `editions.limite_convidados` (padrão 1, campo "Convidados por membro" em Edições), trigger com trava contra corrida; inscrição pelo link acima da cota segue sem vínculo; indicação direta mostra aviso. Fundadora fora do limite. +5 só com presença (já existia). Migração `20261103130000`, testada com rollback.
+  - Perfis de parceiros, vantagens/cupom e comentários com aprovação: rascunhos etapa_6 + ajuste_beneficios aplicados (migração `20261103140000`), com uma mudança: `communicali_private.rede_perfis` aceita qualquer Membro ativo com check-in. Comentários seguem a barreira da Rede (Conector+). Caixa de comentário com convite e sugestões com emoji. Membro abaixo de Conector vê a vitrine de empresas embaixo da Rede bloqueada.
+  - Requisitos v21 nas telas: Conector 60 pts/4 encontros/1 contribuição; Embaixador 180/6/2 contribuições/12 meses; faixas do painel 0-59, 60-179, 180+.
+- Não feito, por decisão dela: kits e crachá (em estudo); escolha do que aparece na Rede (ela pediu explicação); trava de capacidade A4; política de privacidade nova.
+- Testado: build e TypeScript, limite de convidado no banco com rollback, Home e formulário no site publicado. Não testado com sessão real de Membro: vitrine e comentários.
 
 ### 03/11/2026, Claude Code — sincronização com a produção
 - Mudou: o repositório `~/CALI/communicali` (branch `main`, commit `ca56442`) agora é idêntico à produção `dpl_AZBqRustLkBAEGj72tYxsESLZbec`, conferido arquivo por arquivo pelo SHA-1 do manifesto. As preparações v20/v21/v22 do pacote único ficaram na branch `preparacao-chatgpt-v21` (commit `d23c592`, pasta `~/CALI/communicali-prep`), fora do que é publicado.
