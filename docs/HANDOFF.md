@@ -129,6 +129,12 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — e-mails revisados e grafia ComuniCALI
+- Publicado `dpl_AcDdMQG4atcGhX3GWZAYbZjN1crC`. Grafia oficial: **ComuniCALI, com um M**, em todos os textos do site, e-mails, formulários, regras, privacidade e código de acesso (identificadores técnicos como `communicali` e nomes de arquivo continuam iguais). Migração `20261103180000`.
+- E-mails: "Inscrição recebida" e "Lista de espera" sem o bloco Quando/Onde; menos emojis (sem emoji no botão e nos rótulos); "Convite de agenda" deixou de existir e o botão do painel em Edições agora envia **Boas-vindas** (tipo `boasvindas`, uma vez por pessoa, sem data e local); lembrete automático passou para a véspera (sexta 13/11 para o encontro de sábado 14/11), com local e botão de agenda; e-mail de conexão com a frase final em negrito.
+- Prévia dos 10 e-mails: `~/Downloads/CommuniCALI_para_outra_IA/emails-communicali.html` (gerada por `api/_email.js`).
+- Aguardando: aprovação de Patrícia para enviar as boas-vindas hoje aos 38 inscritos da 1ª edição.
+
 ### 03/11/2026, Claude Code — apresentação de parceiros só no formulário
 - Publicado `dpl_8oAmhc58C4U7ouMc3X2eyoV6E7Cy`. Saiu da home o link "Ver apresentação para parceiros". Na primeira etapa do formulário `parceiros-communicali` aparece um cartão com a capa (`public/communicali/seja-parceiro-capa.jpg`) e "Abrir apresentação". Novo campo opcional `attachment` {url, cover, title, text} nas perguntas de texto (`formModel.ts`, `PublicFormPage.tsx`, migração `20261103170000`). O editor de formulários do painel não mostra esse campo, mas o preserva ao salvar.
 
