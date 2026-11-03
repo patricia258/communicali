@@ -16,7 +16,8 @@ function mensagemMembro(aviso, nome) {
   const saudacao = `Oi, ${primeiro(nome)}!`;
   if (aviso.tipo === 'nivel') {
     const nivel = (aviso.texto.match(/agora é (.+?)\.?$/) || [])[1] || 'um novo nível';
-    return { assunto: `🎉 Você agora é ${nivel} na ComuniCALI`, html: layoutSimples({ titulo: '🎉 Novo nível', saudacao, linhas: ['Você subiu de nível na comunidade!', `Agora você é<br><strong>${escape(nivel)}</strong>`, 'Abra seu passaporte para ver o novo selo<br>e o que muda para você.'], botao: { texto: 'Ver meu passaporte', href: MEU } }) };
+    const selo = { Conector: 'conector', Embaixador: 'embaixador', Membro: 'membro' }[nivel];
+    return { assunto: `🎉 Parabéns! Você agora é ${nivel} na ComuniCALI`, html: layoutSimples({ titulo: '🎉 Novo nível conquistado', imagem: selo ? `https://comuni.calirh.com/selos/postal-${selo}.png` : undefined, saudacao: `Parabéns, ${primeiro(nome)}!`, linhas: ['Você subiu de nível na comunidade!', `Agora você é<br><strong>${escape(nivel)}</strong>`, 'Abra seu passaporte para ver o novo selo<br>e o que muda para você.'], botao: { texto: 'Ver meu passaporte', href: MEU } }) };
   }
   if (aviso.tipo === 'missao') {
     const missao = (aviso.texto.match(/^Missão concluída: (.+?)\. O selo/) || [])[1] || 'uma missão';

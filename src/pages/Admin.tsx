@@ -75,17 +75,31 @@ function Login() {
   }
 
   return (
-    <main className="event-page">
-      <section className="event-card">
-        <img className="login__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
-        <h1>Área administrativa</h1>
-        {sent ? <p className="notice">Enviamos um link de acesso para {email}. Abra pelo e-mail neste mesmo navegador.</p> : (
-          <form className="form" onSubmit={submit}>
-            <label>E-mail<input type="email" required autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
-            {error && <p className="notice notice--alert">{error}</p>}
-            <button className="button" type="submit" disabled={busy}>{busy ? 'Enviando...' : 'Receber link de acesso'}</button>
+    <main className="adm-login">
+      <section className="adm-login__marca">
+        <img className="adm-login__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
+        <div>
+          <p className="adm-login__eyebrow">Painel da organização</p>
+          <h1>Bastidores da <em>ComuniCALI</em></h1>
+          <ul>
+            <li><span>01</span>Edições, check-in e votação</li>
+            <li><span>02</span>Pessoas, indicações e conexões</li>
+            <li><span>03</span>Formulários, parceiros e e-mails</li>
+          </ul>
+        </div>
+        <img className="adm-login__selo" src="/selos/carimbo-fundadora.png" alt="" aria-hidden="true" />
+      </section>
+      <section className="adm-login__acesso">
+        <h2>Entrar no painel</h2>
+        {sent ? <p className="adm-login__ok">Enviamos um link de acesso para <strong>{email}</strong>. Abra pelo e-mail neste mesmo navegador.</p> : (
+          <form onSubmit={submit}>
+            <p>Use o e-mail cadastrado na organização. O link chega na hora e vale para este navegador.</p>
+            <label>E-mail<input type="email" required autoComplete="email" placeholder="voce@calirh.com" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
+            {error && <p className="adm-login__erro" role="alert">{error}</p>}
+            <button type="submit" disabled={busy}>{busy ? 'Enviando...' : 'Receber link de acesso'}</button>
           </form>
         )}
+        <a className="adm-login__voltar" href="/meu-espaco">Sou membro, quero meu passaporte</a>
       </section>
     </main>
   );
