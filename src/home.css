@@ -169,9 +169,9 @@
 /* Selos de parceria: quatro estilos coloridos com borda clara, lado a lado. */
 .nowrap{white-space:nowrap}
 .selos{display:grid;grid-template-columns:repeat(4,118px);gap:18px;align-items:center;margin:0;padding:0;list-style:none}
-.selo{display:grid;width:118px;height:146px;color:#F7F0EA}
-.selo__miolo{display:grid;place-items:center;align-content:center;gap:6px;text-align:center;padding:10px}
-.selo__miolo strong{font-family:var(--display);font-size:14px;line-height:1.15}
+.selo{display:grid;grid-template-columns:minmax(0,1fr);width:118px;height:146px;color:#F7F0EA}
+.selo__miolo{display:grid;place-items:center;align-content:center;gap:6px;min-width:0;text-align:center;padding:10px 6px}
+.selo__miolo strong{font-family:var(--display);font-size:13px;line-height:1.15}
 .selo__base{font-size:8px;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
 .selo--postal{padding:6px;background:radial-gradient(circle at 5px 5px,transparent 3px,#F7F0EA 3.4px) -5px -5px/10px 10px;transform:rotate(-2deg)}
 .selo--postal .selo__miolo{background:#C9973B;color:#22100F;outline:1px solid rgba(34,16,15,.35);outline-offset:-6px}
