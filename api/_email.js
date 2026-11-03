@@ -16,6 +16,7 @@ const FAIXA = {
   espera: { etiqueta: '#5F6238', fundo: VIVAS.oliva, etiquetaTexto: '#FFFFFF' },
   lembrete: { etiqueta: '#A9502E', fundo: VIVAS.terra, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
   convite: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
+  agradecimento: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
   boasvindas: { etiqueta: '#B83A62', fundo: VIVAS.rosa, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
 };
 const FONTES = '<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@600;700&family=Inter:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">';
@@ -94,7 +95,7 @@ function rodape() {
 <tr><td align="center" style="padding:18px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#8A7A72">${NAO_RESPONDA}</td></tr>`;
 }
 
-function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, cor, detalhes = true }) {
+function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, cor, detalhes = true, comFoto = true }) {
   const texto = paragrafos.map((item) => `<p style="margin:0 0 16px;font-family:${TEXTO};font-size:17px;line-height:27px;text-align:center;color:${COR.tinta}">${item}</p>`).join('');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">${FONTES}<title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF">
@@ -102,7 +103,7 @@ function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="background:#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 <tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="ComuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
-${foto(edition)}
+${comFoto ? foto(edition) : ''}
 <tr><td align="center" style="padding:0 0 14px"><span style="display:inline-block;padding:8px 18px;border-radius:999px;background-color:${cor.etiqueta};background-image:${cor.fundo};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
 <tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.vivo}">${saudacao}</td></tr>
 <tr><td style="padding:0 0 8px">${texto}</td></tr>
@@ -141,6 +142,7 @@ export function montar(tipo, edition, pessoa) {
     espera: { assunto: `⏳ Lista de espera: ${edition.titulo}`, previa: 'Avisaremos você se abrir um lugar.', titulo: '⏳ Lista de espera', saudacao, paragrafos: [`Ficamos muito felizes com o seu interesse. As vagas do encontro <strong>${titulo}</strong> estão preenchidas, e seu nome entrou na lista de espera.`, 'A equipe avisa você por e-mail se abrir um lugar.'], detalhes: false, anexo: false },
     lembrete: { assunto: `⏰ É amanhã: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: '⏰ É amanhã!', saudacao, paragrafos: ['Na chegada, a recepção confirma o seu nome e indica a sua mesa.', 'Depois de sentar, é só fazer o check-in pelo QR Code.'], botao: agenda, depois: responder, anexo: true },
     boasvindas: { assunto: `Boas-vindas à ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Estamos ansiosos para ver você no nosso encontro!', titulo: 'Uhull! Boas-vindas', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Ficamos <em>muito felizes</em> que você esteja com a gente nessa jornada!', 'A <strong>ComuniCALI</strong> nasceu sem pretensão, era pra ser só "um cafezinho entre colegas de trabalho". Ainda não sabemos onde isso vai chegar, mas temos certeza de que vai trazer <em>grandes contribuições</em> para cada pessoa que faz parte dela.', '<strong><u>Estamos ansiosos para ver você no nosso encontro!</u></strong>', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong>'], botao: { texto: 'Acesse o site', href: SITE }, detalhes: false, anexo: false },
+    agradecimento: { assunto: `Obrigado pelo interesse na ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Essa é só a primeira de muitas edições.', titulo: 'Obrigado pelo interesse', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Muito obrigado pelo seu interesse na <strong>ComuniCALI</strong>!', 'As vagas da nossa <em>primeira edição</em> já estão fechadas, e que pena que desta vez você não vai poder estar com a gente.', '<strong><u>Mas essa é só a primeira de muitas!</u></strong> Queremos muito conhecer você nos próximos encontros.', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong> Lá você conhece a comunidade e registra seu interesse para as próximas edições.'], botao: { texto: 'Conheça a ComuniCALI', href: SITE }, detalhes: false, comFoto: false, anexo: false },
     convite: { assunto: `🗓️ Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: '🗓️ Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
   }[tipo];
   return { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null };
@@ -168,13 +170,20 @@ export async function enviar(para, mensagem) {
 }
 
 /** Reserva o envio no registro antes de mandar: duas chamadas ao mesmo tempo nunca geram dois e-mails. Envio com erro pode ser refeito. */
+// Botões e links passam pelo site para contar o clique; uma imagem invisível conta a abertura.
+export function rastrear(html, id) {
+  const marcado = html.replace(/href="(https?:[^"]+)"/g, (_, url) => `href="${SITE}/api/r?i=${id}&amp;u=${encodeURIComponent(url.replace(/&amp;/g, '&'))}"`);
+  return marcado.replace('</body>', `<img src="${SITE}/api/o?i=${id}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0"></body>`);
+}
+
 export async function enviarUmaVez(tipo, edition, pessoa) {
   const email = pessoa.email.toLowerCase();
   await banco(`email_log?edition_id=eq.${edition.id}&email=eq.${encodeURIComponent(email)}&tipo=eq.${tipo}&situacao=eq.erro`, { method: 'DELETE' });
   const reserved = await banco('email_log?on_conflict=edition_id,email,tipo', { method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=representation' }, body: JSON.stringify({ edition_id: edition.id, email, tipo }) });
   const rows = reserved.ok ? await reserved.json() : [];
   if (!rows.length) return 'ja_enviado';
-  const result = await enviar(email, montar(tipo, edition, pessoa));
+  const mensagem = montar(tipo, edition, pessoa);
+  const result = await enviar(email, { ...mensagem, html: rastrear(mensagem.html, rows[0].id) });
   await banco(`email_log?id=eq.${rows[0].id}`, { method: 'PATCH', body: JSON.stringify(result.erro ? { situacao: 'erro', erro: result.erro.slice(0, 300) } : { situacao: 'enviado', resend_id: result.id }) });
   return result.erro ? 'erro' : 'enviado';
 }

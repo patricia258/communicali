@@ -44,7 +44,7 @@ export default async function handler(req, res) {
   if (!edition) return res.status(404).json({ error: 'Edição não encontrada.' });
 
   if (acao === 'teste') {
-    const tipos = tipo === 'todos' ? ['recebido', 'confirmacao', 'espera', 'lembrete', 'boasvindas'] : [tipo];
+    const tipos = tipo === 'todos' ? ['recebido', 'confirmacao', 'espera', 'lembrete', 'boasvindas', 'agradecimento'] : [tipo];
     for (const item of tipos) {
       const result = await enviar(email, montar(item, edition, { nome: 'Patrícia', email }));
       if (result.erro) return res.status(502).json({ error: result.erro });
@@ -77,19 +77,25 @@ export default async function handler(req, res) {
   }
 
   const pessoas = await destinatarios(edition.id);
-  const log = await (await banco(`email_log?edition_id=eq.${edition.id}&select=email,tipo,situacao`)).json();
+  const log = await (await banco(`email_log?edition_id=eq.${edition.id}&select=email,tipo,situacao,created_at,aberto_em,clicado_em`)).json();
   const enviados = (item) => new Set(log.filter((row) => row.tipo === item && row.situacao === 'enviado').map((row) => row.email));
 
   if (acao === 'resumo') {
-    return res.status(200).json({ todos: pessoas.length, acionados: pessoas.filter((item) => item.acionado).length, confirmacoes: enviados('confirmacao').size, lembretes: enviados('lembrete').size, convites: enviados('boasvindas').size, erros: log.filter((row) => row.situacao === 'erro').length });
+    return res.status(200).json({ todos: pessoas.length, acionados: pessoas.filter((item) => item.acionado).length, confirmacoes: enviados('confirmacao').size, lembretes: enviados('lembrete').size, convites: enviados('boasvindas').size, agradecimentos: enviados('agradecimento').size, erros: log.filter((row) => row.situacao === 'erro').length });
+  }
+
+  if (acao === 'acompanhar') {
+    const nomes = new Map(pessoas.map((item) => [item.email, item.nome]));
+    return res.status(200).json({ linhas: log.filter((row) => row.situacao !== 'reservado').map((row) => ({ ...row, nome: nomes.get(row.email) || '' })) });
   }
 
   if (acao === 'convite') {
-    const ja = enviados('boasvindas');
-    const fila = pessoas.filter((item) => (publico === 'todos' || item.acionado) && !ja.has(item.email));
+    const modelo = tipo === 'agradecimento' ? 'agradecimento' : 'boasvindas';
+    const ja = enviados(modelo);
+    const fila = pessoas.filter((item) => (publico === 'todos' || (publico === 'sem_contato' ? !item.acionado : item.acionado)) && !ja.has(item.email));
     let erros = 0;
     for (const pessoa of fila.slice(0, LOTE)) {
-      if ((await enviarUmaVez('boasvindas', edition, pessoa)) === 'erro') erros += 1;
+      if ((await enviarUmaVez(modelo, edition, pessoa)) === 'erro') erros += 1;
       await pausa();
     }
     return res.status(200).json({ enviados: Math.min(fila.length, LOTE) - erros, restantes: Math.max(fila.length - LOTE, 0), erros });
