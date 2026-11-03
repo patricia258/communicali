@@ -129,6 +129,11 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — e-mails em linhas e roteiro do dia
+- Regra de Patrícia para todo e-mail: frases curtas, uma ideia por linha, nomes e pontos principais em negrito (modelo dela: "Achamos que vale você conhecer o(a) Eduardo! / O ponto em comum é: / **Treinamento de atendimento** / Abra seu passaporte para ver o perfil e trocar figurinhas!"). `layoutSimples` aceita `linhas`; textos de inscrição, confirmação, espera, lembrete, conexão, sugestão e indicações reescritos assim. 8 testes enviados a ela.
+- Início do painel: roteiro do dia em 6 passos (chegada, check-in pelo QR do porta-mesa e do telão, crachás na mesa, pitches de até 1 minuto, votação, resultado). Botão "Registrar presença manualmente" em Edições. Link discreto "Área administrativa" na tela de acesso do Meu espaço.
+- Em aberto: hoje todo check-in vira Membro; a escolha Membro ou Visitante (crachá x etiqueta) da v21 não está construída. O PPT da 1ª edição (`~/CALI/communicali-materiais/apresentacao-1a-edicao`) não foi alterado para o pitch de 1 minuto.
+
 ### 03/11/2026, Claude Code — reações e painel reorganizado
 - Perfil da Rede: comentários com estrela viraram **reações** (❤️ 😄 🚀 👏 🤝 💡 🙌 😢) com mensagem opcional, numa janela com confirmação "Tem certeza...". Publicadas na hora, **sem moderação da CALI** (decisão de Patrícia); quem recebe ou quem escreveu pode remover. RPCs `communicali_reagir` e `communicali_remover_reacao`, migração `20261103240000`. A revisão de comentários saiu da página Parceiros.
 - Painel: menu em seis grupos (Início, Pessoas, Edições, Programa, Formulários, Parceiros) com abas do grupo logo abaixo; "Configurações" (Textos, regras e privacidade) e "Ver o site" no canto direito. Contador saiu do menu (a home usa o número fixo +300). Formulários mostra as categorias Externos e Interno (Staff); Staff também é aba de Formulários.
