@@ -129,6 +129,9 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — parceiro compacto
+- Cartão do parceiro menor (logo 64px, descrição em 2 linhas, canais 36px). A vantagem mostra só "Exclusivo para a comunidade", o valor e o cupom; título e condições ficam em "Ver detalhes da vantagem" (lista suspensa). Carimbo do cartão de convite maior, com o texto do meio dentro do círculo.
+
 ### 03/11/2026, Claude Code — espaço do membro refinado
 - Parceiros: no espaço do membro aparece o **logo original** (`communicali_partner_profiles.logo_original_url`, preenchido para os 4 parceiros; o site continua com o branco de `partners.logo_url`). Novo parceiro cadastrado no painel salva os dois. Logo inteiro na moldura (contain), canais numa linha só, abaixo do nome; vantagem em bloco vinho com desconto dourado e cupom em destaque. Migração `20261103210000`.
 - Missões: selo redondo próprio (cor e ícone por missão, "MISSÃO" em arco, marca dourada quando conquistado), resumo "X de 6 concluídas" com barra, grupos Para começar / Rumo a Conector / Rumo a Embaixador.
