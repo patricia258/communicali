@@ -50,7 +50,10 @@ export default async function handler(req, res) {
       if (result.erro) return res.status(502).json({ error: result.erro });
       await pausa();
     }
-    return res.status(200).json({ para: email, enviados: tipos.length });
+    // Um exemplo de aviso do espaço do membro, com o link de parar de receber.
+    const exemplo = await enviar(email, { assunto: '[Teste] 🤝 Ana quer se conectar com você', html: layoutSimples({ titulo: '🤝 Nova conexão', saudacao: 'Oi, Patrícia!', texto: 'Ana quer se conectar com você na ComuniCALI.', destaque: 'Abra seu passaporte para ver o perfil e se conectar de volta.', botao: { texto: 'Abrir meu passaporte', href: 'https://comuni.calirh.com/meu-espaco' } }) });
+    if (exemplo.erro) return res.status(502).json({ error: exemplo.erro });
+    return res.status(200).json({ para: email, enviados: tipos.length + (exemplo.pulado ? 0 : 1) });
   }
 
   if (acao === 'decidir') {
