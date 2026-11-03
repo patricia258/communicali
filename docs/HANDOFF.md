@@ -129,6 +129,9 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — apresentação de parceiros só no formulário
+- Publicado `dpl_8oAmhc58C4U7ouMc3X2eyoV6E7Cy`. Saiu da home o link "Ver apresentação para parceiros". Na primeira etapa do formulário `parceiros-communicali` aparece um cartão com a capa (`public/communicali/seja-parceiro-capa.jpg`) e "Abrir apresentação". Novo campo opcional `attachment` {url, cover, title, text} nas perguntas de texto (`formModel.ts`, `PublicFormPage.tsx`, migração `20261103170000`). O editor de formulários do painel ainda não mostra esse campo; confira se ele o preserva antes de salvar o formulário pelo painel.
+
 ### 03/11/2026, Claude Code — vantagem exclusiva dos parceiros para Membros
 - Publicado `dpl_8zPQag4paKCf2BFWhTBFXtG5CvVC`. PDF `public/communicali/seja-parceiro.pdf` com o bloco "Um cupom só para os Membros" na página 3 e "a vantagem para os Membros" no passo Acordo (fonte: `build.py` + `deck.html` no scratchpad do Claude, exportado pelo Chrome sem cabeçalho). Formulário `parceiros-communicali` ganhou "Você pode oferecer uma vantagem exclusiva para os Membros?" e "Qual seria a vantagem?" (migração `20261103160000`). O que o parceiro combinar entra em Parceiros > perfil (vantagem, desconto, detalhes, cupom) e aparece na vitrine do Meu espaço.
 - Selo terracota: o texto "Conhecimento" passava da largura e cortava a borda da direita; corrigido.
