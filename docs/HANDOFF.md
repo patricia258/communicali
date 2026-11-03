@@ -129,6 +129,11 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — avisos por e-mail e roteiro da apresentação
+- `api/avisos.js` (migração `20261103250000`): e-mail ao membro quando muda de nível, conclui missão (novo gatilho em `member_missions` cria alerta `missao`) ou recebe um perfil indicado; e-mail simples aos admins (`public.admins`) a cada formulário preenchido e a cada inscrição em encontro, com as respostas. Cada aviso vai uma vez (`email_em`, `admin_avisado_em`); o que existia antes foi marcado como avisado. Disparado após envio de formulário, após indicar perfil, ao navegar no painel e no cron diário. 5 testes enviados a Patrícia.
+- Apresentação: textos de cada slide e falas dela em Google Doc "ComuniCALI 1ª Edição: textos para a apresentação e falas da Patrícia" (https://docs.google.com/document/d/1zz-hcAYCSBdYz4AisgsODXUWFPGyVIWqdXZS70mRf7o/edit). Selos para o slide em `~/Downloads/ComuniCALI_selos_para_apresentacao`. O arquivo da apresentação é editado por ela fora do Mac.
+- Decisão provisória: na 1ª edição todo check-in vira Membro com crachá de Membro; escolha Membro ou Visitante fica para a 2ª edição.
+
 ### 03/11/2026, Claude Code — e-mails em linhas e roteiro do dia
 - Regra de Patrícia para todo e-mail: frases curtas, uma ideia por linha, nomes e pontos principais em negrito (modelo dela: "Achamos que vale você conhecer o(a) Eduardo! / O ponto em comum é: / **Treinamento de atendimento** / Abra seu passaporte para ver o perfil e trocar figurinhas!"). `layoutSimples` aceita `linhas`; textos de inscrição, confirmação, espera, lembrete, conexão, sugestão e indicações reescritos assim. 8 testes enviados a ela.
 - Início do painel: roteiro do dia em 6 passos (chegada, check-in pelo QR do porta-mesa e do telão, crachás na mesa, pitches de até 1 minuto, votação, resultado). Botão "Registrar presença manualmente" em Edições. Link discreto "Área administrativa" na tela de acesso do Meu espaço.
