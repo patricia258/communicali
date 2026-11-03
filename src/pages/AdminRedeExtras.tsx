@@ -71,7 +71,7 @@ export function AdminRedeExtras({ parceiros, uploadOriginal }: { parceiros: Part
       </form>}
       {nota && <p className="inline-notice" role="status">{nota}</p>}{erro && <p className="inline-notice" role="alert">{erro}</p>}
     </section>
-    <FeedbackModeracao />
+    
   </>;
 }
 

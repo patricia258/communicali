@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { Copy, Globe, Mail, Star } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Copy, Globe, Mail } from 'lucide-react';
 import { supabase } from '../lib';
 
 export type PerfilParceiro = { partner_id: string; logo_original_url: string | null; descricao: string | null; whatsapp: string | null; email: string | null; instagram: string | null; linkedin: string | null; beneficio?: string | null; desconto?: string | null; beneficio_detalhes?: string | null; cupom?: string | null };
@@ -68,62 +68,73 @@ export function ParceiroRede({ parceiro, perfil, demonstracao = false }: { parce
   </article>;
 }
 
-const IDEIAS = ['👏 Valeu pela troca!', '🤝 Que conexão boa!', '💡 Aprendi muito com você', '☕ Bora tomar outro café?', '✨', '💛', '🙌', '😊'];
+const REACOES: Array<[string, string]> = [['❤️', 'Amei'], ['😄', 'Que bom'], ['🚀', 'Incrível'], ['👏', 'Parabéns'], ['🤝', 'Boa parceria'], ['💡', 'Aprendi'], ['🙌', 'Valeu'], ['😢', 'Saudade']];
 
-type Comentario = { id: string; nome: string; estrelas: number; comentario: string; criado_em: string };
-type Feedback = { pode_comentar: boolean; comentarios: Comentario[]; meu: { id: string; estrelas: number; comentario: string; status: string; motivo?: string | null } | null };
-export function FeedbackPerfil({ membroId, proprio }: { membroId: string; proprio: boolean }) {
+type Comentario = { id: string; nome: string; reacao: string | null; estrelas: number | null; comentario: string | null; criado_em: string; meu: boolean };
+type Feedback = { pode_comentar: boolean; proprio: boolean; comentarios: Comentario[]; meu: { id: string; reacao: string | null; comentario: string | null } | null };
+
+// Reações no perfil da Rede: publicadas na hora, sem moderação. Quem recebe pode remover.
+export function FeedbackPerfil({ membroId, proprio, nome = '' }: { membroId: string; proprio: boolean; nome?: string }) {
   const [dados, setDados] = useState<Feedback | null>(null);
-  const [ativo, setAtivo] = useState(false);
-  const [nota, setNota] = useState(0);
+  const [aberto, setAberto] = useState(false);
+  const [confirmar, setConfirmar] = useState(false);
+  const [reacao, setReacao] = useState('');
   const [texto, setTexto] = useState('');
   const [busy, setBusy] = useState(false);
-  const [aviso, setAviso] = useState('');
   const [erro, setErro] = useState('');
-  const [tentativa, setTentativa] = useState(0);
-  useEffect(() => {
-    let atual = true;
-    setDados(null); setAtivo(false); setNota(0); setTexto(''); setAviso(''); setErro('');
-    void supabase.rpc('communicali_feedback_listar', { p_perfil: membroId }).then(({ data, error }) => {
-      if (!atual || recursoAusente(error)) return;
-      setAtivo(true);
-      if (error) { setErro('Não foi possível carregar os comentários.'); return; }
-      const resposta = data as Feedback;
-      setDados(resposta); setNota(resposta.meu?.estrelas || 0); setTexto(resposta.meu?.comentario || '');
-    });
-    return () => { atual = false; };
-  }, [membroId, tentativa]);
-  async function enviar(event: FormEvent) {
-    event.preventDefault();
-    if (proprio || !dados?.pode_comentar || busy || nota < 1 || texto.trim().length < 3 || texto.length > 600) return;
-    setBusy(true); setErro(''); setAviso('');
-    try {
-      const { data, error } = await supabase.rpc('communicali_feedback_enviar', { p_perfil: membroId, p_estrelas: nota, p_comentario: texto.trim() });
-      if (error) throw error;
-      setDados((atual) => atual ? { ...atual, comentarios: atual.comentarios.filter((item) => item.id !== atual.meu?.id), meu: { id: data as string, estrelas: nota, comentario: texto.trim(), status: 'pendente' } } : atual);
-      setAviso('Comentário enviado para aprovação da CALI.');
-    } catch { setErro('Não foi possível enviar. Seu texto foi mantido para tentar novamente.'); }
-    finally { setBusy(false); }
+  const primeiro = nome.split(' ')[0] || 'esta pessoa';
+  const carregar = () => supabase.rpc('communicali_feedback_listar', { p_perfil: membroId }).then(({ data, error }) => { if (!error) setDados(data as Feedback); });
+  useEffect(() => { setDados(null); void carregar(); }, [membroId]);
+  if (!dados) return null;
+  const contagem = REACOES.map(([emoji]) => [emoji, dados.comentarios.filter((item) => item.reacao === emoji).length] as const).filter(([, total]) => total);
+  function abrir() { setReacao(dados?.meu?.reacao || ''); setTexto(dados?.meu?.comentario || ''); setConfirmar(false); setErro(''); setAberto(true); }
+  async function enviar() {
+    setBusy(true); setErro('');
+    const { error } = await supabase.rpc('communicali_reagir', { p_perfil: membroId, p_reacao: reacao, p_comentario: texto });
+    setBusy(false);
+    if (error) { setErro(error.message); setConfirmar(false); return; }
+    setAberto(false); void carregar();
   }
-  // A etapa de banco precisa estar ativa. Não exibir formulário sem persistência.
-  if (!ativo) return null;
-  return <section className="passe__cartao passe__feedback"><h2>Quem já se conectou</h2>
-    {dados?.comentarios.map((item) => <article className="passe__comentario" key={item.id}>
-      <div className="passe__comentario-topo"><strong>{item.nome}</strong><span aria-label={`${item.estrelas} de 5 estrelas`}>{Array.from({ length: 5 }, (_, n) => <Star key={n} size={13} aria-hidden="true" fill={n < item.estrelas ? 'currentColor' : 'none'} />)}</span></div>
-      <p>{item.comentario}</p><time dateTime={item.criado_em}>{new Date(item.criado_em).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</time>
-    </article>)}
-    {dados && !dados.comentarios.length && <p className="passe__aviso">Nenhum comentário publicado ainda.</p>}
-    {!dados && erro && <button type="button" className="passe__link" onClick={() => setTentativa((n) => n + 1)}>Tentar novamente</button>}
-    {!proprio && dados?.pode_comentar && <form className="passe__form" onSubmit={(event) => void enviar(event)}>
-      <h3>{dados.meu ? 'Seu comentário' : 'Deixe uma mensagem 💬'}</h3>
-      {!dados.meu && <p className="passe__feedback-convite">Um elogio, um agradecimento, algo que você aprendeu nessa troca. A CALI aprova antes de aparecer no perfil.</p>}
-      <div className="passe__estrelas" role="group" aria-label="Sua avaliação">{Array.from({ length: 5 }, (_, n) => <button type="button" key={n} disabled={busy} aria-label={`${n + 1} ${n ? 'estrelas' : 'estrela'}`} aria-pressed={nota === n + 1} onClick={() => setNota(n + 1)}><Star size={22} fill={n < nota ? 'currentColor' : 'none'} aria-hidden="true" /></button>)}</div>
-      <label>Comentário<textarea required minLength={3} maxLength={600} rows={3} value={texto} disabled={busy} onChange={(event) => setTexto(event.target.value)} /></label>
-      <div className="passe__feedback-ideias" role="group" aria-label="Sugestões de mensagem">{IDEIAS.map((ideia) => <button type="button" key={ideia} disabled={busy} onClick={() => setTexto((atual) => (atual.trim() ? `${atual.trim()} ${ideia}` : ideia).slice(0, 600))}>{ideia}</button>)}</div>
-      <p className="passe__aviso">A CALI revisa antes de publicar. Aparecem seu nome, avaliação e comentário, sem foto.</p>
-      {dados.meu && <p className="passe__aviso">{dados.meu.status === 'aprovado' ? 'Publicado. Uma edição passa por nova aprovação.' : dados.meu.status === 'oculto' ? `Não publicado. ${dados.meu.motivo || 'Você pode revisar e reenviar.'}` : 'Aguardando aprovação da CALI.'}</p>}
-      <button type="submit" className="passe__botao passe__botao--linha" disabled={busy || nota < 1 || texto.trim().length < 3}>{busy ? 'Enviando…' : 'Enviar para aprovação'}</button>
-    </form>}
-    {aviso && <p className="passe__ok" role="status">{aviso}</p>}{erro && <p className="passe__erro" role="alert">{erro}</p>}
-  </section>;
+  async function remover(id: string) {
+    if (!window.confirm('Remover esta reação do perfil?')) return;
+    const { error } = await supabase.rpc('communicali_remover_reacao', { p_id: id });
+    if (!error) void carregar();
+  }
+  return (
+    <section className="passe__cartao passe__reacoes">
+      <header><h2>Reações</h2>{!!contagem.length && <div className="passe__reacoes-resumo">{contagem.map(([emoji, total]) => <span key={emoji}>{emoji} {total}</span>)}</div>}</header>
+      {!dados.comentarios.length ? <p className="passe__aviso">{proprio ? 'Quando alguém reagir ao seu perfil, aparece aqui.' : `Ninguém reagiu ao perfil de ${primeiro} ainda.`}</p> : (
+        <ul className="passe__reacoes-lista">
+          {dados.comentarios.map((item) => (
+            <li key={item.id}>
+              <span className="passe__reacao-emoji" aria-hidden="true">{item.reacao || '💬'}</span>
+              <div><strong>{item.nome.split(' ')[0]}</strong>{item.comentario && <p>{item.comentario}</p>}<time dateTime={item.criado_em}>{new Date(item.criado_em).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</time></div>
+              {(proprio || item.meu) && <button type="button" className="passe__link" onClick={() => void remover(item.id)}>Remover</button>}
+            </li>
+          ))}
+        </ul>
+      )}
+      {dados.pode_comentar && !proprio && <button type="button" className="passe__botao" onClick={abrir}>{dados.meu ? 'Mudar minha reação' : `Deixar uma reação para ${primeiro}`}</button>}
+      {aberto && (
+        <div className="passe__modal" role="dialog" aria-modal="true" aria-label={`Reação para ${primeiro}`} onKeyDown={(event) => { if (event.key === 'Escape') setAberto(false); }}>
+          <div className="passe__janela passe__reagir">
+            {!confirmar ? <>
+              <h2>Como foi conhecer {primeiro}?</h2>
+              <div className="passe__reagir-opcoes" role="group" aria-label="Escolha uma reação">
+                {REACOES.map(([emoji, rotulo]) => <button key={emoji} type="button" className={reacao === emoji ? 'is-on' : ''} aria-pressed={reacao === emoji} onClick={() => setReacao(emoji)}><span aria-hidden="true">{emoji}</span><small>{rotulo}</small></button>)}
+              </div>
+              <label>Mensagem <em>opcional</em><textarea rows={3} maxLength={280} value={texto} placeholder="Um elogio, um agradecimento, algo que você aprendeu" onChange={(event) => setTexto(event.target.value)} /></label>
+              {erro && <p className="passe__erro" role="alert">{erro}</p>}
+              <div className="passe__reagir-acoes"><button type="button" className="passe__botao" disabled={!reacao} onClick={() => setConfirmar(true)}>Continuar</button><button type="button" className="passe__link" onClick={() => setAberto(false)}>Cancelar</button></div>
+            </> : <>
+              <span className="passe__reagir-grande" aria-hidden="true">{reacao}</span>
+              <h2>Tem certeza que quer deixar esta reação?</h2>
+              <p>Ela aparece agora no perfil de {primeiro}, com o seu nome{texto.trim() ? ' e a sua mensagem' : ''}. {primeiro} pode remover quando quiser.</p>
+              <div className="passe__reagir-acoes"><button type="button" className="passe__botao" disabled={busy} onClick={() => void enviar()}>{busy ? 'Enviando…' : 'Sim, deixar reação'}</button><button type="button" className="passe__link" onClick={() => setConfirmar(false)}>Voltar</button></div>
+            </>}
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }

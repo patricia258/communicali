@@ -443,3 +443,29 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__empresa-detalhes[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
 .passe__empresa-detalhes h4{margin:6px 0 4px;font-size:15px}
 .passe__empresa-detalhes p{margin:0}
+
+/* Reações no perfil. */
+.passe__reacoes>header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.passe__reacoes-resumo{display:flex;flex-wrap:wrap;gap:6px}
+.passe__reacoes-resumo span{padding:4px 10px;border-radius:999px;background:#F7F0EA;font:600 13px Inter,sans-serif;color:#5A1E2D}
+.passe__reacoes-lista{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.passe__reacoes-lista li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:start;gap:10px;padding:10px 0;border-top:1px solid #EFE5DC}
+.passe__reacao-emoji{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#F7F0EA;font-size:20px}
+.passe__reacoes-lista strong{font-size:14px;color:#22100F}
+.passe__reacoes-lista p{margin:2px 0;font-size:13px;line-height:1.5;color:#4A3A34}
+.passe__reacoes-lista time{font-size:11px;color:#8A7A72}
+.passe__reacoes .passe__botao{border-radius:999px}
+.passe__reagir{display:flex;flex-direction:column;gap:14px;text-align:center}
+.passe__reagir h2{margin:0;font:700 22px/1.25 'Funnel Display',sans-serif;color:#22100F}
+.passe__reagir-opcoes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.passe__reagir-opcoes button{display:grid;justify-items:center;gap:2px;padding:10px 4px;border:1.5px solid #EADFD6;border-radius:14px;background:#FFFDFA;cursor:pointer;transition:transform .15s}
+.passe__reagir-opcoes button span{font-size:28px;line-height:1}
+.passe__reagir-opcoes button small{font-size:11px;color:#6B5A52}
+.passe__reagir-opcoes button:hover{transform:translateY(-2px)}
+.passe__reagir-opcoes button.is-on{border-color:#7A1F3D;background:#F7E8EC}
+.passe__reagir label{display:flex;flex-direction:column;gap:6px;text-align:left;font-size:13px;font-weight:600}
+.passe__reagir textarea{padding:10px 12px;border:1px solid #DCCDC3;border-radius:12px;font:400 14px/1.5 Inter,sans-serif}
+.passe__reagir-acoes{display:flex;flex-direction:column;align-items:center;gap:8px}
+.passe__reagir-acoes .passe__botao{width:100%;border-radius:999px}
+.passe__reagir-grande{font-size:56px;line-height:1}
+.passe__reagir p{margin:0;font-size:14px;line-height:1.55;color:#5A4740}

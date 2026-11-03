@@ -136,3 +136,21 @@
 .adm-tipo--lembrete{background:#F3DDD2;color:#7A3418}
 .adm-tipo--confirmacao{background:#EBD6DC;color:#5A1E2D}
 @media (max-width:760px){.adm-envios .adm-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Menu em grupos: seis itens no topo e as abas do grupo logo abaixo. */
+.adm__top nav{flex-wrap:nowrap;gap:4px}
+.adm__top nav a{padding:0 14px;font-size:14px}
+.adm__user a{display:inline-flex;align-items:center;min-height:30px;padding:0 10px;border-radius:7px;color:#CBB9B1;font:600 12px Inter,system-ui,sans-serif;text-decoration:none;white-space:nowrap}
+.adm__user a:hover,.adm__user a.active{background:#361C24;color:#DDB160}
+.adm__sub{position:sticky;top:56px;z-index:19;display:flex;gap:4px;padding:8px clamp(14px,3vw,32px);background:#FFFFFF;border-bottom:1px solid var(--line);overflow-x:auto}
+.adm__sub a{display:inline-flex;align-items:center;min-height:32px;padding:0 14px;border-radius:999px;color:#5A4740;font:600 13px Inter,system-ui,sans-serif;text-decoration:none;white-space:nowrap}
+.adm__sub a:hover{background:#F5EEE8}
+.adm__sub a.active{background:#1F0E14;color:#F7F0EA}
+@media (max-width:760px){.adm__sub{top:auto;position:static}}
+.adm-categorias{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.adm-categoria{display:grid;gap:4px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);text-decoration:none}
+.adm-categoria:hover{border-color:#C9973B}
+.adm-categoria small{font-size:11px;font-weight:700;letter-spacing:.14em;color:#A9502E}
+.adm-categoria strong{font-size:16px}
+.adm-categoria span{font-size:13px;color:var(--muted)}
+@media (max-width:760px){.adm-categorias{grid-template-columns:1fr}}

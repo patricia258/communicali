@@ -111,6 +111,11 @@ export function AdminFormsPage() {
         <div className="v2-head-actions"><button className="wf-secondary" type="button" onClick={() => void load()} disabled={loading}><RefreshCw size={15} /> {loading ? 'Atualizando…' : 'Atualizar'}</button><button className="wf-primary" type="button" onClick={() => setCreating({ title: '', category: '', audience: 'cali', busy: false, error: '' })}><Plus size={15} /> Novo formulário</button></div></div>
       {error && <div className="inline-notice" role="alert">{error}</div>}
       <div className="wf-controls v2-forms-filter"><div className="wf-segments">{([['all', 'Todos'], ['trash', 'Lixeira']] as Array<['all' | FormAudience | 'trash', string]>).map(([key, label]) => <button type="button" key={key} className={audienceFilter === key ? 'on' : ''} onClick={() => setAudienceFilter(key)}>{label} <b>{key === 'all' ? forms.length : key === 'trash' ? trash.length : forms.filter((form) => form.audience === key).length}</b></button>)}</div></div>
+      {audienceFilter !== 'trash' && <div className="adm-categorias">
+        <a className="adm-categoria" href="#externos"><small>EXTERNOS</small><strong>{forms.length} formulários</strong><span>O público preenche: inscrições, parceiros, interesse em participar.</span></a>
+        <a className="adm-categoria" href="/admin/staff"><small>INTERNO</small><strong>Staff dos encontros</strong><span>Fotógrafos, recepção e prestadores. CPF e endereço só a organização vê.</span></a>
+      </div>}
+      <span id="externos" />
       {audienceFilter === 'trash' ? <>
         <div className="wf-group-head"><div><span>LIXEIRA</span><strong>Excluídos nos últimos {TRASH_DAYS} dias</strong></div><b>{trash.length}</b></div>
         {loading ? <div className="data-loading">Carregando…</div> : trash.length ? <div className="wf-records v2-forms-list v2-forms-trash">

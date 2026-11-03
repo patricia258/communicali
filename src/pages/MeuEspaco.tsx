@@ -809,7 +809,7 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar, outras = [] }: 
         ) : <p>Quer falar com {primeiro}? Conecte-se aqui. Os contatos diretos abrem quando você chega a Conector.</p>}
       </section>
       {contatos && !eu && <IndicarPerfil pessoa={pessoa} outras={outras} />}
-      {contatos && <FeedbackPerfil key={pessoa.id} membroId={pessoa.id} proprio={eu} />}
+      {contatos && <FeedbackPerfil key={pessoa.id} membroId={pessoa.id} proprio={eu} nome={pessoa.nome} />}
     </>
   );
 }

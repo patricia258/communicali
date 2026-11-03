@@ -1,6 +1,6 @@
 /* Área administrativa: login por link no e-mail. Quem não está em public.admins não entra; o banco repete essa regra. */
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
@@ -399,30 +399,30 @@ function CounterPanel() {
   );
 }
 
+// Menu do painel em poucos grupos; cada grupo mostra as suas abas logo abaixo.
+const GRUPOS: Array<{ nome: string; itens: Array<[string, string]> }> = [
+  { nome: 'Início', itens: [['/admin', 'Início']] },
+  { nome: 'Pessoas', itens: [['/admin/membros', 'Membros'], ['/admin/indicacoes', 'Indicações'], ['/admin/matches', 'Matches']] },
+  { nome: 'Edições', itens: [['/admin/edicoes', 'Edições'], ['/admin/votacoes', 'Votações']] },
+  { nome: 'Programa', itens: [['/admin/programa', 'Como funciona'], ['/admin/missoes', 'Missões'], ['/admin/impacto', 'Impacto']] },
+  { nome: 'Formulários', itens: [['/admin/formularios', 'Formulários'], ['/admin/staff', 'Staff']] },
+  { nome: 'Parceiros', itens: [['/admin/parceiros', 'Parceiros']] },
+];
+
 function Frame({ session, children }: { session: Session; children: ReactNode }) {
+  const { pathname } = useLocation();
+  const caminho = pathname.replace(/\/$/, '') || '/admin';
+  const grupoAtual = GRUPOS.find((grupo) => grupo.itens.some(([to]) => to === caminho)) || (caminho === '/admin/convidados' ? GRUPOS[1] : undefined);
   return (
     <div className="adm">
       <header className="adm__top">
         <NavLink to="/admin" className="adm__logo"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></NavLink>
         <nav>
-          <NavLink to="/admin" end>Início</NavLink>
-          <NavLink to="/admin/membros">Membros</NavLink>
-          <NavLink to="/admin/programa">Programa</NavLink>
-          <NavLink to="/admin/missoes">Missões</NavLink>
-          <NavLink to="/admin/matches">Matches</NavLink>
-          <NavLink to="/admin/edicoes">Edições</NavLink>
-          <NavLink to="/admin/indicacoes">Indicações</NavLink>
-          <NavLink to="/admin/impacto">Impacto</NavLink>
-          <NavLink to="/admin/votacoes">Votações</NavLink>
-          <NavLink to="/admin/formularios">Formulários</NavLink>
-          <NavLink to="/admin/staff">Staff</NavLink>
-          <NavLink to="/admin/parceiros">Parceiros</NavLink>
-          <NavLink to="/admin/contador">Contador</NavLink>
-          <NavLink to="/admin/textos">Textos</NavLink>
-          <a href="/" target="_blank" rel="noopener noreferrer">Ver o site</a>
+          {GRUPOS.map((grupo) => <NavLink key={grupo.nome} to={grupo.itens[0][0]} end={grupo.itens[0][0] === '/admin'} className={() => (grupoAtual === grupo ? 'active' : '')}>{grupo.nome}</NavLink>)}
         </nav>
-        <div className="adm__user"><span>{session.user.email}</span><button type="button" onClick={() => void supabase.auth.signOut()}>Sair</button></div>
+        <div className="adm__user"><a href="/" target="_blank" rel="noopener noreferrer">Ver o site</a><NavLink to="/admin/textos" title="Regras, privacidade e textos do site" className="adm__config">⚙ Configurações</NavLink><button type="button" onClick={() => void supabase.auth.signOut()}>Sair</button></div>
       </header>
+      {grupoAtual && grupoAtual.itens.length > 1 && <nav className="adm__sub" aria-label={grupoAtual.nome}>{grupoAtual.itens.map(([to, nome]) => <NavLink key={to} to={to} end>{nome}</NavLink>)}</nav>}
       <main className="adm__main ap-app v2-admin-page v2-forms v2-client-module"><div className="ap-content"><div className="wf">{children}</div></div></main>
     </div>
   );
