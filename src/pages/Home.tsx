@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import QRCode from 'qrcode';
-import { ArrowRight, BadgeCheck, CalendarDays, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_DECK_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 import { SiteFooter } from '../components/SiteFooter';
 import { EDITION_FIELDS, EditionCard, Share, type EditionRow } from './Edicao';
@@ -15,6 +15,45 @@ const MODALIDADES = [
   ['Conhecimento', 'Conteúdo, facilitação, mentoria e ferramentas de RH e liderança.'],
   ['Rede e comunidade', 'Conexões, divulgação e apresentações institucionais.'],
 ];
+
+// Categorias de parceria em selos de estilos diferentes, girando sozinhas, com setas para ir e voltar.
+const ESTILOS_SELO = ['postal', 'carimbo', 'recorte', 'oval'] as const;
+function SelosParceria() {
+  const [inicio, setInicio] = useState(0);
+  const [pausado, setPausado] = useState(false);
+  const total = MODALIDADES.length;
+  useEffect(() => {
+    if (pausado || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setInterval(() => setInicio((atual) => (atual + 1) % total), 3200);
+    return () => window.clearInterval(timer);
+  }, [pausado, total]);
+  const mover = (passo: number) => setInicio((atual) => (atual + passo + total) % total);
+  const ordem = Array.from({ length: total }, (_, n) => (inicio + n) % total);
+  return (
+    <div className="selos" onMouseEnter={() => setPausado(true)} onMouseLeave={() => setPausado(false)} aria-roledescription="carrossel" aria-label="Formas de parceria">
+      <ul className="selos__trilho" key={inicio}>
+        {ordem.map((indice) => {
+          const [titulo] = MODALIDADES[indice];
+          const Icon = MODE_ICONS[indice];
+          return (
+            <li key={titulo} className={`selo selo--${ESTILOS_SELO[indice]}`}>
+              <div className="selo__miolo">
+                <span className="selo__topo">CommuniCALI</span>
+                <Icon size={34} strokeWidth={1.5} aria-hidden="true" />
+                <strong>{titulo}</strong>
+                <span className="selo__base">Parceria</span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="selos__setas">
+        <button type="button" onClick={() => mover(-1)} aria-label="Selo anterior"><ArrowRight size={18} aria-hidden="true" style={{ transform: 'rotate(180deg)' }} /></button>
+        <button type="button" onClick={() => mover(1)} aria-label="Próximo selo"><ArrowRight size={18} aria-hidden="true" /></button>
+      </div>
+    </div>
+  );
+}
 
 const FAQ = [
   ['Fazer parte da comunidade é gratuito?', 'Sim. Fazer parte da CommuniCALI é gratuito.'],
@@ -140,7 +179,7 @@ export function Home() {
       </header>
 
       <section className="wrap stats">
-        {members > 0 && <article className="stat"><Users size={20} aria-hidden="true" /><strong>+{members.toLocaleString('pt-BR')}</strong><h3>Membros</h3><p>Na comunidade</p></article>}
+        <article className="stat"><Users size={20} aria-hidden="true" /><strong>+300</strong><h3>Pessoas</h3><p>Na comunidade, nos canais e nos encontros</p></article>
         <article className="stat"><CalendarDays size={20} aria-hidden="true" /><strong>{next?.numero || Math.max(1, editions.length)}ª</strong><h3>Edição presencial</h3><p>{next ? `${formatDate(next.data_evento)} em ${next.cidade}` : 'Encontros em Curitiba'}</p></article>
         <article className="stat"><Handshake size={20} aria-hidden="true" /><strong>Brasil</strong><h3>Inteiro</h3><p>Pessoas de vários estados no grupo</p></article>
       </section>
@@ -159,36 +198,25 @@ export function Home() {
       <section className="wrap block" id="fazer-parte">
         <div className="block__head">
           <div>
-            <p className="eyebrow">Como fazer parte</p>
-            <h2>Escolha como <em>participar.</em></h2>
+            <p className="eyebrow">Primeira vez?</p>
+            <h2>Venha nos <em>conhecer.</em></h2>
           </div>
-          <p>Fazer parte da CommuniCALI é gratuito. O grupo é onde a conversa acontece todo dia, e o cadastro de Membro pode ser feito a qualquer momento.</p>
         </div>
-        <div className="doors">
-          <article className="door">
-            <span className="door__icon"><MessageCircle size={20} aria-hidden="true" /></span>
+        <div className="entrada">
+          <article className="entrada__visita">
+            <span className="entrada__icone"><UserPlus size={22} aria-hidden="true" /></span>
+            <h3>Visite a comunidade</h3>
+            <p>Na primeira vez, você participa como visitante. Cadastre seu interesse e avisamos sobre os próximos encontros, online ou presenciais em Curitiba e região.</p>
+            <a className="pill" href="/f/quero-ser-membro">Cadastrar meu interesse</a>
+          </article>
+          <article className="entrada__grupo">
             <div>
-              <h3>Grupo da comunidade</h3>
-              <p>Pessoas do Brasil inteiro no WhatsApp, trocando vagas, contatos, dúvidas e experiências.</p>
+              <span className="entrada__icone"><MessageCircle size={22} aria-hidden="true" /></span>
+              <h3>Grupo no WhatsApp</h3>
+              <p>Pessoas do Brasil inteiro trocando vagas, contatos, dúvidas e experiências.</p>
               <a className="link" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>
             </div>
-            {qr && <img className="door__qr" src={qr} alt="QR Code do grupo da comunidade" />}
-          </article>
-          <article className="door">
-            <span className="door__icon"><UserPlus size={20} aria-hidden="true" /></span>
-            <div>
-              <h3>Encontros presenciais</h3>
-              <p>Inscreva-se no próximo encontro. Você pode participar como visitante de até dois encontros abertos.</p>
-              <a className="link" href="#proximo">Ver o próximo encontro</a>
-            </div>
-          </article>
-          <article className="door">
-            <span className="door__icon"><BadgeCheck size={20} aria-hidden="true" /></span>
-            <div>
-              <h3>Cadastro de Membro</h3>
-              <p>Conte um pouco sobre você e entre na nossa lista, mesmo sem encontro marcado. A equipe lê cada pedido e retorna.</p>
-              <a className="link" href="/f/quero-ser-membro">Quero ser Membro</a>
-            </div>
+            {qr && <img className="entrada__qr" src={qr} alt="QR Code do grupo da comunidade" />}
           </article>
         </div>
       </section>
@@ -199,7 +227,6 @@ export function Home() {
             <p className="eyebrow">Programa de membros</p>
             <h2>Seu passaporte, <em>sempre online.</em></h2>
           </div>
-          <p>Cada membro acompanha tudo pelo celular: carimbos das edições, pontos, missões, indicações e fotos dos encontros.</p>
         </div>
         <div className="trilha">
           {TRILHA.map(([id, nome, texto]) => (
@@ -280,9 +307,7 @@ export function Home() {
               <a className="link" href={PARTNER_DECK_URL} target="_blank" rel="noopener noreferrer">Ver apresentação para parceiros</a>
             </div>
           </div>
-          <ul className="modes">
-            {MODALIDADES.map(([title], index) => { const Icon = MODE_ICONS[index]; return <li key={title}><Icon size={18} aria-hidden="true" /><strong>{title}</strong></li>; })}
-          </ul>
+          <SelosParceria />
         </div>
       </section>
 
