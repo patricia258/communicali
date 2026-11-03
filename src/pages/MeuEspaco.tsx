@@ -9,6 +9,7 @@ import { FeedbackPerfil, ParceiroRede, usePerfisParceiros } from './RedeExtras';
 import { ConviteMembro } from './ConviteMembro';
 import { ParceirosExemplos } from './ParceirosExemplos';
 import { TrilhaPrograma } from './TrilhaPrograma';
+import { ParceirosMembros } from './ParceirosMembros';
 import './membro.css';
 
 type Carimbo = { slug: string; titulo: string; selo: string; data_evento: string; local: string; cidade: string; capa_url: string | null; carimbo_url: string | null; fotos_url: string | null };
@@ -31,13 +32,8 @@ type Parceiro = { id: string; nome: string; logo_url: string | null; site_url: s
 
 const ABAS: Array<[Aba, string]> = [['inicio', 'Início'], ['edicoes', 'Edições'], ['missoes', 'Missões'], ['rede', 'Rede'], ['indicar', 'Indicar'], ['programa', 'Programa']];
 const NIVEIS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organização', kids: 'Kids' };
-const META: Record<string, { nome: string; pontos: number; encontros: number; nivel: string }> = {
-  membro: { nome: 'Conector', pontos: 100, encontros: 3, nivel: 'conector' },
-  conector: { nome: 'Embaixador', pontos: 250, encontros: 6, nivel: 'embaixador' },
-};
 const MISSAO_SELOS: Record<string, [string, string]> = { convidados: ['postal-indicacao', 'Convidou'], conexao: ['postal-conector', 'Conectou'], lugar: ['postal-lugar', 'Recomendou'], palestra: ['postal-palestra', 'Palestrou'], parceiro: ['postal-embaixador', 'Aproximou'], representar: ['postal-embaixador', 'Representou'] };
 const SITUACAO: Record<string, string> = { concluida: 'Concluída', enviada: 'Em análise', recusada: 'Pode reenviar', aberta: 'Em aberto' };
-const PONTOS: Array<[string, number]> = [['Presença em encontro', 10], ['Visitante indicado que compareceu', 5], ['Recomendação validada', 10], ['Contribuição aprovada', 15], ['Parceiro que contribuiu', 20], ['Palestra a convite da organização', 30]];
 
 const ATUACAO = ['Recrutamento e seleção', 'Departamento pessoal', 'RH estratégico', 'Consultoria de RH', 'Treinamento e desenvolvimento', 'Treinamento de liderança', 'Treinamento de atendimento', 'Treinamento de vendas', 'Desenvolvimento de líderes', 'Cultura e clima', 'Pesquisa de clima', 'Onboarding e integração', 'Avaliação de desempenho', 'Cargos e salários', 'Remuneração e benefícios', 'Saúde ocupacional', 'Segurança do trabalho', 'Coaching e mentoria', 'Palestras', 'Facilitação de grupos', 'Jurídico trabalhista', 'Contabilidade', 'Finanças', 'Gestão de negócios', 'Planejamento estratégico', 'Processos', 'Marketing', 'Comunicação interna', 'Design', 'Eventos', 'Vendas', 'Atendimento ao cliente', 'Tecnologia', 'Inteligência artificial', 'Dados e indicadores', 'Saúde e bem-estar', 'Psicologia', 'Educação', 'Logística', 'Empreendedorismo'];
 const SEGMENTOS = ['RH e gestão de pessoas', 'Marketing e comunicação', 'Jurídico', 'Tecnologia', 'Financeiro e contábil', 'Comercial e vendas', 'Educação e treinamento', 'Saúde e bem-estar', 'Indústria', 'Serviços', 'Varejo', 'Logística', 'Terceiro setor', 'Outro'];
@@ -171,9 +167,6 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
   const [erroAviso, setErroAviso] = useState('');
   const m = espaco.membro!;
   const avisos = extra?.avisos || [];
-  const meta = META[m.categoria];
-  const faltam = meta ? Math.max(meta.pontos - espaco.pontos, 0) : 0;
-  const preenchidos = meta ? Math.min(espaco.pontos / meta.pontos, 1) * 10 : 10;
   async function marcarLido(id: string) {
     setAvisoPendente(id);
     setErroAviso('');
@@ -246,11 +239,9 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
         </div>
       </section>
       <section className="passe__pontos">
-        <p className="passe__numero"><strong>{espaco.pontos}</strong> pontos{meta ? <>, <b>{faltam ? `faltam ${faltam} para ${meta.nome}` : `pontos alcançados para ${meta.nome}`}</b></> : ''}</p>
-        <div className="passe__barra" aria-hidden="true">
-          {Array.from({ length: 10 }, (_, indice) => <span key={indice} className={`c${Math.min(Math.floor(indice / 2), 3)}`} style={{ '--fill': `${Math.max(Math.min(preenchidos - indice, 1), 0) * 100}%` } as React.CSSProperties} />)}
-        </div>
-        {meta && <p className="passe__req">{Math.min(espaco.encontros, meta.encontros)} de {meta.encontros} encontros · {espaco.missoes.filter((item) => item.nivel === meta.nivel && item.status === 'concluida').length} de {espaco.missoes.filter((item) => item.nivel === meta.nivel).length} missões</p>}
+        <p className="passe__numero"><strong>{espaco.pontos}</strong> pontos registrados</p>
+        <p className="passe__req">{espaco.encontros} {espaco.encontros === 1 ? 'presença registrada' : 'presenças registradas'}. A mudança de categoria depende dos critérios do Programa.</p>
+        <button type="button" className="passe__link" onClick={() => abrir('programa')}>Ver critérios do programa</button>
         <p className="passe__mrz">P&lt;COMMUNICALI&lt;{m.nome.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z]+/g, '<').slice(0, 18)}<br />{m.codigo.replace(/-/g, '<').padEnd(10, '<')}{espaco.carimbos[0]?.data_evento.split('-').reverse().join('') || ''}&lt;&lt;&lt;{espaco.pontos}</p>
       </section>
     </>
@@ -414,7 +405,7 @@ function CartaoMissao({ missao, recarregar, liberada, comoMembro, abrirPrograma 
           <p>{missao.descricao}</p>
         </div>
       </div>
-      {bloqueada && <div className="passe__missao-requisito"><p>Libera no nível Conector: 100 pontos, 3 encontros e 2 missões. A organização confirma a mudança de nível.</p><button type="button" className="passe__link" onClick={abrirPrograma}>Ver requisitos do programa</button></div>}
+      {bloqueada && <div className="passe__missao-requisito"><p>Disponível a partir de Conector. A organização confirma os requisitos e a mudança de categoria.</p><button type="button" className="passe__link" onClick={abrirPrograma}>Ver requisitos do programa</button></div>}
       {podeEnviar && !abrindo && <button type="button" className="passe__botao passe__botao--terra" onClick={() => setAbrindo(true)}>Enviar para análise</button>}
       {podeEnviar && abrindo && (
         <form className="passe__form" onSubmit={(event) => void enviar(event)}>
@@ -556,14 +547,14 @@ function Programa({ espaco, extra, compartilhar, comoMembro, setComoMembro, verP
       </section>
       <RelatoImpacto />
       <section className="passe__cartao">
-        <h2>Como ganhar pontos</h2>
-        {PONTOS.map(([texto, valor]) => <div className="passe__ponto" key={texto}><span>{texto}</span><strong>+{valor}</strong></div>)}
+        <h2>Pontuação e histórico</h2>
+        <p>Os pontos dependem de presença ou contribuição efetivamente validada pela organização. O extrato mantém os lançamentos já registrados.</p>
       </section>
       {fundadora && (
         <section className="passe__cartao passe__cartao--fundadora">
           <h2>Visão da fundadora</h2>
           <p>Veja como as telas aparecem para outras pessoas. Vale para Rede, Missões e Programa.</p>
-          <label className="passe__marca"><input type="checkbox" checked={comoMembro} onChange={(event) => setComoMembro(event.target.checked)} /><span><strong>Ver como Membro</strong>, com a Rede bloqueada e os níveis acima com cadeado.</span></label>
+          <label className="passe__marca"><input type="checkbox" checked={comoMembro} onChange={(event) => setComoMembro(event.target.checked)} /><span><strong>Ver como Membro</strong>, com os perfis pessoais restritos e os níveis acima com cadeado.</span></label>
           <button type="button" className="passe__botao passe__botao--linha" onClick={verParabens}>Ver o parabéns de novo nível</button>
         </section>
       )}
@@ -775,13 +766,12 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar }: { pessoa: Pes
 function RedeBloqueada({ total, abrir }: { total: number; abrir: () => void }) {
   return (
     <>
-      <header className="passe__rede-titulo"><Users size={28} aria-hidden="true" /><h1>Rede</h1></header>
       <section className="passe__bloqueio">
         <div className="passe__borrado" aria-hidden="true">{Array.from({ length: 6 }, (_, indice) => <div key={indice}><span /><i /><i /></div>)}</div>
         <div className="passe__bloqueio-texto">
           <svg className="passe__cadeado passe__cadeado--grande" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
-          <h2>A Rede abre em Conector</h2>
-          <p>{total > 1 ? `${total} pessoas e parceiros` : 'Pessoas e parceiros'} esperam por você aqui. Continue somando pontos e cumprindo missões.</p>
+          <h2>Os perfis de pessoas abrem em Conector</h2>
+          <p>{total > 1 ? `${total} pessoas fazem parte da Rede.` : 'Conheça os critérios para acessar os perfis da comunidade.'}</p>
           <button type="button" className="passe__botao" onClick={abrir}>Ver como chegar</button>
         </div>
       </section>
@@ -798,7 +788,11 @@ function Rede({ comoMembro, abrir, fundadora = false }: { comoMembro: boolean; a
   const carregarRede = () => { supabase.rpc('communicali_rede').then(({ data }) => setRede(data as typeof rede)); };
   useEffect(carregarRede, []);
   const perfis = usePerfisParceiros(!!rede?.acesso && !comoMembro && frente === 'parceiros');
-  if (rede && (!rede.acesso || comoMembro)) return <RedeBloqueada total={rede.total ?? rede.pessoas.length} abrir={() => abrir('programa')} />;
+  if (rede && (!rede.acesso || comoMembro)) return <>
+    <header className="passe__rede-titulo"><Users size={28} aria-hidden="true" /><h1>Rede</h1></header>
+    <ParceirosMembros previa={comoMembro} />
+    <RedeBloqueada total={rede.total ?? rede.pessoas.length} abrir={() => abrir('programa')} />
+  </>;
   const aberta = rede?.pessoas.find((pessoa) => pessoa.id === abertaId);
   if (aberta) return <FichaPessoa pessoa={aberta} contatos eu={aberta.id === rede?.eu} voltar={() => setAbertaId('')} recarregar={carregarRede} />;
   const termo = busca.trim().toLowerCase();
@@ -881,7 +875,7 @@ export function MeuEspaco() {
     <Pagina>
       <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="CommuniCALI" />
       <h1>Seu passaporte abre no primeiro encontro</h1>
-      <p>Quem participa de um encontro presencial se torna membro. Depois do check-in, este espaço libera seus carimbos, pontos e missões.</p>
+      <p>Já participou de um encontro? Entre com o e-mail usado no check-in para consultar seu passaporte. O cadastro de Membro é gratuito.</p>
       <a className="passe__botao" href="/#proximo">Ver o próximo encontro</a>
       <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
     </Pagina>

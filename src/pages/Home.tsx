@@ -17,11 +17,12 @@ const MODALIDADES = [
 ];
 
 const FAQ = [
+  ['O cadastro como Membro é gratuito?', 'Sim. A identidade de Membro é gratuita. Encontros e experiências têm inscrição, vagas e condições próprias, informadas em cada edição.'],
   ['Preciso ser de RH para participar?', 'Não. A base da comunidade é de profissionais de RH e administrativos, e líderes, empreendedores e especialistas de qualquer área são bem-vindos, do estágio à transição de carreira.'],
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
   ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
-  ['Como acompanho minha participação?', 'Depois do primeiro encontro presencial, você entra no seu espaço online com o e-mail do check-in e acompanha carimbos, pontos, missões, indicações e fotos.'],
+  ['Como acompanho minha participação?', 'Depois do primeiro encontro presencial, acesse Meu espaço com o e-mail do check-in para acompanhar carimbos, pontos, missões, indicações e fotos.'],
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
@@ -50,9 +51,9 @@ function Arches({ photos }: { photos: Photo[] }) {
 
 const TRILHA = [
   ['visitante', 'Visitante', 'Quem chega pelo grupo ou pela inscrição em um encontro.'],
-  ['membro', 'Membro', 'Quem esteve presencialmente e começa a somar pontos.'],
+  ['membro', 'Membro', 'Adere gratuitamente ao programa e constrói seu histórico de participação.'],
   ['conector', 'Conector', 'Quem aproxima pessoas e cumpre as missões de conexão.'],
-  ['embaixador', 'Embaixador', 'Quem traz parceiros e representa a comunidade.'],
+  ['embaixador', 'Embaixador', 'Contribui com a curadoria e a programação, conforme combinado com a organização.'],
 ];
 
 const PEOPLE_CARDS = ['fundadora', 'embaixadores'] as const;
@@ -161,7 +162,7 @@ export function Home() {
             <p className="eyebrow">Como fazer parte</p>
             <h2>Escolha como <em>participar.</em></h2>
           </div>
-          <p>O grupo é onde a conversa acontece todo dia. Quem participa de um encontro presencial se torna membro.</p>
+          <p>O grupo é onde a conversa acontece todo dia. O cadastro como Membro é gratuito e facultativo; cada encontro tem inscrição e condições próprias.</p>
         </div>
         <div className="doors">
           <article className="door">
@@ -177,7 +178,7 @@ export function Home() {
             <span className="door__icon"><UserPlus size={20} aria-hidden="true" /></span>
             <div>
               <h3>Encontros presenciais</h3>
-              <p>Inscreva-se no próximo encontro. A presença no dia torna você membro e abre seu passaporte online.</p>
+              <p>Inscreva-se no próximo encontro e aguarde a confirmação da equipe. No dia, registre sua presença pelo check-in.</p>
               <a className="link" href="#proximo">Ver o próximo encontro</a>
             </div>
           </article>

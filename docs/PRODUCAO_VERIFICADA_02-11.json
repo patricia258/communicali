@@ -1,0 +1,415 @@
+{
+  "deployment": "dpl_AZBqRustLkBAEGj72tYxsESLZbec",
+  "project": "prj_6lcb2F6GlA4nKAZqiD1GPIrIGjEd",
+  "domain": "https://comuni.calirh.com",
+  "files": [
+    {
+      "file": "api/_email.js",
+      "sha1": "b64753a9861af4347e5905f38ee0d9e12b07cfb9"
+    },
+    {
+      "file": "api/edicao.js",
+      "sha1": "82f89b4c3e236892e3e16e65d0332f351e2b3d4c"
+    },
+    {
+      "file": "api/email-admin.js",
+      "sha1": "92a685a18732e3b741f2b22d0eac76240a2968ec"
+    },
+    {
+      "file": "api/email-conexao.js",
+      "sha1": "224b97cf7392678b164ac82f0709b0d035c45876"
+    },
+    {
+      "file": "api/email-confirmacao.js",
+      "sha1": "3f3ffd1fdca15bc128facc2d75b15b0e021149b6"
+    },
+    {
+      "file": "api/email-indicacao.js",
+      "sha1": "cf900fb5b0a2c07e29284b62bb51ca058e15429e"
+    },
+    {
+      "file": "api/email-lembretes.js",
+      "sha1": "d613327e1384770ae128a4c3ef9d2803357a679b"
+    },
+    {
+      "file": "docs/HANDOFF.md",
+      "sha1": "99a1835bacd8ec01192dc883065a4d5f2f46e547"
+    },
+    {
+      "file": "docs/PLANO_REFINAMENTO_MEU_ESPACO.md",
+      "sha1": "87f56db92497bd991458cae96bcd1df26dce8ee5"
+    },
+    {
+      "file": "docs/sql/ajuste_beneficios_parceiros.sql",
+      "sha1": "91b38579224d1ef8c53ce91ef0c7c623bbba3255"
+    },
+    {
+      "file": "docs/sql/etapa_6_parceiros_feedback.sql",
+      "sha1": "b164a1c66be44698858b70e9946a411cd2858094"
+    },
+    {
+      "file": "docs/sql/etapa_7_limite_convite.sql",
+      "sha1": "aaf2ecead6845a22a42889f16a23843909330cac"
+    },
+    {
+      "file": "index.html",
+      "sha1": "866d16d68c75f2abc27bde78d80228fa2fc42dc0"
+    },
+    {
+      "file": "package-lock.json",
+      "sha1": "7821567e42c35f5c1926c62a4488898a72a28d0f"
+    },
+    {
+      "file": "package.json",
+      "sha1": "452371ef5e998934c3b2ce42472b127cfec9d5dd"
+    },
+    {
+      "file": "public/brand/cali-favicon.svg",
+      "sha1": "4aef6db57d4aa14d5c801ccac0deee3e1ed1b21e"
+    },
+    {
+      "file": "public/brand/cali-lime-mark.svg",
+      "sha1": "fa023e5e2c90e7c15c0eb391bf4801117522cbfe"
+    },
+    {
+      "file": "public/brand/cali-logo-light.svg",
+      "sha1": "e76a3529e9dc8f0ce4a89ab9e75db37eea80e7c2"
+    },
+    {
+      "file": "public/brand/cali-oak-mark-light.svg",
+      "sha1": "1d333407e3ab198db9fb011d363bd72eec87810e"
+    },
+    {
+      "file": "public/brand/cali-oak-mark.svg",
+      "sha1": "7056c1a7eedeff72b751e38032b608705862c114"
+    },
+    {
+      "file": "public/brand/cali-rh-bordo.png",
+      "sha1": "e8327275e3e34199fe72edfb27b9a807a404ca50"
+    },
+    {
+      "file": "public/brand/communicali-bordo.png",
+      "sha1": "ed94b237b309bf207486c0b2490cb1678f355d15"
+    },
+    {
+      "file": "public/brand/communicali-branco.png",
+      "sha1": "491af8f1ecbe8ba64d926a757fd1058d026abc1d"
+    },
+    {
+      "file": "public/brand/communicali-horizontal.png",
+      "sha1": "351be5d1096120253cb3baff088ef2142942b175"
+    },
+    {
+      "file": "public/communicali/seja-parceiro.pdf",
+      "sha1": "b22c359937f064ddb395e12504c75f29686fd2b2"
+    },
+    {
+      "file": "public/fotos/legacy-coffee.jpg",
+      "sha1": "0872fe0d84cd9e6d65302648413512c90e83aac6"
+    },
+    {
+      "file": "public/fotos/neutras/1.jpg",
+      "sha1": "4b7b2ff521071b530ab291af0c46355e966a58df"
+    },
+    {
+      "file": "public/fotos/neutras/2.jpg",
+      "sha1": "bf0ccb170d5f595039cc7ec570b14a7b686da6f3"
+    },
+    {
+      "file": "public/fotos/neutras/3.jpg",
+      "sha1": "eb747c2a475e0f6a0e4d670418f1447f08abdb7c"
+    },
+    {
+      "file": "public/fotos/neutras/4.jpg",
+      "sha1": "a9588736eeb37bd112de0a86f96767efae629065"
+    },
+    {
+      "file": "public/fotos/neutras/5.jpg",
+      "sha1": "c24d4d74c6c5a6a2a241abf36429d4a1e979bd0e"
+    },
+    {
+      "file": "public/fotos/patricia-lima.jpg",
+      "sha1": "ea763c567a897efe3354d1e2d9f27c367e19f145"
+    },
+    {
+      "file": "public/og-comunidade.jpg",
+      "sha1": "01210f24e1744aadc2a707502a02b939ce1ee1c3"
+    },
+    {
+      "file": "public/selos/carimbo-2.png",
+      "sha1": "6fb98e4c0ccc02ad0578ae9e494f06e5e295cf54"
+    },
+    {
+      "file": "public/selos/carimbo-3.png",
+      "sha1": "266b63aca4939364015fb5081d3d091a2e6825fb"
+    },
+    {
+      "file": "public/selos/carimbo-fundadora.png",
+      "sha1": "71cdaad413c849b0bc7bb790882089980cddf626"
+    },
+    {
+      "file": "public/selos/postal-conector.png",
+      "sha1": "fb267e56e9d53df1034b7a7138e3940dd7dcebca"
+    },
+    {
+      "file": "public/selos/postal-embaixador.png",
+      "sha1": "3dab1adf3d5185d2723c2c06797d8c8bf1f5a33e"
+    },
+    {
+      "file": "public/selos/postal-fundadora.png",
+      "sha1": "7deb659f3655ca38d93de63d018f13d7eaee7241"
+    },
+    {
+      "file": "public/selos/postal-indicacao.png",
+      "sha1": "126aa92f91615444152d8443b0d6b26bdc3f7611"
+    },
+    {
+      "file": "public/selos/postal-lugar.png",
+      "sha1": "54691003e955714424486b475bfad18c0ca95a0c"
+    },
+    {
+      "file": "public/selos/postal-membro.png",
+      "sha1": "c77eea7a279a4c3d5b5759f79de5993790ce74b3"
+    },
+    {
+      "file": "public/selos/postal-palestra.png",
+      "sha1": "91c237ddf51247db52513cf0eb094621fcc4f5ac"
+    },
+    {
+      "file": "public/selos/postal-visitante.png",
+      "sha1": "573e1ea56d89c2a6229e6d28efab97aa47ee14a8"
+    },
+    {
+      "file": "src/components/ErrorBoundary.tsx",
+      "sha1": "8500e5a0e6e02378f372ae15436a7314d457c734"
+    },
+    {
+      "file": "src/components/SiteFooter.tsx",
+      "sha1": "fc61e00d6952a9f04f272835376df0e2a0309c1b"
+    },
+    {
+      "file": "src/components/WorkspaceShell.tsx",
+      "sha1": "19d207e13f1e0008e19b23933caa0ed853f6e323"
+    },
+    {
+      "file": "src/forms/AdminFormsPage.tsx",
+      "sha1": "05e7ca65bb7e39c07557911d3bb4ddf6ccd68a4b"
+    },
+    {
+      "file": "src/forms/PublicFormPage.tsx",
+      "sha1": "7717fc2652e8d7341fe28f8c8fe117d8931f2247"
+    },
+    {
+      "file": "src/forms/admin-forms.css",
+      "sha1": "bd6d89c34570d410a9fbc820f8460cf645ff0c76"
+    },
+    {
+      "file": "src/forms/app-forms.css",
+      "sha1": "82ac18b71fbe05639911af9d1f61d44bcd6ab956"
+    },
+    {
+      "file": "src/forms/formExports.ts",
+      "sha1": "e455fcc4a1714ad38c90a5efe8a33ff68063bc4c"
+    },
+    {
+      "file": "src/forms/formModel.ts",
+      "sha1": "2a69761eae1f6169f4e3876a763d895d8b1f50a8"
+    },
+    {
+      "file": "src/forms/public-form.css",
+      "sha1": "e990a95148932dce8b01bae09c2d113c8658d4a1"
+    },
+    {
+      "file": "src/home.css",
+      "sha1": "733915f27cb334bc367919fbc409554b1b261209"
+    },
+    {
+      "file": "src/lib.ts",
+      "sha1": "7616d3756be067b82f30cf9d602f4659f3982084"
+    },
+    {
+      "file": "src/lib/supabase.ts",
+      "sha1": "90b30e7ad3ac478c33782d1c52731795c191991e"
+    },
+    {
+      "file": "src/main.tsx",
+      "sha1": "6c97ae32fbcf7b4d9fb7bc6ca002d313a02c4c5a"
+    },
+    {
+      "file": "src/pages/Admin.tsx",
+      "sha1": "157afe53bf1ecf65359caa9d736f040b6760f685"
+    },
+    {
+      "file": "src/pages/AdminEmails.tsx",
+      "sha1": "501e7d67b867bd4c3e980a58fa61923b5ba7fc66"
+    },
+    {
+      "file": "src/pages/AdminInicio.tsx",
+      "sha1": "553b646417a7e7434e74add55a99c003af043037"
+    },
+    {
+      "file": "src/pages/AdminPrograma.tsx",
+      "sha1": "06d9b0cf1478b80afc11f627afb7374729a7d2a0"
+    },
+    {
+      "file": "src/pages/AdminRecomendacoes.tsx",
+      "sha1": "b7e55e6a96a7c6be4917b9d8614a40fc39e1b867"
+    },
+    {
+      "file": "src/pages/AdminRedeExtras.tsx",
+      "sha1": "956c904910b7efc223766c5ba2c1adf728ffdae2"
+    },
+    {
+      "file": "src/pages/AdminTabela.tsx",
+      "sha1": "5de0f498a5760bdd2867535867394e2d5e57c620"
+    },
+    {
+      "file": "src/pages/Cadastro.tsx",
+      "sha1": "3f62740793e0514490630bcb3f7c0584df45d933"
+    },
+    {
+      "file": "src/pages/Checkin.tsx",
+      "sha1": "87262f05d35994d5e6eb703b4d678a89c61f8ef8"
+    },
+    {
+      "file": "src/pages/Convidados.tsx",
+      "sha1": "20eecec6c10cc13ecae5da9ccdab5d058df370db"
+    },
+    {
+      "file": "src/pages/ConviteMembro.tsx",
+      "sha1": "2623e3a83ea2de792ec4b0323f691cc12f3c09b1"
+    },
+    {
+      "file": "src/pages/Edicao.tsx",
+      "sha1": "f0a23c35d65b47c1f34481d3bcf8ef0e8dce95fb"
+    },
+    {
+      "file": "src/pages/Home.tsx",
+      "sha1": "da3b5ed88680a60e229b4de66a0024c249dcb8b4"
+    },
+    {
+      "file": "src/pages/MemberFields.tsx",
+      "sha1": "62c5822aea181d98e1bd68f912cd7cc453ef870b"
+    },
+    {
+      "file": "src/pages/MembroCartao.tsx",
+      "sha1": "4d44ef58213d747617dab11da2094e54ab8c0c9d"
+    },
+    {
+      "file": "src/pages/MeuEspaco.tsx",
+      "sha1": "3042f2fd0d228c632659dd4a897aae985ff46757"
+    },
+    {
+      "file": "src/pages/ParceirosExemplos.tsx",
+      "sha1": "e4fc931067165fb38b565a5abd111da245bcbda5"
+    },
+    {
+      "file": "src/pages/RedeExtras.tsx",
+      "sha1": "8341c242f39427e5837a930f6c3d46de950eaf03"
+    },
+    {
+      "file": "src/pages/Staff.tsx",
+      "sha1": "c8aed2abcabf87a0cf82fcad14249d480c77d97e"
+    },
+    {
+      "file": "src/pages/Telao.tsx",
+      "sha1": "411aa067217e990a254463d1268a660dc46fd796"
+    },
+    {
+      "file": "src/pages/TrilhaPrograma.tsx",
+      "sha1": "d665290d232433b5aa3454038b63a87595d2829f"
+    },
+    {
+      "file": "src/pages/Votar.tsx",
+      "sha1": "5267613f128da0558bde21fa5aa2203bf217a349"
+    },
+    {
+      "file": "src/pages/admin.css",
+      "sha1": "38aee644812546f14c773b3721d6fe694b05396e"
+    },
+    {
+      "file": "src/pages/membro.css",
+      "sha1": "f4950ea3a214ba7e03537573ad2d11cb51fab197"
+    },
+    {
+      "file": "src/styles.css",
+      "sha1": "8e152199b828f83920a98af0b844f304e4e52ad3"
+    },
+    {
+      "file": "supabase/migrations/20261031120000_checkin_votacao.sql",
+      "sha1": "1e19336c746bc5ba0bcbad67eb9f30197ca32397"
+    },
+    {
+      "file": "supabase/migrations/20261031125000_formularios.sql",
+      "sha1": "c5e98e500ac3642f684384d8917bad3a0ea62139"
+    },
+    {
+      "file": "supabase/migrations/20261031130000_vitrine_admin.sql",
+      "sha1": "ec54a45f167638e5f0d1bfe12cc01048d71dd513"
+    },
+    {
+      "file": "supabase/migrations/20261031140000_programa_membros_fase1.sql",
+      "sha1": "da032427660f531ffbd6cade17b2a93042e4ffe6"
+    },
+    {
+      "file": "supabase/migrations/20261031150000_convidados.sql",
+      "sha1": "5b05ee7673eaa2b30934a76aeee466400ba28cd9"
+    },
+    {
+      "file": "supabase/migrations/20261031160000_inscritos_e_gestao.sql",
+      "sha1": "a4b9e1ae0279f9c53c7c063cb2f5ef3851f74f23"
+    },
+    {
+      "file": "supabase/migrations/20261031170000_staff.sql",
+      "sha1": "90f89d84c3aa274a9669739ddb846c4fbb772a05"
+    },
+    {
+      "file": "supabase/migrations/20261031180000_inscricoes.sql",
+      "sha1": "7562363d00a5c82d08d61371c374799f87eb13d4"
+    },
+    {
+      "file": "supabase/migrations/20261101120000_emails_e_pontos_convidado.sql",
+      "sha1": "50c601e66269f802cc0000e4b426db2482462b49"
+    },
+    {
+      "file": "supabase/migrations/20261101150000_espaco_do_membro.sql",
+      "sha1": "d97329e6161dadc946c5959cc0a829d8853b3600"
+    },
+    {
+      "file": "supabase/migrations/20261101180000_rede_da_comunidade.sql",
+      "sha1": "ccb1e81d75c1d93755ef61ac467c55d62a1d9c0f"
+    },
+    {
+      "file": "supabase/migrations/20261101210000_link_unico_e_fundadora.sql",
+      "sha1": "b751e672809fd9e85721190a4c77b2afcffd4231"
+    },
+    {
+      "file": "supabase/migrations/20261101230000_inscricao_com_aprovacao.sql",
+      "sha1": "ee1c862480d77d3972b386a9c69c3b4756dcb9d2"
+    },
+    {
+      "file": "supabase/migrations/20261102090000_conexoes_e_extrato.sql",
+      "sha1": "7755bfd644c16f6fdca45310308b84f92f492954"
+    },
+    {
+      "file": "supabase/migrations/20261102120000_rede_matches_indicacoes.sql",
+      "sha1": "730b6c9cc291e38d96d31f9706cffbea410896dc"
+    },
+    {
+      "file": "supabase/migrations/20261102150000_mercado_impacto_auditoria.sql",
+      "sha1": "d84de18e940ed56ee734d740be590b7dbac42221"
+    },
+    {
+      "file": "tsconfig.json",
+      "sha1": "7f4b17e7594932b85d0e1d7e4e08589aae8188fb"
+    },
+    {
+      "file": "vercel.json",
+      "sha1": "9657269d5c98d18432ea9c7e099cfcef562a85e7"
+    },
+    {
+      "file": "vite.config.ts",
+      "sha1": "149512360007abf421aeb5c9ad7d04f4a104b9e4"
+    }
+  ]
+}

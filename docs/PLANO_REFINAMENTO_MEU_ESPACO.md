@@ -1,3 +1,5 @@
+> Continuidade consolidada em HANDOFF.md. Este arquivo é referência complementar e pode descrever uma etapa anterior; o estado atual está no HANDOFF único.
+
 # Refinamento do Meu espaço — ordem de execução
 
 Pedido de Patrícia: melhorar acabamento visual por etapas, preservando a experiência de celular também no navegador. Não reconstruir o aplicativo. Cartela: bordo #5A1E2D, vinho #7A1F3D, marfim #F7F0EA e mostarda #DDB160; Funnel Display e Inter.

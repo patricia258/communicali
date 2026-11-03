@@ -5,14 +5,16 @@ import { IdCard } from 'lucide-react';
 import { editionSlug, errorMessage, formatDate, supabase, type Edition } from '../lib';
 import { answerArgs, confirmQuestions, memberQuestions, useSiteTexts } from './MemberFields';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
+import { mensagemCreditoCheckin, type CreditoCheckin } from './checkinCredito';
 
-type Done = { nome: string; categoria: string; edicao: string; selo: string; codigo: string; repetido: boolean };
+type Done = { nome: string; categoria: string; edicao: string; selo: string; codigo: string; repetido: boolean; credito?: CreditoCheckin | null };
 type Step = 'email' | 'novo' | 'codigo' | 'inscrito';
 
 export const CATEGORIAS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organizador', kids: 'Kids' };
 
 function Success({ done }: { done: Done }) {
   const [qr, setQr] = useState('');
+  const mensagemCredito = mensagemCreditoCheckin(done);
   useEffect(() => {
     QRCode.toDataURL(`${window.location.origin}/validar/${done.codigo}`, { width: 320, margin: 1, color: { dark: '#5A1E2D', light: '#FFFFFF' } }).then(setQr);
   }, [done.codigo]);
@@ -21,8 +23,8 @@ function Success({ done }: { done: Done }) {
       <section className="pass">
         <img className="pass__logo" src="/brand/communicali-branco.png" alt="CommuniCALI" />
         <h1>Presença confirmada!</h1>
-        <p className="pass__lead">Parabéns! Você faz parte da CommuniCALI.</p>
-        {done.repetido ? <p className="pass__hint">Sua presença neste encontro já estava registrada.</p> : <p className="pass__hint">Você conquistou 10 pontos pela participação neste encontro.</p>}
+        <p className="pass__lead">Que bom ter você neste encontro.</p>
+        {mensagemCredito && <p className="pass__hint">{mensagemCredito}</p>}
         <dl className="pass__data">
           <div><dt>Nome</dt><dd>{done.nome}</dd></div>
           <div><dt>Categoria</dt><dd>{CATEGORIAS[done.categoria] || done.categoria}</dd></div>
@@ -32,7 +34,7 @@ function Success({ done }: { done: Done }) {
         {qr && <img className="pass__qr" src={qr} alt="QR Code para a organização validar sua presença" />}
         <div className="pass__badge">
           <IdCard size={26} aria-hidden="true" />
-          <p><strong>Obrigada pelas confirmações!</strong> Mostre esta tela na recepção e retire seu crachá de membro.</p>
+          <p><strong>Obrigada pelas confirmações!</strong> Mostre esta tela à recepção para conferir sua identificação.</p>
         </div>
       </section>
     </main>
