@@ -129,6 +129,10 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — home: primeira vez, +300 e selos de parceria
+- Publicado `dpl_ByF41DSjN92Jz51EPusbggP7hmA1`. Pedidos de Patrícia: botões "Quero participar" mais finos; número fixo "+300 pessoas" (comunidade toda, não só o grupo); seção "Escolha como participar" substituída por "Primeira vez? Venha nos conhecer." com dois blocos (visitar a comunidade → `/f/quero-ser-membro`, e grupo do WhatsApp com QR); sem a porta "Encontros presenciais" (a agenda já mostra) e sem texto lateral; sem texto lateral no Programa de membros; categorias de parceria em carrossel de selos com quatro estilos (postal picotado, carimbo redondo, recorte terracota, oval oliva), girando sozinho com setas.
+- Regra dela: quem vem pela primeira vez é visitante, não entra direto como Membro. O formulário virou "Quero conhecer a CommuniCALI", com a pergunta online ou presencial em Curitiba e região (migração `20261103150000`). O slug continua `quero-ser-membro`.
+
 ### 03/11/2026, Claude Code — decisões de Patrícia publicadas
 - Decisões novas ficam no Google Doc "CommuniCALI — Decisões após a v21 (atualizar sempre)", na mesma pasta do Documento Mestre: https://docs.google.com/document/d/1SYHtmoAL0-AyaTV7EMbRR_ECkcjinya-Jsyhs3gTWhU/edit . Ele prevalece sobre a v21 em caso de conflito. Acrescente decisões no topo.
 - Publicado (`dpl_AJuFkGBTPAL1a5h57im5kzq8AKzh`, commit em `main`):
