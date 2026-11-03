@@ -193,5 +193,5 @@
 .cali-form-page .cf-anexo img{flex:none;width:92px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
 .cali-form-page .cf-anexo span{display:grid;gap:6px}
 .cali-form-page .cf-anexo strong{font-size:16px}
-.cali-form-page .cf-anexo small{font-size:13px;opacity:.75;line-height:1.5}
+.cali-form-page .cf-anexo small{font:400 13px/1.5 Inter,sans-serif;letter-spacing:normal;text-transform:none;color:#CBB9B1}
 .cali-form-page .cf-anexo em{display:inline-flex;align-items:center;gap:6px;font-style:normal;font-weight:600;color:#DDB160;font-size:14px}
