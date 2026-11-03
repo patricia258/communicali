@@ -1,5 +1,5 @@
 // Ações do painel: resumo dos envios, boas-vindas em lotes e teste para quem está logado. Exige sessão de administrador.
-import { EDITION_FIELDS, PUBLIC_KEY, SUPABASE, banco, destinatarios, enviar, enviarUmaVez, layoutSimples, montar, pausa } from './_email.js';
+import { EDITION_FIELDS, PUBLIC_KEY, SUPABASE, banco, destinatarios, enviar, enviarUmaVez, layoutSimples, montar, pausa, escape } from './_email.js';
 
 const LOTE = 25;
 
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         const nome = (outra.apelido || outra.nome).trim().split(/\s+/)[0];
         await banco('notifications', { method: 'POST', body: JSON.stringify({ member_id: pessoa.id, tipo: 'match', texto: `Temos uma sugestão de conexão: ${nome}.`, de: outra.id }) });
         if (!pessoa.email.endsWith('.test')) {
-          await enviar(pessoa.email, { assunto: `✨ Sugestão de conexão: ${nome}`, html: layoutSimples({ titulo: '✨ Sugestão de conexão', saudacao: `Oi, ${(pessoa.apelido || pessoa.nome).trim().split(/\s+/)[0]}!`, texto: `A organização da ComuniCALI acha que vale você conhecer ${nome}. O ponto em comum é ${par.motivo}. Abra seu passaporte para ver o perfil.`, botao: { texto: 'Ver sugestão', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
+          await enviar(pessoa.email, { assunto: `✨ Sugestão de conexão: ${nome}`, html: layoutSimples({ titulo: '✨ Sugestão de conexão', saudacao: `Oi, ${(pessoa.apelido || pessoa.nome).trim().split(/\s+/)[0]}!`, linhas: [`Achamos que vale você conhecer<br><strong>${escape(nome)}</strong>!`, 'O ponto em comum é:', `<strong>${escape(par.motivo)}</strong>`, 'Abra seu passaporte para ver o perfil<br>e trocar figurinhas!'], botao: { texto: 'Ver sugestão', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
           await pausa();
         }
       }
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       await pausa();
     }
     // Um exemplo de aviso do espaço do membro, com o link de parar de receber.
-    const exemplo = await enviar(email, { assunto: '[Teste] 🤝 Ana quer se conectar com você', html: layoutSimples({ titulo: '🤝 Nova conexão', saudacao: 'Oi, Patrícia!', texto: 'Ana quer se conectar com você na ComuniCALI.', destaque: 'Abra seu passaporte para ver o perfil e se conectar de volta.', botao: { texto: 'Abrir meu passaporte', href: 'https://comuni.calirh.com/meu-espaco' } }) });
+    const exemplo = await enviar(email, { assunto: '[Teste] 🤝 Ana quer se conectar com você', html: layoutSimples({ titulo: '🤝 Nova conexão', saudacao: 'Oi, Patrícia!', linhas: ['<strong>Ana</strong> quer se conectar com você<br>na ComuniCALI!', '<strong>Abra seu passaporte</strong> para ver o perfil<br>e se conectar de volta.'], botao: { texto: 'Abrir meu passaporte', href: 'https://comuni.calirh.com/meu-espaco' } }) });
     if (exemplo.erro) return res.status(502).json({ error: exemplo.erro });
     return res.status(200).json({ para: email, enviados: tipos.length + (exemplo.pulado ? 0 : 1) });
   }
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       const quem = (await (await banco(`members?id=eq.${pessoa.indicado_por}&select=nome,apelido,email`)).json())[0];
       if (quem && !quem.email.endsWith('.test')) {
         const convidada = pessoa.nome.trim().split(/\s+/)[0];
-        await enviar(quem.email, { assunto: `🎉 ${convidada} foi confirmada no encontro`, html: layoutSimples({ titulo: '🎉 Indicação aprovada', saudacao: `Oi, ${(quem.apelido || quem.nome).trim().split(/\s+/)[0]}!`, texto: `${pessoa.nome} está confirmada no encontro ${edition.titulo}. Como a pessoa vem pela sua indicação, conte com você para:`, itens: ['Receber a pessoa na chegada', 'Não deixar a pessoa sozinha', 'Apresentar a comunidade e outras pessoas', 'Mostrar como funciona o check-in'], botao: { texto: 'Ver minhas indicações', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
+        await enviar(quem.email, { assunto: `🎉 ${convidada} foi confirmada no encontro`, html: layoutSimples({ titulo: '🎉 Indicação aprovada', saudacao: `Oi, ${(quem.apelido || quem.nome).trim().split(/\s+/)[0]}!`, linhas: [`<strong>${escape(pessoa.nome)}</strong> está confirmada no encontro`, `<strong>${escape(edition.titulo)}</strong>`, 'Como vem pela sua indicação,<br>contamos com você para:'], itens: ['Receber a pessoa na chegada', 'Não deixar a pessoa sozinha', 'Apresentar a comunidade e outras pessoas', 'Mostrar como funciona o check-in'], botao: { texto: 'Ver minhas indicações', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
       }
     }
     return res.status(200).json({ email: situacao });

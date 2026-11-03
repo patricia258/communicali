@@ -297,7 +297,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         <div className="adm-links">
           <a className="wf-secondary" href={`${origin}/telao/checkin?edicao=${edition.slug}`} target="_blank" rel="noopener noreferrer">Telão do check-in</a>
           <a className="wf-secondary" href={`${origin}/telao/votacao?edicao=${edition.slug}`} target="_blank" rel="noopener noreferrer">Telão da votação</a>
-          <button type="button" className="wf-secondary" onClick={() => void manualCheckin()}>Registrar presença</button>
+          <button type="button" className="wf-secondary" title="Para quem não conseguiu fazer o check-in pelo celular" onClick={() => void manualCheckin()}>Registrar presença manualmente</button>
           <button type="button" className="wf-secondary" disabled={!people.length} onClick={exportCsv}>Exportar CSV</button>
           <button type="button" className="wf-secondary" disabled={!people.length} onClick={exportPeople}>Exportar Excel</button>
         </div>

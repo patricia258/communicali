@@ -469,3 +469,5 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__reagir-acoes .passe__botao{width:100%;border-radius:999px}
 .passe__reagir-grande{font-size:56px;line-height:1}
 .passe__reagir p{margin:0;font-size:14px;line-height:1.55;color:#5A4740}
+.passe__admin-link{align-self:flex-end;margin-top:6px;font:600 12px Inter,sans-serif;color:#8A7A72;text-decoration:none}
+.passe__admin-link:hover{color:#7A1F3D;text-decoration:underline}

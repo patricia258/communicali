@@ -138,6 +138,7 @@ function Entrar() {
             <button className="passe__botao" type="submit" disabled={busy}>{busy ? 'Aguarde...' : enviado ? 'Abrir meu passaporte' : 'Receber meu código'}</button>
           </form>
           {enviado ? <button type="button" className="passe__link" onClick={() => { setEnviado(false); setCodigo(''); setErro(''); }}>Usar outro e-mail</button> : <p className="passe__aviso">Use o e-mail do seu check-in. Ainda não foi a um encontro? <a href="/#proximo">Veja o próximo</a>.</p>}
+          <a className="passe__admin-link" href="/admin">Área administrativa</a>
         </section>
       </main>
     </div>

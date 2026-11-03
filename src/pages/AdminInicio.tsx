@@ -35,12 +35,12 @@ export function HomePanel() {
 
   const slug = edition?.slug || 'fundadora';
   const steps: Array<[typeof MonitorPlay, string, string, string, boolean]> = [
-    [MonitorPlay, 'Abra o telão do check-in', 'É o primeiro QR Code. Na chegada, a recepção confirma o nome na lista, pede para a pessoa se acomodar e avisa do QR Code. Ainda não entrega crachá.', `/telao/checkin?edicao=${slug}`, true],
-    [UserCheck, 'Check-in com todos sentados', 'Na abertura, reserve cerca de 5 minutos. Quem se inscreveu só confirma os aceites; quem é novo faz o cadastro.', '/admin/edicoes', false],
-    [IdCard, 'Crachás por mesa', 'A recepção chama uma mesa de cada vez. A pessoa mostra a tela final e retira o crachá. Quem chegar depois faz o check-in e já retira.', '/admin/edicoes', false],
-    [Vote, 'Ative a votação na hora da dinâmica', 'Em Votações, abra a dinâmica e clique em Ativar votação.', '/admin/votacoes', false],
-    [MonitorPlay, 'Troque o telão para a votação', 'O QR Code muda e a contagem de respostas sobe sozinha.', `/telao/votacao?edicao=${slug}`, true],
-    [Trophy, 'Revele o resultado', 'Em Votações, clique em Revelar no telão para mostrar média e gráfico.', '/admin/votacoes', false],
+    [UserCheck, 'Chegada', 'A recepção confirma o nome na lista e indica a mesa. Ainda não entrega crachá.', '/admin/edicoes', false],
+    [MonitorPlay, 'Check-in pelo QR Code', 'O QR Code fica no porta-mesa de cada mesa e também no telão. Abra o telão do check-in. Reserve cerca de 5 minutos na abertura.', `/telao/checkin?edicao=${slug}`, true],
+    [IdCard, 'Crachás na mesa', 'Quem terminou o check-in levanta o celular com a tela final, e a equipe leva o crachá até a mesa. Quem chegar depois faz o check-in e recebe na hora.', '/admin/edicoes', false],
+    [Users, 'Pitches', 'Cada pessoa tem até 1 minuto para se apresentar.', '/admin/edicoes', false],
+    [Vote, 'Votação', 'Em Votações, ative a pergunta do dia e troque o telão para a votação. As respostas sobem sozinhas.', '/admin/votacoes', false],
+    [Trophy, 'Resultado', 'Em Votações, clique em Revelar no telão para mostrar a média e o gráfico.', '/admin/votacoes', false],
   ];
 
   const cards: Array<[typeof Users, string, number, string]> = [

@@ -1,5 +1,5 @@
 // Avisa quem indicou que a inscrição da pessoa chegou e será avaliada. Vale uma vez por inscrição.
-import { banco, enviar, layoutSimples } from './_email.js';
+import { banco, enviar, escape, layoutSimples } from './_email.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -14,6 +14,6 @@ export default async function handler(req, res) {
   if (!quem || quem.email.endsWith('.test')) return res.status(200).json({ enviado: false });
   const nome = (quem.apelido || quem.nome).trim().split(/\s+/)[0];
   const convidada = linhas[0].nome.trim().split(/\s+/)[0];
-  const result = await enviar(quem.email, { assunto: `💌 ${convidada} se inscreveu com sua indicação`, html: layoutSimples({ titulo: '💌 Nova indicação', saudacao: `Oi, ${nome}!`, texto: `${linhas[0].nome} se inscreveu no encontro ${edicao[0].titulo} com a sua indicação. A equipe vai avaliar a inscrição e avisar vocês por e-mail. Os 5 pontos entram quando a pessoa fizer o check-in.`, botao: { texto: 'Acompanhar minhas indicações', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
+  const result = await enviar(quem.email, { assunto: `💌 ${convidada} se inscreveu com sua indicação`, html: layoutSimples({ titulo: '💌 Nova indicação', saudacao: `Oi, ${nome}!`, linhas: [`<strong>${escape(linhas[0].nome)}</strong> se inscreveu no encontro`, `<strong>${escape(edicao[0].titulo)}</strong>`, 'com a sua indicação!', 'A equipe vai avaliar a inscrição<br>e avisar vocês por e-mail.', 'Os <strong>5 pontos</strong> entram quando a pessoa<br>fizer o check-in.'], botao: { texto: 'Acompanhar minhas indicações', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
   res.status(result.erro ? 502 : 200).json({ enviado: !result.erro });
 }
