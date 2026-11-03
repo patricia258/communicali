@@ -328,9 +328,12 @@ function PartnersPanel() {
     event.preventDefault();
     setError('');
     try {
+      // O site usa o logo branco; o espaço do membro usa o original.
       const logo_url = logo ? await uploadImage(await logoBranco(logo), 'parceiros') : null;
-      const { error: failure } = await supabase.from('partners').insert({ nome: nome.trim(), site_url: site.trim() || null, logo_url, ordem: list.length });
+      const logo_original_url = logo ? await uploadImage(logo, 'parceiros-originais') : null;
+      const { data: criado, error: failure } = await supabase.from('partners').insert({ nome: nome.trim(), site_url: site.trim() || null, logo_url, ordem: list.length }).select('id').single();
       if (failure) throw failure;
+      if (logo_original_url) await supabase.from('communicali_partner_profiles').upsert({ partner_id: criado.id, logo_original_url }, { onConflict: 'partner_id' });
       setNome(''); setSite(''); setLogo(undefined); (event.target as HTMLFormElement).reset();
       await load();
     } catch { setError('Não foi possível salvar o parceiro.'); }

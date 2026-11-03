@@ -1,7 +1,7 @@
 /* Espaço do membro: passaporte com carimbos, edições, missões, indicações, programa e perfil. Abre com código enviado ao e-mail. */
 import { useEffect, useId, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { Bell, CalendarDays, Check, ChevronDown, ExternalLink, Images, LockKeyhole, Mail, MapPin, Pencil, Share2, Target, Users } from 'lucide-react';
+import { Bell, Building2, CalendarDays, Check, ChevronDown, ExternalLink, Handshake, Images, LockKeyhole, Mail, MapPin, Megaphone, Mic, Pencil, Share2, Target, UserPlus, Users } from 'lucide-react';
 import { errorMessage, supabase } from '../lib';
 import { longDate } from './Edicao';
 import { JanelaCartao } from './MembroCartao';
@@ -208,7 +208,7 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
                   <p><TextoAviso texto={aviso.texto} /></p>
                   <div className="passe__notificacao-acoes">
                     {aviso.tipo === 'match' && m.categoria === 'fundadora' && <a href="/admin/matches">Ver no painel</a>}
-                    {aviso.de && aviso.pode_voltar && <button type="button" onClick={() => verPerfil(aviso.de!)}>Ver perfil</button>}
+                    {aviso.de && (aviso.pode_voltar || aviso.tipo === 'perfil') && <button type="button" onClick={() => verPerfil(aviso.de!)}>Ver perfil</button>}
                     <button type="button" disabled={avisoPendente !== null} onClick={() => void marcarLido(aviso.id)}><Check size={15} aria-hidden="true" />{avisoPendente === aviso.id ? 'Salvando…' : 'Marcar como lido'}</button>
                   </div>
                 </div>
@@ -366,22 +366,25 @@ function contornoSelo(serrilhado: boolean) {
   }).join(' ') + ' Z';
 }
 
+// Selo redondo de missão: cor e ícone próprios, diferente dos selos postais do programa.
+const SELO_MISSAO: Record<string, { cor: string; Icone: typeof Users }> = {
+  convidados: { cor: '#7A1F3D', Icone: UserPlus }, conexao: { cor: '#A9502E', Icone: Handshake }, lugar: { cor: '#5F6238', Icone: MapPin },
+  palestra: { cor: '#C9973B', Icone: Mic }, parceiro: { cor: '#4A1424', Icone: Building2 }, representar: { cor: '#B83A62', Icone: Megaphone },
+};
 function SeloMissao({ slug, conquistado }: { slug: string; conquistado: boolean }) {
-  const recorte = useId();
-  const [arquivo, legenda] = MISSAO_SELOS[slug] || ['postal-conector', 'Missão'];
-  // Estilo fixo por missão; permanece igual ao alternar entre conta real e prévias.
-  const estilo = Math.max(Object.keys(MISSAO_SELOS).indexOf(slug), 0) % 3;
+  const arco = useId();
+  const legenda = (MISSAO_SELOS[slug] || ['', 'Missão'])[1];
+  const { cor, Icone } = SELO_MISSAO[slug] || { cor: '#7A1F3D', Icone: Target };
   return (
-    <svg className={`passe__missao-selo${conquistado ? '' : ' is-pendente'}`} data-estilo={['ondulado', 'serrilhado', 'faixa'][estilo]} viewBox="0 0 120 120" role="img" aria-label={`Selo ${legenda}: ${conquistado ? 'conquistado' : 'a conquistar'}`}>
-      {estilo === 2 ? <circle cx="60" cy="60" r="56" fill="#5A1E2D" /> : <path d={contornoSelo(estilo === 1)} fill="#5A1E2D" />}
-      <circle cx="60" cy="60" r="50" fill="#F7F0EA" />
-      <circle cx="60" cy="60" r="47.5" fill="none" stroke="#5A1E2D" strokeWidth=".7" />
-      <defs><clipPath id={recorte}><circle cx="60" cy={estilo === 2 ? 55 : 53} r="40" /></clipPath></defs>
-      <g clipPath={`url(#${recorte})`}>
-        <svg x="20" y={estilo === 2 ? 15 : 13} width="80" height="80" viewBox="30 32 340 300" preserveAspectRatio="xMidYMid slice"><image href={`/selos/${arquivo}.png`} width="400" height="500" /></svg>
-      </g>
-      {estilo === 2 && <path d="M3 80H117L111 90L117 100H3L9 90Z" fill="#5A1E2D" stroke="#F7F0EA" strokeWidth="1" />}
-      <text x="60" y={estilo === 2 ? 93 : 103} textAnchor="middle" fill={estilo === 2 ? '#F7F0EA' : '#5A1E2D'} fontFamily="Inter, sans-serif" fontWeight="700" fontSize={estilo === 2 ? 10 : 8}>{legenda}</text>
+    <svg className={`passe__selo-redondo${conquistado ? ' is-conquistado' : ''}`} viewBox="0 0 120 120" role="img" aria-label={`Selo ${legenda}: ${conquistado ? 'conquistado' : 'a conquistar'}`}>
+      <circle cx="60" cy="60" r="58" fill="#F7F0EA" />
+      <circle cx="60" cy="60" r="54" fill={cor} />
+      <circle cx="60" cy="60" r="47" fill="none" stroke="#F7F0EA" strokeWidth="1" strokeDasharray="2.5 3" opacity=".75" />
+      <defs><path id={arco} d="M 22 60 A 38 38 0 0 1 98 60" /></defs>
+      <text fill="#F7F0EA" fontFamily="Inter, sans-serif" fontWeight="700" fontSize="8.5" letterSpacing="2.4"><textPath href={`#${arco}`} startOffset="50%" textAnchor="middle">MISSÃO</textPath></text>
+      <Icone x="44" y="40" width="32" height="32" color="#F7F0EA" strokeWidth={1.6} />
+      <text x="60" y="88" textAnchor="middle" fill="#F7F0EA" fontFamily="'Funnel Display', Inter, sans-serif" fontWeight="700" fontSize="11">{legenda}</text>
+      {conquistado && <g><circle cx="96" cy="24" r="13" fill="#DDB160" stroke="#F7F0EA" strokeWidth="2.5" /><path d="M90 24l4 4 8-8" fill="none" stroke="#22100F" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></g>}
     </svg>
   );
 }
@@ -405,11 +408,11 @@ function CartaoMissao({ missao, recarregar, liberada, comoMembro, abrirPrograma 
   }
 
   return (
-    <article className="passe__missao">
-      <div className="passe__missao-cabecalho"><span className={`passe__missao-status${feita ? ' is-feita' : bloqueada ? ' is-bloqueada' : ''}`}>{feita ? <Check size={12} aria-hidden="true" /> : bloqueada ? <LockKeyhole size={12} aria-hidden="true" /> : null}{status}</span></div>
+    <article className={`passe__missao${feita ? ' is-feita' : bloqueada ? ' is-bloqueada' : ''}`}>
       <div className="passe__missao-topo">
         <SeloMissao slug={missao.slug} conquistado={feita} />
         <div>
+          <span className={`passe__missao-status${feita ? ' is-feita' : bloqueada ? ' is-bloqueada' : ''}`}>{feita ? <Check size={12} aria-hidden="true" /> : bloqueada ? <LockKeyhole size={12} aria-hidden="true" /> : null}{status}</span>
           <h2>{missao.titulo}</h2>
           <p>{missao.descricao}</p>
         </div>
@@ -433,20 +436,30 @@ function CartaoMissao({ missao, recarregar, liberada, comoMembro, abrirPrograma 
   );
 }
 
+const GRUPOS_MISSAO: Array<[string, string[]]> = [['Para começar', ['livre', 'membro']], ['Rumo a Conector', ['conector']], ['Rumo a Embaixador', ['embaixador']]];
+
 function Missoes({ espaco, recarregar, comoMembro, abrirPrograma }: { espaco: Espaco; recarregar: () => void; comoMembro: boolean; abrirPrograma: () => void }) {
   const [previa, setPrevia] = useState<'minhas' | 'membro' | 'conector'>('minhas');
   const podeSimular = espaco.membro!.categoria === 'fundadora';
   const simulando = comoMembro || (podeSimular && previa !== 'minhas');
   const categoria = comoMembro ? 'membro' : podeSimular && previa !== 'minhas' ? previa : espaco.membro!.categoria;
+  const concluidas = simulando ? 0 : espaco.missoes.filter((missao) => missao.status === 'concluida').length;
   const liberada = (missao: Missao) => missao.nivel !== 'embaixador' || categoria === 'conector' || categoria === 'embaixador' || categoria === 'fundadora';
   return (
     <>
       <header className="passe__missoes-titulo"><Target size={28} aria-hidden="true" /><h1>Missões</h1></header>
-      <p className="passe__missoes-intro">Acompanhe suas contribuições para a comunidade.</p>
+      <p className="passe__missoes-intro">Cada missão cumprida vira um selo no seu passaporte e soma pontos no programa.</p>
+      <div className="passe__missoes-progresso" aria-label="Seu progresso nas missões">
+        <strong>{concluidas}<span> de {espaco.missoes.length}</span></strong><small>missões concluídas</small>
+        <div className="passe__missoes-barra"><i style={{ width: `${espaco.missoes.length ? (concluidas / espaco.missoes.length) * 100 : 0}%` }} /></div>
+      </div>
       {podeSimular && !comoMembro && <label className="passe__previa-missoes">Visualização<select value={previa} onChange={(event) => setPrevia(event.target.value as typeof previa)}><option value="minhas">Minhas missões</option><option value="membro">Prévia: Membro</option><option value="conector">Prévia: Conector</option></select></label>}
       <details className="passe__missoes-ajuda"><summary>Como as missões são liberadas</summary><p>As primeiras ficam disponíveis após o primeiro encontro. As de Embaixador abrem no nível Conector, confirmado pela organização.</p></details>
       {simulando && <p className="passe__previa-aviso" role="status">Prévia de {NIVEIS[categoria] || categoria}, com missões por cumprir. Suas conquistas estão preservadas e os envios ficam desativados nesta prévia.</p>}
-      {espaco.missoes.map((missao) => <CartaoMissao key={`${missao.slug}-${categoria}-${simulando}`} missao={missao} recarregar={recarregar} liberada={liberada(missao)} comoMembro={simulando} abrirPrograma={abrirPrograma} />)}
+      {GRUPOS_MISSAO.map(([titulo, niveis]) => {
+        const lista = espaco.missoes.filter((missao) => niveis.includes(missao.nivel));
+        return lista.length ? <section key={titulo} className="passe__missoes-grupo"><h2>{titulo}</h2>{lista.map((missao) => <CartaoMissao key={`${missao.slug}-${categoria}-${simulando}`} missao={missao} recarregar={recarregar} liberada={liberada(missao)} comoMembro={simulando} abrirPrograma={abrirPrograma} />)}</section> : null;
+      })}
     </>
   );
 }
@@ -725,7 +738,35 @@ function IconeContato({ tipo }: { tipo: 'whatsapp' | 'linkedin' | 'instagram' })
     : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M3.5 20.5 5 16a8.5 8.5 0 1 1 3.2 3.1l-4.7 1.4Z" strokeLinejoin="round" /><path d="M9 8.8c.3 3 2.8 5.5 6 6.2l1-1.6-2-1-.9.7c-.8-.4-1.5-1.1-1.9-1.9l.7-.9-1-2-1.9 0Z" fill="currentColor" stroke="none" /></svg>;
 }
 
-function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar }: { pessoa: Pessoa; contatos: boolean; eu: boolean; voltar: () => void; recarregar: () => void }) {
+// Indicar este perfil para outra pessoa da Rede, por exemplo para quem recruta e procura essa experiência.
+function IndicarPerfil({ pessoa, outras }: { pessoa: Pessoa; outras: Pessoa[] }) {
+  const [para, setPara] = useState('');
+  const [mensagem, setMensagem] = useState('');
+  const [aviso, setAviso] = useState('');
+  const [erro, setErro] = useState('');
+  const primeiro = pessoa.nome.split(' ')[0];
+  async function enviar(event: FormEvent) {
+    event.preventDefault(); setErro(''); setAviso('');
+    const { error } = await supabase.rpc('communicali_indicar_perfil', { p_perfil: pessoa.id, p_para: para, p_mensagem: mensagem });
+    if (error) { setErro(errorMessage(error)); return; }
+    const nome = outras.find((item) => item.id === para)?.nome.split(' ')[0] || 'A pessoa';
+    setPara(''); setMensagem(''); setAviso(`${nome} recebeu o perfil de ${primeiro} nos alertas.`);
+  }
+  if (!outras.length) return null;
+  return (
+    <form className="passe__cartao passe__form passe__indicar-perfil" onSubmit={(event) => void enviar(event)}>
+      <h2>Indicar {primeiro} para alguém</h2>
+      <p>Conhece alguém que precisa dessa experiência? Envie o perfil e a pessoa recebe um alerta.</p>
+      <label>Para quem<select required value={para} onChange={(event) => setPara(event.target.value)}><option value="">Escolha uma pessoa</option>{outras.map((item) => <option key={item.id} value={item.id}>{item.nome}{item.recrutador ? ' · recruta' : ''}</option>)}</select></label>
+      <label>Mensagem <em>opcional</em><textarea rows={2} maxLength={280} value={mensagem} placeholder={`Por que ${primeiro} pode ajudar`} onChange={(event) => setMensagem(event.target.value)} /></label>
+      {erro && <p className="passe__erro" role="alert">{erro}</p>}
+      {aviso && <p className="passe__ok" role="status">{aviso}</p>}
+      <button type="submit" className="passe__botao">Enviar perfil</button>
+    </form>
+  );
+}
+
+function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar, outras = [] }: { pessoa: Pessoa; contatos: boolean; eu: boolean; voltar: () => void; recarregar: () => void; outras?: Pessoa[] }) {
   const whatsapp = pessoa.whatsapp?.replace(/\D/g, '');
   const email = pessoa.email?.trim();
   const instagram = pessoa.instagram?.trim().replace(/^.*instagram\.com\//, '').replace(/^@/, '');
@@ -767,6 +808,7 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar }: { pessoa: Pes
           </div>
         ) : <p>Quer falar com {primeiro}? Conecte-se aqui. Os contatos diretos abrem quando você chega a Conector.</p>}
       </section>
+      {contatos && !eu && <IndicarPerfil pessoa={pessoa} outras={outras} />}
       {contatos && <FeedbackPerfil key={pessoa.id} membroId={pessoa.id} proprio={eu} />}
     </>
   );
@@ -807,18 +849,18 @@ function Rede({ comoMembro, abrir, fundadora = false }: { comoMembro: boolean; a
   const [rede, setRede] = useState<{ eu: string; acesso: boolean; total?: number; pessoas: Pessoa[]; parceiros: Parceiro[] } | null>(null);
   const [frente, setFrente] = useState<'pessoas' | 'parceiros'>('pessoas');
   const [busca, setBusca] = useState('');
-  const [filtro, setFiltro] = useState({ segmento: '', regiao: '', nivel: '', mercado: '' });
+  const [filtro, setFiltro] = useState({ segmento: '', regiao: '', nivel: '', mercado: '', conexao: '' });
   const [abertaId, setAbertaId] = useState('');
   const carregarRede = () => { supabase.rpc('communicali_rede').then(({ data }) => setRede(data as typeof rede)); };
   useEffect(carregarRede, []);
   const perfis = usePerfisParceiros(!!rede?.acesso && !comoMembro && frente === 'parceiros');
   if (rede && (!rede.acesso || comoMembro)) return <><RedeBloqueada total={rede.total ?? rede.pessoas.length} abrir={() => abrir('programa')} /><VitrineParceiros /></>;
   const aberta = rede?.pessoas.find((pessoa) => pessoa.id === abertaId);
-  if (aberta) return <FichaPessoa pessoa={aberta} contatos eu={aberta.id === rede?.eu} voltar={() => setAbertaId('')} recarregar={carregarRede} />;
+  if (aberta) return <FichaPessoa pessoa={aberta} contatos eu={aberta.id === rede?.eu} voltar={() => setAbertaId('')} recarregar={carregarRede} outras={(rede?.pessoas || []).filter((item) => item.id !== aberta.id && item.id !== rede?.eu)} />;
   const termo = busca.trim().toLowerCase();
   const todas = rede?.pessoas || [];
   const valores = (chave: 'segmento' | 'regiao') => [...new Set(todas.map((pessoa) => pessoa[chave]).filter(Boolean))] as string[];
-  const confere = (pessoa: Pessoa) => (!filtro.segmento || pessoa.segmento === filtro.segmento) && (!filtro.regiao || pessoa.regiao === filtro.regiao) && (!filtro.nivel || pessoa.categoria === filtro.nivel) && (!filtro.mercado || (filtro.mercado === 'aberto' ? pessoa.aberto_trabalho : pessoa.recrutador))
+  const confere = (pessoa: Pessoa) => (!filtro.conexao || (pessoa.eu_conectei && pessoa.me_conectou)) && (!filtro.segmento || pessoa.segmento === filtro.segmento) && (!filtro.regiao || pessoa.regiao === filtro.regiao) && (!filtro.nivel || pessoa.categoria === filtro.nivel) && (!filtro.mercado || (filtro.mercado === 'aberto' ? pessoa.aberto_trabalho : pessoa.recrutador))
     && (!termo || [pessoa.nome, pessoa.cidade_uf, pessoa.empresa, ...pessoa.temas, ...pessoa.interesses].join(' ').toLowerCase().includes(termo));
   const pessoas = todas.filter((pessoa) => confere(pessoa) && (frente === 'pessoas' || pessoa.presta_servicos));
   const parceiros = (rede?.parceiros || []).filter((item) => !termo || [item.nome, perfis.find((perfil) => perfil.partner_id === item.id)?.descricao || ''].join(' ').toLowerCase().includes(termo));
@@ -832,6 +874,7 @@ function Rede({ comoMembro, abrir, fundadora = false }: { comoMembro: boolean; a
       </div>
       <div className="passe__form passe__filtros">
         <label>Buscar<input value={busca} placeholder="Nome, cidade ou tema" onChange={(event) => setBusca(event.target.value)} /></label>
+        <label>Mostrar<select value={filtro.conexao} onChange={(event) => setFiltro({ ...filtro, conexao: event.target.value })}><option value="">Toda a Rede</option><option value="minhas">Minhas conexões</option></select></label>
         <label>Segmento<select value={filtro.segmento} onChange={(event) => setFiltro({ ...filtro, segmento: event.target.value })}><option value="">Todos</option>{valores('segmento').map((item) => <option key={item}>{item}</option>)}</select></label>
         <label>Região<select value={filtro.regiao} onChange={(event) => setFiltro({ ...filtro, regiao: event.target.value })}><option value="">Todas</option>{valores('regiao').map((item) => <option key={item}>{item}</option>)}</select></label>
         <label>Nível<select value={filtro.nivel} onChange={(event) => setFiltro({ ...filtro, nivel: event.target.value })}><option value="">Todos</option>{['embaixador', 'conector', 'membro'].map((item) => <option key={item} value={item}>{NIVEIS[item]}</option>)}</select></label>

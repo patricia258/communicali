@@ -45,20 +45,20 @@ export function ParceiroRede({ parceiro, perfil, demonstracao = false }: { parce
       {logo && !falhou ? <img src={logo} alt={`Logo ${parceiro.nome}`} onError={() => setFalhou(true)} /> : <span aria-hidden="true">{parceiro.nome.charAt(0)}</span>}
     </div>
     <div className="passe__empresa-corpo"><h3>{parceiro.nome}</h3>{perfil?.descricao && <p>{perfil.descricao}</p>}
-      <div className="passe__empresa-contatos">
+      {!site && !telefone && !email && !instagram && !linkedin && <p className="passe__aviso">Contato ainda não informado.</p>}
+    </div>
+    {!!(site || telefone || email || instagram || linkedin) && <div className="passe__empresa-contatos">
         {site && canal('Site', site, <Globe size={19} aria-hidden="true" />)}
         {telefone && canal('WhatsApp', `https://wa.me/${telefone.length <= 11 ? `55${telefone}` : telefone}`, <IconeCanal tipo="whatsapp" />)}
         {email && canal('E-mail', `mailto:${email}`, <Mail size={19} aria-hidden="true" />)}
         {instagram && canal('Instagram', `https://www.instagram.com/${instagram}`, <IconeCanal tipo="instagram" />)}
         {linkedin && canal('LinkedIn', linkedin, <IconeCanal tipo="linkedin" />)}
-      </div>
-      {!site && !telefone && !email && !instagram && !linkedin && <p className="passe__aviso">Contato ainda não informado.</p>}
-    </div>
+    </div>}
     {!![perfil?.beneficio, perfil?.desconto, perfil?.beneficio_detalhes, perfil?.cupom].some((v) => v?.trim()) && <section className="passe__empresa-beneficio" aria-label={`Vantagem de ${parceiro.nome}`}>
-      <div className="passe__empresa-beneficio-topo"><span>PARA A COMUNIDADE</span>{perfil?.desconto?.trim() && <strong className="passe__empresa-desconto">{perfil.desconto}</strong>}</div>
+      <div className="passe__empresa-beneficio-topo"><span>Exclusivo para a comunidade</span>{perfil?.desconto?.trim() && <strong className="passe__empresa-desconto">{perfil.desconto}</strong>}</div>
       {perfil?.beneficio?.trim() && <h4>{perfil.beneficio}</h4>}
       {perfil?.beneficio_detalhes?.trim() && <p>{perfil.beneficio_detalhes}</p>}
-      {perfil?.cupom?.trim() && <div className="passe__empresa-cupom"><div><span>SEU CUPOM</span><code>{perfil.cupom}</code></div><button type="button" disabled={demonstracao} aria-label={`Copiar cupom de ${parceiro.nome}`} title="Copiar cupom" onClick={() => {
+      {perfil?.cupom?.trim() && <div className="passe__empresa-cupom"><div><span>Seu cupom</span><code>{perfil.cupom}</code></div><button type="button" disabled={demonstracao} aria-label={`Copiar cupom de ${parceiro.nome}`} title="Copiar cupom" onClick={() => {
         void navigator.clipboard.writeText(perfil.cupom!.trim()).then(() => setAvisoCupom('Cupom copiado.'), () => setAvisoCupom('Não foi possível copiar. Selecione o código acima.'));
       }}><Copy size={18} aria-hidden="true" /></button></div>}
       {avisoCupom && <p role="status">{avisoCupom}</p>}
