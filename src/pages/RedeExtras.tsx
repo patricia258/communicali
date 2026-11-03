@@ -66,6 +66,8 @@ export function ParceiroRede({ parceiro, perfil, demonstracao = false }: { parce
   </article>;
 }
 
+const IDEIAS = ['👏 Valeu pela troca!', '🤝 Que conexão boa!', '💡 Aprendi muito com você', '☕ Bora tomar outro café?', '✨', '💛', '🙌', '😊'];
+
 type Comentario = { id: string; nome: string; estrelas: number; comentario: string; criado_em: string };
 type Feedback = { pode_comentar: boolean; comentarios: Comentario[]; meu: { id: string; estrelas: number; comentario: string; status: string; motivo?: string | null } | null };
 export function FeedbackPerfil({ membroId, proprio }: { membroId: string; proprio: boolean }) {
@@ -111,9 +113,11 @@ export function FeedbackPerfil({ membroId, proprio }: { membroId: string; propri
     {dados && !dados.comentarios.length && <p className="passe__aviso">Nenhum comentário publicado ainda.</p>}
     {!dados && erro && <button type="button" className="passe__link" onClick={() => setTentativa((n) => n + 1)}>Tentar novamente</button>}
     {!proprio && dados?.pode_comentar && <form className="passe__form" onSubmit={(event) => void enviar(event)}>
-      <h3>{dados.meu ? 'Seu comentário' : 'Conte como foi a conexão'}</h3>
+      <h3>{dados.meu ? 'Seu comentário' : 'Deixe uma mensagem 💬'}</h3>
+      {!dados.meu && <p className="passe__feedback-convite">Um elogio, um agradecimento, algo que você aprendeu nessa troca. A CALI aprova antes de aparecer no perfil.</p>}
       <div className="passe__estrelas" role="group" aria-label="Sua avaliação">{Array.from({ length: 5 }, (_, n) => <button type="button" key={n} disabled={busy} aria-label={`${n + 1} ${n ? 'estrelas' : 'estrela'}`} aria-pressed={nota === n + 1} onClick={() => setNota(n + 1)}><Star size={22} fill={n < nota ? 'currentColor' : 'none'} aria-hidden="true" /></button>)}</div>
       <label>Comentário<textarea required minLength={3} maxLength={600} rows={3} value={texto} disabled={busy} onChange={(event) => setTexto(event.target.value)} /></label>
+      <div className="passe__feedback-ideias" role="group" aria-label="Sugestões de mensagem">{IDEIAS.map((ideia) => <button type="button" key={ideia} disabled={busy} onClick={() => setTexto((atual) => (atual.trim() ? `${atual.trim()} ${ideia}` : ideia).slice(0, 600))}>{ideia}</button>)}</div>
       <p className="passe__aviso">A CALI revisa antes de publicar. Aparecem seu nome, avaliação e comentário, sem foto.</p>
       {dados.meu && <p className="passe__aviso">{dados.meu.status === 'aprovado' ? 'Publicado. Uma edição passa por nova aprovação.' : dados.meu.status === 'oculto' ? `Não publicado. ${dados.meu.motivo || 'Você pode revisar e reenviar.'}` : 'Aguardando aprovação da CALI.'}</p>}
       <button type="submit" className="passe__botao passe__botao--linha" disabled={busy || nota < 1 || texto.trim().length < 3}>{busy ? 'Enviando…' : 'Enviar para aprovação'}</button>

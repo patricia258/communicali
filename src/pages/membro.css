@@ -360,3 +360,8 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__programa-trilha .is-atual .passe__programa-passo{border-color:#7A1F3D;background:#7A1F3D;color:#F7F0EA}
 .passe__programa-trilha .is-atual .passe__programa-etapa{border-color:#9D6E7A;box-shadow:inset 3px 0 #7A1F3D;background:#F5EAE4}
 .passe__programa-trilha .is-atual .passe__programa-estado{color:#7A1F3D}
+
+.passe__feedback-convite{margin:0 0 10px;font-size:13px;color:#6B5A52}
+.passe__feedback-ideias{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.passe__feedback-ideias button{border:1px solid #E2D6CC;background:#FFFDFA;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;color:#3A2A24;cursor:pointer}
+.passe__feedback-ideias button:hover{border-color:#C9973B}

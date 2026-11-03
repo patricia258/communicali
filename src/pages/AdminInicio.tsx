@@ -5,9 +5,9 @@ import { CalendarCheck, ClipboardList, Gift, Handshake, IdCard, MonitorPlay, Tro
 import { supabase } from '../lib/supabase';
 
 export const FAIXAS = [
-  { nome: 'Membro', de: 0, ate: 99 },
-  { nome: 'Conector', de: 100, ate: 249 },
-  { nome: 'Embaixador', de: 250, ate: Infinity },
+  { nome: 'Membro', de: 0, ate: 59 },
+  { nome: 'Conector', de: 60, ate: 179 },
+  { nome: 'Embaixador', de: 180, ate: Infinity },
 ];
 
 export const PONTOS: Array<[string, string, number]> = [

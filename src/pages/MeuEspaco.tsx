@@ -32,8 +32,8 @@ type Parceiro = { id: string; nome: string; logo_url: string | null; site_url: s
 const ABAS: Array<[Aba, string]> = [['inicio', 'Início'], ['edicoes', 'Edições'], ['missoes', 'Missões'], ['rede', 'Rede'], ['indicar', 'Indicar'], ['programa', 'Programa']];
 const NIVEIS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organização', kids: 'Kids' };
 const META: Record<string, { nome: string; pontos: number; encontros: number; nivel: string }> = {
-  membro: { nome: 'Conector', pontos: 100, encontros: 3, nivel: 'conector' },
-  conector: { nome: 'Embaixador', pontos: 250, encontros: 6, nivel: 'embaixador' },
+  membro: { nome: 'Conector', pontos: 60, encontros: 4, nivel: 'conector' },
+  conector: { nome: 'Embaixador', pontos: 180, encontros: 6, nivel: 'embaixador' },
 };
 const MISSAO_SELOS: Record<string, [string, string]> = { convidados: ['postal-indicacao', 'Convidou'], conexao: ['postal-conector', 'Conectou'], lugar: ['postal-lugar', 'Recomendou'], palestra: ['postal-palestra', 'Palestrou'], parceiro: ['postal-embaixador', 'Aproximou'], representar: ['postal-embaixador', 'Representou'] };
 const SITUACAO: Record<string, string> = { concluida: 'Concluída', enviada: 'Em análise', recusada: 'Pode reenviar', aberta: 'Em aberto' };
@@ -414,7 +414,7 @@ function CartaoMissao({ missao, recarregar, liberada, comoMembro, abrirPrograma 
           <p>{missao.descricao}</p>
         </div>
       </div>
-      {bloqueada && <div className="passe__missao-requisito"><p>Libera no nível Conector: 100 pontos, 3 encontros e 2 missões. A organização confirma a mudança de nível.</p><button type="button" className="passe__link" onClick={abrirPrograma}>Ver requisitos do programa</button></div>}
+      {bloqueada && <div className="passe__missao-requisito"><p>Libera no nível Conector: 60 pontos, 4 encontros e 1 contribuição de conexão. A organização confirma a mudança de nível.</p><button type="button" className="passe__link" onClick={abrirPrograma}>Ver requisitos do programa</button></div>}
       {podeEnviar && !abrindo && <button type="button" className="passe__botao passe__botao--terra" onClick={() => setAbrindo(true)}>Enviar para análise</button>}
       {podeEnviar && abrindo && (
         <form className="passe__form" onSubmit={(event) => void enviar(event)}>
@@ -772,6 +772,20 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar }: { pessoa: Pes
   );
 }
 
+// Empresas parceiras e suas vantagens ficam abertas a todo Membro; a Rede de pessoas segue a partir de Conector.
+function VitrineParceiros() {
+  const [parceiros, setParceiros] = useState<Parceiro[]>([]);
+  const perfis = usePerfisParceiros(true);
+  useEffect(() => { void supabase.from('partners').select('id,nome,logo_url,site_url').eq('ativo', true).order('ordem').then(({ data }) => setParceiros((data || []) as Parceiro[])); }, []);
+  if (!parceiros.length) return null;
+  return (
+    <>
+      <header className="passe__rede-grupo"><h2>Empresas parceiras <span>{parceiros.length}</span></h2><p>Quem apoia os encontros. Quando houver cupom, é só usar.</p></header>
+      <div className="passe__empresas">{parceiros.map((item) => <ParceiroRede key={item.id} parceiro={item} perfil={perfis.find((perfil) => perfil.partner_id === item.id)} />)}</div>
+    </>
+  );
+}
+
 function RedeBloqueada({ total, abrir }: { total: number; abrir: () => void }) {
   return (
     <>
@@ -798,7 +812,7 @@ function Rede({ comoMembro, abrir, fundadora = false }: { comoMembro: boolean; a
   const carregarRede = () => { supabase.rpc('communicali_rede').then(({ data }) => setRede(data as typeof rede)); };
   useEffect(carregarRede, []);
   const perfis = usePerfisParceiros(!!rede?.acesso && !comoMembro && frente === 'parceiros');
-  if (rede && (!rede.acesso || comoMembro)) return <RedeBloqueada total={rede.total ?? rede.pessoas.length} abrir={() => abrir('programa')} />;
+  if (rede && (!rede.acesso || comoMembro)) return <><RedeBloqueada total={rede.total ?? rede.pessoas.length} abrir={() => abrir('programa')} /><VitrineParceiros /></>;
   const aberta = rede?.pessoas.find((pessoa) => pessoa.id === abertaId);
   if (aberta) return <FichaPessoa pessoa={aberta} contatos eu={aberta.id === rede?.eu} voltar={() => setAbertaId('')} recarregar={carregarRede} />;
   const termo = busca.trim().toLowerCase();

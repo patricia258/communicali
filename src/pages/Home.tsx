@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import QRCode from 'qrcode';
-import { ArrowRight, CalendarDays, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
+import { ArrowRight, BadgeCheck, CalendarDays, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_DECK_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 import { SiteFooter } from '../components/SiteFooter';
 import { EDITION_FIELDS, EditionCard, Share, type EditionRow } from './Edicao';
@@ -17,6 +17,7 @@ const MODALIDADES = [
 ];
 
 const FAQ = [
+  ['Fazer parte da comunidade é gratuito?', 'Sim. Fazer parte da CommuniCALI é gratuito.'],
   ['Preciso ser de RH para participar?', 'Não. A base da comunidade é de profissionais de RH e administrativos, e líderes, empreendedores e especialistas de qualquer área são bem-vindos, do estágio à transição de carreira.'],
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
@@ -161,7 +162,7 @@ export function Home() {
             <p className="eyebrow">Como fazer parte</p>
             <h2>Escolha como <em>participar.</em></h2>
           </div>
-          <p>O grupo é onde a conversa acontece todo dia. Quem participa de um encontro presencial se torna membro.</p>
+          <p>Fazer parte da CommuniCALI é gratuito. O grupo é onde a conversa acontece todo dia, e o cadastro de Membro pode ser feito a qualquer momento.</p>
         </div>
         <div className="doors">
           <article className="door">
@@ -177,8 +178,16 @@ export function Home() {
             <span className="door__icon"><UserPlus size={20} aria-hidden="true" /></span>
             <div>
               <h3>Encontros presenciais</h3>
-              <p>Inscreva-se no próximo encontro. A presença no dia torna você membro e abre seu passaporte online.</p>
+              <p>Inscreva-se no próximo encontro. Você pode participar como visitante de até dois encontros abertos.</p>
               <a className="link" href="#proximo">Ver o próximo encontro</a>
+            </div>
+          </article>
+          <article className="door">
+            <span className="door__icon"><BadgeCheck size={20} aria-hidden="true" /></span>
+            <div>
+              <h3>Cadastro de Membro</h3>
+              <p>Conte um pouco sobre você e entre na nossa lista, mesmo sem encontro marcado. A equipe lê cada pedido e retorna.</p>
+              <a className="link" href="/f/quero-ser-membro">Quero ser Membro</a>
             </div>
           </article>
         </div>
@@ -272,7 +281,7 @@ export function Home() {
             </div>
           </div>
           <ul className="modes">
-            {MODALIDADES.map(([title, text], index) => { const Icon = MODE_ICONS[index]; return <li key={title}><Icon size={18} aria-hidden="true" /><strong>{title}</strong><span>{text}</span></li>; })}
+            {MODALIDADES.map(([title], index) => { const Icon = MODE_ICONS[index]; return <li key={title}><Icon size={18} aria-hidden="true" /><strong>{title}</strong></li>; })}
           </ul>
         </div>
       </section>

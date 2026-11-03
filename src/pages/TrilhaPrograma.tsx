@@ -23,7 +23,7 @@ export function TrilhaPrograma({ categoria, previa }: { categoria: string; previ
       <span>{proximo ? 'PRÓXIMA ETAPA' : indice === ETAPAS.length - 1 ? 'CONTINUE SUA TRAJETÓRIA' : 'CONHEÇA A TRILHA'}</span>
       <h2>{proximo?.nome || (indice === ETAPAS.length - 1 ? 'Seu papel continua em movimento' : 'Da primeira visita às contribuições para a comunidade')}</h2>
       <p>{proximo ? proximo.descricao : 'Cada etapa representa uma forma de participar e contribuir.'}</p>
-      <p className="passe__aviso">Os requisitos de avanço estão em atualização. A organização avalia cada progressão; pontos sozinhos não mudam o nível.</p>
+      <p className="passe__aviso">Conector: 60 pontos no ciclo de 12 meses, 4 encontros e 1 contribuição de conexão. Embaixador: 180 pontos, 6 encontros, 2 contribuições diferentes e 12 meses como Conector. A organização avalia cada progressão; pontos sozinhos não mudam o nível.</p>
     </section>
     <ol className="passe__programa-trilha" aria-label="Etapas do programa">
       {ETAPAS.map((etapa, n) => <li key={etapa.id} className={`${n === indice ? 'is-atual' : n < indice ? 'is-anterior' : 'is-proxima'}`} aria-current={n === indice ? 'step' : undefined}>
