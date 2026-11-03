@@ -399,7 +399,7 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__missao.is-feita{border-color:#E3D3B0;background:linear-gradient(180deg,#FFFBF1,#FFFDFA)}
 .passe__missao-topo{align-items:center;gap:16px}
 .passe__selo-redondo{display:block;flex:none;width:88px;height:88px;filter:drop-shadow(0 3px 6px rgba(34,16,15,.18));transition:transform .2s}
-.passe__selo-redondo:not(.is-conquistado){filter:grayscale(.85);opacity:.5}
+.passe__selo-redondo:not(.is-conquistado){filter:saturate(.55) drop-shadow(0 2px 4px rgba(34,16,15,.12));opacity:.72}
 .passe__missao:hover .passe__selo-redondo{transform:rotate(-4deg)}
 .passe__missao-status{margin-bottom:6px;border:0;background:#F3E9E0;color:#6C4D3F;letter-spacing:.04em}
 .passe__missao-status.is-feita{background:linear-gradient(135deg,#E8B954,#C9973B);color:#22100F}

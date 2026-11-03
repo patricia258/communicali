@@ -129,6 +129,13 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — espaço do membro refinado
+- Parceiros: no espaço do membro aparece o **logo original** (`communicali_partner_profiles.logo_original_url`, preenchido para os 4 parceiros; o site continua com o branco de `partners.logo_url`). Novo parceiro cadastrado no painel salva os dois. Logo inteiro na moldura (contain), canais numa linha só, abaixo do nome; vantagem em bloco vinho com desconto dourado e cupom em destaque. Migração `20261103210000`.
+- Missões: selo redondo próprio (cor e ícone por missão, "MISSÃO" em arco, marca dourada quando conquistado), resumo "X de 6 concluídas" com barra, grupos Para começar / Rumo a Conector / Rumo a Embaixador.
+- Convite: cartão novo ("Tem um lugar para você nessa mesa.", carimbo redondo Café & Pessoas no canto, faixa de cores, bilhete com picote); bloco do código na aba Indicar virou bilhete vinho. Aplicado o limite de 2 trocas do código (migração `20261103220000`, rascunho etapa_7).
+- Rede: filtro "Mostrar: Minhas conexões" e "Indicar {nome} para alguém" no perfil (alerta tipo `perfil` para quem recebe, com Ver perfil; limite de uma vez por dia por par). Migração `20261103230000`. Sem e-mail por enquanto.
+- Conferido no celular com Membro de teste (removido): Missões, vitrine de parceiros, Indicar e cartão. Não conferidos com dados reais: bloco de vantagem/cupom (nenhum parceiro tem vantagem cadastrada) e indicar perfil (exige Conector).
+
 ### 03/11/2026, Claude Code — agradecimento enviado e texto mais fino
 - **Enviado** o agradecimento aos 13 inscritos sem contato (13 enviados, 0 erros), com aprovação de Patrícia.
 - Texto dos e-mails em 15px (era 17px) e `semViuva()` junta as duas últimas palavras de cada parágrafo, para nenhuma linha terminar com uma palavra sozinha no celular. Regra dela: atenção aos detalhes da estrutura do texto em todo conteúdo.
