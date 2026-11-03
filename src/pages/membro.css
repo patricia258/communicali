@@ -422,3 +422,24 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__convite .passe__bilhete-acoes::before{left:-13px}
 .passe__convite .passe__bilhete-acoes::after{right:-13px}
 .passe__convite .passe__bilhete-acoes .passe__botao{border-radius:999px}
+
+/* Parceiro mais compacto: vantagem resumida e detalhes em lista suspensa. */
+.passe__empresa{grid-template-columns:64px minmax(0,1fr);gap:12px;padding:14px}
+.passe__empresa-logo,.passe__empresa-logo.is-original{width:64px;height:64px;border-radius:12px}
+.passe__empresa-corpo h3{font-size:16px;margin-bottom:3px}
+.passe__empresa-corpo>p{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.passe__empresa-contatos{gap:6px}
+.passe__empresa-contatos a,.passe__empresa-contatos button{width:36px;height:36px}
+.passe__empresa-contatos svg{width:16px;height:16px}
+.passe__empresa-beneficio{gap:10px;padding:12px 14px;border-radius:12px}
+.passe__empresa-desconto{font-size:13px;padding:4px 11px}
+.passe__empresa-cupom{padding:8px 10px}
+.passe__empresa-cupom code{font-size:16px}
+.passe__empresa-cupom button{width:36px;height:36px}
+.passe__empresa-detalhes{position:relative;z-index:1}
+.passe__empresa-detalhes summary{display:flex;align-items:center;gap:6px;min-height:32px;color:#DDB160;font:600 12px Inter,sans-serif;cursor:pointer;list-style:none}
+.passe__empresa-detalhes summary::-webkit-details-marker{display:none}
+.passe__empresa-detalhes summary::after{content:'';width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+.passe__empresa-detalhes[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.passe__empresa-detalhes h4{margin:6px 0 4px;font-size:15px}
+.passe__empresa-detalhes p{margin:0}

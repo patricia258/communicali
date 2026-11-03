@@ -56,12 +56,14 @@ export function ParceiroRede({ parceiro, perfil, demonstracao = false }: { parce
     </div>}
     {!![perfil?.beneficio, perfil?.desconto, perfil?.beneficio_detalhes, perfil?.cupom].some((v) => v?.trim()) && <section className="passe__empresa-beneficio" aria-label={`Vantagem de ${parceiro.nome}`}>
       <div className="passe__empresa-beneficio-topo"><span>Exclusivo para a comunidade</span>{perfil?.desconto?.trim() && <strong className="passe__empresa-desconto">{perfil.desconto}</strong>}</div>
-      {perfil?.beneficio?.trim() && <h4>{perfil.beneficio}</h4>}
-      {perfil?.beneficio_detalhes?.trim() && <p>{perfil.beneficio_detalhes}</p>}
       {perfil?.cupom?.trim() && <div className="passe__empresa-cupom"><div><span>Seu cupom</span><code>{perfil.cupom}</code></div><button type="button" disabled={demonstracao} aria-label={`Copiar cupom de ${parceiro.nome}`} title="Copiar cupom" onClick={() => {
         void navigator.clipboard.writeText(perfil.cupom!.trim()).then(() => setAvisoCupom('Cupom copiado.'), () => setAvisoCupom('Não foi possível copiar. Selecione o código acima.'));
-      }}><Copy size={18} aria-hidden="true" /></button></div>}
+      }}><Copy size={16} aria-hidden="true" /></button></div>}
       {avisoCupom && <p role="status">{avisoCupom}</p>}
+      {!!(perfil?.beneficio?.trim() || perfil?.beneficio_detalhes?.trim()) && <details className="passe__empresa-detalhes"><summary>Ver detalhes da vantagem</summary>
+        {perfil?.beneficio?.trim() && <h4>{perfil.beneficio}</h4>}
+        {perfil?.beneficio_detalhes?.trim() && <p>{perfil.beneficio_detalhes}</p>}
+      </details>}
     </section>}
   </article>;
 }

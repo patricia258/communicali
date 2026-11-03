@@ -21,7 +21,7 @@ function carimbo(c: CanvasRenderingContext2D, x: number, y: number, r: number) {
   c.fillStyle = '#F7F0EA'; c.font = '700 17px Inter, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
   const passo = (Math.PI * 2) / texto.length;
   [...texto].forEach((letra, n) => { c.save(); c.rotate(n * passo); c.translate(0, -(r - 27)); c.fillText(letra, 0, 0); c.restore(); });
-  c.font = '700 30px "Funnel Display", sans-serif'; c.fillText('Café &', 0, -14); c.fillText('Pessoas', 0, 20);
+  c.font = '700 27px "Funnel Display", sans-serif'; c.fillText('Café &', 0, -15); c.fillText('Pessoas', 0, 17);
   c.restore();
 }
 
@@ -38,7 +38,7 @@ export async function gerarCartaoConvite(nome: string, codigo: string): Promise<
   // Faixa com as cores da marca, como no topo do site.
   [['#7A1F3D', 0], ['#A9502E', 270], ['#C9973B', 540], ['#5F6238', 810]].forEach(([cor, x]) => { c.fillStyle = cor as string; c.fillRect(x as number, 0, 270, 16); });
   c.drawImage(logo, 80, 80, 400, 400 * logo.height / logo.width);
-  carimbo(c, 900, 190, 112);
+  carimbo(c, 888, 205, 132);
   c.textAlign = 'left'; c.textBaseline = 'alphabetic';
   c.fillStyle = '#A9502E'; c.font = '600 24px Inter, sans-serif'; c.fillText(primeiro ? `CONVITE DE ${primeiro}` : 'UM CONVITE ESPECIAL', 80, 330, 640);
   c.fillStyle = '#22100F'; c.font = '700 74px "Funnel Display", sans-serif';
