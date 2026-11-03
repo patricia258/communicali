@@ -129,6 +129,10 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — vantagem exclusiva dos parceiros para Membros
+- Publicado `dpl_8zPQag4paKCf2BFWhTBFXtG5CvVC`. PDF `public/communicali/seja-parceiro.pdf` com o bloco "Um cupom só para os Membros" na página 3 e "a vantagem para os Membros" no passo Acordo (fonte: `build.py` + `deck.html` no scratchpad do Claude, exportado pelo Chrome sem cabeçalho). Formulário `parceiros-communicali` ganhou "Você pode oferecer uma vantagem exclusiva para os Membros?" e "Qual seria a vantagem?" (migração `20261103160000`). O que o parceiro combinar entra em Parceiros > perfil (vantagem, desconto, detalhes, cupom) e aparece na vitrine do Meu espaço.
+- Selo terracota: o texto "Conhecimento" passava da largura e cortava a borda da direita; corrigido.
+
 ### 03/11/2026, Claude Code — selos fixos e botão Registrar interesse
 - Publicado `dpl_2HYzfmrNcksxasKVScGbZzwaiDfC`. Sem carrossel: os quatro selos ficam lado a lado em tamanho fixo (postal mostarda, redondo vinho, recorte terracota, oval oliva), todos coloridos com borda marfim. Título em duas linhas: "Apoie este encontro." / "Seja um parceiro.". Os botões "Quero participar" do topo e da abertura viraram "Registrar interesse" e levam direto a `/f/quero-ser-membro`.
 - Próximo pedido dela: revisar e aprovar o layout dos e-mails automáticos.
