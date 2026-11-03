@@ -89,6 +89,15 @@ function foto(edition) {
   return capa ? `<tr><td style="padding:0 0 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td height="220" bgcolor="${COR.rose}" background="${escape(capa)}" style="height:220px;border-radius:20px;background-color:${COR.rose};background-image:url('${escape(capa)}');background-position:center 18%;background-size:cover;background-repeat:no-repeat;font-size:1px;line-height:1px">&nbsp;</td></tr></table></td></tr>` : '';
 }
 
+// Junta as duas últimas palavras para nenhuma linha terminar com uma palavra sozinha.
+function semViuva(html) {
+  for (let i = html.length - 1; i >= 0; i -= 1) {
+    if (html[i] === '>') { i = html.lastIndexOf('<', i); continue; }
+    if (html[i] === ' ') return `${html.slice(0, i)}&nbsp;${html.slice(i + 1)}`;
+  }
+  return html;
+}
+
 function rodape() {
   return `<tr><td align="center" style="padding:32px 0 0;font-family:${TEXTO};font-size:15px;line-height:22px;font-style:italic;color:${COR.vivo}">Falar de pessoas pode mudar o mundo.</td></tr>
 <tr><td align="center" style="padding:4px 0 0;font-family:${TEXTO};font-size:14px;line-height:22px;color:${COR.tinta}"><strong>Toda honra a Deus! 🙏</strong><br><a href="${SITE}" style="color:${COR.vivo}">comuni.calirh.com</a> · <a href="https://www.instagram.com/calirh_/" style="color:${COR.vivo}">@calirh_</a></td></tr>
@@ -96,7 +105,7 @@ function rodape() {
 }
 
 function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, cor, detalhes = true, comFoto = true }) {
-  const texto = paragrafos.map((item) => `<p style="margin:0 0 16px;font-family:${TEXTO};font-size:17px;line-height:27px;text-align:center;color:${COR.tinta}">${item}</p>`).join('');
+  const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${semViuva(item)}</p>`).join('');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">${FONTES}<title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escape(previa)}</div>
@@ -122,7 +131,7 @@ export function layoutSimples({ titulo, saudacao, texto, destaque, botao, itens 
 <tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="ComuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
 <tr><td align="center" style="padding:0 0 12px"><span style="display:inline-block;padding:7px 16px;border-radius:999px;background:${COR.mostarda};font-family:${TEXTO};font-size:14px;font-weight:600;color:${COR.tinta}">${escape(titulo)}</span></td></tr>
 <tr><td align="center" style="padding:0 0 12px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;color:${COR.vivo}">${escape(saudacao)}</td></tr>
-<tr><td align="center" style="padding:0 0 22px;font-family:${TEXTO};font-size:17px;line-height:27px;color:${COR.tinta}">${escape(texto)}${destaque ? `<br><strong>${escape(destaque)}</strong>` : ''}</td></tr>
+<tr><td align="center" style="padding:0 0 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${semViuva(escape(texto))}${destaque ? `<br><strong>${semViuva(escape(destaque))}</strong>` : ''}</td></tr>
 ${itens.length ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:18px 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${itens.map((item) => `✓ ${escape(item)}`).join('<br>')}</td></tr><tr><td height="20"></td></tr>` : ''}
 <tr><td align="center"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.vivo};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>
 ${rodape()}

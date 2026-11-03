@@ -129,6 +129,10 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — agradecimento enviado e texto mais fino
+- **Enviado** o agradecimento aos 13 inscritos sem contato (13 enviados, 0 erros), com aprovação de Patrícia.
+- Texto dos e-mails em 15px (era 17px) e `semViuva()` junta as duas últimas palavras de cada parágrafo, para nenhuma linha terminar com uma palavra sozinha no celular. Regra dela: atenção aos detalhes da estrutura do texto em todo conteúdo.
+
 ### 03/11/2026, Claude Code — boas-vindas enviadas, rastreio e agradecimento
 - **Enviado** em 03/11 o e-mail de boas-vindas aos 25 contatados da 1ª edição (25 enviados, 0 erros), com aprovação de Patrícia.
 - Rastreio próprio (a API da Resend não aceitou ligar o rastreio do domínio): `api/o.js` (imagem de 1 pixel, marca `email_log.aberto_em`) e `api/r.js` (clique, marca `clicado_em`, só redireciona para domínios conhecidos). `rastrear()` em `enviarUmaVez`. Migração `20261103200000`. Painel de Edições, cartão "Envios e acompanhamento": tabela com nome, e-mail, tipo, envio, abriu e clicou.
