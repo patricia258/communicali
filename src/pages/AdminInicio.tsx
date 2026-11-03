@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarCheck, ClipboardList, Gift, Handshake, IdCard, MonitorPlay, Trophy, UserCheck, Users, Vote } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { Email, Tabela, dataBr } from './AdminTabela';
 
 export const FAIXAS = [
   { nome: 'Membro', de: 0, ate: 59 },
@@ -78,6 +79,7 @@ export function HomePanel() {
           <a className="wf-secondary" href="/convidar?edicao=teste" target="_blank" rel="noopener noreferrer">Indicar convidado</a>
         </div>
       </section>
+      <Descadastros />
     </>
   );
 }
@@ -115,5 +117,24 @@ export function ProgramPanel() {
         </div>
       </section>
     </>
+  );
+}
+
+// Quem clicou em "Parar de receber estes e-mails" nos avisos do espaço do membro.
+function Descadastros() {
+  const [linhas, setLinhas] = useState<Array<{ email: string; criado_em: string; nome: string }>>([]);
+  useEffect(() => {
+    void Promise.all([supabase.from('email_descadastro').select('email,criado_em'), supabase.from('members').select('email,nome')]).then(([saidas, membros]) => {
+      const nomes = new Map((membros.data || []).map((item) => [String(item.email).toLowerCase(), item.nome as string]));
+      setLinhas((saidas.data || []).map((item) => ({ ...item, nome: nomes.get(item.email) || '-' })));
+    });
+  }, []);
+  return (
+    <section className="v2-forms-card">
+      <header><small>E-MAILS</small><h2>Pararam de receber e-mails</h2></header>
+      <p className="adm-hint">Quem saiu continua com acesso ao espaço do membro. Deixa de receber só os avisos de conexão, sugestão e indicação.</p>
+      <Tabela colunas={[{ id: 'nome', titulo: 'Nome', valor: (item) => item.nome }, { id: 'email', titulo: 'E-mail', valor: (item) => item.email, render: (item) => <Email email={item.email} /> }, { id: 'data', titulo: 'Desde', valor: (item) => item.criado_em, render: (item) => dataBr(item.criado_em) }]}
+        linhas={linhas} chave={(item) => item.email} inicial={{ id: 'data', desc: true }} vazio="Ninguém pediu para sair até agora." />
+    </section>
   );
 }

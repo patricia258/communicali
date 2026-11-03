@@ -1,6 +1,7 @@
 // E-mails da ComuniCALI: layout próprio, convite de agenda e registro de envio. Cada pessoa recebe cada tipo uma vez por edição.
 export const SUPABASE = 'https://cyyrrtekbkltdiatixhp.supabase.co';
 export const PUBLIC_KEY = 'sb_publishable_57ZoSr7YGi1KqVdKmXMUxw_wGS-H19P';
+import { createHmac } from 'node:crypto';
 const SITE = 'https://comuni.calirh.com';
 const FROM = 'ComuniCALI <comuni@calirh.com>';
 const REPLY_TO = 'contato@calirh.com';
@@ -84,7 +85,7 @@ function detalhe(rotulo, valor) {
 // A foto entra como fundo da célula para qualquer formato virar uma faixa recortada; sem capa, o espaço some.
 function foto(edition) {
   const capa = absoluta(edition.capa_url);
-  return capa ? `<tr><td style="padding:0 0 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td height="220" bgcolor="${COR.rose}" background="${escape(capa)}" style="height:220px;border-radius:20px;background-color:${COR.rose};background-image:url('${escape(capa)}');background-position:center 62%;background-size:cover;background-repeat:no-repeat;font-size:1px;line-height:1px">&nbsp;</td></tr></table></td></tr>` : '';
+  return capa ? `<tr><td style="padding:0 0 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td height="220" bgcolor="${COR.rose}" background="${escape(capa)}" style="height:220px;border-radius:20px;background-color:${COR.rose};background-image:url('${escape(capa)}');background-position:center 18%;background-size:cover;background-repeat:no-repeat;font-size:1px;line-height:1px">&nbsp;</td></tr></table></td></tr>` : '';
 }
 
 function rodape() {
@@ -124,6 +125,7 @@ export function layoutSimples({ titulo, saudacao, texto, destaque, botao, itens 
 ${itens.length ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:18px 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${itens.map((item) => `✓ ${escape(item)}`).join('<br>')}</td></tr><tr><td height="20"></td></tr>` : ''}
 <tr><td align="center"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.vivo};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>
 ${rodape()}
+<tr><td align="center" style="padding:8px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#8A7A72"><a href="${DESCADASTRO}" style="color:#8A7A72">Parar de receber estes e-mails</a></td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -146,9 +148,21 @@ export function montar(tipo, edition, pessoa) {
 
 export const banco = (path, options = {}) => fetch(`${SUPABASE}/rest/v1/${path}`, { ...options, headers: { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json', ...options.headers } });
 
+const DESCADASTRO = '{{DESCADASTRO}}';
+export const assinatura = (email) => createHmac('sha256', process.env.CRON_SECRET || '').update(String(email).toLowerCase()).digest('hex').slice(0, 32);
+const linkDescadastro = (email) => `${SITE}/api/descadastro?e=${encodeURIComponent(email.toLowerCase())}&t=${assinatura(email)}`;
+
 export async function enviar(para, mensagem) {
+  // E-mails do espaço do membro levam o link de parar de receber e respeitam quem já saiu.
+  const membro = mensagem.html.includes(DESCADASTRO);
+  if (membro) {
+    const saiu = await banco(`email_descadastro?email=eq.${encodeURIComponent(para.toLowerCase())}&select=email`);
+    if (saiu.ok && (await saiu.json()).length) return { pulado: true };
+  }
+  const html = membro ? mensagem.html.replaceAll(DESCADASTRO, linkDescadastro(para)) : mensagem.html;
+  const headers = membro ? { 'List-Unsubscribe': `<${linkDescadastro(para)}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' } : undefined;
   const attachments = mensagem.ics ? [{ filename: 'convite-communicali.ics', content: Buffer.from(mensagem.ics).toString('base64'), content_type: 'text/calendar; method=REQUEST; charset=UTF-8' }] : undefined;
-  const sent = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: FROM, to: [para], reply_to: REPLY_TO, subject: mensagem.assunto, html: mensagem.html, attachments }) });
+  const sent = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: FROM, to: [para], reply_to: REPLY_TO, subject: mensagem.assunto, html, attachments, headers }) });
   const body = await sent.json().catch(() => ({}));
   return sent.ok ? { id: body.id } : { erro: `${sent.status} ${body.message || ''}`.trim() };
 }
