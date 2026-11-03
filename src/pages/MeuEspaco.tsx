@@ -1,9 +1,14 @@
 /* Espaço do membro: passaporte com carimbos, edições, missões, indicações, programa e perfil. Abre com código enviado ao e-mail. */
-import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { Bell, CalendarDays, Check, ChevronDown, ExternalLink, Images, LockKeyhole, Mail, MapPin, Pencil, Share2, Target, Users } from 'lucide-react';
 import { errorMessage, supabase } from '../lib';
 import { longDate } from './Edicao';
 import { JanelaCartao } from './MembroCartao';
+import { FeedbackPerfil, ParceiroRede, usePerfisParceiros } from './RedeExtras';
+import { ConviteMembro } from './ConviteMembro';
+import { ParceirosExemplos } from './ParceirosExemplos';
+import { TrilhaPrograma } from './TrilhaPrograma';
 import './membro.css';
 
 type Carimbo = { slug: string; titulo: string; selo: string; data_evento: string; local: string; cidade: string; capa_url: string | null; carimbo_url: string | null; fotos_url: string | null };
@@ -30,7 +35,7 @@ const META: Record<string, { nome: string; pontos: number; encontros: number; ni
   membro: { nome: 'Conector', pontos: 100, encontros: 3, nivel: 'conector' },
   conector: { nome: 'Embaixador', pontos: 250, encontros: 6, nivel: 'embaixador' },
 };
-const SELO: Record<string, string> = { convidados: 'postal-indicacao', conexao: 'postal-conector', lugar: 'postal-lugar', palestra: 'postal-palestra', parceiro: 'postal-embaixador', representar: 'postal-embaixador' };
+const MISSAO_SELOS: Record<string, [string, string]> = { convidados: ['postal-indicacao', 'Convidou'], conexao: ['postal-conector', 'Conectou'], lugar: ['postal-lugar', 'Recomendou'], palestra: ['postal-palestra', 'Palestrou'], parceiro: ['postal-embaixador', 'Aproximou'], representar: ['postal-embaixador', 'Representou'] };
 const SITUACAO: Record<string, string> = { concluida: 'Concluída', enviada: 'Em análise', recusada: 'Pode reenviar', aberta: 'Em aberto' };
 const PONTOS: Array<[string, number]> = [['Presença em encontro', 10], ['Visitante indicado que compareceu', 5], ['Recomendação validada', 10], ['Contribuição aprovada', 15], ['Parceiro que contribuiu', 20], ['Palestra a convite da organização', 30]];
 
@@ -56,7 +61,6 @@ const FORMULARIOS: Record<string, CampoMissao[]> = {
   ],
 };
 
-const inviteUrl = (codigo: string) => `https://comuni.calirh.com/c/${codigo}`;
 const primeiroNome = (espaco: Espaco) => (espaco.membro?.apelido || espaco.membro?.nome || '').trim().split(/\s+/)[0];
 
 async function conectar(para: string) {
@@ -141,7 +145,7 @@ function Entrar() {
 }
 
 function CarimboEdicao({ carimbo, indice }: { carimbo: Carimbo; indice: number }) {
-  if (carimbo.carimbo_url) return <img className="passe__carimbo" src={carimbo.carimbo_url} alt={`Carimbo: ${carimbo.titulo}`} />;
+  if (carimbo.carimbo_url) return <img className="passe__carimbo" src={carimbo.carimbo_url} alt={`Carimbo: ${carimbo.titulo}`} draggable={false} />;
   const cor = ['#5F6238', '#A9502E', '#7A1F3D'][indice % 3];
   const data = carimbo.data_evento.split('-').reverse().join('.');
   return (
@@ -155,34 +159,74 @@ function CarimboEdicao({ carimbo, indice }: { carimbo: Carimbo; indice: number }
   );
 }
 
+function TextoAviso({ texto }: { texto: string }) {
+  // O aviso atual não informa o serviço específico. Realçar apenas o texto recebido.
+  const partes = texto.split(/(^.+?(?= busca | quer se conectar | se conectou de volta )|serviços da CALI)/);
+  return <>{partes.map((parte, indice) => indice % 2 ? <strong key={indice}>{parte}</strong> : parte)}</>;
+}
+
 function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { espaco: Espaco; extra: Extra | null; abrir: (aba: Aba) => void; atualizar: () => void; compartilhar: () => void; verPerfil: (id: string) => void }) {
+  const [alertasAbertos, setAlertasAbertos] = useState(false);
+  const [avisoPendente, setAvisoPendente] = useState<string | null>(null);
+  const [erroAviso, setErroAviso] = useState('');
   const m = espaco.membro!;
+  const avisos = extra?.avisos || [];
   const meta = META[m.categoria];
   const faltam = meta ? Math.max(meta.pontos - espaco.pontos, 0) : 0;
   const preenchidos = meta ? Math.min(espaco.pontos / meta.pontos, 1) * 10 : 10;
+  async function marcarLido(id: string) {
+    setAvisoPendente(id);
+    setErroAviso('');
+    try {
+      const { error } = await supabase.rpc('communicali_aviso_lido', { p_id: id });
+      if (error) throw error;
+      atualizar();
+    } catch {
+      setErroAviso('Não foi possível marcar o alerta como lido. Tente novamente.');
+    } finally {
+      setAvisoPendente(null);
+    }
+  }
   return (
     <>
       <header className="passe__topo"><img className="passe__logo" src="/brand/communicali-horizontal.png" alt="CommuniCALI" /><span>PASSAPORTE</span></header>
-      <h1>Olá, <em>{primeiroNome(espaco)}</em></h1>
-      <section className="passe__dados passe__cartao passe__dados--cartao">
+      <div className="passe__saudacao">
+        <h1>Olá, <em>{m.nome}</em></h1>
+        <button type="button" className="passe__sino" aria-label={`Alertas${extra ? `: ${avisos.length} ${avisos.length === 1 ? 'não lido' : 'não lidos'}` : ''}`} aria-expanded={alertasAbertos} aria-controls="passaporte-alertas" onClick={() => setAlertasAbertos(!alertasAbertos)}>
+          <Bell size={21} aria-hidden="true" />
+          {avisos.length > 0 && <span className="passe__sino-contagem" aria-hidden="true">{avisos.length > 99 ? '99+' : avisos.length}</span>}
+        </button>
+      </div>
+      <section id="passaporte-alertas" className="passe__notificacoes" aria-labelledby="passaporte-alertas-titulo" hidden={!alertasAbertos}>
+        <h2 id="passaporte-alertas-titulo">Alertas</h2>
+        {!extra ? <p>Carregando alertas…</p> : !avisos.length ? <p>Nenhum alerta por enquanto.</p> : (
+          <ul className="passe__notificacoes-lista">
+            {avisos.map((aviso) => (
+              <li className="passe__notificacao" key={aviso.id}>
+                {aviso.foto_url ? <img src={aviso.foto_url} alt="" /> : <span className="passe__notificacao-icone"><Bell size={18} aria-hidden="true" /></span>}
+                <div>
+                  <p><TextoAviso texto={aviso.texto} /></p>
+                  <div className="passe__notificacao-acoes">
+                    {aviso.tipo === 'match' && m.categoria === 'fundadora' && <a href="/admin/matches">Ver no painel</a>}
+                    {aviso.de && aviso.pode_voltar && <button type="button" onClick={() => verPerfil(aviso.de!)}>Ver perfil</button>}
+                    <button type="button" disabled={avisoPendente !== null} onClick={() => void marcarLido(aviso.id)}><Check size={15} aria-hidden="true" />{avisoPendente === aviso.id ? 'Salvando…' : 'Marcar como lido'}</button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        {erroAviso && <p role="alert">{erroAviso}</p>}
+      </section>
+      <section className="passe__dados passe__cartao passe__dados--cartao passe__identidade" aria-label="Seu passaporte">
+        <button type="button" className="passe__editar" aria-label="Editar meu perfil" onClick={() => abrir('perfil')}><Pencil size={18} aria-hidden="true" /></button>
         <div className="passe__foto">{m.foto_url ? <img src={m.foto_url} alt="Sua foto" /> : <button type="button" onClick={() => abrir('perfil')}>Colocar foto</button>}</div>
         <dl>
-          <div><dt>NOME</dt><dd className="grande">{m.nome}</dd></div>
           <div><dt>NÍVEL</dt><dd>{NIVEIS[m.categoria] || m.categoria}</dd></div>
           <div><dt>CÓDIGO</dt><dd>{m.codigo}</dd></div>
-          <div className="passe__acoes"><button type="button" className="passe__link" onClick={() => abrir('perfil')}>Editar meu perfil</button><button type="button" className="passe__link" onClick={compartilhar}>Compartilhar meu selo</button></div>
         </dl>
+        <button type="button" className="passe__compartilhar" onClick={compartilhar}><Share2 size={16} aria-hidden="true" />Compartilhar meu selo</button>
       </section>
-      {extra?.avisos.map((aviso) => (
-        <section className="passe__alerta" key={aviso.id}>
-          {aviso.foto_url ? <img src={aviso.foto_url} alt="" /> : <span aria-hidden="true">🎉</span>}
-          <p>{aviso.texto}</p>
-          {aviso.tipo === 'match' && espaco.membro?.categoria === 'fundadora' && <a className="passe__botao" href="/admin/matches">Ver no painel</a>}
-          {aviso.de && aviso.pode_voltar
-            ? <button type="button" className="passe__botao" onClick={() => verPerfil(aviso.de!)}>Ver perfil</button>
-            : <button type="button" className="passe__link" onClick={() => void supabase.rpc('communicali_aviso_lido', { p_id: aviso.id }).then(atualizar)}>Ok</button>}
-        </section>
-      ))}
       {!!extra?.sugestoes.length && (
         <section className="passe__cartao">
           <h2>Sugestões para você</h2>
@@ -213,41 +257,143 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
   );
 }
 
+type EncontroAgenda = Pick<Carimbo, 'slug' | 'titulo' | 'data_evento' | 'local' | 'cidade' | 'capa_url'> & {
+  resumo?: string | null; fotos_url?: string | null; horario?: string; inscricoes_abertas?: boolean; inscricao_url?: string | null;
+};
+const AGENDA_FIELDS = 'slug,titulo,data_evento,horario,local,cidade,capa_url,resumo,fotos_url,inscricoes_abertas,inscricao_url';
+
+function linkEncontro(valor?: string | null) {
+  const link = valor?.trim() || '';
+  if (/^\/(?!\/)/.test(link)) return link;
+  try { return ['https:', 'http:'].includes(new URL(link).protocol) ? link : ''; } catch { return ''; }
+}
+
+function TextoResumo({ texto }: { texto: string }) {
+  return <>{texto.trim().split(/\n\s*\n/).map((paragrafo, indice) => (
+    <p key={indice}>{paragrafo.split(/(https?:\/\/[^\s<>]+)/g).map((parte, posicao) => {
+      if (posicao % 2 === 0) return parte;
+      const url = parte.replace(/[.,;:!?]+$/, '');
+      return linkEncontro(url) ? <span key={posicao}><a href={url} target="_blank" rel="noopener noreferrer">{url}<ExternalLink size={12} aria-hidden="true" /></a>{parte.slice(url.length)}</span> : parte;
+    })}</p>
+  ))}</>;
+}
+
+function organizarAgenda(espaco: Espaco, publicadas: EncontroAgenda[], hoje: string) {
+  // Manter as edições já autorizadas pelo passaporte e somar somente a agenda pública.
+  const encontros = new Map<string, EncontroAgenda>();
+  [...espaco.carimbos, ...espaco.proximas, ...publicadas].forEach((edicao) => encontros.set(edicao.slug, { ...encontros.get(edicao.slug), ...edicao }));
+  const ordem = (a: EncontroAgenda, b: EncontroAgenda) => a.data_evento.localeCompare(b.data_evento) || a.slug.localeCompare(b.slug);
+  return {
+    proximos: [...encontros.values()].filter((edicao) => edicao.data_evento >= hoje).sort(ordem),
+    anteriores: [...encontros.values()].filter((edicao) => edicao.data_evento < hoje).sort((a, b) => ordem(b, a)),
+  };
+}
+
+function EncontroCartao({ edicao, proximo, carregando, erro }: { edicao: EncontroAgenda; proximo: boolean; carregando: boolean; erro: boolean }) {
+  const fotos = linkEncontro(edicao.fotos_url);
+  const inscricao = edicao.inscricoes_abertas ? linkEncontro(edicao.inscricao_url) || `/inscricao/${encodeURIComponent(edicao.slug)}` : '';
+  return (
+    <article className="passe__agenda-cartao">
+      <div className="passe__agenda-cabecalho">
+        {edicao.capa_url && <img className="passe__agenda-capa" src={edicao.capa_url} alt={`Local: ${edicao.local}`} loading="lazy" />}
+        <span className={`passe__agenda-status passe__agenda-status--${!proximo ? 'encerrado' : edicao.inscricoes_abertas ? 'aberto' : 'previsto'}`}>{!proximo ? 'Encerrado' : edicao.inscricoes_abertas ? 'Inscrições abertas' : 'Previsto'}</span>
+      </div>
+      <div className="passe__agenda-corpo">
+        <time className="passe__data" dateTime={edicao.data_evento}>{longDate(edicao.data_evento)}</time>
+        <h3>{edicao.titulo}</h3>
+        <p className="passe__agenda-local"><MapPin size={14} aria-hidden="true" /><span>{[edicao.local, edicao.cidade].filter(Boolean).join(', ')}{edicao.horario ? ` · ${edicao.horario}` : ''}</span></p>
+        <details className="passe__encontro">
+          <summary aria-label={`Ver o encontro: ${edicao.titulo}`}>Ver o encontro<ChevronDown size={16} aria-hidden="true" /></summary>
+          <div className="passe__encontro-resumo">
+            <h4>{proximo ? 'Sobre o encontro' : 'Como foi o encontro'}</h4>
+            {edicao.resumo?.trim() ? <TextoResumo texto={edicao.resumo} /> : <p className="passe__aviso">{carregando ? 'Carregando resumo…' : erro ? 'Não foi possível carregar o resumo. Tente atualizar a agenda.' : proximo ? 'A programação ainda não está disponível.' : 'O resumo ainda não está disponível.'}</p>}
+            {fotos && <a className="passe__encontro-fotos" href={fotos} target="_blank" rel="noopener noreferrer"><Images size={16} aria-hidden="true" />Ver as fotos<ExternalLink size={13} aria-hidden="true" /></a>}
+          </div>
+        </details>
+        {proximo && inscricao && <a className="passe__botao" href={inscricao}>Quero me inscrever</a>}
+      </div>
+    </article>
+  );
+}
+
 function Edicoes({ espaco }: { espaco: Espaco }) {
+  const [publicadas, setPublicadas] = useState<EncontroAgenda[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState(false);
+  const [tentativa, setTentativa] = useState(0);
+  useEffect(() => {
+    let ativa = true;
+    async function carregarAgenda() {
+      setCarregando(true); setErro(false);
+      try {
+        // Mesmo filtro público do site, sem ampliar acesso a edições privadas.
+        const { data, error } = await supabase.from('editions').select(AGENDA_FIELDS).eq('publica', true).order('data_evento', { ascending: false });
+        if (error) throw error;
+        if (ativa) setPublicadas((data || []) as EncontroAgenda[]);
+      } catch { if (ativa) setErro(true); }
+      finally { if (ativa) setCarregando(false); }
+    }
+    void carregarAgenda();
+    return () => { ativa = false; };
+  }, [tentativa]);
+  const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+  const { proximos, anteriores } = organizarAgenda(espaco, publicadas, hoje);
   return (
     <>
-      <h1>Edições</h1>
-      {[...espaco.carimbos].reverse().map((edicao) => (
-        <article className="passe__edicao" key={edicao.slug}>
-          {edicao.capa_url && <img src={edicao.capa_url} alt={`Local: ${edicao.local}`} />}
-          <div>
-            <p className="passe__data">{longDate(edicao.data_evento)}</p>
-            <h2>{edicao.titulo}</h2>
-            <p>{edicao.local}, {edicao.cidade}</p>
-            {edicao.fotos_url ? <a className="passe__botao" href={edicao.fotos_url} target="_blank" rel="noopener noreferrer">Acessar as fotos</a> : <p className="passe__aviso">As fotos entram aqui depois do encontro.</p>}
-          </div>
-        </article>
-      ))}
-      {espaco.proximas.map((edicao) => (
-        <article className="passe__edicao passe__edicao--proxima" key={edicao.slug}>
-          <div>
-            <p className="passe__data">Próximo encontro · {longDate(edicao.data_evento)}</p>
-            <h2>{edicao.titulo}</h2>
-            <p>{edicao.local}, {edicao.cidade}</p>
-            {edicao.inscricoes_abertas && <a className="passe__botao passe__botao--oliva" href={`/inscricao/${edicao.slug}`}>Quero me inscrever</a>}
-          </div>
-        </article>
-      ))}
+      <header className="passe__agenda-titulo"><CalendarDays size={28} aria-hidden="true" /><h1>Edições</h1></header>
+      {carregando && <p className="passe__aviso" role="status">Atualizando a agenda…</p>}
+      {erro && <div className="passe__agenda-erro" role="alert"><p>Não foi possível atualizar a agenda. Os encontros já carregados continuam disponíveis.</p><button type="button" className="passe__link" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
+      <section className="passe__agenda-grupo" aria-labelledby="agenda-proximos">
+        <h2 id="agenda-proximos">Próximos encontros</h2>
+        {proximos.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo carregando={carregando} erro={erro} />)}
+        {!proximos.length && !carregando && !erro && <p className="passe__aviso">Nenhum próximo encontro anunciado.</p>}
+      </section>
+      <section className="passe__agenda-grupo" aria-labelledby="agenda-anteriores">
+        <h2 id="agenda-anteriores">Encontros anteriores</h2>
+        {anteriores.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo={false} carregando={carregando} erro={erro} />)}
+        {!anteriores.length && !carregando && !erro && <p className="passe__aviso">Os encontros realizados aparecerão aqui.</p>}
+      </section>
     </>
   );
 }
 
-function CartaoMissao({ missao, recarregar, liberada, comoMembro }: { missao: Missao; recarregar: () => void; liberada: boolean; comoMembro: boolean }) {
+function contornoSelo(serrilhado: boolean) {
+  const passos = serrilhado ? 72 : 180;
+  return Array.from({ length: passos }, (_, indice) => {
+    const angulo = indice * Math.PI * 2 / passos - Math.PI / 2;
+    const raio = serrilhado ? (indice % 2 ? 53 : 57) : 55 + 2.5 * Math.cos(angulo * 14);
+    return `${indice ? 'L' : 'M'}${(60 + raio * Math.cos(angulo)).toFixed(2)},${(60 + raio * Math.sin(angulo)).toFixed(2)}`;
+  }).join(' ') + ' Z';
+}
+
+function SeloMissao({ slug, conquistado }: { slug: string; conquistado: boolean }) {
+  const recorte = useId();
+  const [arquivo, legenda] = MISSAO_SELOS[slug] || ['postal-conector', 'Missão'];
+  // Estilo fixo por missão; permanece igual ao alternar entre conta real e prévias.
+  const estilo = Math.max(Object.keys(MISSAO_SELOS).indexOf(slug), 0) % 3;
+  return (
+    <svg className={`passe__missao-selo${conquistado ? '' : ' is-pendente'}`} data-estilo={['ondulado', 'serrilhado', 'faixa'][estilo]} viewBox="0 0 120 120" role="img" aria-label={`Selo ${legenda}: ${conquistado ? 'conquistado' : 'a conquistar'}`}>
+      {estilo === 2 ? <circle cx="60" cy="60" r="56" fill="#5A1E2D" /> : <path d={contornoSelo(estilo === 1)} fill="#5A1E2D" />}
+      <circle cx="60" cy="60" r="50" fill="#F7F0EA" />
+      <circle cx="60" cy="60" r="47.5" fill="none" stroke="#5A1E2D" strokeWidth=".7" />
+      <defs><clipPath id={recorte}><circle cx="60" cy={estilo === 2 ? 55 : 53} r="40" /></clipPath></defs>
+      <g clipPath={`url(#${recorte})`}>
+        <svg x="20" y={estilo === 2 ? 15 : 13} width="80" height="80" viewBox="30 32 340 300" preserveAspectRatio="xMidYMid slice"><image href={`/selos/${arquivo}.png`} width="400" height="500" /></svg>
+      </g>
+      {estilo === 2 && <path d="M3 80H117L111 90L117 100H3L9 90Z" fill="#5A1E2D" stroke="#F7F0EA" strokeWidth="1" />}
+      <text x="60" y={estilo === 2 ? 93 : 103} textAnchor="middle" fill={estilo === 2 ? '#F7F0EA' : '#5A1E2D'} fontFamily="Inter, sans-serif" fontWeight="700" fontSize={estilo === 2 ? 10 : 8}>{legenda}</text>
+    </svg>
+  );
+}
+
+function CartaoMissao({ missao, recarregar, liberada, comoMembro, abrirPrograma }: { missao: Missao; recarregar: () => void; liberada: boolean; comoMembro: boolean; abrirPrograma: () => void }) {
   const [abrindo, setAbrindo] = useState(false);
   const [campos, setCampos] = useState<Record<string, string>>({});
   const [erro, setErro] = useState('');
   const situacao = comoMembro ? 'aberta' : missao.status;
   const feita = situacao === 'concluida';
+  const bloqueada = !liberada && !feita;
+  const status = feita ? 'Concluída' : bloqueada ? 'Bloqueada' : missao.modo === 'convite' ? 'Por convite' : situacao === 'aberta' ? 'Disponível' : SITUACAO[situacao] || situacao;
   const podeEnviar = !comoMembro && liberada && missao.modo === 'analise' && (situacao === 'aberta' || situacao === 'recusada');
   const formulario = FORMULARIOS[missao.slug] || [];
 
@@ -259,17 +405,18 @@ function CartaoMissao({ missao, recarregar, liberada, comoMembro }: { missao: Mi
   }
 
   return (
-    <article className={`passe__missao passe__missao--${missao.slug}`}>
+    <article className="passe__missao">
+      <div className="passe__missao-cabecalho"><span className={`passe__missao-status${feita ? ' is-feita' : bloqueada ? ' is-bloqueada' : ''}`}>{feita ? <Check size={12} aria-hidden="true" /> : bloqueada ? <LockKeyhole size={12} aria-hidden="true" /> : null}{status}</span></div>
       <div className="passe__missao-topo">
-        <img className={feita ? '' : 'is-apagado'} src={`/selos/${SELO[missao.slug] || 'postal-conector'}.png`} alt={feita ? 'Selo conquistado' : 'Selo ainda não conquistado'} />
+        <SeloMissao slug={missao.slug} conquistado={feita} />
         <div>
-          <p className="passe__etiqueta">{!liberada && !feita ? 'ABRE EM CONECTOR' : missao.modo === 'convite' && !feita ? 'POR CONVITE' : (SITUACAO[situacao] || situacao).toUpperCase()}</p>
           <h2>{missao.titulo}</h2>
           <p>{missao.descricao}</p>
         </div>
       </div>
+      {bloqueada && <div className="passe__missao-requisito"><p>Libera no nível Conector: 100 pontos, 3 encontros e 2 missões. A organização confirma a mudança de nível.</p><button type="button" className="passe__link" onClick={abrirPrograma}>Ver requisitos do programa</button></div>}
       {podeEnviar && !abrindo && <button type="button" className="passe__botao passe__botao--terra" onClick={() => setAbrindo(true)}>Enviar para análise</button>}
-      {abrindo && (
+      {podeEnviar && abrindo && (
         <form className="passe__form" onSubmit={(event) => void enviar(event)}>
           {formulario.map((item) => (
             <label key={item.id}>{item.rotulo}
@@ -286,15 +433,20 @@ function CartaoMissao({ missao, recarregar, liberada, comoMembro }: { missao: Mi
   );
 }
 
-function Missoes({ espaco, recarregar, comoMembro }: { espaco: Espaco; recarregar: () => void; comoMembro: boolean }) {
-  const categoria = comoMembro ? 'membro' : espaco.membro!.categoria;
+function Missoes({ espaco, recarregar, comoMembro, abrirPrograma }: { espaco: Espaco; recarregar: () => void; comoMembro: boolean; abrirPrograma: () => void }) {
+  const [previa, setPrevia] = useState<'minhas' | 'membro' | 'conector'>('minhas');
+  const podeSimular = espaco.membro!.categoria === 'fundadora';
+  const simulando = comoMembro || (podeSimular && previa !== 'minhas');
+  const categoria = comoMembro ? 'membro' : podeSimular && previa !== 'minhas' ? previa : espaco.membro!.categoria;
   const liberada = (missao: Missao) => missao.nivel !== 'embaixador' || categoria === 'conector' || categoria === 'embaixador' || categoria === 'fundadora';
   return (
     <>
-      <h1>Missões</h1>
-      <p>Cada missão cumprida acende um selo. As de Conector ficam abertas desde o primeiro encontro. As de Embaixador abrem quando você chega a Conector.</p>
-      {comoMembro && <p className="passe__ok" role="status">Você está vendo as missões como um Membro.</p>}
-      {espaco.missoes.map((missao) => <CartaoMissao key={missao.slug} missao={missao} recarregar={recarregar} liberada={liberada(missao)} comoMembro={comoMembro} />)}
+      <header className="passe__missoes-titulo"><Target size={28} aria-hidden="true" /><h1>Missões</h1></header>
+      <p className="passe__missoes-intro">Acompanhe suas contribuições para a comunidade.</p>
+      {podeSimular && !comoMembro && <label className="passe__previa-missoes">Visualização<select value={previa} onChange={(event) => setPrevia(event.target.value as typeof previa)}><option value="minhas">Minhas missões</option><option value="membro">Prévia: Membro</option><option value="conector">Prévia: Conector</option></select></label>}
+      <details className="passe__missoes-ajuda"><summary>Como as missões são liberadas</summary><p>As primeiras ficam disponíveis após o primeiro encontro. As de Embaixador abrem no nível Conector, confirmado pela organização.</p></details>
+      {simulando && <p className="passe__previa-aviso" role="status">Prévia de {NIVEIS[categoria] || categoria}, com missões por cumprir. Suas conquistas estão preservadas e os envios ficam desativados nesta prévia.</p>}
+      {espaco.missoes.map((missao) => <CartaoMissao key={`${missao.slug}-${categoria}-${simulando}`} missao={missao} recarregar={recarregar} liberada={liberada(missao)} comoMembro={simulando} abrirPrograma={abrirPrograma} />)}
     </>
   );
 }
@@ -302,20 +454,9 @@ function Missoes({ espaco, recarregar, comoMembro }: { espaco: Espaco; recarrega
 function Indicar({ espaco, extra, recarregar }: { espaco: Espaco; extra: Extra | null; recarregar: () => void }) {
   const [pessoa, setPessoa] = useState({ nome: '', email: '', whatsapp: '', cargo: '' });
   const [frente, setFrente] = useState<'visitantes' | 'parceiro' | 'lugar'>('visitantes');
-  const [codigo, setCodigo] = useState(espaco.membro!.codigo);
   const [aviso, setAviso] = useState('');
   const [erro, setErro] = useState('');
   const [form, setForm] = useState({ nome: '', instagram: '', linkedin: '', telefone: '', pessoa: '' });
-  const atual = espaco.membro!.codigo;
-  const mudou = codigo.trim().toUpperCase() !== atual;
-  const texto = `Quero te convidar para um encontro da CommuniCALI: ${inviteUrl(atual)}`;
-
-  async function salvarCodigo() {
-    setErro(''); setAviso('');
-    const { error } = await supabase.rpc('communicali_escolher_codigo', { p_codigo: codigo });
-    if (error) setErro(errorMessage(error)); else { setAviso('Código salvo.'); recarregar(); }
-  }
-
   async function recomendar(event: FormEvent) {
     event.preventDefault();
     setErro(''); setAviso('');
@@ -343,7 +484,7 @@ function Indicar({ espaco, extra, recarregar }: { espaco: Espaco; extra: Extra |
 
   return (
     <>
-      <h1>Indicar</h1>
+      <header className="passe__rede-titulo"><Share2 size={28} aria-hidden="true" /><h1>Indicar</h1></header>
       <div className="passe__seg" role="group" aria-label="O que indicar">
         {([['visitantes', 'Visitantes'], ['parceiro', 'Parceiros'], ['lugar', 'Lugares']] as const).map(([id, nome]) => <button key={id} type="button" className={frente === id ? 'is-on' : ''} aria-pressed={frente === id} onClick={() => { setFrente(id); setErro(''); setAviso(''); }}>{nome}</button>)}
       </div>
@@ -351,16 +492,7 @@ function Indicar({ espaco, extra, recarregar }: { espaco: Espaco; extra: Extra |
       {erro && <p className="passe__erro" role="alert">{erro}</p>}
       {frente === 'visitantes' ? (
         <>
-          <section className="passe__bilhete">
-            <div>
-              <label>ESCOLHA SEU CÓDIGO<input value={codigo} maxLength={20} onChange={(event) => setCodigo(event.target.value.toUpperCase().replace(/\s/g, ''))} /></label>
-              {mudou ? <button type="button" className="passe__botao" onClick={() => void salvarCodigo()}>Salvar código</button> : <p>Use um nome fácil de lembrar, como um cupom.</p>}
-            </div>
-            <div className="passe__bilhete-acoes">
-              <button type="button" className="passe__botao" onClick={() => void navigator.clipboard.writeText(texto).then(() => setAviso('Convite copiado.'))}>Copiar convite</button>
-              <a className="passe__botao passe__botao--linha" href={`https://wa.me/?text=${encodeURIComponent(texto)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
-            </div>
-          </section>
+          <ConviteMembro nome={espaco.membro!.nome} codigoAtual={espaco.membro!.codigo} recarregar={recarregar} />
           <p><strong>A indicação só vale se a pessoa comparecer.</strong> A equipe avalia cada inscrição, e os 5 pontos entram depois do check-in. Quando ela for aprovada, você recebe as orientações para recebê-la no encontro.</p>
           <form className="passe__form passe__cartao" onSubmit={(event) => void indicar(event)}>
             <h2>Indicar uma pessoa</h2>
@@ -371,7 +503,8 @@ function Indicar({ espaco, extra, recarregar }: { espaco: Espaco; extra: Extra |
             <button type="submit" className="passe__botao">Enviar indicação</button>
           </form>
           <h2>Minhas indicações</h2>
-          {extra?.indicados.map((item, indice) => (
+          <p className="passe__aviso">Acompanhe a avaliação da inscrição e a presença no encontro.</p>
+          {[...(extra?.indicados || [])].sort((a, b) => b.data.localeCompare(a.data)).map((item, indice) => (
             <article className="passe__indicado" key={`${item.nome}-${indice}`}>
               <div><strong>{item.nome}</strong><span>{[item.cargo, item.empresa].filter(Boolean).join(', ') || 'Cargo não informado'}</span><span>{item.edicao} · {item.data.split('-').reverse().join('/')}</span></div>
               <em className={item.compareceu ? 'ok' : ''}>{item.compareceu ? 'Compareceu, +5' : { analise: 'Em análise', inscrito: 'Aprovada', espera: 'Lista de espera', cancelado: 'Não aprovada' }[item.status] || item.status}</em>
@@ -401,28 +534,10 @@ function Indicar({ espaco, extra, recarregar }: { espaco: Espaco; extra: Extra |
 function Programa({ espaco, extra, compartilhar, comoMembro, setComoMembro, verParabens }: { espaco: Espaco; extra: Extra | null; compartilhar: () => void; comoMembro: boolean; setComoMembro: (valor: boolean) => void; verParabens: () => void }) {
   const categoria = comoMembro ? 'membro' : espaco.membro!.categoria;
   const fundadora = espaco.membro!.categoria === 'fundadora';
-  const ordem = ['visitante', 'membro', 'conector', 'embaixador'];
   const extrato = extra?.extrato || [];
-  const niveis: Array<[string, string, string, string]> = [
-    ...(categoria === 'fundadora' ? [['fundadora', 'Fundadora', 'Quem plantou esta comunidade.', 'rose'] as [string, string, string, string]] : []),
-    ['visitante', 'Visitante', 'Inscrito no grupo ou em um encontro.', 'rose'],
-    ['membro', 'Membro', 'Esteve em um encontro presencial.', 'branco'],
-    ['conector', 'Conector', '100 pontos, 3 encontros e 2 missões. Vantagens a definir.', 'oliva'],
-    ['embaixador', 'Embaixador', '250 pontos, 6 encontros, parceiro trazido, missões e aprovação. Vantagens a definir.', 'areia'],
-  ];
   return (
     <>
-      <h1>Programa</h1>
-      <p>Cada pessoa tem um papel na comunidade.</p>
-      {niveis.map(([id, nome, texto, cor]) => {
-        const bloqueado = ordem.includes(categoria) && ordem.indexOf(id) > ordem.indexOf(categoria);
-        return (
-          <section key={id} className={`passe__nivel passe__nivel--${cor}${id === categoria ? ' is-on' : ''}${bloqueado ? ' is-bloqueado' : ''}`}>
-            <img src={`/selos/postal-${id}.png`} alt="" />
-            <div><h2>{bloqueado && <svg className="passe__cadeado" viewBox="0 0 24 24" aria-label="Bloqueado"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>}{nome}{id === categoria ? ' · você está aqui' : ''}</h2><p>{texto}</p></div>
-          </section>
-        );
-      })}
+      <TrilhaPrograma categoria={categoria} previa={comoMembro} />
       <section className="passe__cartao">
         <h2>Minha pontuação</h2>
         <p className="passe__numero"><strong>{espaco.pontos}</strong> pontos no total</p>
@@ -454,7 +569,6 @@ function Programa({ espaco, extra, compartilhar, comoMembro, setComoMembro, verP
       )}
       <a className="passe__botao passe__botao--linha" href="/admin/matches" hidden={!fundadora}>Abrir Matches no painel</a>
       <a className="passe__botao passe__botao--linha" href="/regras" target="_blank" rel="noopener noreferrer">Nossas regras</a>
-      <p className="passe__aviso">Pontos sozinhos não mudam o nível: a organização confirma cada avanço. Os detalhes do programa entram aqui em breve.</p>
     </>
   );
 }
@@ -604,8 +718,20 @@ function Perfil({ espaco, recarregar, voltar }: { espaco: Espaco; recarregar: ()
   );
 }
 
+function IconeContato({ tipo }: { tipo: 'whatsapp' | 'linkedin' | 'instagram' }) {
+  if (tipo === 'instagram') return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>;
+  return tipo === 'linkedin'
+    ? <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.5 8.5H3V21h3.5V8.5ZM4.75 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM21 13.6c0-3.3-1.8-5.4-4.6-5.4-1.5 0-2.7.7-3.4 1.8V8.5H9.7V21h3.5v-6.6c0-1.9.9-3 2.4-3 1.4 0 2 .9 2 2.8V21H21v-7.4Z" /></svg>
+    : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M3.5 20.5 5 16a8.5 8.5 0 1 1 3.2 3.1l-4.7 1.4Z" strokeLinejoin="round" /><path d="M9 8.8c.3 3 2.8 5.5 6 6.2l1-1.6-2-1-.9.7c-.8-.4-1.5-1.1-1.9-1.9l.7-.9-1-2-1.9 0Z" fill="currentColor" stroke="none" /></svg>;
+}
+
 function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar }: { pessoa: Pessoa; contatos: boolean; eu: boolean; voltar: () => void; recarregar: () => void }) {
   const whatsapp = pessoa.whatsapp?.replace(/\D/g, '');
+  const email = pessoa.email?.trim();
+  const instagram = pessoa.instagram?.trim().replace(/^.*instagram\.com\//, '').replace(/^@/, '');
+  const linkedin = pessoa.linkedin?.trim();
+  const linkedinUrl = linkedin ? linkEncontro(/^https?:/.test(linkedin) ? linkedin : `https://${linkedin}`) : '';
+  const temContato = !!(whatsapp || email || instagram || linkedinUrl);
   const [erro, setErro] = useState('');
   const primeiro = pessoa.nome.split(' ')[0];
   const conexao = pessoa.eu_conectei && pessoa.me_conectou ? 'Vocês estão conectados' : pessoa.eu_conectei ? 'Pedido de conexão enviado' : '';
@@ -630,16 +756,18 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar }: { pessoa: Pes
       {!!pessoa.interesses.length && <section className="passe__cartao"><h2>Interesses</h2><div className="passe__temas">{pessoa.interesses.map((item) => <span key={item}>{item}</span>)}</div></section>}
       <section className="passe__cartao">
         <h2>Onde encontrar</h2>
-        {contatos ? <p>Mande uma mensagem, siga nas redes e continue a conversa fora da tela.</p> : null}
+        {contatos && temContato ? <p>Continue a conversa pelos canais abaixo.</p> : null}
         {contatos ? (
           <div className="passe__contatos">
-            {whatsapp && <a href={`https://wa.me/${whatsapp.length <= 11 ? `55${whatsapp}` : whatsapp}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>}
-            {pessoa.email && <a href={`mailto:${pessoa.email}`}>E-mail</a>}
-            {pessoa.instagram && <a href={`https://www.instagram.com/${pessoa.instagram.replace(/^.*instagram\.com\//, '').replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer">Instagram</a>}
-            {pessoa.linkedin && <a href={/^https?:/.test(pessoa.linkedin) ? pessoa.linkedin : `https://${pessoa.linkedin}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>}
+            {whatsapp && <a href={`https://wa.me/${whatsapp.length <= 11 ? `55${whatsapp}` : whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp"><IconeContato tipo="whatsapp" /></a>}
+            {email && <a href={`mailto:${email}`} aria-label="E-mail" title="E-mail"><Mail size={20} aria-hidden="true" /></a>}
+            {instagram && <a href={`https://www.instagram.com/${instagram}`} target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><IconeContato tipo="instagram" /></a>}
+            {linkedinUrl && <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><IconeContato tipo="linkedin" /></a>}
+            {!temContato && <p>Nenhum canal de contato informado.</p>}
           </div>
         ) : <p>Quer falar com {primeiro}? Conecte-se aqui. Os contatos diretos abrem quando você chega a Conector.</p>}
       </section>
+      {contatos && <FeedbackPerfil key={pessoa.id} membroId={pessoa.id} proprio={eu} />}
     </>
   );
 }
@@ -647,7 +775,7 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar }: { pessoa: Pes
 function RedeBloqueada({ total, abrir }: { total: number; abrir: () => void }) {
   return (
     <>
-      <h1>Rede</h1>
+      <header className="passe__rede-titulo"><Users size={28} aria-hidden="true" /><h1>Rede</h1></header>
       <section className="passe__bloqueio">
         <div className="passe__borrado" aria-hidden="true">{Array.from({ length: 6 }, (_, indice) => <div key={indice}><span /><i /><i /></div>)}</div>
         <div className="passe__bloqueio-texto">
@@ -661,7 +789,7 @@ function RedeBloqueada({ total, abrir }: { total: number; abrir: () => void }) {
   );
 }
 
-function Rede({ comoMembro, abrir }: { comoMembro: boolean; abrir: (aba: Aba) => void }) {
+function Rede({ comoMembro, abrir, fundadora = false }: { comoMembro: boolean; abrir: (aba: Aba) => void; fundadora?: boolean }) {
   const [rede, setRede] = useState<{ eu: string; acesso: boolean; total?: number; pessoas: Pessoa[]; parceiros: Parceiro[] } | null>(null);
   const [frente, setFrente] = useState<'pessoas' | 'parceiros'>('pessoas');
   const [busca, setBusca] = useState('');
@@ -669,6 +797,7 @@ function Rede({ comoMembro, abrir }: { comoMembro: boolean; abrir: (aba: Aba) =>
   const [abertaId, setAbertaId] = useState('');
   const carregarRede = () => { supabase.rpc('communicali_rede').then(({ data }) => setRede(data as typeof rede)); };
   useEffect(carregarRede, []);
+  const perfis = usePerfisParceiros(!!rede?.acesso && !comoMembro && frente === 'parceiros');
   if (rede && (!rede.acesso || comoMembro)) return <RedeBloqueada total={rede.total ?? rede.pessoas.length} abrir={() => abrir('programa')} />;
   const aberta = rede?.pessoas.find((pessoa) => pessoa.id === abertaId);
   if (aberta) return <FichaPessoa pessoa={aberta} contatos eu={aberta.id === rede?.eu} voltar={() => setAbertaId('')} recarregar={carregarRede} />;
@@ -678,12 +807,12 @@ function Rede({ comoMembro, abrir }: { comoMembro: boolean; abrir: (aba: Aba) =>
   const confere = (pessoa: Pessoa) => (!filtro.segmento || pessoa.segmento === filtro.segmento) && (!filtro.regiao || pessoa.regiao === filtro.regiao) && (!filtro.nivel || pessoa.categoria === filtro.nivel) && (!filtro.mercado || (filtro.mercado === 'aberto' ? pessoa.aberto_trabalho : pessoa.recrutador))
     && (!termo || [pessoa.nome, pessoa.cidade_uf, pessoa.empresa, ...pessoa.temas, ...pessoa.interesses].join(' ').toLowerCase().includes(termo));
   const pessoas = todas.filter((pessoa) => confere(pessoa) && (frente === 'pessoas' || pessoa.presta_servicos));
-  const parceiros = (rede?.parceiros || []).filter((item) => !termo || item.nome.toLowerCase().includes(termo));
+  const parceiros = (rede?.parceiros || []).filter((item) => !termo || [item.nome, perfis.find((perfil) => perfil.partner_id === item.id)?.descricao || ''].join(' ').toLowerCase().includes(termo));
   return (
     <>
-      <h1>Rede</h1>
+      <header className="passe__rede-titulo"><Users size={28} aria-hidden="true" /><h1>Rede</h1></header>
       <p>Conheça quem faz parte e crie conexões.</p>
-      <div className="passe__seg passe__seg--dois" role="group" aria-label="Quem ver">
+      <div className="passe__seg passe__seg--dois passe__rede-abas" role="group" aria-label="Quem ver">
         <button type="button" className={frente === 'pessoas' ? 'is-on' : ''} aria-pressed={frente === 'pessoas'} onClick={() => setFrente('pessoas')}>Pessoas</button>
         <button type="button" className={frente === 'parceiros' ? 'is-on' : ''} aria-pressed={frente === 'parceiros'} onClick={() => setFrente('parceiros')}>Parceiros e prestadores</button>
       </div>
@@ -694,25 +823,24 @@ function Rede({ comoMembro, abrir }: { comoMembro: boolean; abrir: (aba: Aba) =>
         <label>Nível<select value={filtro.nivel} onChange={(event) => setFiltro({ ...filtro, nivel: event.target.value })}><option value="">Todos</option>{['embaixador', 'conector', 'membro'].map((item) => <option key={item} value={item}>{NIVEIS[item]}</option>)}</select></label>
         <label>Mercado<select value={filtro.mercado} onChange={(event) => setFiltro({ ...filtro, mercado: event.target.value })}><option value="">Todos</option><option value="aberto">Disponíveis</option><option value="recruta">Recrutadores</option></select></label>
       </div>
-      {frente === 'parceiros' && parceiros.map((item) => (
-        <article className="passe__linha passe__linha--parceiro" key={item.id}>
-          {item.logo_url && <img src={item.logo_url} alt="" />}
-          <strong>{item.nome}</strong>
-          {item.site_url && <a className="passe__link" href={item.site_url} target="_blank" rel="noopener noreferrer">Visitar</a>}
-        </article>
-      ))}
+      {frente === 'parceiros' && <>
+        {fundadora && <ParceirosExemplos />}
+        <header className="passe__rede-grupo"><h2>Empresas parceiras <span>{parceiros.length}</span></h2><p>Quem apoia os encontros da comunidade.</p></header>
+        <div className="passe__empresas">{parceiros.map((item) => <ParceiroRede key={item.id} parceiro={item} perfil={perfis.find((perfil) => perfil.partner_id === item.id)} />)}</div>
+        {rede && !parceiros.length && <p className="passe__aviso">Nenhuma empresa encontrada.</p>}
+        <header className="passe__rede-grupo"><h2>Prestadores da comunidade <span>{pessoas.length}</span></h2><p>Membros que oferecem serviços. Segmento, região, nível e mercado filtram este grupo.</p></header>
+      </>}
       <div className="passe__pessoas">
         {pessoas.map((pessoa) => (
           <button type="button" className="passe__pessoa" key={pessoa.id} onClick={() => { setAbertaId(pessoa.id); window.scrollTo(0, 0); }}>
-            <span className="passe__pessoa-foto">{pessoa.foto_url ? <img src={pessoa.foto_url} alt="" /> : pessoa.nome.charAt(0)}</span>
+            <span className="passe__pessoa-foto">{pessoa.foto_url ? <img src={pessoa.foto_url} alt="" /> : pessoa.nome.charAt(0)}{pessoa.segmento && <span className="passe__segmento">{pessoa.segmento}</span>}</span>
             <strong>{pessoa.nome}</strong>
-            {pessoa.segmento && <span className="passe__segmento">{pessoa.segmento}</span>}
             {pessoa.aberto_trabalho && <span className="passe__segmento passe__segmento--trabalho">Disponível no mercado</span>}
             <span className="passe__pessoa-linha">{NIVEIS[pessoa.categoria] || pessoa.categoria}{pessoa.regiao ? ` · ${pessoa.regiao}` : ''}</span>
           </button>
         ))}
       </div>
-      {rede && !pessoas.length && (frente === 'pessoas' || !parceiros.length) && <p className="passe__aviso">Ninguém encontrado com esses filtros.</p>}
+      {rede && !pessoas.length && <p className="passe__aviso">{frente === 'parceiros' ? 'Nenhum prestador encontrado com esses filtros.' : 'Ninguém encontrado com esses filtros.'}</p>}
     </>
   );
 }
@@ -764,8 +892,8 @@ export function MeuEspaco() {
       {perfilAberto ? <FichaPessoa pessoa={perfilAberto} contatos={Boolean(perfilAberto.whatsapp || perfilAberto.email)} eu={false} voltar={() => setPerfilAberto(null)} recarregar={() => { carregar(); verPerfil(perfilAberto.id); }} /> : <>
       {aba === 'inicio' && <Inicio espaco={espaco} extra={extra} abrir={setAba} atualizar={carregar} verPerfil={verPerfil} compartilhar={() => setCartao({ categoria: espaco.membro!.categoria, novo: false })} />}
       {aba === 'edicoes' && <Edicoes espaco={espaco} />}
-      {aba === 'missoes' && <Missoes espaco={espaco} recarregar={carregar} comoMembro={comoMembro} />}
-      {aba === 'rede' && <Rede comoMembro={comoMembro} abrir={setAba} />}
+      {aba === 'missoes' && <Missoes espaco={espaco} recarregar={carregar} comoMembro={comoMembro} abrirPrograma={() => setAba('programa')} />}
+      {aba === 'rede' && <Rede comoMembro={comoMembro} abrir={setAba} fundadora={espaco.membro!.categoria === 'fundadora'} />}
       {aba === 'indicar' && <Indicar espaco={espaco} extra={extra} recarregar={carregar} />}
       {aba === 'programa' && <Programa espaco={espaco} extra={extra} compartilhar={() => setCartao({ categoria: espaco.membro!.categoria, novo: false })} comoMembro={comoMembro} setComoMembro={setComoMembro} verParabens={() => setCartao({ categoria: 'conector', novo: true })} />}
       {aba === 'perfil' && <Perfil espaco={espaco} recarregar={carregar} voltar={() => setAba('inicio')} />}

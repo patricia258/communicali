@@ -270,6 +270,6 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
       <button type="button" aria-label="Pergunta anterior" disabled={!trail.length} onClick={goBack}><ArrowUp size={18} /></button>
       <button type="button" aria-label="Próxima pergunta" disabled={isLast} onClick={goNext}><ArrowDown size={18} /></button>
     </nav>}
-    <footer className="cf-foot"><FooterLinks /></footer>
+    <footer className="cf-foot"><FooterLinks legalOnly /></footer>
   </div>;
 }

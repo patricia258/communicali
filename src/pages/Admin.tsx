@@ -13,6 +13,7 @@ import { StaffPanel } from './Staff';
 import { EmailsCard, chamar } from './AdminEmails';
 import { ImpactosPanel, IndicacoesPanel, MatchesPanel, RecommendationsPanel } from './AdminRecomendacoes';
 import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
+import { AdminRedeExtras } from './AdminRedeExtras';
 import './admin.css';
 
 type Edition = { inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
@@ -358,6 +359,7 @@ function PartnersPanel() {
         ))}
       </div>
       {!list.length && <p className="adm-hint">Nenhum parceiro cadastrado ainda.</p>}
+      <AdminRedeExtras parceiros={list} uploadOriginal={(file) => uploadImage(file, 'parceiros-originais')} />
     </>
   );
 }

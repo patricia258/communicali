@@ -119,3 +119,7 @@
 @media (max-width:760px){.adm-ficha{grid-template-columns:1fr}.adm-ficha__acoes{flex-direction:row;flex-wrap:wrap}}
 .adm .ap-content:has(.adm-tabela){max-width:1500px}
 .adm__top nav{flex-wrap:wrap;row-gap:2px}
+
+.adm-beneficio{display:flex;flex-direction:column;gap:14px;margin:8px 0;padding:18px;border:1px solid #DCCDC3;border-radius:12px}
+.adm-beneficio legend{padding:0 6px;font-weight:600;color:#5A1E2D}
+.adm-beneficio>p{margin:0;font-size:13px;line-height:1.6;color:#665049}
