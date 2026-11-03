@@ -166,33 +166,25 @@
 .entrada__icone{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(201,151,59,.16);color:var(--gold-2)}
 .entrada__qr{flex:none;width:112px;height:112px;border-radius:8px}
 
-/* Selos de parceria: quatro estilos, girando. */
-.selos{display:grid;gap:14px;justify-items:end;width:min(560px,100%)}
-.selos__trilho{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;width:100%;margin:0;padding:0;list-style:none;animation:selos-entra .5s ease}
-.selos__trilho>li:nth-child(n+4){display:none}
-@keyframes selos-entra{from{opacity:.35;transform:translateX(28px)}to{opacity:1;transform:none}}
-.selos__setas{display:flex;gap:8px}
-.selos__setas button{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--edge);border-radius:999px;background:transparent;color:var(--gold-2);cursor:pointer}
-.selos__setas button:hover{border-color:var(--gold)}
-.selo{position:relative;aspect-ratio:4/5;display:grid}
-.selo__miolo{display:grid;place-items:center;align-content:center;gap:8px;text-align:center;padding:14px}
-.selo__miolo strong{font-family:var(--display);font-size:17px;line-height:1.15}
-.selo__topo,.selo__base{font-size:9px;letter-spacing:.24em;text-transform:uppercase;opacity:.75}
-.selo--postal{padding:7px;background:radial-gradient(circle at 6px 6px,transparent 3.6px,#F7F0EA 4px) -6px -6px/12px 12px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));transform:rotate(-2deg)}
-.selo--postal .selo__miolo{background:#C9973B;color:#22100F;outline:1px solid rgba(34,16,15,.35);outline-offset:-8px}
-.selo--carimbo{aspect-ratio:1;align-self:center;border:2px solid #DDB160;border-radius:50%;color:#DDB160;transform:rotate(6deg)}
-.selo--carimbo .selo__miolo{margin:7px;border:1px dashed rgba(221,177,96,.7);border-radius:50%}
-.selo--recorte{background:#A9502E;color:#F7F0EA;clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px);transform:rotate(2deg)}
-.selo--recorte .selo__miolo{margin:9px;border:1px dashed rgba(247,240,234,.6)}
-.selo--oval{background:#5F6238;color:#F7F0EA;border-radius:50%/42%;transform:rotate(-4deg)}
-.selo--oval .selo__miolo{margin:8px;border:3px double rgba(247,240,234,.7);border-radius:50%/42%}
-@media (prefers-reduced-motion:reduce){.selos__trilho{animation:none}}
+/* Selos de parceria: quatro estilos coloridos com borda clara, lado a lado. */
+.nowrap{white-space:nowrap}
+.selos{display:grid;grid-template-columns:repeat(4,118px);gap:18px;align-items:center;margin:0;padding:0;list-style:none}
+.selo{display:grid;width:118px;height:146px;color:#F7F0EA}
+.selo__miolo{display:grid;place-items:center;align-content:center;gap:6px;text-align:center;padding:10px}
+.selo__miolo strong{font-family:var(--display);font-size:14px;line-height:1.15}
+.selo__base{font-size:8px;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
+.selo--postal{padding:6px;background:radial-gradient(circle at 5px 5px,transparent 3px,#F7F0EA 3.4px) -5px -5px/10px 10px;transform:rotate(-2deg)}
+.selo--postal .selo__miolo{background:#C9973B;color:#22100F;outline:1px solid rgba(34,16,15,.35);outline-offset:-6px}
+.selo--carimbo{height:118px;padding:4px;border-radius:50%;background:#F7F0EA;transform:rotate(4deg)}
+.selo--carimbo .selo__miolo{border-radius:50%;background:#7A1F3D;outline:1px dashed rgba(247,240,234,.7);outline-offset:-6px}
+.selo--recorte{padding:4px;background:#F7F0EA;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px);transform:rotate(2deg)}
+.selo--recorte .selo__miolo{background:#A9502E;clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px);outline:1px dashed rgba(247,240,234,.6);outline-offset:-7px}
+.selo--oval{padding:4px;border-radius:50%/42%;background:#F7F0EA;transform:rotate(-3deg)}
+.selo--oval .selo__miolo{border-radius:50%/42%;background:#5F6238;outline:1px solid rgba(247,240,234,.6);outline-offset:-6px}
 @media (max-width:900px){
   .entrada{grid-template-columns:1fr}
   .entrada article{padding:22px}
   .entrada__visita{min-height:0}
   .entrada__qr{width:88px;height:88px}
-  .selos{justify-items:start;width:100%}
-  .selos__trilho{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .selos__trilho>li:nth-child(n+3){display:none}
+  .selos{grid-template-columns:repeat(2,118px);justify-content:center}
 }

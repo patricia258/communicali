@@ -16,42 +16,24 @@ const MODALIDADES = [
   ['Rede e comunidade', 'Conexões, divulgação e apresentações institucionais.'],
 ];
 
-// Categorias de parceria em selos de estilos diferentes, girando sozinhas, com setas para ir e voltar.
+// Categorias de parceria em quatro estilos de selo, lado a lado.
 const ESTILOS_SELO = ['postal', 'carimbo', 'recorte', 'oval'] as const;
 function SelosParceria() {
-  const [inicio, setInicio] = useState(0);
-  const [pausado, setPausado] = useState(false);
-  const total = MODALIDADES.length;
-  useEffect(() => {
-    if (pausado || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const timer = window.setInterval(() => setInicio((atual) => (atual + 1) % total), 3200);
-    return () => window.clearInterval(timer);
-  }, [pausado, total]);
-  const mover = (passo: number) => setInicio((atual) => (atual + passo + total) % total);
-  const ordem = Array.from({ length: total }, (_, n) => (inicio + n) % total);
   return (
-    <div className="selos" onMouseEnter={() => setPausado(true)} onMouseLeave={() => setPausado(false)} aria-roledescription="carrossel" aria-label="Formas de parceria">
-      <ul className="selos__trilho" key={inicio}>
-        {ordem.map((indice) => {
-          const [titulo] = MODALIDADES[indice];
-          const Icon = MODE_ICONS[indice];
-          return (
-            <li key={titulo} className={`selo selo--${ESTILOS_SELO[indice]}`}>
-              <div className="selo__miolo">
-                <span className="selo__topo">CommuniCALI</span>
-                <Icon size={34} strokeWidth={1.5} aria-hidden="true" />
-                <strong>{titulo}</strong>
-                <span className="selo__base">Parceria</span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="selos__setas">
-        <button type="button" onClick={() => mover(-1)} aria-label="Selo anterior"><ArrowRight size={18} aria-hidden="true" style={{ transform: 'rotate(180deg)' }} /></button>
-        <button type="button" onClick={() => mover(1)} aria-label="Próximo selo"><ArrowRight size={18} aria-hidden="true" /></button>
-      </div>
-    </div>
+    <ul className="selos" aria-label="Formas de parceria">
+      {MODALIDADES.map(([titulo], indice) => {
+        const Icon = MODE_ICONS[indice];
+        return (
+          <li key={titulo} className={`selo selo--${ESTILOS_SELO[indice]}`}>
+            <div className="selo__miolo">
+              <Icon size={26} strokeWidth={1.5} aria-hidden="true" />
+              <strong>{titulo}</strong>
+              <span className="selo__base">Parceria</span>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -148,7 +130,7 @@ export function Home() {
   const upcoming = editions.filter((edition) => edition.data_evento >= today());
   const next = upcoming[0] || null;
   const past = editions.filter((edition) => edition.data_evento < today()).reverse();
-  const joinHref = '#fazer-parte';
+  const joinHref = '/f/quero-ser-membro';
 
   return (
     <div className="home">
@@ -161,7 +143,7 @@ export function Home() {
             <a href="#proximo">Agenda</a>
             <a href="#parceiros">Parceiros</a>
           </div>
-          <a className="pill" href={joinHref}>Quero participar</a>
+          <a className="pill" href={joinHref}>Registrar interesse</a>
         </div>
       </nav>
 
@@ -172,7 +154,7 @@ export function Home() {
           <h1>Falar de pessoas <em>pode mudar o mundo.</em></h1>
           <p className="hero__text">Uma comunidade para quem se interessa por gente, gestão e desenvolvimento humano, com pessoas do Brasil inteiro e encontros presenciais.</p>
           <div className="hero__actions">
-            <a className="pill pill--large" href={joinHref}>Quero participar</a>
+            <a className="pill pill--large" href={joinHref}>Registrar interesse</a>
             <a className="link" href="#proximo">Ver a agenda</a>
           </div>
         </div>
@@ -300,7 +282,7 @@ export function Home() {
         <div className="wrap sponsors__body">
           <div>
             <p className="eyebrow">Para empresas e profissionais</p>
-            <h2>Apoie este encontro. <em>Seja um parceiro.</em></h2>
+            <h2>Apoie este encontro.<br /><em className="nowrap">Seja um parceiro.</em></h2>
             <p className="muted">Nem toda contribuição é financeira: cada parceiro oferece o que faz bem, e a proposta é combinada individualmente.</p>
             <div className="hero__actions">
               <a className="pill" href={PARTNER_FORM_URL}>Quero ser parceiro</a>
