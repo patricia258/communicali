@@ -751,7 +751,8 @@ function IndicarPerfil({ pessoa, outras }: { pessoa: Pessoa; outras: Pessoa[] })
     const { error } = await supabase.rpc('communicali_indicar_perfil', { p_perfil: pessoa.id, p_para: para, p_mensagem: mensagem });
     if (error) { setErro(errorMessage(error)); return; }
     const nome = outras.find((item) => item.id === para)?.nome.split(' ')[0] || 'A pessoa';
-    setPara(''); setMensagem(''); setAviso(`${nome} recebeu o perfil de ${primeiro} nos alertas.`);
+    setPara(''); setMensagem(''); setAviso(`${nome} recebeu o perfil de ${primeiro} nos alertas e por e-mail.`);
+    void fetch('/api/avisos', { method: 'POST' }).catch(() => null);
   }
   if (!outras.length) return null;
   return (

@@ -6,8 +6,15 @@
     }
   ],
   "functions": {
-    "api/email-lembretes.js": { "maxDuration": 60 },
-    "api/email-admin.js": { "maxDuration": 60 }
+    "api/email-lembretes.js": {
+      "maxDuration": 60
+    },
+    "api/email-admin.js": {
+      "maxDuration": 60
+    },
+    "api/avisos.js": {
+      "maxDuration": 60
+    }
   },
   "rewrites": [
     {

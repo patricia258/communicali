@@ -15,5 +15,6 @@ export default async function handler(req, res) {
       if (situacao !== 'ja_enviado') await pausa();
     }
   }
-  res.status(200).json({ alvo, edicoes: editions.length, ...total });
+  const avisos = await fetch('https://comuni.calirh.com/api/avisos', { method: 'POST' }).then((r) => r.json()).catch(() => null);
+  res.status(200).json({ alvo, edicoes: editions.length, ...total, avisos });
 }

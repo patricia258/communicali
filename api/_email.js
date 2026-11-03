@@ -125,7 +125,7 @@ ${rodape()}
 </table></td></tr></table></body></html>`;
 }
 
-export function layoutSimples({ titulo, saudacao, texto, destaque, linhas, botao, itens = [] }) {
+export function layoutSimples({ titulo, saudacao, texto, destaque, linhas, botao, itens = [], semSair = false }) {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">${FONTES}<title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
 <tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="ComuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
@@ -133,9 +133,9 @@ export function layoutSimples({ titulo, saudacao, texto, destaque, linhas, botao
 <tr><td align="center" style="padding:0 0 12px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;color:${COR.vivo}">${escape(saudacao)}</td></tr>
 <tr><td align="center" style="padding:0 0 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${linhas ? linhas.map((item) => `<div style="margin:0 0 8px">${semViuva(item)}</div>`).join('') : `${semViuva(escape(texto))}${destaque ? `<br><strong>${semViuva(escape(destaque))}</strong>` : ''}`}</td></tr>
 ${itens.length ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:18px 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${itens.map((item) => `✓ ${escape(item)}`).join('<br>')}</td></tr><tr><td height="20"></td></tr>` : ''}
-<tr><td align="center"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.vivo};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>
+${botao ? `<tr><td align="center"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.vivo};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
 ${rodape()}
-<tr><td align="center" style="padding:8px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#8A7A72"><a href="${DESCADASTRO}" style="color:#8A7A72">Parar de receber estes e-mails</a></td></tr>
+${semSair ? '' : `<tr><td align="center" style="padding:8px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#8A7A72"><a href="${DESCADASTRO}" style="color:#8A7A72">Parar de receber estes e-mails</a></td></tr>`}
 </table></td></tr></table></body></html>`;
 }
 

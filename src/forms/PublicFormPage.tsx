@@ -87,6 +87,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     if (preset) {
       const problem = await preset.submit(sent as Record<string, FormAnswer>);
       if (problem) { setSendError(problem); setPhase('questions'); return; }
+      void fetch('/api/avisos', { method: 'POST' }).catch(() => null);
       if (preset.successText) setPhase('done');
       return;
     }
@@ -94,6 +95,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     const { data, error: rpcError } = await anonPublicRpc<{ ok: boolean; confirmation: boolean }>('cali_form_submit', { p_slug: form.slug, p_answers: sent });
     if (rpcError || !data?.ok) { setSendError(rpcError?.message || 'Não foi possível enviar agora.'); setPhase('questions'); return; }
     setConfirmation(Boolean(data.confirmation)); setPhase('done');
+    void fetch('/api/avisos', { method: 'POST' }).catch(() => null);
   }, [answers, form, preset, preview, trail, index, questions]);
 
   const goNext = useCallback(() => {

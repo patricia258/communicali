@@ -412,6 +412,8 @@ const GRUPOS: Array<{ nome: string; itens: Array<[string, string]> }> = [
 function Frame({ session, children }: { session: Session; children: ReactNode }) {
   const { pathname } = useLocation();
   const caminho = pathname.replace(/\/$/, '') || '/admin';
+  // Ao navegar no painel, os avisos de nível e missão que você acabou de liberar saem por e-mail.
+  useEffect(() => { void fetch('/api/avisos', { method: 'POST' }).catch(() => null); }, [pathname]);
   const grupoAtual = GRUPOS.find((grupo) => grupo.itens.some(([to]) => to === caminho)) || (caminho === '/admin/convidados' ? GRUPOS[1] : undefined);
   return (
     <div className="adm">
