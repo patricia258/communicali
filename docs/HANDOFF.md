@@ -129,6 +129,12 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — boas-vindas final, parar de receber e foto
+- Boas-vindas com o texto e a formatação de Patrícia (itálico, negrito, sublinhado), botão "Acesse o site", assunto "Boas-vindas à ComuniCALI, Nome!". Etiquetas com degradê vivo; fontes Funnel Display/Inter carregadas (Gmail troca por Helvetica). Rodapé de todos: itálico, negrito e "Este é um e-mail automático. Por favor, não responda."; quem não puder ir avisa pelo WhatsApp.
+- Parar de receber: só nos avisos do espaço do membro (`layoutSimples`: conexão, sugestão, indicações). Link assinado com HMAC do `CRON_SECRET` → `api/descadastro.js`, grava em `email_descadastro` (migração `20261103190000`); `enviar()` pula quem saiu e manda `List-Unsubscribe`. Lista "Pararam de receber e-mails" no Início do painel. Link inválido testado (400); link válido só será testado pelo botão "Enviar teste para mim" da edição, que agora inclui um aviso de conexão.
+- Foto do café nos e-mails recortada mais para cima (letreiro visível).
+- Envio das boas-vindas: decisão de Patrícia, só para os **25 contatados** (`acionado`), ainda não enviado.
+
 ### 03/11/2026, Claude Code — e-mails revisados e grafia ComuniCALI
 - Publicado `dpl_AcDdMQG4atcGhX3GWZAYbZjN1crC`. Grafia oficial: **ComuniCALI, com um M**, em todos os textos do site, e-mails, formulários, regras, privacidade e código de acesso (identificadores técnicos como `communicali` e nomes de arquivo continuam iguais). Migração `20261103180000`.
 - E-mails: "Inscrição recebida" e "Lista de espera" sem o bloco Quando/Onde; menos emojis (sem emoji no botão e nos rótulos); "Convite de agenda" deixou de existir e o botão do painel em Edições agora envia **Boas-vindas** (tipo `boasvindas`, uma vez por pessoa, sem data e local); lembrete automático passou para a véspera (sexta 13/11 para o encontro de sábado 14/11), com local e botão de agenda; e-mail de conexão com a frase final em negrito.
