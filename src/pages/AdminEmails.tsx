@@ -54,29 +54,46 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
   }
 
   const enviadas = linhas.filter((item) => item.situacao === 'enviado');
+  const abriram = enviadas.filter((item) => item.aberto_em).length;
+  const clicaram = enviadas.filter((item) => item.clicado_em).length;
+  const pct = (valor: number) => (enviadas.length ? ` · ${Math.round((valor / enviadas.length) * 100)}%` : '');
+  const marca = (iso: string | null) => (iso ? <span className="adm-status adm-status--sim" title={quando(iso)}>✓ {quando(iso).slice(0, 5)}</span> : <span className="adm-status">Ainda não</span>);
+  const pendentes = faltamBoasVindas + faltamAgradecimento;
   return (
-    <section className="v2-forms-card">
-      <header><small>E-MAILS</small><h2>Envios e acompanhamento</h2></header>
-      <label className="v2-forms-check"><input type="checkbox" checked={lembrete} onChange={(event) => onLembrete(event.target.checked)} /><span><strong>Lembrete automático em {diaLembrete}</strong><small>Vai na véspera, pela manhã, com local e agenda, para quem foi aprovado e para os contatados do formulário.</small></span></label>
-      {resumo && <p className="adm-hint">{resumo.todos} inscritos, {resumo.acionados} contatados. Enviados: {resumo.convites} boas-vindas, {resumo.agradecimentos} agradecimentos, {resumo.confirmacoes} confirmações e {resumo.lembretes} lembretes.{resumo.erros ? ` ${resumo.erros} com erro.` : ''}</p>}
-      <div className="adm-links">
-        <button type="button" className="wf-primary" disabled={busy || !faltamBoasVindas} onClick={() => void enviarLote('boasvindas', faltamBoasVindas)}>{busy ? 'Enviando...' : `Boas-vindas aos contatados (${faltamBoasVindas})`}</button>
-        <button type="button" className="wf-secondary" disabled={busy || !faltamAgradecimento} onClick={() => void enviarLote('agradecimento', faltamAgradecimento)}>{`Agradecimento aos sem contato (${faltamAgradecimento})`}</button>
-        <button type="button" className="wf-secondary" disabled={busy} onClick={() => void teste()}>Enviar teste para mim</button>
-        <button type="button" className="wf-secondary" disabled={busy} onClick={() => void carregar()}>Atualizar</button>
+    <section className="v2-forms-card adm-envios">
+      <header className="adm-envios__topo">
+        <div><small>E-MAILS</small><h2>Envios desta edição</h2></div>
+        <div className="adm-links">
+          <button type="button" className="wf-secondary" disabled={busy} onClick={() => void teste()}>Enviar teste para mim</button>
+          <button type="button" className="wf-secondary" disabled={busy} onClick={() => void carregar()}>Atualizar</button>
+        </div>
+      </header>
+
+      <div className="adm-cards">
+        <div className="adm-card"><span>Enviados</span><strong>{enviadas.length}</strong><small>{resumo ? `${resumo.convites} boas-vindas · ${resumo.agradecimentos} agradecimentos` : ''}</small></div>
+        <div className="adm-card"><span>Abriram</span><strong>{abriram}</strong><small>{pct(abriram).replace(' · ', '') || '-'} dos enviados (aproximado)</small></div>
+        <div className="adm-card"><span>Clicaram</span><strong>{clicaram}</strong><small>{pct(clicaram).replace(' · ', '') || '-'} dos enviados</small></div>
+        <div className="adm-card"><span>Com erro</span><strong>{resumo?.erros ?? 0}</strong><small>{resumo ? `${resumo.todos} inscritos · ${resumo.acionados} contatados` : ''}</small></div>
       </div>
+
+      <label className="v2-forms-check"><input type="checkbox" checked={lembrete} onChange={(event) => onLembrete(event.target.checked)} /><span><strong>Lembrete automático em {diaLembrete}</strong><small>Vai na véspera, pela manhã, com local e agenda, para quem foi aprovado e para os contatados.</small></span></label>
+
+      {pendentes > 0 && <div className="adm-links">
+        {faltamBoasVindas > 0 && <button type="button" className="wf-primary" disabled={busy} onClick={() => void enviarLote('boasvindas', faltamBoasVindas)}>{busy ? 'Enviando...' : `Enviar boas-vindas (${faltamBoasVindas})`}</button>}
+        {faltamAgradecimento > 0 && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void enviarLote('agradecimento', faltamAgradecimento)}>{`Enviar agradecimento (${faltamAgradecimento})`}</button>}
+      </div>}
       {note && <p className="adm-hint" role="status">{note}</p>}
+
       {linhas.length > 0 && <>
-        <p className="adm-hint">{enviadas.length} entregues ao servidor de e-mail · {enviadas.filter((item) => item.aberto_em).length} abriram · {enviadas.filter((item) => item.clicado_em).length} clicaram. Alguns programas, como o Apple Mail, contam abertura sozinhos, e outros bloqueiam as imagens; use a abertura como sinal aproximado e o clique como sinal seguro.</p>
         <Tabela colunas={[
           { id: 'nome', titulo: 'Nome', valor: (item: Linha) => item.nome || '-' },
           { id: 'email', titulo: 'E-mail', valor: (item: Linha) => item.email },
-          { id: 'tipo', titulo: 'E-mail enviado', valor: (item: Linha) => NOMES[item.tipo] || item.tipo },
-          { id: 'situacao', titulo: 'Envio', valor: (item: Linha) => (item.situacao === 'enviado' ? 'Enviado' : item.situacao === 'erro' ? 'Erro' : 'Enviando') },
-          { id: 'enviado', titulo: 'Quando', valor: (item: Linha) => item.created_at, render: (item: Linha) => quando(item.created_at) },
-          { id: 'aberto', titulo: 'Abriu', valor: (item: Linha) => item.aberto_em || '', render: (item: Linha) => quando(item.aberto_em) },
-          { id: 'clicado', titulo: 'Clicou', valor: (item: Linha) => item.clicado_em || '', render: (item: Linha) => quando(item.clicado_em) },
-        ]} filtros={[{ id: 'tipo', titulo: 'E-mail', valor: (item: Linha) => NOMES[item.tipo] || item.tipo }]} linhas={linhas} chave={(item) => `${item.email}-${item.tipo}`} inicial={{ id: 'enviado', desc: true }} vazio="Nenhum e-mail enviado." />
+          { id: 'tipo', titulo: 'Qual e-mail', valor: (item: Linha) => NOMES[item.tipo] || item.tipo, render: (item: Linha) => <span className={`adm-pill adm-tipo--${item.tipo}`}>{NOMES[item.tipo] || item.tipo}</span> },
+          { id: 'enviado', titulo: 'Enviado em', valor: (item: Linha) => item.created_at, render: (item: Linha) => (item.situacao === 'erro' ? <span className="adm-status adm-status--erro">Erro</span> : quando(item.created_at)) },
+          { id: 'aberto', titulo: 'Abriu', valor: (item: Linha) => item.aberto_em || '', render: (item: Linha) => marca(item.aberto_em) },
+          { id: 'clicado', titulo: 'Clicou', valor: (item: Linha) => item.clicado_em || '', render: (item: Linha) => marca(item.clicado_em) },
+        ]} filtros={[{ id: 'tipo', titulo: 'Qual e-mail', valor: (item: Linha) => NOMES[item.tipo] || item.tipo }]} linhas={linhas} chave={(item) => `${item.email}-${item.tipo}`} inicial={{ id: 'enviado', desc: true }} vazio="Nenhum e-mail enviado." />
+        <p className="adm-hint">A abertura é aproximada: o Apple Mail marca sozinho e alguns programas bloqueiam a contagem. O clique é o sinal seguro.</p>
       </>}
     </section>
   );
