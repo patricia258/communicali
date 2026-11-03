@@ -129,6 +129,12 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — sincronização com a produção
+- Mudou: o repositório `~/CALI/communicali` (branch `main`, commit `ca56442`) agora é idêntico à produção `dpl_AZBqRustLkBAEGj72tYxsESLZbec`, conferido arquivo por arquivo pelo SHA-1 do manifesto. As preparações v20/v21/v22 do pacote único ficaram na branch `preparacao-chatgpt-v21` (commit `d23c592`, pasta `~/CALI/communicali-prep`), fora do que é publicado.
+- Banco (somente leitura): nenhum objeto dos rascunhos de `docs/sql` existe no ComuniCALI (sem `communicali_private`, `communicali_feedback`, `communicali_partner_profiles`, `codigo_alteracoes`, funções de convite, vitrine ou capacidade). Nenhum erro de tela registrado em `client_errors` nos últimos 3 dias.
+- Regra daqui em diante: publicar só a partir de `main`. Pacote da outra IA entra por branch e é integrado por diferença.
+- Pendente: integrações A3 a A9, conforme decisões de Patrícia.
+
 ### 02/11/2026, ChatGPT — ajuste isolado dos carimbos da tela inicial
 - Pedido específico: diminuir um pouco os selos/carimbos da tela inicial e restringir a movimentação à horizontal, sem redesenhar nada.
 - Carimbos: 168 × 168 → 140 × 140 px; espaço do próximo encontro 130 → 110 px. Artes, cores e rotação original intactas. Faixa com overflow-y hidden, touch-action pan-x pinch-zoom, contenção horizontal e espaço vertical para não cortar as imagens inclinadas. Imagens com draggable=false; sem seleção/arraste nativo. Pinça para ampliar preservada.
