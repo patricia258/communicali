@@ -127,7 +127,7 @@ export async function downloadShareCard(card: { title: string; category: string;
   context.fillStyle = '#7A1F3D'; context.font = '600 24px Inter, Arial, sans-serif';
   wrap(context, url.replace(/^https?:\/\//, ''), W - P - tx - 30, 2).forEach((line, index) => context.fillText(line, tx, panelY + 250 + index * 32));
   context.fillStyle = 'rgba(243,233,225,.7)'; context.font = '500 22px Inter, Arial, sans-serif'; context.textAlign = 'center';
-  context.fillText('CommuniCALI  ·  Café & Pessoas  ·  comuni.calirh.com', W / 2, H - 38);
+  context.fillText('ComuniCALI  ·  Café & Pessoas  ·  comuni.calirh.com', W / 2, H - 38);
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
   if (blob) download(blob, filename);
 }

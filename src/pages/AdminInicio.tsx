@@ -51,7 +51,7 @@ export function HomePanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>INÍCIO</small><h1>Painel da CommuniCALI</h1><p>{edition ? `Próximo encontro: ${edition.titulo}, ${edition.data_evento.split('-').reverse().join('/')}.` : 'Nenhum encontro futuro cadastrado.'}</p></div></div>
+      <div className="wf-head"><div><small>INÍCIO</small><h1>Painel da ComuniCALI</h1><p>{edition ? `Próximo encontro: ${edition.titulo}, ${edition.data_evento.split('-').reverse().join('/')}.` : 'Nenhum encontro futuro cadastrado.'}</p></div></div>
       <div className="adm-cards">
         {cards.map(([Icon, label, value, to]) => <Link className="adm-card" to={to} key={label}><Icon size={18} aria-hidden="true" /><strong>{value}</strong><span>{label}</span></Link>)}
       </div>

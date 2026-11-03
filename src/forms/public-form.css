@@ -146,7 +146,7 @@
 .cali-form-page.cali-form-page :is(input,textarea,select){font-size:16px!important}
 .cali-form-page.cali-form-page .cf-text{font-size:max(16px,clamp(20px,3vw,26px))!important}
 
-/* CommuniCALI: o bordô fica nos títulos e o destaque passa para o mostarda da página principal. */
+/* ComuniCALI: o bordô fica nos títulos e o destaque passa para o mostarda da página principal. */
 .cali-form-page{--cf-mustard:#C9973B;--cf-mustard-2:#B5852E}
 .cali-form-page.cali-form-page.cali-form-page .cf-primary,.cali-form-page.cali-form-page.cali-form-page .cf-nav button,.cali-form-page.cali-form-page.cali-form-page .cf-done-mark{background:var(--cf-mustard)!important;color:#22100F!important}
 .cali-form-page.cali-form-page.cali-form-page .cf-primary:hover{background:var(--cf-mustard-2)!important}

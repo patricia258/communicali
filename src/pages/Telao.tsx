@@ -22,7 +22,7 @@ export function TelaoCheckin() {
   return (
     <main className="screen">
       <div className="screen__text">
-        <img className="screen__logo" src="/brand/communicali-branco.png" alt="CommuniCALI" />
+        <img className="screen__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
         <h1>Faça seu <span className="nowrap">check-in</span></h1>
         <p className="screen__url">{url.replace(/^https?:\/\//, '')}</p>
       </div>
@@ -83,7 +83,7 @@ export function TelaoVotacao() {
   return (
     <main className={`screen screen--poll${poll?.revelada ? ' screen--revealed' : ''}`}>
       <div className="screen__text">
-        <img className="screen__logo" src="/brand/communicali-branco.png" alt="CommuniCALI" />
+        <img className="screen__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
         <p className="eyebrow">Percepção de quem está nesta sala</p>
         <h1>{poll?.pergunta}</h1>
         {poll?.revelada ? <Results poll={poll} /> : (

@@ -8,7 +8,7 @@ const ACEITE = 'Autorizo';
 
 const PRESET: FormPreset = {
   title: 'Cadastro de staff',
-  category: 'CommuniCALI | Café & Pessoas',
+  category: 'ComuniCALI | Café & Pessoas',
   description: 'Para quem vai trabalhar nos encontros, como fotografia, vídeo e apoio. Seus dados ficam restritos à organização.',
   submitLabel: 'Enviar cadastro',
   successText: 'Cadastro recebido! A organização vai entrar em contato com os próximos passos.',

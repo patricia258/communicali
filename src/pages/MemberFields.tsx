@@ -30,11 +30,11 @@ export function memberQuestions(texts: SiteTexts, options: { email?: boolean; im
     { id: 'cargo', kind: 'short_text', label: 'Cargo ou área de atuação' },
     { id: 'linkedin', kind: 'short_text', label: 'Qual é o seu LinkedIn?' },
     { id: 'interesses', kind: 'multi_choice', label: 'Qual é o seu principal interesse na comunidade?', options: INTERESSES, required: true },
-    { id: 'como', kind: 'single_choice', label: 'Como conheceu a CommuniCALI?', options: texts.como_conheceu_opcoes, required: true },
+    { id: 'como', kind: 'single_choice', label: 'Como conheceu a ComuniCALI?', options: texts.como_conheceu_opcoes, required: true },
     { id: 'privacidade', kind: 'single_choice', label: 'Política de privacidade', help: `Leia a [política de privacidade](${SITE}/privacidade).`, options: [ACEITE], required: true },
   );
   if (texts.regras_texto) list.push({ id: 'regras', kind: 'single_choice', label: 'Regras de participação da comunidade', help: `Leia as [regras de participação](${SITE}/regras).`, options: [ACEITE], required: true });
-  list.push({ id: 'comunicacoes', kind: 'yes_no', label: 'Quer receber comunicações da CommuniCALI?' });
+  list.push({ id: 'comunicacoes', kind: 'yes_no', label: 'Quer receber comunicações da ComuniCALI?' });
   if (options.imagem) list.push({ id: 'imagem', kind: 'yes_no', label: 'Autoriza o uso da sua imagem em fotos do encontro publicadas pela CALI RH?' });
   return list;
 }
@@ -47,7 +47,7 @@ export function confirmQuestions(texts: SiteTexts, nome: string): FormQuestion[]
   ];
   if (texts.regras_texto) list.push({ id: 'regras', kind: 'single_choice', label: 'Regras de participação da comunidade', help: `Leia as [regras de participação](${SITE}/regras).`, options: [ACEITE], required: true });
   list.push(
-    { id: 'comunicacoes', kind: 'yes_no', label: 'Quer receber comunicações da CommuniCALI?' },
+    { id: 'comunicacoes', kind: 'yes_no', label: 'Quer receber comunicações da ComuniCALI?' },
     { id: 'imagem', kind: 'yes_no', label: 'Autoriza o uso da sua imagem em fotos do encontro publicadas pela CALI RH?' },
   );
   return list;

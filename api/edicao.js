@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   const edition = found.ok ? (await found.json())[0] : null;
   let html = page;
   if (edition) {
-    const title = escape(`${edition.titulo} | CommuniCALI`);
+    const title = escape(`${edition.titulo} | ComuniCALI`);
     const text = escape(`${longDate(edition.data_evento)}, ${edition.horario}, ${edition.local}, ${edition.cidade}`);
     const image = escape(edition.capa_url ? new URL(edition.capa_url, origin).href : `${origin}/og-comunidade.jpg`);
     html = page

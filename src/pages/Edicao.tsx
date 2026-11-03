@@ -23,7 +23,7 @@ const Whatsapp = ({ size }: { size: number }) => (
 export function Share({ edition }: { edition: EditionRow }) {
   const [copied, setCopied] = useState(false);
   const url = `https://comuni.calirh.com/e/${edition.slug}`;
-  const text = `${edition.titulo} | CommuniCALI: ${url}`;
+  const text = `${edition.titulo} | ComuniCALI: ${url}`;
   const copy = () => navigator.clipboard.writeText(url).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 2000); });
   return (
     <div className="share">
@@ -76,7 +76,7 @@ export function EdicaoPage() {
   const past = edition ? edition.data_evento < new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }) : false;
   return (
     <div className="home">
-      <nav className="nav"><div className="wrap nav__row"><a href="/" className="nav__logo"><img src="/brand/communicali-branco.png" alt="CommuniCALI" /></a><a className="link" href="/">Conhecer a comunidade</a></div></nav>
+      <nav className="nav"><div className="wrap nav__row"><a href="/" className="nav__logo"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></a><a className="link" href="/">Conhecer a comunidade</a></div></nav>
       <main className="wrap block">
         {edition === null && <p className="muted">Encontro não encontrado.</p>}
         {edition && <EditionCard edition={edition} badge={past ? 'Realizado' : 'Próximo encontro'} />}
@@ -102,7 +102,7 @@ export function CodigoConvite() {
   if (!invalido) return <main className="event-page" aria-busy="true" />;
   return (
     <>
-      <main className="event-page"><section className="event-card"><p className="eyebrow">CommuniCALI</p><h1>Sem inscrições abertas agora</h1><p className="notice">Este convite não encontrou um encontro aberto. Veja a agenda no site ou entre no <a className="link" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">grupo da comunidade</a>.</p></section></main>
+      <main className="event-page"><section className="event-card"><p className="eyebrow">ComuniCALI</p><h1>Sem inscrições abertas agora</h1><p className="notice">Este convite não encontrou um encontro aberto. Veja a agenda no site ou entre no <a className="link" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">grupo da comunidade</a>.</p></section></main>
       <SiteFooter />
     </>
   );
@@ -117,7 +117,7 @@ export function InscricaoPage() {
   const codigo = params.get('c') || '';
   const preset = useMemo<FormPreset | null>(() => edition?.inscricoes_abertas && texts ? {
     title: edition.titulo,
-    category: 'Inscrição CommuniCALI',
+    category: 'Inscrição ComuniCALI',
     description: `${longDate(edition.data_evento)}, ${edition.horario}, ${edition.local}, ${edition.cidade}.`,
     submitLabel: 'Enviar inscrição',
     successText: 'Recebemos sua intenção de participar! A equipe vai analisar e você recebe a confirmação por e-mail.',
@@ -148,7 +148,7 @@ export function InscricaoPage() {
     <>
       <main className="event-page">
         <section className="event-card">
-          <p className="eyebrow">CommuniCALI</p>
+          <p className="eyebrow">ComuniCALI</p>
           <h1>{edition?.titulo || 'Inscrição'}</h1>
           {edition && <p className="event-card__meta">{formatDate(edition.data_evento)} · {edition.local}</p>}
           <p className="notice">As inscrições desta edição estão encerradas. No dia do encontro, quem for participar faz o check-in pelo QR Code do telão.</p>

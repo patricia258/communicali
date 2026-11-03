@@ -1,8 +1,8 @@
-// E-mails da CommuniCALI: layout próprio, convite de agenda e registro de envio. Cada pessoa recebe cada tipo uma vez por edição.
+// E-mails da ComuniCALI: layout próprio, convite de agenda e registro de envio. Cada pessoa recebe cada tipo uma vez por edição.
 export const SUPABASE = 'https://cyyrrtekbkltdiatixhp.supabase.co';
 export const PUBLIC_KEY = 'sb_publishable_57ZoSr7YGi1KqVdKmXMUxw_wGS-H19P';
 const SITE = 'https://comuni.calirh.com';
-const FROM = 'CommuniCALI <comuni@calirh.com>';
+const FROM = 'ComuniCALI <comuni@calirh.com>';
 const REPLY_TO = 'contato@calirh.com';
 export const EDITION_FIELDS = 'id,slug,titulo,data_evento,horario,local,cidade,endereco,capa_url,lembrete_ativo,publica';
 
@@ -14,6 +14,7 @@ const FAIXA = {
   espera: { etiqueta: COR.suave, etiquetaTexto: COR.tinta },
   lembrete: { etiqueta: COR.terra, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
   convite: { etiqueta: COR.mostarda, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
+  boasvindas: { etiqueta: COR.mostarda, etiquetaTexto: COR.tinta },
 };
 const TITULO = "'Funnel Display',Helvetica,Arial,sans-serif";
 const TEXTO = 'Inter,Helvetica,Arial,sans-serif';
@@ -52,20 +53,20 @@ function fold(line) {
 export function convite(edition, pessoa) {
   const { inicio, fim } = horarios(edition);
   const lines = [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CALI RH//CommuniCALI//PT', 'METHOD:REQUEST', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT',
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CALI RH//ComuniCALI//PT', 'METHOD:REQUEST', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT',
     `UID:${edition.id}@comuni.calirh.com`, `DTSTAMP:${utc(new Date())}`, `DTSTART:${utc(inicio)}`, `DTEND:${utc(fim)}`,
-    `SUMMARY:${icsText(`${edition.titulo} | CommuniCALI`)}`, `LOCATION:${icsText(endereco(edition))}`,
-    `DESCRIPTION:${icsText(`Encontro da comunidade CommuniCALI. ${SITE}/e/${edition.slug}`)}`,
-    'ORGANIZER;CN=CommuniCALI:mailto:comuni@calirh.com',
+    `SUMMARY:${icsText(`${edition.titulo} | ComuniCALI`)}`, `LOCATION:${icsText(endereco(edition))}`,
+    `DESCRIPTION:${icsText(`Encontro da comunidade ComuniCALI. ${SITE}/e/${edition.slug}`)}`,
+    'ORGANIZER;CN=ComuniCALI:mailto:comuni@calirh.com',
     `ATTENDEE;CN=${icsText(pessoa.nome || pessoa.email)};ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE:mailto:${pessoa.email}`,
-    'STATUS:CONFIRMED', 'SEQUENCE:0', 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Encontro CommuniCALI amanhã', 'TRIGGER:-P1D', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR',
+    'STATUS:CONFIRMED', 'SEQUENCE:0', 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Encontro ComuniCALI amanhã', 'TRIGGER:-P1D', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR',
   ];
   return `${lines.map(fold).join('\r\n')}\r\n`;
 }
 
 function linkGoogle(edition) {
   const { inicio, fim } = horarios(edition);
-  const params = new URLSearchParams({ action: 'TEMPLATE', text: `${edition.titulo} | CommuniCALI`, dates: `${utc(inicio)}/${utc(fim)}`, location: endereco(edition), details: `${SITE}/e/${edition.slug}`, ctz: 'America/Sao_Paulo' });
+  const params = new URLSearchParams({ action: 'TEMPLATE', text: `${edition.titulo} | ComuniCALI`, dates: `${utc(inicio)}/${utc(fim)}`, location: endereco(edition), details: `${SITE}/e/${edition.slug}`, ctz: 'America/Sao_Paulo' });
   return `https://calendar.google.com/calendar/render?${params}`;
 }
 
@@ -81,21 +82,21 @@ function foto(edition) {
   return capa ? `<tr><td style="padding:0 0 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td height="220" bgcolor="${COR.rose}" background="${escape(capa)}" style="height:220px;border-radius:20px;background-color:${COR.rose};background-image:url('${escape(capa)}');background-position:center 62%;background-size:cover;background-repeat:no-repeat;font-size:1px;line-height:1px">&nbsp;</td></tr></table></td></tr>` : '';
 }
 
-function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, cor }) {
+function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, cor, detalhes = true }) {
   const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:17px;line-height:27px;color:${COR.tinta}">${item}</p>`).join('');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escape(previa)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="background:#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
-<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="CommuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
+<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="ComuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
 ${foto(edition)}
 <tr><td style="padding:0 0 12px"><span style="display:inline-block;padding:7px 16px;border-radius:999px;background:${cor.etiqueta};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
 <tr><td style="padding:0 0 14px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.vivo}">${saudacao}</td></tr>
 <tr><td style="padding:0 0 8px">${texto}</td></tr>
-<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:22px 24px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-${detalhe('📅 Quando', `${longDate(edition.data_evento)}, ${edition.horario}`)}${detalhe('📍 Onde', endereco(edition))}
-</table></td></tr>
+${detalhes ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:22px 24px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+${detalhe('Quando', `${longDate(edition.data_evento)}, ${edition.horario}`)}${detalhe('Onde', endereco(edition))}
+</table></td></tr>` : ''}
 ${botao ? `<tr><td align="center" style="padding:24px 0 4px"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${cor.botao};font-family:${TITULO};font-size:16px;font-weight:600;color:${cor.botaoTexto};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
 ${depois ? `<tr><td align="center" style="padding:16px 0 0;font-family:${TEXTO};font-size:14px;line-height:22px;color:${COR.bordo}">${depois}</td></tr>` : ''}
 <tr><td align="center" style="padding:32px 0 0;font-family:${TITULO};font-size:17px;line-height:24px;color:${COR.vivo}">Falar de pessoas pode mudar o mundo.</td></tr>
@@ -103,13 +104,13 @@ ${depois ? `<tr><td align="center" style="padding:16px 0 0;font-family:${TEXTO};
 </table></td></tr></table></body></html>`;
 }
 
-export function layoutSimples({ titulo, saudacao, texto, botao, itens = [] }) {
+export function layoutSimples({ titulo, saudacao, texto, destaque, botao, itens = [] }) {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
-<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="CommuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
+<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="ComuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
 <tr><td align="center" style="padding:0 0 12px"><span style="display:inline-block;padding:7px 16px;border-radius:999px;background:${COR.mostarda};font-family:${TEXTO};font-size:14px;font-weight:600;color:${COR.tinta}">${escape(titulo)}</span></td></tr>
 <tr><td align="center" style="padding:0 0 12px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;color:${COR.vivo}">${escape(saudacao)}</td></tr>
-<tr><td align="center" style="padding:0 0 22px;font-family:${TEXTO};font-size:17px;line-height:27px;color:${COR.tinta}">${escape(texto)}</td></tr>
+<tr><td align="center" style="padding:0 0 22px;font-family:${TEXTO};font-size:17px;line-height:27px;color:${COR.tinta}">${escape(texto)}${destaque ? `<br><strong>${escape(destaque)}</strong>` : ''}</td></tr>
 ${itens.length ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:18px 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${itens.map((item) => `✓ ${escape(item)}`).join('<br>')}</td></tr><tr><td height="20"></td></tr>` : ''}
 <tr><td align="center"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.vivo};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>
 <tr><td align="center" style="padding:32px 0 0;font-family:${TITULO};font-size:17px;line-height:24px;color:${COR.vivo}">Falar de pessoas pode mudar o mundo.</td></tr>
@@ -120,13 +121,14 @@ export function montar(tipo, edition, pessoa) {
   const nome = escape(primeiroNome(pessoa.nome));
   const saudacao = nome ? `Oi, ${nome}!` : 'Oi!';
   const titulo = escape(edition.titulo);
-  const agenda = { texto: '📅 Colocar na minha agenda', href: linkGoogle(edition) };
+  const agenda = { texto: 'Colocar na minha agenda', href: linkGoogle(edition) };
   const responder = 'Se não puder ir, responda este e-mail para liberarmos o seu lugar.';
   const textos = {
-    recebido: { assunto: `💌 Recebemos sua inscrição: ${edition.titulo}`, previa: 'A equipe vai analisar e você recebe a confirmação por e-mail.', titulo: '💌 Inscrição recebida', saudacao, paragrafos: [`Ficamos muito felizes com o seu interesse. Recebemos sua intenção de participar do encontro <strong>${titulo}</strong>.`, 'A equipe vai analisar e você recebe a confirmação por e-mail.'], anexo: false },
+    recebido: { assunto: `💌 Recebemos sua inscrição: ${edition.titulo}`, previa: 'A equipe vai analisar e você recebe a confirmação por e-mail.', titulo: '💌 Inscrição recebida', saudacao, paragrafos: [`Ficamos muito felizes com o seu interesse. Recebemos sua intenção de participar do encontro <strong>${titulo}</strong>.`, 'A equipe vai analisar e você recebe a confirmação por e-mail.'], detalhes: false, anexo: false },
     confirmacao: { assunto: `🎉 Reserva confirmada: ${edition.titulo}`, previa: 'Sua vaga está reservada.', titulo: '🎉 Reserva confirmada!', saudacao, paragrafos: [`Boa notícia: sua vaga no encontro <strong>${titulo}</strong> está reservada.`], botao: agenda, depois: `Para Outlook ou celular, use o convite anexo. ${responder}`, anexo: true },
-    espera: { assunto: `⏳ Lista de espera: ${edition.titulo}`, previa: 'Avisaremos você se abrir um lugar.', titulo: '⏳ Lista de espera', saudacao, paragrafos: [`Ficamos muito felizes com o seu interesse. As vagas do encontro <strong>${titulo}</strong> estão preenchidas, e seu nome entrou na lista de espera.`, 'A equipe avisa você por e-mail se abrir um lugar.'], anexo: false },
-    lembrete: { assunto: `⏰ Faltam 2 dias: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: '⏰ Faltam 2 dias', saudacao, paragrafos: ['Na chegada, a recepção confirma o seu nome e indica a sua mesa. 🤝', 'Depois de sentar, é só fazer o check-in pelo QR Code. 📲'], botao: agenda, depois: responder, anexo: true },
+    espera: { assunto: `⏳ Lista de espera: ${edition.titulo}`, previa: 'Avisaremos você se abrir um lugar.', titulo: '⏳ Lista de espera', saudacao, paragrafos: [`Ficamos muito felizes com o seu interesse. As vagas do encontro <strong>${titulo}</strong> estão preenchidas, e seu nome entrou na lista de espera.`, 'A equipe avisa você por e-mail se abrir um lugar.'], detalhes: false, anexo: false },
+    lembrete: { assunto: `⏰ É amanhã: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: '⏰ É amanhã!', saudacao, paragrafos: ['Na chegada, a recepção confirma o seu nome e indica a sua mesa.', 'Depois de sentar, é só fazer o check-in pelo QR Code.'], botao: agenda, depois: responder, anexo: true },
+    boasvindas: { assunto: `Que bom ter você com a gente, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Estamos ansiosos para ver você no nosso encontro.', titulo: '💛 Boas-vindas', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Ficamos muito felizes que você esteja com a gente nessa jornada.', 'A ComuniCALI nasceu sem pretensão, e temos certeza de que vai trazer grandes contribuições para cada pessoa que faz parte dela.', 'Estamos ansiosos para ver você no nosso encontro.'], detalhes: false, anexo: false },
     convite: { assunto: `🗓️ Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: '🗓️ Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
   }[tipo];
   return { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null };

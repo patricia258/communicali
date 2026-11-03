@@ -1,4 +1,4 @@
-/* E-mails da edição: confirmação e lembrete automáticos, convite de agenda enviado pelo painel. */
+/* E-mails da edição: confirmação e lembrete automáticos, boas-vindas enviadas pelo painel. */
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -21,7 +21,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
   useEffect(() => { void carregar(); }, [edition.id]);
 
   const faltam = resumo ? Math.max((publico === 'todos' ? resumo.todos : resumo.acionados) - resumo.convites, 0) : 0;
-  const diaLembrete = new Date(new Date(`${edition.data_evento}T12:00:00Z`).getTime() - 2 * 86400000).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+  const diaLembrete = new Date(new Date(`${edition.data_evento}T12:00:00Z`).getTime() - 1 * 86400000).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
   async function teste() {
     setBusy(true); setNote('');
@@ -31,17 +31,17 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
   }
 
   async function convidar() {
-    if (!window.confirm(`Enviar o convite de agenda para ${faltam} ${faltam === 1 ? 'pessoa' : 'pessoas'}? Quem já recebeu não recebe de novo.`)) return;
+    if (!window.confirm(`Enviar as boas-vindas para ${faltam} ${faltam === 1 ? 'pessoa' : 'pessoas'}? Quem já recebeu não recebe de novo.`)) return;
     setBusy(true); setNote('');
     let enviados = 0;
     try {
       for (;;) {
         const result = await chamar({ acao: 'convite', edicao: edition.id, publico });
         enviados += result.enviados;
-        setNote(`${enviados} convites enviados...`);
+        setNote(`${enviados} e-mails de boas-vindas enviados...`);
         if (!result.restantes) break;
       }
-      setNote(`${enviados} convites enviados.`);
+      setNote(`${enviados} e-mails de boas-vindas enviados.`);
     } catch (error) { setNote((error as Error).message); }
     await carregar();
     setBusy(false);
@@ -49,15 +49,15 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
 
   return (
     <section className="v2-forms-card">
-      <header><small>E-MAILS</small><h2>Confirmação, lembrete e agenda</h2></header>
-      <label className="v2-forms-check"><input type="checkbox" checked={lembrete} onChange={(event) => onLembrete(event.target.checked)} /><span><strong>Lembrete automático em {diaLembrete}</strong><small>Vai 2 dias antes, pela manhã, para todas as pessoas inscritas. Vai para quem foi aprovado e para os inscritos do formulário. Lembre de salvar as alterações.</small></span></label>
-      {resumo && <p className="adm-hint">{resumo.todos} inscritos, {resumo.acionados} acionados. Enviados: {resumo.confirmacoes} confirmações, {resumo.lembretes} lembretes e {resumo.convites} convites.{resumo.erros ? ` ${resumo.erros} com erro.` : ''}</p>}
+      <header><small>E-MAILS</small><h2>Confirmação, boas-vindas e lembrete</h2></header>
+      <label className="v2-forms-check"><input type="checkbox" checked={lembrete} onChange={(event) => onLembrete(event.target.checked)} /><span><strong>Lembrete automático em {diaLembrete}</strong><small>Vai na véspera, pela manhã, com local e agenda, para todas as pessoas inscritas. Vai para quem foi aprovado e para os inscritos do formulário. Lembre de salvar as alterações.</small></span></label>
+      {resumo && <p className="adm-hint">{resumo.todos} inscritos, {resumo.acionados} acionados. Enviados: {resumo.confirmacoes} confirmações, {resumo.lembretes} lembretes e {resumo.convites} boas-vindas.{resumo.erros ? ` ${resumo.erros} com erro.` : ''}</p>}
       <div className="adm-links">
-        <select aria-label="Quem recebe o convite" value={publico} onChange={(event) => setPublico(event.target.value)}>
+        <select aria-label="Quem recebe as boas-vindas" value={publico} onChange={(event) => setPublico(event.target.value)}>
           <option value="acionados">Só quem foi acionado ({resumo?.acionados ?? 0})</option>
           <option value="todos">Todos os inscritos ({resumo?.todos ?? 0})</option>
         </select>
-        <button type="button" className="wf-primary" disabled={busy || !faltam} onClick={() => void convidar()}>{busy ? 'Enviando...' : 'Enviar convite de agenda'}</button>
+        <button type="button" className="wf-primary" disabled={busy || !faltam} onClick={() => void convidar()}>{busy ? 'Enviando...' : 'Enviar boas-vindas'}</button>
         <button type="button" className="wf-secondary" disabled={busy} onClick={() => void teste()}>Enviar teste para mim</button>
       </div>
       {note && <p className="adm-hint" role="status">{note}</p>}

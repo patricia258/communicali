@@ -17,7 +17,7 @@ export function Convidar() {
 
   const meta = edition ? `${edition.titulo} · ${formatDate(edition.data_evento)} · ${edition.local}` : '';
   const preset = useMemo<FormPreset>(() => {
-    const base = { title: 'Indicar um convidado', category: 'CommuniCALI', skipWelcome: true };
+    const base = { title: 'Indicar um convidado', category: 'ComuniCALI', skipWelcome: true };
     if (step === 'email') return {
       ...base, submitLabel: 'Receber código',
       questions: [{ id: 'email', kind: 'email', label: 'Qual é o seu e-mail de membro?', help: `${meta}\nA indicação não garante vaga. A organização confirma conforme a disponibilidade do encontro.`, required: true }],
@@ -77,7 +77,7 @@ export function Convite() {
   return (
     <main className="event-page">
       <section className="event-card">
-        <p className="eyebrow">CommuniCALI</p>
+        <p className="eyebrow">ComuniCALI</p>
         {invite === null && <><h1>Convite não encontrado</h1><p>Confira o link que você recebeu.</p></>}
         {invite && (
           <>

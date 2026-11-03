@@ -43,7 +43,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
   const advanceTimer = useRef<number>();
 
   useEffect(() => {
-    document.title = 'CommuniCALI';
+    document.title = 'ComuniCALI';
     if (preset) {
       setForm({ id: 'preset', slug: 'preset', title: preset.title, category: preset.category, description: preset.description || '', thank_you: '', status: 'open', confirm_email: false, questions: preset.questions, submit_label: preset.submitLabel, success_text: preset.successText });
       setPhase(preset.skipWelcome ? 'questions' : 'welcome');
@@ -59,7 +59,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
       }
       if (!alive) return;
       if (!data) { setPhase('missing'); return; }
-      setForm(data); document.title = `${data.title} · CommuniCALI`;
+      setForm(data); document.title = `${data.title} · ComuniCALI`;
       setPhase(data.status === 'open' ? 'welcome' : 'closed');
     });
     return () => { alive = false; };
@@ -229,7 +229,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
   return <div className="cali-form-page">
     <div className={`cf-leaf cf-leaf-${phase === 'welcome' || phase === 'loading' || phase === 'missing' || phase === 'closed' ? 'intro' : phase === 'done' ? 'done' : 'questions'}`} key={phase === 'sending' ? 'questions' : phase} aria-hidden="true" />
     <div className="cf-progress" aria-hidden="true"><i style={{ width: `${progress}%` }} /></div>
-    <header className="cf-top"><a href="/"><img src="/brand/communicali-branco.png" alt="CommuniCALI" /></a>{preview && <span className="cf-preview">Prévia · as respostas não são salvas</span>}</header>
+    <header className="cf-top"><a href="/"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></a>{preview && <span className="cf-preview">Prévia · as respostas não são salvas</span>}</header>
     <main className="cf-stage">
       {phase === 'loading' && <div className="cf-screen cf-center"><span className="cf-spinner" aria-label="Carregando" /></div>}
       {phase === 'missing' && <div className="cf-screen cf-center cf-enter"><small>COMMUNICALI</small><h1>Formulário não encontrado</h1><p>Confira o link que você recebeu ou fale com a CALI RH.</p></div>}

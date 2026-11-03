@@ -127,7 +127,7 @@ function Entrar() {
           <img src="/selos/carimbo-fundadora.png" alt="" />
         </div>
         <section className="passe__acesso">
-          <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="CommuniCALI" />
+          <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
           <h1>Seu passaporte está <em>te esperando</em></h1>
           <p>{enviado ? `Enviamos um código para ${email.trim()}. Ele chega em instantes.` : 'Carimbos, pontos, missões e conexões da comunidade em um só lugar.'}</p>
           <form className="passe__form" onSubmit={(event) => void enviar(event)}>
@@ -189,7 +189,7 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
   }
   return (
     <>
-      <header className="passe__topo"><img className="passe__logo" src="/brand/communicali-horizontal.png" alt="CommuniCALI" /><span>PASSAPORTE</span></header>
+      <header className="passe__topo"><img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" /><span>PASSAPORTE</span></header>
       <div className="passe__saudacao">
         <h1>Olá, <em>{m.nome}</em></h1>
         <button type="button" className="passe__sino" aria-label={`Alertas${extra ? `: ${avisos.length} ${avisos.length === 1 ? 'não lido' : 'não lidos'}` : ''}`} aria-expanded={alertasAbertos} aria-controls="passaporte-alertas" onClick={() => setAlertasAbertos(!alertasAbertos)}>
@@ -893,7 +893,7 @@ export function MeuEspaco() {
   if (!espaco) return <div className="passe" aria-busy="true" />;
   if (!espaco.membro) return (
     <Pagina>
-      <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="CommuniCALI" />
+      <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
       <h1>Seu passaporte abre no primeiro encontro</h1>
       <p>Quem participa de um encontro presencial se torna membro. Depois do check-in, este espaço libera seus carimbos, pontos e missões.</p>
       <a className="passe__botao" href="/#proximo">Ver o próximo encontro</a>

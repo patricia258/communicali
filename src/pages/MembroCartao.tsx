@@ -65,7 +65,7 @@ async function desenhar(nome: string, nivel: string, categoria: string, foto: st
   c.fillText(nome, 70, 1000, 940);
   c.fillStyle = '#7A1F3D';
   c.font = '700 54px "Funnel Display", sans-serif';
-  c.fillText(`${nivel} da CommuniCALI`, 70, 1075, 940);
+  c.fillText(`${nivel} da ComuniCALI`, 70, 1075, 940);
   c.fillStyle = '#C9973B';
   c.fillRect(70, 1120, 300, 5);
   c.fillStyle = '#5A1E2D';
@@ -86,7 +86,7 @@ export function JanelaCartao({ nome, nivel, categoria, foto, novo, fechar }: { n
   async function compartilhar() {
     if (!arquivo) return;
     const imagem = new File([arquivo], 'meu-selo-communicali.png', { type: 'image/png' });
-    if (navigator.canShare?.({ files: [imagem] })) await navigator.share({ files: [imagem], text: `Sou ${nivel} da CommuniCALI. Falar de pessoas pode mudar o mundo.` }).catch(() => undefined);
+    if (navigator.canShare?.({ files: [imagem] })) await navigator.share({ files: [imagem], text: `Sou ${nivel} da ComuniCALI. Falar de pessoas pode mudar o mundo.` }).catch(() => undefined);
   }
 
   const podeCompartilhar = Boolean(arquivo && navigator.canShare?.({ files: [new File([arquivo], 'selo.png', { type: 'image/png' })] }));

@@ -1,10 +1,10 @@
-// Roda todo dia pelo agendador da Vercel e lembra quem está inscrito nas edições que acontecem daqui a 2 dias.
+// Roda todo dia pelo agendador da Vercel e lembra quem está inscrito nas edições que acontecem no dia seguinte (sexta-feira, para encontros de sábado).
 import { EDITION_FIELDS, banco, destinatarios, enviarUmaVez, pausa } from './_email.js';
 
 export default async function handler(req, res) {
   if (!process.env.CRON_SECRET || req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) return res.status(401).end();
   const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
-  const alvo = new Date(new Date(`${hoje}T12:00:00Z`).getTime() + 2 * 86400000).toISOString().slice(0, 10);
+  const alvo = new Date(new Date(`${hoje}T12:00:00Z`).getTime() + 1 * 86400000).toISOString().slice(0, 10);
   const found = await banco(`editions?data_evento=eq.${alvo}&publica=eq.true&lembrete_ativo=eq.true&select=${EDITION_FIELDS}`);
   const editions = found.ok ? await found.json() : [];
   const total = { enviado: 0, ja_enviado: 0, erro: 0 };

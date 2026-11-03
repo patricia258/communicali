@@ -126,7 +126,7 @@ export function ImpactosPanel() {
   ];
   return (
     <>
-      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Impacto da comunidade</h1><p>O que os membros contam que aconteceu por causa da CommuniCALI: conexões, entrevistas, empregos e parcerias.</p></div></div>
+      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Impacto da comunidade</h1><p>O que os membros contam que aconteceu por causa da ComuniCALI: conexões, entrevistas, empregos e parcerias.</p></div></div>
       <div className="adm-cards">{['Conheci pessoas', 'Consegui uma entrevista', 'Consegui um emprego', 'Fechei uma parceria'].map((tipo) => <div className="adm-card" key={tipo}><strong>{lista.filter((item) => item.tipo === tipo).length}</strong><span>{tipo}</span></div>)}</div>
       <Tabela colunas={colunas} linhas={lista} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhum relato ainda." filtros={[{ id: 'tipo', titulo: 'O que aconteceu', valor: (item) => item.tipo }]} />
     </>

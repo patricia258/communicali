@@ -19,9 +19,9 @@ function Success({ done }: { done: Done }) {
   return (
     <main className="event-page event-page--wine">
       <section className="pass">
-        <img className="pass__logo" src="/brand/communicali-branco.png" alt="CommuniCALI" />
+        <img className="pass__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
         <h1>Presença confirmada!</h1>
-        <p className="pass__lead">Parabéns! Você faz parte da CommuniCALI.</p>
+        <p className="pass__lead">Parabéns! Você faz parte da ComuniCALI.</p>
         {done.repetido ? <p className="pass__hint">Sua presença neste encontro já estava registrada.</p> : <p className="pass__hint">Você conquistou 10 pontos pela participação neste encontro.</p>}
         <dl className="pass__data">
           <div><dt>Nome</dt><dd>{done.nome}</dd></div>
@@ -60,7 +60,7 @@ export function Checkin() {
 
   const preset = useMemo<FormPreset | null>(() => {
     if (step === 'email') return {
-      title: 'Check-in', category: 'CommuniCALI', skipWelcome: true, submitLabel: 'Continuar',
+      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Continuar',
       questions: [{ id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', help: meta, required: true }],
       submit: async (answers) => {
         const clean = String(answers.email).trim().toLowerCase();
@@ -77,7 +77,7 @@ export function Checkin() {
       },
     };
     if (step === 'codigo') return {
-      title: 'Check-in', category: 'CommuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
+      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
       questions: [{ id: 'codigo', kind: 'short_text', label: 'Digite o código que enviamos', help: `Confira o e-mail ${email}.`, required: true }],
       submit: async (answers) => {
         const { error } = await supabase.auth.verifyOtp({ email, token: String(answers.codigo).trim(), type: 'email' });
@@ -91,7 +91,7 @@ export function Checkin() {
     };
     if (!texts) return null;
     if (step === 'inscrito') return {
-      title: 'Check-in', category: 'CommuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
+      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
       questions: confirmQuestions(texts, inscritoNome),
       submit: async (answers) => {
         const { data, error } = await supabase.rpc('communicali_checkin_inscrito', { p_slug: slug, p_email: email, p_privacidade: answers.privacidade === 'Li e aceito', p_regras: answers.regras === 'Li e aceito', p_comunicacoes: answers.comunicacoes === 'Sim', p_imagem: answers.imagem === 'Sim' });
@@ -101,7 +101,7 @@ export function Checkin() {
       },
     };
     return {
-      title: 'Check-in', category: 'CommuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
+      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
       questions: memberQuestions(texts, { imagem: true }),
       submit: async (answers) => {
         const { data, error } = await supabase.rpc('communicali_checkin_novo', { p_slug: slug, ...answerArgs(answers, email), p_imagem: answers.imagem === 'Sim' });
@@ -119,7 +119,7 @@ export function Checkin() {
   return (
     <main className="event-page">
       <section className="event-card">
-        <p className="eyebrow">CommuniCALI</p>
+        <p className="eyebrow">ComuniCALI</p>
         <h1>Check-in</h1>
         {loadError && <p className="notice notice--alert">{loadError}</p>}
         {edition && <p className="event-card__meta">{meta}</p>}

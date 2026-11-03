@@ -77,7 +77,7 @@ function Login() {
   return (
     <main className="event-page">
       <section className="event-card">
-        <img className="login__logo" src="/brand/communicali-branco.png" alt="CommuniCALI" />
+        <img className="login__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
         <h1>Área administrativa</h1>
         {sent ? <p className="notice">Enviamos um link de acesso para {email}. Abra pelo e-mail neste mesmo navegador.</p> : (
           <form className="form" onSubmit={submit}>
@@ -338,7 +338,7 @@ function PartnersPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>PARCEIROS</small><h1>Logos na faixa do site</h1><p>Cada parceiro cadastrado aqui entra na faixa, com o logo convertido para branco e sem fundo, "Quem apoia a CommuniCALI". Sem parceiros, o site mostra os espaços "Sua marca aqui". As propostas recebidas ficam em Formulários, no formulário de parceiros.</p></div></div>
+      <div className="wf-head"><div><small>PARCEIROS</small><h1>Logos na faixa do site</h1><p>Cada parceiro cadastrado aqui entra na faixa, com o logo convertido para branco e sem fundo, "Quem apoia a ComuniCALI". Sem parceiros, o site mostra os espaços "Sua marca aqui". As propostas recebidas ficam em Formulários, no formulário de parceiros.</p></div></div>
       {error && <p className="inline-notice">{error}</p>}
       <section className="v2-forms-card">
         <header><small>NOVO PARCEIRO</small><h2>Cadastre só parceiros confirmados</h2></header>
@@ -400,7 +400,7 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
   return (
     <div className="adm">
       <header className="adm__top">
-        <NavLink to="/admin" className="adm__logo"><img src="/brand/communicali-branco.png" alt="CommuniCALI" /></NavLink>
+        <NavLink to="/admin" className="adm__logo"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></NavLink>
         <nav>
           <NavLink to="/admin" end>Início</NavLink>
           <NavLink to="/admin/membros">Membros</NavLink>

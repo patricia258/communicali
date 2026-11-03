@@ -38,7 +38,7 @@ function SelosParceria() {
 }
 
 const FAQ = [
-  ['Fazer parte da comunidade é gratuito?', 'Sim. Fazer parte da CommuniCALI é gratuito.'],
+  ['Fazer parte da comunidade é gratuito?', 'Sim. Fazer parte da ComuniCALI é gratuito.'],
   ['Preciso ser de RH para participar?', 'Não. A base da comunidade é de profissionais de RH e administrativos, e líderes, empreendedores e especialistas de qualquer área são bem-vindos, do estágio à transição de carreira.'],
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
@@ -136,7 +136,7 @@ export function Home() {
     <div className="home">
       <nav className="nav">
         <div className="wrap nav__row">
-          <a href="/" className="nav__logo"><img src="/brand/communicali-branco.png" alt="CommuniCALI" /></a>
+          <a href="/" className="nav__logo"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></a>
           <div className="nav__links">
             <a href="#comunidade">Comunidade</a>
             <a href="#fazer-parte">Como entrar</a>
@@ -170,7 +170,7 @@ export function Home() {
         <div className="founder__text">
           <p className="eyebrow">A comunidade</p>
           <h2>Relações que continuam <em>depois do café.</em></h2>
-          <p>A CommuniCALI é uma comunidade para quem se interessa por gente: profissionais de RH, lideranças, empresários, empreendedores e todas as pessoas que querem falar de gestão e desenvolvimento humano.</p>
+          <p>A ComuniCALI é uma comunidade para quem se interessa por gente: profissionais de RH, lideranças, empresários, empreendedores e todas as pessoas que querem falar de gestão e desenvolvimento humano.</p>
           <p>Ela nasceu nos canais digitais, do cansaço com conversas superficiais e grupos feitos só para repassar informação. Dentro do próprio grupo surgiu a vontade de sair da tela e se encontrar para escutar, aprender e debater assuntos difíceis com respeito.</p>
           <p>Quem organiza é a CALI RH, que liga a gestão de pessoas às decisões do negócio sem perder a responsabilidade humana.</p>
         </div>
@@ -269,8 +269,8 @@ export function Home() {
       </section>
 
       <section className="sponsors" id="parceiros">
-        <p className="sponsors__label">Quem apoia a CommuniCALI</p>
-        <div className="logos" aria-label="Parceiros da CommuniCALI">
+        <p className="sponsors__label">Quem apoia a ComuniCALI</p>
+        <div className="logos" aria-label="Parceiros da ComuniCALI">
           <div className="logos__track">
             {(partners.length ? [...partners, ...partners, ...partners] : Array.from({ length: 12 }, (_, index) => ({ id: String(index), nome: '', logo_url: null, site_url: null }))).map((partner, index) => (
               partner.nome

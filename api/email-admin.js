@@ -1,4 +1,4 @@
-// Ações do painel: resumo dos envios, convite de agenda em lotes e teste para quem está logado. Exige sessão de administrador.
+// Ações do painel: resumo dos envios, boas-vindas em lotes e teste para quem está logado. Exige sessão de administrador.
 import { EDITION_FIELDS, PUBLIC_KEY, SUPABASE, banco, destinatarios, enviar, enviarUmaVez, layoutSimples, montar, pausa } from './_email.js';
 
 const LOTE = 25;
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         const nome = (outra.apelido || outra.nome).trim().split(/\s+/)[0];
         await banco('notifications', { method: 'POST', body: JSON.stringify({ member_id: pessoa.id, tipo: 'match', texto: `Temos uma sugestão de conexão: ${nome}.`, de: outra.id }) });
         if (!pessoa.email.endsWith('.test')) {
-          await enviar(pessoa.email, { assunto: `✨ Sugestão de conexão: ${nome}`, html: layoutSimples({ titulo: '✨ Sugestão de conexão', saudacao: `Oi, ${(pessoa.apelido || pessoa.nome).trim().split(/\s+/)[0]}!`, texto: `A organização da CommuniCALI acha que vale você conhecer ${nome}. O ponto em comum é ${par.motivo}. Abra seu passaporte para ver o perfil.`, botao: { texto: 'Ver sugestão', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
+          await enviar(pessoa.email, { assunto: `✨ Sugestão de conexão: ${nome}`, html: layoutSimples({ titulo: '✨ Sugestão de conexão', saudacao: `Oi, ${(pessoa.apelido || pessoa.nome).trim().split(/\s+/)[0]}!`, texto: `A organização da ComuniCALI acha que vale você conhecer ${nome}. O ponto em comum é ${par.motivo}. Abra seu passaporte para ver o perfil.`, botao: { texto: 'Ver sugestão', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
           await pausa();
         }
       }
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
   if (!edition) return res.status(404).json({ error: 'Edição não encontrada.' });
 
   if (acao === 'teste') {
-    const tipos = tipo === 'todos' ? ['recebido', 'confirmacao', 'espera', 'lembrete', 'convite'] : [tipo];
+    const tipos = tipo === 'todos' ? ['recebido', 'confirmacao', 'espera', 'lembrete', 'boasvindas'] : [tipo];
     for (const item of tipos) {
       const result = await enviar(email, montar(item, edition, { nome: 'Patrícia', email }));
       if (result.erro) return res.status(502).json({ error: result.erro });
@@ -78,15 +78,15 @@ export default async function handler(req, res) {
   const enviados = (item) => new Set(log.filter((row) => row.tipo === item && row.situacao === 'enviado').map((row) => row.email));
 
   if (acao === 'resumo') {
-    return res.status(200).json({ todos: pessoas.length, acionados: pessoas.filter((item) => item.acionado).length, confirmacoes: enviados('confirmacao').size, lembretes: enviados('lembrete').size, convites: enviados('convite').size, erros: log.filter((row) => row.situacao === 'erro').length });
+    return res.status(200).json({ todos: pessoas.length, acionados: pessoas.filter((item) => item.acionado).length, confirmacoes: enviados('confirmacao').size, lembretes: enviados('lembrete').size, convites: enviados('boasvindas').size, erros: log.filter((row) => row.situacao === 'erro').length });
   }
 
   if (acao === 'convite') {
-    const ja = enviados('convite');
+    const ja = enviados('boasvindas');
     const fila = pessoas.filter((item) => (publico === 'todos' || item.acionado) && !ja.has(item.email));
     let erros = 0;
     for (const pessoa of fila.slice(0, LOTE)) {
-      if ((await enviarUmaVez('convite', edition, pessoa)) === 'erro') erros += 1;
+      if ((await enviarUmaVez('boasvindas', edition, pessoa)) === 'erro') erros += 1;
       await pausa();
     }
     return res.status(200).json({ enviados: Math.min(fila.length, LOTE) - erros, restantes: Math.max(fila.length - LOTE, 0), erros });

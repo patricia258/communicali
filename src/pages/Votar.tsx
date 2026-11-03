@@ -34,7 +34,7 @@ export function Votar() {
   return (
     <main className="event-page">
       <section className="event-card">
-        <p className="eyebrow">CommuniCALI</p>
+        <p className="eyebrow">ComuniCALI</p>
         {loadError && <p className="notice notice--alert">{loadError}</p>}
         {sent === 'novo' && <h1 className="question">Sua resposta foi registrada. Obrigada por contribuir com essa conversa!</h1>}
         {sent === 'repetido' && <h1 className="question">Este aparelho já respondeu a esta pergunta.</h1>}
