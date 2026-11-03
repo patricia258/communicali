@@ -129,6 +129,10 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — selos fixos e botão Registrar interesse
+- Publicado `dpl_2HYzfmrNcksxasKVScGbZzwaiDfC`. Sem carrossel: os quatro selos ficam lado a lado em tamanho fixo (postal mostarda, redondo vinho, recorte terracota, oval oliva), todos coloridos com borda marfim. Título em duas linhas: "Apoie este encontro." / "Seja um parceiro.". Os botões "Quero participar" do topo e da abertura viraram "Registrar interesse" e levam direto a `/f/quero-ser-membro`.
+- Próximo pedido dela: revisar e aprovar o layout dos e-mails automáticos.
+
 ### 03/11/2026, Claude Code — home: primeira vez, +300 e selos de parceria
 - Publicado `dpl_ByF41DSjN92Jz51EPusbggP7hmA1`. Pedidos de Patrícia: botões "Quero participar" mais finos; número fixo "+300 pessoas" (comunidade toda, não só o grupo); seção "Escolha como participar" substituída por "Primeira vez? Venha nos conhecer." com dois blocos (visitar a comunidade → `/f/quero-ser-membro`, e grupo do WhatsApp com QR); sem a porta "Encontros presenciais" (a agenda já mostra) e sem texto lateral; sem texto lateral no Programa de membros; categorias de parceria em carrossel de selos com quatro estilos (postal picotado, carimbo redondo, recorte terracota, oval oliva), girando sozinho com setas.
 - Regra dela: quem vem pela primeira vez é visitante, não entra direto como Membro. O formulário virou "Quero conhecer a CommuniCALI", com a pergunta online ou presencial em Curitiba e região (migração `20261103150000`). O slug continua `quero-ser-membro`.
