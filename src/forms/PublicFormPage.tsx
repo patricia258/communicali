@@ -246,6 +246,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
           <h2>{question.label}{isAnswerable(question) && (question.required ? <em className="cf-req" aria-label="obrigatória">*</em> : <span className="cf-optional">Opcional</span>)}</h2>
         </div>
         {question.help && <p className="cf-help" dangerouslySetInnerHTML={{ __html: richTextHtml(question.help) }} />}
+        {question.attachment && <a className="cf-anexo" href={question.attachment.url} target="_blank" rel="noopener noreferrer"><img src={question.attachment.cover} alt="" /><span><strong>{question.attachment.title}</strong>{question.attachment.text && <small>{question.attachment.text}</small>}<em>Abrir apresentação <ArrowRight size={14} /></em></span></a>}
         {renderInput(question)}
         {error && <p className="cf-error" role="alert">{error}</p>}
         {sendError && isLast && <p className="cf-error" role="alert">{sendError}</p>}

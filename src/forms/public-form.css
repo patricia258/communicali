@@ -186,3 +186,12 @@
 .cali-form-page.cali-form-page.cali-form-page .cf-text::placeholder{color:#CBB9B1!important;opacity:.75!important}
 .cali-form-page.cali-form-page.cali-form-page :is(.cf-num,.cf-req){color:#DDB160!important}
 .cali-form-page.cali-form-page.cali-form-page .cf-num svg{color:#DDB160}
+
+/* Material anexo numa tela de texto, como a apresentação para parceiros. */
+.cali-form-page .cf-anexo{display:flex;align-items:center;gap:18px;max-width:520px;margin:18px 0 6px;padding:14px;border:1px solid rgba(247,240,234,.16);border-radius:14px;background:rgba(247,240,234,.05);color:inherit;text-decoration:none}
+.cali-form-page .cf-anexo:hover{border-color:#C9973B}
+.cali-form-page .cf-anexo img{flex:none;width:92px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.cali-form-page .cf-anexo span{display:grid;gap:6px}
+.cali-form-page .cf-anexo strong{font-size:16px}
+.cali-form-page .cf-anexo small{font-size:13px;opacity:.75;line-height:1.5}
+.cali-form-page .cf-anexo em{display:inline-flex;align-items:center;gap:6px;font-style:normal;font-weight:600;color:#DDB160;font-size:14px}

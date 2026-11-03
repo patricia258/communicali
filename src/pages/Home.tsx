@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import QRCode from 'qrcode';
 import { ArrowRight, CalendarDays, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
-import { COMMUNITY_URL, PARTNER_DECK_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
+import { COMMUNITY_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 import { SiteFooter } from '../components/SiteFooter';
 import { EDITION_FIELDS, EditionCard, Share, type EditionRow } from './Edicao';
 
@@ -286,7 +286,6 @@ export function Home() {
             <p className="muted">Nem toda contribuição é financeira: cada parceiro oferece o que faz bem, e a proposta é combinada individualmente.</p>
             <div className="hero__actions">
               <a className="pill" href={PARTNER_FORM_URL}>Quero ser parceiro</a>
-              <a className="link" href={PARTNER_DECK_URL} target="_blank" rel="noopener noreferrer">Ver apresentação para parceiros</a>
             </div>
           </div>
           <SelosParceria />
