@@ -129,6 +129,10 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — reações e painel reorganizado
+- Perfil da Rede: comentários com estrela viraram **reações** (❤️ 😄 🚀 👏 🤝 💡 🙌 😢) com mensagem opcional, numa janela com confirmação "Tem certeza...". Publicadas na hora, **sem moderação da CALI** (decisão de Patrícia); quem recebe ou quem escreveu pode remover. RPCs `communicali_reagir` e `communicali_remover_reacao`, migração `20261103240000`. A revisão de comentários saiu da página Parceiros.
+- Painel: menu em seis grupos (Início, Pessoas, Edições, Programa, Formulários, Parceiros) com abas do grupo logo abaixo; "Configurações" (Textos, regras e privacidade) e "Ver o site" no canto direito. Contador saiu do menu (a home usa o número fixo +300). Formulários mostra as categorias Externos e Interno (Staff); Staff também é aba de Formulários.
+
 ### 03/11/2026, Claude Code — parceiro compacto
 - Cartão do parceiro menor (logo 64px, descrição em 2 linhas, canais 36px). A vantagem mostra só "Exclusivo para a comunidade", o valor e o cupom; título e condições ficam em "Ver detalhes da vantagem" (lista suspensa). Carimbo do cartão de convite maior, com o texto do meio dentro do círculo.
 
