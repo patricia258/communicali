@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (4) | Mimo em destaque e retirada pela lista
+- E-mail do card: o mimo vai num cartão destacado (`destaque` no `layout`), antes do botão "Criar meu card", com o passo "toque em Já compartilhei".
+- Retirada pela lista: ninguém precisa mostrar o post; o "Já compartilhei" coloca o nome na lista do painel (Mimos), onde a recepção marca a entrega. Textos da página e do painel ajustados. Teste reenviado para pclazumi@gmail.com; lote não enviado.
+
 ### 2026-11-05 (3) | Mimo para quem compartilha e topo dos e-mails no modo escuro
 - Sem sorteio (Lei 5.768/1971): mimo para todos que postarem o card marcando a CALI RH (@calirh_) e mostrarem na recepção. `/eu-vou` mostra as regras, a pessoa marca Instagram/LinkedIn e toca em "Já compartilhei"; `api/eu-vou.js` (acao compartilhei) grava em `compartilhamentos` (migração `20261105110000_compartilhamentos.sql`), só para quem está confirmado.
 - Painel, E-mails da edição: "Mimos: N pessoas compartilharam · M retirados", com caixinha para marcar a entrega na recepção.

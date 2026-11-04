@@ -93,11 +93,11 @@ export function EuVou() {
           <button className="button button--linha" type="button" onClick={baixar}>Baixar imagem</button>
           <label className="euvou__trocar">Usar outra foto<input type="file" accept="image/*" hidden onChange={(event) => trocarFoto(event.target.files?.[0])} /></label>
           <div className="euvou__mimo">
-            <h2>Tem mimo! 🎁</h2>
+            <h2>Temos um mimo super especial para você! 🎁</h2>
             <p>Poste o seu card no <strong>Instagram</strong> ou no <strong>LinkedIn</strong> marcando a <strong>CALI RH</strong> (no Instagram, <strong>@calirh_</strong>).</p>
-            <p>No dia do encontro, mostre o post na recepção e retire o seu <strong>mimo surpresa</strong>. Um mimo por pessoa.</p>
+            <p>Depois, marque onde postou e toque no botão abaixo. No dia do encontro, é só <strong>retirar o seu mimo surpresa</strong>: seu nome já vai estar na nossa lista.</p>
             {mimo === 'ok'
-              ? <p className="notice">Anotado! Leve o post no celular para mostrar na recepção. 💛</p>
+              ? <p className="notice">Anotado! Seu nome está na lista do mimo. Até o encontro! 💛</p>
               : <>
                 <div className="euvou__redes" role="group" aria-label="Onde você compartilhou">
                   {['Instagram', 'LinkedIn'].map((rede) => <button key={rede} type="button" className={redes.includes(rede) ? 'is-on' : ''} aria-pressed={redes.includes(rede)} onClick={() => alternarRede(rede)}>{rede}</button>)}

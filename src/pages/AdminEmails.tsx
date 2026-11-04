@@ -27,7 +27,7 @@ function Mimos({ editionId }: { editionId: string }) {
         <strong>{item.nome || item.email}</strong><span>{item.redes.join(' e ')} · {dataBr(item.created_at)}</span><em>{item.entregue_em ? 'Mimo retirado' : 'Aguardando'}</em>
       </label>
     ))}</div> : <p className="adm-hint">Quando alguém tocar em "Já compartilhei" na página do card, aparece aqui.</p>}
-    <p className="adm-hint">Confira o post na recepção antes de entregar e marque a caixinha.</p>
+    <p className="adm-hint">Na recepção, entregue pelo nome da lista e marque a caixinha.</p>
   </details>;
 }
 
