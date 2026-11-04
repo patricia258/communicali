@@ -176,6 +176,32 @@ export function ConviteMembro({ nome, codigoAtual, recarregar }: { nome: string;
 }
 
 // Card "Eu vou!" para quem tem inscrição confirmada: foto de passaporte e cartão de embarque, nas cores do site, com respiro.
+// Carimbo de borracha: anel duplo, texto e falhas de tinta (pontos e riscos apagados). O sorteio das falhas parte
+// do nome, para o mesmo card sair igual se a pessoa gerar de novo.
+function carimboGasto(semente: string) {
+  let n = [...semente].reduce((total, letra) => (total * 31 + letra.charCodeAt(0)) >>> 0, 7) || 7;
+  const acaso = () => { n = (n * 1664525 + 1013904223) >>> 0; return n / 4294967296; };
+  const tela = document.createElement('canvas'); tela.width = 220; tela.height = 220;
+  const t = tela.getContext('2d')!;
+  t.translate(110, 110); t.strokeStyle = '#7A1F3D'; t.fillStyle = '#7A1F3D'; t.textAlign = 'center';
+  // Anel externo com espessura irregular, como pressão desigual.
+  for (let i = 0; i < 72; i += 1) { const a0 = (i / 72) * Math.PI * 2; t.lineWidth = 4 + acaso() * 3; t.beginPath(); t.arc(0, 0, 96, a0, a0 + Math.PI / 36 + 0.01); t.stroke(); }
+  t.lineWidth = 2; t.beginPath(); t.arc(0, 0, 81, 0, Math.PI * 2); t.stroke();
+  t.font = '700 14px Inter, sans-serif'; t.fillText('★  ★  ★', 0, -44);
+  t.font = '800 25px Inter, sans-serif'; t.fillText('PRESENÇA', 0, -6);
+  t.font = '800 19px Inter, sans-serif'; t.fillText('CONFIRMADA', 0, 22);
+  t.font = 'italic 600 15px Inter, sans-serif'; t.fillText('ComuniCALI', 0, 52);
+  // Falhas: apaga pontinhos e alguns riscos finos.
+  t.globalCompositeOperation = 'destination-out';
+  for (let i = 0; i < 260; i += 1) { t.globalAlpha = 0.35 + acaso() * 0.65; t.beginPath(); t.arc((acaso() - 0.5) * 210, (acaso() - 0.5) * 210, 0.6 + acaso() * 2.4, 0, Math.PI * 2); t.fill(); }
+  t.globalAlpha = 0.55;
+  for (let i = 0; i < 7; i += 1) { t.lineWidth = 1 + acaso() * 2.5; t.beginPath(); const x = (acaso() - 0.5) * 180, yy = (acaso() - 0.5) * 180; t.moveTo(x, yy); t.lineTo(x + 30 + acaso() * 60, yy + (acaso() - 0.5) * 14); t.stroke(); }
+  // Uma borda mais fraca, como se o carimbo tivesse pegado menos tinta de um lado.
+  const fraco = t.createLinearGradient(-110, -110, 110, 110); fraco.addColorStop(0, 'rgba(0,0,0,0)'); fraco.addColorStop(0.78, 'rgba(0,0,0,0)'); fraco.addColorStop(1, 'rgba(0,0,0,.55)');
+  t.globalAlpha = 1; t.fillStyle = fraco; t.fillRect(-110, -110, 220, 220);
+  return tela;
+}
+
 export async function gerarCartaoEuVou(nome: string, foto: string | null, encontro: { titulo: string; data: string; local: string }, frase = 'Vou estar no próximo encontro da ComuniCALI.'): Promise<Blob> {
   await Promise.all([document.fonts.load('700 72px "Funnel Display"'), document.fonts.load('400 36px Inter'), document.fonts.load('600 32px Inter'), document.fonts.load('700 20px Inter')]);
   const [logo, retrato] = await Promise.all([imagem('/brand/communicali-branco.png'), foto ? imagem(foto).catch(() => null) : Promise.resolve(null)]);
@@ -202,22 +228,14 @@ export async function gerarCartaoEuVou(nome: string, foto: string | null, encont
   const y = 900, h = 300;
   c.fillStyle = '#F7F0EA'; c.beginPath(); c.roundRect(70, y, 940, h, 26); c.fill();
   c.fillStyle = '#1F0E14'; for (const px of [70, 1010]) { c.beginPath(); c.arc(px, y + h / 2, 22, 0, Math.PI * 2); c.fill(); }
-  c.beginPath(); c.arc(770, y, 18, 0, Math.PI * 2); c.fill(); c.beginPath(); c.arc(770, y + h, 18, 0, Math.PI * 2); c.fill();
-  c.strokeStyle = '#C9B6A3'; c.lineWidth = 3; c.setLineDash([4, 10]); c.beginPath(); c.moveTo(770, y + 30); c.lineTo(770, y + h - 30); c.stroke(); c.setLineDash([]);
   c.textAlign = 'left';
   c.fillStyle = '#A9502E'; c.font = '700 20px Inter, sans-serif'; c.fillText('CARTÃO DE EMBARQUE', 120, y + 58);
   c.fillStyle = '#22100F'; let t = 46; do { c.font = `700 ${t}px "Funnel Display", sans-serif`; t -= 2; } while (c.measureText(encontro.titulo).width > 600 && t > 28); c.fillText(encontro.titulo, 120, y + 118);
   c.fillStyle = '#8A7A72'; c.font = '700 18px Inter, sans-serif'; c.fillText('DATA', 120, y + 172); c.fillText('LOCAL', 120, y + 232);
   c.fillStyle = '#3A2A24'; c.font = '600 26px Inter, sans-serif'; c.fillText(encontro.data, 210, y + 174, 530); c.fillText(encontro.local, 210, y + 234, 530);
-  // Carimbo redondo "Presença confirmada" no canhoto, levemente torto, como carimbo de verdade.
-  c.save(); c.translate(890, y + h / 2); c.rotate(-0.2); c.globalAlpha = 0.92;
-  c.strokeStyle = '#7A1F3D'; c.fillStyle = '#7A1F3D'; c.textAlign = 'center';
-  c.lineWidth = 5; c.beginPath(); c.arc(0, 0, 96, 0, Math.PI * 2); c.stroke();
-  c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 82, 0, Math.PI * 2); c.stroke();
-  c.font = '700 14px Inter, sans-serif'; c.fillText('★  ★  ★', 0, -44);
-  c.font = '800 24px Inter, sans-serif'; c.fillText('PRESENÇA', 0, -6);
-  c.font = '800 19px Inter, sans-serif'; c.fillText('CONFIRMADA', 0, 22);
-  c.font = 'italic 600 15px Inter, sans-serif'; c.fillText('ComuniCALI', 0, 52);
+  // Carimbo "Presença confirmada" com falhas de tinta, afastado da borda do ticket.
+  c.save(); c.translate(855, y + h / 2); c.rotate(-0.24); c.globalAlpha = 0.88;
+  c.drawImage(carimboGasto(nome), -110, -110, 220, 220);
   c.restore();
   c.textAlign = 'center';
   c.fillStyle = '#DDB160'; c.font = 'italic 400 30px Inter, sans-serif'; c.fillText('Falar de pessoas pode mudar o mundo.', 540, 1268);

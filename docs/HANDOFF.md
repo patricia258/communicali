@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (2) | Carimbo do card com falhas
+- Card Eu vou!: saiu a linha picotada e os recortes do meio do ticket; carimbo "PRESENÇA CONFIRMADA" afastado da borda (centro em x=855), girado, com anel irregular e falhas de tinta (`carimboGasto`, padrão fixo pelo nome, então o card sai igual se gerar de novo).
+- Sorteio para quem compartilhar: proposto, aguardando decisão da Patrícia (ponto legal da Lei 5.768/1971).
+
 ### 2026-11-05 | Tudo da edição dentro da edição, card Eu vou! por e-mail
 - Página da edição (painel): seção VOTAÇÃO (`VotacoesDaEdicao` em AdminPrograma.tsx) com lista, nova votação (a primeira usa o slug da edição) e o editor; aba Votações saiu do menu. Editor sem "Revelar no telão" e sem telão antigo; botões Ativar/Encerrar, "Abrir tela ao vivo", "Excluir esta votação"; mostra médias de opinião e prática.
 - E-mails enviados ficam numa lista suspensa. Botão "Excluir edição" (confirma digitando o nome) chama `communicali_excluir_edicao` (migração `20261105100000_excluir_edicao.sql`), que apaga votações, votos, presenças, milhas da edição, convidados, inscrições e fotos.
