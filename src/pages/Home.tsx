@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import QRCode from 'qrcode';
-import { ArrowRight, CalendarDays, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
+import { ArrowRight, Award, CalendarDays, Route, Stamp, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 import { SiteFooter } from '../components/SiteFooter';
 import { EDITION_FIELDS, EditionCard, Share, type EditionRow } from './Edicao';
@@ -76,11 +76,12 @@ const TRILHA = [
   ['conector', 'Conector', 'Ajuda a criar pontes entre trajetórias.'],
   ['embaixador', 'Embaixador', 'Leva a comunidade a novos horizontes.'],
 ];
+// Fotos provisórias até chegarem as escolhidas por Patrícia.
 const FORMATOS = [
-  ['Encontros presenciais', 'Em Curitiba e região, com café e conversa.'],
-  ['Encontros virtuais', 'Online, para quem está em qualquer lugar do Brasil.'],
-  ['Experiências', 'Vivências e visitas que ampliam o olhar.'],
-  ['Almoços e jantares', 'Conversas à mesa, em grupos menores.'],
+  ['Encontros presenciais', 'Em Curitiba e região, com café, conversa e troca de experiências.', '/fotos/neutras/1.jpg'],
+  ['Encontros virtuais', 'Online, para quem está em qualquer lugar do Brasil.', '/fotos/neutras/2.jpg'],
+  ['Experiências', 'Vivências, visitas e palestras que ampliam o olhar.', '/fotos/neutras/4.jpg'],
+  ['Almoços e jantares', 'Conversas à mesa, em grupos menores.', '/fotos/neutras/5.jpg'],
 ];
 const PASSAPORTE = [
   ['Carimbos', 'Cada encontro vivido deixa um carimbo no seu passaporte.'],
@@ -172,19 +173,19 @@ export function Home() {
       </header>
 
       <section className="wrap stats">
-        <article className="stat"><Users size={20} aria-hidden="true" /><strong>+300</strong><h3>Pessoas</h3><p>Na comunidade, nos canais e nos encontros</p></article>
-        <article className="stat"><CalendarDays size={20} aria-hidden="true" /><strong>{next?.numero || Math.max(1, editions.length)}ª</strong><h3>Edição presencial</h3><p>{next ? `${formatDate(next.data_evento)} em ${next.cidade}` : 'Encontros em Curitiba'}</p></article>
-        <article className="stat"><Handshake size={20} aria-hidden="true" /><strong>Brasil</strong><h3>Inteiro</h3><p>Pessoas de vários estados no grupo</p></article>
+        <article className="stat ticket"><Users size={20} aria-hidden="true" /><strong>+300</strong><h3>Pessoas</h3><p>Na comunidade, nos canais e nos encontros</p></article>
+        <article className="stat ticket"><CalendarDays size={20} aria-hidden="true" /><strong>{next?.numero || Math.max(1, editions.length)}ª</strong><h3>Edição presencial</h3><p>{next ? `${formatDate(next.data_evento)} em ${next.cidade}` : 'Encontros em Curitiba'}</p></article>
+        <article className="stat ticket"><Handshake size={20} aria-hidden="true" /><strong>Brasil</strong><h3>Inteiro</h3><p>Pessoas de vários estados no grupo</p></article>
       </section>
 
       <section className="wrap founder" id="comunidade">
         <div className="founder__text">
           <p className="eyebrow">A comunidade</p>
           <h2>Caminhos que se cruzam <em>e seguem juntos.</em></h2>
-          <p>A ComuniCALI reúne quem se interessa por gente: profissionais de RH, lideranças, empreendedores e todas as pessoas que querem falar de gestão e desenvolvimento humano.</p>
-          <p>Cada pessoa chega com a sua bagagem, com histórias, escolhas e vivências próprias. Quando escutamos alguém, descobrimos caminhos que talvez nunca percorreríamos sozinhos. É isso que acontece nos encontros e continua entre um encontro e outro.</p>
-          <p>A comunidade nasceu nos canais digitais e ganhou vida nos encontros, com escuta, respeito e coragem para debater temas difíceis. Quem organiza é a CALI RH.</p>
-          <p>Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com fé e integridade, e damos toda honra a Deus por cada caminho que se cruza aqui.</p>
+          <p>A ComuniCALI reúne <strong>quem se interessa por gente</strong>: profissionais de RH, lideranças, empreendedores e todas as pessoas que querem falar de <strong>gestão e desenvolvimento humano</strong>.</p>
+          <p>Cada pessoa chega com a <strong>sua bagagem</strong>, com histórias, escolhas e vivências próprias. Quando escutamos alguém, <strong>descobrimos caminhos</strong> que talvez nunca percorreríamos sozinhos. É isso que acontece nos encontros e <strong>continua entre um encontro e outro</strong>.</p>
+          <p>A comunidade nasceu nos canais digitais e ganhou vida nos encontros, com <strong>escuta, respeito e coragem</strong> para debater temas difíceis. Quem organiza é a <strong>CALI RH</strong>.</p>
+          <p>Acreditamos que <strong>nenhum encontro acontece por acaso</strong>. Servimos às pessoas com fé e integridade, e damos <strong>toda honra a Deus</strong> por cada caminho que se cruza aqui.</p>
         </div>
         <People joinHref={joinHref} />
       </section>
@@ -215,6 +216,23 @@ export function Home() {
         </div>
       </section>
 
+      <section className="wrap block" id="formatos">
+        <div className="block__head">
+          <div>
+            <p className="eyebrow">Formatos</p>
+            <h2>Sua próxima <em>escala.</em></h2>
+          </div>
+        </div>
+        <div className="escalas">
+          {FORMATOS.map(([titulo, texto, foto]) => (
+            <article className="escala" key={titulo}>
+              <div className="escala__capa" style={{ backgroundImage: `url(${foto})` }} />
+              <div className="escala__corpo"><h3>{titulo}</h3><p>{texto}</p></div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="wrap block" id="programa">
         <div className="block__head">
           <div>
@@ -231,7 +249,7 @@ export function Home() {
           ))}
         </div>
         <div className="passaporte">
-          {PASSAPORTE.map(([titulo, texto]) => <article key={titulo}><strong>{titulo}</strong><p>{texto}</p></article>)}
+          {PASSAPORTE.map(([titulo, texto], indice) => { const Icone = [Stamp, Award, Route][indice]; return <article className="ticket" key={titulo}><span className="ticket__numero" aria-hidden="true">Nº 000{indice + 1}</span><Icone size={30} strokeWidth={1.6} aria-hidden="true" /><span className="ticket__estrelas" aria-hidden="true">★ ★ ★</span><strong>{titulo}</strong><p>{texto}</p></article>; })}
         </div>
         <a className="link" href="/meu-espaco">Já sou membro, quero entrar</a>
       </section>
@@ -240,13 +258,10 @@ export function Home() {
         <div className="block__head">
           <div>
             <p className="eyebrow">Agenda</p>
-            <h2>Sua próxima <em>escala.</em></h2>
+            <h2>Próximo <em>check-in.</em></h2>
           </div>
         </div>
-        <ul className="formatos" aria-label="Formatos de encontro">
-          {FORMATOS.map(([titulo, texto]) => <li key={titulo}><strong>{titulo}</strong><span>{texto}</span></li>)}
-        </ul>
-        {next ? <EditionCard edition={next} badge="Próximo encontro" /> : <p className="muted">A próxima data sai em breve. Quem está no grupo da comunidade fica sabendo primeiro.</p>}
+        {next ? <EditionCard edition={next} badge="Próximo check-in" /> : <p className="muted">A próxima data sai em breve. Quem está no grupo da comunidade fica sabendo primeiro.</p>}
         {upcoming.length > 1 && (
           <div className="past">
             <h3>Próximas edições</h3>
@@ -286,17 +301,8 @@ export function Home() {
         </div>
       </section>
 
+
       <section className="sponsors" id="parceiros">
-        <p className="sponsors__label">Quem apoia a ComuniCALI</p>
-        <div className="logos" aria-label="Parceiros da ComuniCALI">
-          <div className="logos__track">
-            {(partners.length ? [...partners, ...partners, ...partners] : Array.from({ length: 12 }, (_, index) => ({ id: String(index), nome: '', logo_url: null, site_url: null }))).map((partner, index) => (
-              partner.nome
-                ? <a key={`${partner.id}-${index}`} className="logo" href={partner.site_url || undefined} target="_blank" rel="noopener noreferrer" title={partner.nome}>{partner.logo_url ? <img src={partner.logo_url} alt={partner.nome} /> : <span>{partner.nome}</span>}</a>
-                : <a key={index} className="logo logo--empty" href={PARTNER_FORM_URL}>Sua marca aqui</a>
-            ))}
-          </div>
-        </div>
         <div className="wrap sponsors__body">
           <div>
             <p className="eyebrow">Para empresas e profissionais</p>
@@ -307,6 +313,16 @@ export function Home() {
             </div>
           </div>
           <SelosParceria />
+        </div>
+        <p className="sponsors__label">Quem apoia a ComuniCALI</p>
+        <div className="logos" aria-label="Parceiros da ComuniCALI">
+          <div className="logos__track">
+            {(partners.length ? [...partners, ...partners, ...partners] : Array.from({ length: 12 }, (_, index) => ({ id: String(index), nome: '', logo_url: null, site_url: null }))).map((partner, index) => (
+              partner.nome
+                ? <a key={`${partner.id}-${index}`} className="logo" href={partner.site_url || undefined} target="_blank" rel="noopener noreferrer" title={partner.nome}>{partner.logo_url ? <img src={partner.logo_url} alt={partner.nome} /> : <span>{partner.nome}</span>}</a>
+                : <a key={index} className="logo logo--empty" href={PARTNER_FORM_URL}>Sua marca aqui</a>
+            ))}
+          </div>
         </div>
       </section>
 
