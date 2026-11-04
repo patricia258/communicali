@@ -24,6 +24,7 @@ type Espaco = {
   indicacoes: Array<{ nome: string; compareceu: boolean }>;
   recomendacoes: Array<{ nome: string; tipo: string; status: string }>;
 };
+type Cartao = { cargo: string | null; empresa: string | null; temas: string[]; aberto_trabalho: boolean; recrutador: boolean; reacoes: Array<{ reacao: string | null; nome: string; comentario: string | null }> };
 type Aba = 'inicio' | 'edicoes' | 'missoes' | 'rede' | 'indicar' | 'programa' | 'perfil';
 type Pessoa = { aberto_trabalho: boolean; recrutador: boolean; id: string; nome: string; foto_url: string | null; categoria: string; cidade_uf: string | null; empresa: string | null; cargo: string | null; regiao: string | null; segmento: string | null; temas: string[]; interesses: string[]; busca: string[]; presta_servicos: boolean; eu_conectei: boolean; me_conectou: boolean; whatsapp?: string | null; email?: string; instagram?: string | null; linkedin?: string | null };
 type Extra = { extrato: Array<{ acao: string; pontos: number; motivo: string | null; titulo: string | null; data: string }>; avisos: Array<{ id: string; tipo: string; texto: string; de: string | null; foto_url: string | null; pode_voltar: boolean }>; conexoes: number; nivel_novo: string | null; sugestoes: Array<{ id: string; nome: string; foto_url: string | null; segmento: string | null; motivo: string }>; indicados: Array<{ nome: string; cargo: string | null; empresa: string | null; edicao: string; data: string; status: string; compareceu: boolean }> };
@@ -82,6 +83,22 @@ const ROTULO = (acao: string, titulo: string | null) => {
   if (acao.startsWith('palestra:')) return 'Palestra a convite';
   return 'Ajuste da organização';
 };
+
+// Foto redonda com selo em arco, como nas redes profissionais: #DISPONÍVEL (aberto ao mercado) ou #RECRUTANDO.
+function FotoSelo({ url, nome, aberto, recruta, tamanho = 120 }: { url: string | null; nome: string; aberto?: boolean; recruta?: boolean; tamanho?: number }) {
+  const arco = useId();
+  const selo = recruta ? { texto: '#RECRUTANDO', cor: '#7A1F3D' } : aberto ? { texto: '#DISPONÍVEL', cor: '#5F6238' } : null;
+  return (
+    <span className="passe__foto-selo" style={{ width: tamanho, height: tamanho }}>
+      {url ? <img src={url} alt={`Foto de ${nome}`} /> : <span className="passe__foto-inicial">{nome.charAt(0)}</span>}
+      {selo && <svg viewBox="0 0 100 100" aria-label={selo.texto.replace('#', '')} role="img">
+        <defs><path id={arco} d="M 12 50 A 38 38 0 0 0 88 50" /></defs>
+        <path d="M 4 50 A 46 46 0 0 0 96 50 L 82 50 A 32 32 0 0 1 18 50 Z" fill={selo.cor} />
+        <text fill="#FFFFFF" fontFamily="Inter, sans-serif" fontWeight="700" fontSize="9.5" letterSpacing="1.4"><textPath href={`#${arco}`} startOffset="50%" textAnchor="middle" dominantBaseline="middle">{selo.texto}</textPath></text>
+      </svg>}
+    </span>
+  );
+}
 
 // Clique suave nos botões e abas. Fica mudo para quem pede menos movimento no aparelho.
 let audio: AudioContext | null = null;
@@ -194,6 +211,18 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
   const meta = META[m.categoria];
   const faltam = meta ? Math.max(meta.pontos - espaco.pontos, 0) : 0;
   const preenchidos = meta ? Math.min(espaco.pontos / meta.pontos, 1) * 10 : 10;
+  const [cartao, setCartao] = useState<Cartao | null>(null);
+  const [ocultas, setOcultas] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem('passe:sugestoes-ocultas') || '[]'); } catch { return []; } });
+  useEffect(() => { void supabase.rpc('communicali_meu_cartao').then(({ data }) => setCartao(data as Cartao)); }, []);
+  const ocultar = (id: string) => { const lista = [...ocultas, id]; setOcultas(lista); try { localStorage.setItem('passe:sugestoes-ocultas', JSON.stringify(lista)); } catch { /* só nesta visita */ } };
+  // Uma pessoa aparece uma vez, com todos os pontos em comum juntos.
+  const sugestoes = Object.values((extra?.sugestoes || []).reduce<Record<string, { id: string; nome: string; foto_url: string | null; motivos: string[] }>>((acc, item) => {
+    acc[item.id] = acc[item.id] || { id: item.id, nome: item.nome, foto_url: item.foto_url, motivos: [] };
+    if (!acc[item.id].motivos.includes(item.motivo)) acc[item.id].motivos.push(item.motivo);
+    return acc;
+  }, {})).filter((item) => !ocultas.includes(item.id));
+  const reacoes = cartao?.reacoes || [];
+  const contagem = [...new Set(reacoes.map((item) => item.reacao).filter(Boolean))].map((emoji) => [emoji, reacoes.filter((item) => item.reacao === emoji).length] as const);
   async function marcarLido(id: string) {
     setAvisoPendente(id);
     setErroAviso('');
@@ -211,7 +240,7 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
     <>
       <header className="passe__topo"><img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" /><span>PASSAPORTE</span></header>
       <div className="passe__saudacao">
-        <h1>Olá, <em>{m.nome}</em></h1>
+        <h1>Olá, <em>{(m.apelido || m.nome).split(' ')[0]}!</em></h1>
         <button type="button" className="passe__sino" aria-label={`Alertas${extra ? `: ${avisos.length} ${avisos.length === 1 ? 'não lido' : 'não lidos'}` : ''}`} aria-expanded={alertasAbertos} aria-controls="passaporte-alertas" onClick={() => setAlertasAbertos(!alertasAbertos)}>
           <Bell size={21} aria-hidden="true" />
           {avisos.length > 0 && <span className="passe__sino-contagem" aria-hidden="true">{avisos.length > 99 ? '99+' : avisos.length}</span>}
@@ -238,23 +267,52 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
         )}
         {erroAviso && <p role="alert">{erroAviso}</p>}
       </section>
-      <section className="passe__dados passe__cartao passe__dados--cartao passe__identidade" aria-label="Seu passaporte">
+      <section className="passe__heroi" aria-label="Seu passaporte">
         <button type="button" className="passe__editar" aria-label="Editar meu perfil" onClick={() => abrir('perfil')}><Pencil size={18} aria-hidden="true" /></button>
-        <div className="passe__foto">{m.foto_url ? <img src={m.foto_url} alt="Sua foto" /> : <button type="button" onClick={() => abrir('perfil')}>Colocar foto</button>}</div>
-        <dl>
-          <div><dt>NÍVEL</dt><dd>{NIVEIS[m.categoria] || m.categoria}</dd></div>
-          <div><dt>CÓDIGO</dt><dd>{m.codigo}</dd></div>
-        </dl>
+        <div className="passe__heroi-foto">
+          {m.foto_url ? <FotoSelo url={m.foto_url} nome={m.nome} aberto={cartao?.aberto_trabalho} recruta={cartao?.recrutador} tamanho={116} /> : <button type="button" className="passe__heroi-sem-foto" onClick={() => abrir('perfil')}>Colocar foto</button>}
+        </div>
+        <div className="passe__heroi-texto">
+          <span className="passe__heroi-nivel"><img src={`/selos/postal-${m.categoria === 'organizador' ? 'fundadora' : m.categoria}.png`} alt="" onError={(event) => { event.currentTarget.style.display = 'none'; }} />{NIVEIS[m.categoria] || m.categoria}</span>
+          <h2>{m.nome}</h2>
+          {(cartao?.cargo || cartao?.empresa) && <p>{[cartao.cargo, cartao.empresa].filter(Boolean).join(' · ')}</p>}
+          {!!cartao?.temas?.length && <div className="passe__heroi-temas">{cartao.temas.slice(0, 3).map((tema) => <span key={tema}>{tema}</span>)}</div>}
+        </div>
+        <div className="passe__heroi-numeros">
+          <div><strong>{espaco.pontos}</strong><span>pontos</span></div>
+          <div><strong>{espaco.carimbos.length}</strong><span>{espaco.carimbos.length === 1 ? 'carimbo' : 'carimbos'}</span></div>
+          <div><strong>{espaco.missoes.filter((item) => item.status === 'concluida').length}</strong><span>selos</span></div>
+        </div>
         <button type="button" className="passe__compartilhar" onClick={compartilhar}><Share2 size={16} aria-hidden="true" />Compartilhar meu selo</button>
       </section>
-      {!!extra?.sugestoes.length && (
+      {(avisos.length > 0 || reacoes.length > 0) && (
+        <section className="passe__cartao passe__novidades">
+          <h2>Para você</h2>
+          {avisos.slice(0, 3).map((aviso) => (
+            <div className="passe__novidade" key={aviso.id}>
+              {aviso.foto_url ? <img src={aviso.foto_url} alt="" /> : <span className="passe__notificacao-icone"><Bell size={16} aria-hidden="true" /></span>}
+              <p><TextoAviso texto={aviso.texto} />{aviso.de && (aviso.pode_voltar || aviso.tipo === 'perfil') && <button type="button" className="passe__link" onClick={() => verPerfil(aviso.de!)}>Ver perfil</button>}</p>
+              <button type="button" className="passe__fechar" aria-label="Dispensar alerta" disabled={avisoPendente !== null} onClick={() => void marcarLido(aviso.id)}>×</button>
+            </div>
+          ))}
+          {avisos.length > 3 && <button type="button" className="passe__link" onClick={() => setAlertasAbertos(true)}>Ver todos os {avisos.length} alertas</button>}
+          {reacoes.length > 0 && <div className="passe__novidade passe__novidade--reacoes">
+            <span className="passe__reacoes-resumo">{contagem.map(([emoji, total]) => <span key={emoji}>{emoji} {total}</span>)}</span>
+            <p><strong>{reacoes.length} {reacoes.length === 1 ? 'reação' : 'reações'}</strong> no seu perfil{reacoes[0]?.comentario ? <>: <em>"{reacoes[0].comentario}"</em>, de {reacoes[0].nome}</> : '.'}</p>
+          </div>}
+        </section>
+      )}
+      {!!sugestoes.length && (
         <section className="passe__cartao">
-          <h2>Sugestões para você</h2>
-          {extra.sugestoes.map((item) => (
-            <button type="button" className="passe__sugestao" key={`${item.id}-${item.motivo}`} onClick={() => verPerfil(item.id)}>
-              <span className="passe__sugestao-foto">{item.foto_url ? <img src={item.foto_url} alt="" /> : item.nome.charAt(0)}</span>
-              <span><strong>{item.nome}</strong><small>Em comum: {item.motivo}</small></span>
-            </button>
+          <h2>Sugestões de conexão</h2>
+          {sugestoes.map((item) => (
+            <div className="passe__sugestao-linha" key={item.id}>
+              <button type="button" className="passe__sugestao" onClick={() => verPerfil(item.id)}>
+                <span className="passe__sugestao-foto">{item.foto_url ? <img src={item.foto_url} alt="" /> : item.nome.charAt(0)}</span>
+                <span><strong>{item.nome}</strong><small>Em comum: {item.motivos.join(', ')}</small></span>
+              </button>
+              <button type="button" className="passe__fechar" aria-label={`Não mostrar ${item.nome}`} onClick={() => ocultar(item.id)}>×</button>
+            </div>
           ))}
         </section>
       )}
@@ -806,9 +864,9 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar, outras = [] }: 
   return (
     <>
       <button type="button" className="passe__link" onClick={voltar}>Voltar</button>
-      <section className="passe__dados passe__cartao passe__dados--cartao">
-        <div className="passe__foto">{pessoa.foto_url ? <img src={pessoa.foto_url} alt={`Foto de ${pessoa.nome}`} /> : <span>Sem foto</span>}</div>
-        <div><h1 className="menor">{pessoa.nome}</h1><p className="passe__data">{NIVEIS[pessoa.categoria] || pessoa.categoria}</p>{pessoa.segmento && <span className="passe__segmento">{pessoa.segmento}</span>}{pessoa.aberto_trabalho && <span className="passe__segmento passe__segmento--trabalho">Disponível no mercado</span>}{pessoa.recrutador && <span className="passe__segmento">Recruta</span>}{(pessoa.cidade_uf || pessoa.regiao) && <p>{pessoa.cidade_uf || pessoa.regiao}</p>}{(pessoa.cargo || pessoa.empresa) && <p>{[pessoa.cargo, pessoa.empresa].filter(Boolean).join(', ')}</p>}</div>
+      <section className="passe__dados passe__cartao passe__dados--cartao passe__perfil-topo">
+        <FotoSelo url={pessoa.foto_url} nome={pessoa.nome} aberto={pessoa.aberto_trabalho} recruta={pessoa.recrutador} tamanho={132} />
+        <div><h1 className="menor">{pessoa.nome}</h1><p className="passe__data">{NIVEIS[pessoa.categoria] || pessoa.categoria}</p>{pessoa.segmento && <span className="passe__segmento">{pessoa.segmento}</span>}{(pessoa.cidade_uf || pessoa.regiao) && <p>{pessoa.cidade_uf || pessoa.regiao}</p>}{(pessoa.cargo || pessoa.empresa) && <p>{[pessoa.cargo, pessoa.empresa].filter(Boolean).join(', ')}</p>}</div>
       </section>
       {!eu && (conexao
         ? <p className="passe__ok" role="status">{conexao}</p>
@@ -917,9 +975,9 @@ function Rede({ comoMembro, abrir, fundadora = false }: { comoMembro: boolean; a
       <div className="passe__pessoas">
         {pessoas.map((pessoa) => (
           <button type="button" className="passe__pessoa" key={pessoa.id} onClick={() => { setAbertaId(pessoa.id); window.scrollTo(0, 0); }}>
-            <span className="passe__pessoa-foto">{pessoa.foto_url ? <img src={pessoa.foto_url} alt="" /> : pessoa.nome.charAt(0)}{pessoa.segmento && <span className="passe__segmento">{pessoa.segmento}</span>}</span>
+            <span className="passe__pessoa-topo"><FotoSelo url={pessoa.foto_url} nome={pessoa.nome} aberto={pessoa.aberto_trabalho} recruta={pessoa.recrutador} tamanho={92} /></span>
             <strong>{pessoa.nome}</strong>
-            {pessoa.aberto_trabalho && <span className="passe__segmento passe__segmento--trabalho">Disponível no mercado</span>}
+            {pessoa.segmento && <span className="passe__pessoa-segmento">{pessoa.segmento}</span>}
             <span className="passe__pessoa-linha">{NIVEIS[pessoa.categoria] || pessoa.categoria}{pessoa.regiao ? ` · ${pessoa.regiao}` : ''}</span>
           </button>
         ))}

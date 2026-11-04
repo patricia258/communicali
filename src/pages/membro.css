@@ -515,3 +515,50 @@ img.passe__carimbo{transform:rotate(-8deg)}
 @media (prefers-reduced-motion:reduce){.passe *,.passe *::before,.passe *::after{animation:none!important;transition:none!important}}
 .passe__reagir-abrir{align-self:stretch;white-space:nowrap}
 .passe__reagir-abrir span{letter-spacing:2px}
+
+/* Foto redonda com selo em arco. */
+.passe__foto-selo{position:relative;display:inline-grid;place-items:center;flex:none;border-radius:50%;padding:4px;background:#FFFFFF;box-shadow:0 6px 18px rgba(34,16,15,.16)}
+.passe__foto-selo img,.passe__foto-inicial{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.passe__foto-inicial{display:grid;place-items:center;background:#F3E9E0;color:#7A1F3D;font:700 32px 'Funnel Display',sans-serif}
+.passe__foto-selo svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.passe__pessoa-topo{display:flex;justify-content:center;padding:14px 0 4px}
+.passe__pessoa-segmento{align-self:center;padding:3px 10px;border-radius:999px;background:#F7F0EA;color:#6C4D3F;font:600 11px Inter,sans-serif;text-align:center}
+.passe__pessoa{text-align:center}
+.passe__perfil-topo{align-items:center}
+
+/* Topo do Início: cartão de identidade com impacto. */
+.passe__heroi{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px 18px;align-items:center;padding:22px;border-radius:22px;background:radial-gradient(120% 120% at 100% 0%,#A8275A 0%,#7A1F3D 35%,#3E1220 100%);color:#F7F0EA;box-shadow:0 18px 40px rgba(74,20,36,.28);overflow:hidden}
+.passe__heroi::after{content:'';position:absolute;right:-60px;bottom:-60px;width:200px;height:200px;border-radius:50%;border:2px dashed rgba(221,177,96,.25)}
+.passe__heroi .passe__editar{position:absolute;top:14px;right:14px;z-index:1}
+.passe__heroi-sem-foto{width:116px;height:116px;border:2px dashed rgba(247,240,234,.5);border-radius:50%;background:transparent;color:#F7F0EA;font:600 13px Inter,sans-serif}
+.passe__heroi-texto{min-width:0}
+.passe__heroi-nivel{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;border-radius:999px;background:rgba(247,240,234,.14);color:#DDB160;font:700 11px Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.passe__heroi-nivel img{width:26px;height:26px;border-radius:50%;object-fit:cover;background:#F7F0EA}
+.passe .passe__tela .passe__heroi h2{margin:8px 0 2px;color:#FFFFFF;font:700 26px/1.15 'Funnel Display',sans-serif}
+.passe__heroi-texto p{margin:0;color:rgba(247,240,234,.85);font-size:14px}
+.passe__heroi-temas{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.passe__heroi-temas span{padding:4px 10px;border:1px solid rgba(247,240,234,.3);border-radius:999px;font-size:12px}
+.passe__heroi-numeros{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:14px;border-top:1px solid rgba(247,240,234,.18)}
+.passe__heroi-numeros div{display:grid;justify-items:center}
+.passe__heroi-numeros strong{font:700 26px/1 'Funnel Display',sans-serif;color:#DDB160}
+.passe__heroi-numeros span{font-size:12px;color:rgba(247,240,234,.8)}
+.passe__heroi .passe__compartilhar{grid-column:1/-1;justify-self:center;min-height:38px;padding:0 18px;border:1px solid rgba(247,240,234,.4);border-radius:999px;background:transparent;color:#F7F0EA;font:600 13px Inter,sans-serif}
+@media (max-width:420px){.passe__heroi{grid-template-columns:1fr;justify-items:center;text-align:center}.passe__heroi-temas{justify-content:center}}
+
+/* Para você e sugestões com X. */
+.passe__novidade{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #EFE5DC}
+.passe__novidade:first-of-type{border-top:0}
+.passe__novidade img,.passe__novidade .passe__notificacao-icone{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.passe__novidade p{margin:0;font-size:13px;line-height:1.5;color:#3A2A24}
+.passe__novidade p .passe__link{margin-left:6px;font-size:12px}
+.passe__novidade--reacoes{grid-template-columns:auto minmax(0,1fr)}
+.passe__fechar{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:50%;background:#F7F0EA;color:#6C4D3F;font:400 18px/1 Inter,sans-serif;cursor:pointer}
+.passe__fechar:hover{background:#EADFD6;color:#22100F}
+.passe__sugestao-linha{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;border-top:1px solid #EFE5DC}
+.passe__sugestao-linha:first-of-type{border-top:0}
+.passe__sugestao-linha .passe__sugestao{border:0}
+
+/* Código do convite: o mesmo formato com ou sem edição, sem pulo. */
+.passe__convite input,.passe__convite input[readonly],.passe__convite input:not([readonly]){box-sizing:border-box;height:56px;min-height:56px;padding:0 12px;border:1.5px dashed transparent;border-radius:10px}
+.passe__convite input:not([readonly]){border-color:rgba(221,177,96,.8);background:rgba(255,255,255,.06)}
+.passe__convite,.passe__convite *{animation:none!important}
