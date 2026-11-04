@@ -620,3 +620,5 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__rota--agenda .passe__agenda-cartao:not(.is-estive) .passe__agenda-capa{filter:grayscale(.6);opacity:.85}
 .passe__agenda-status{position:absolute;top:12px;right:12px;padding:4px 10px;border-radius:999px;font:600 11px Inter,sans-serif}
 .passe__agenda-cartao .passe__agenda-cabecalho:not(:has(.passe__agenda-capa)){min-height:76px}
+.passe__agenda-cartao--proximo .passe__encontro-resumo h4,.passe__agenda-cartao--proximo .passe__encontro-resumo p,.passe__agenda-cartao--proximo .passe__encontro-resumo .passe__aviso,.passe__agenda-cartao--proximo .passe__encontro-resumo li{color:#F7F0EA}
+.passe__agenda-cartao--proximo .passe__encontro-resumo a{color:#DDB160}
