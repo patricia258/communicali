@@ -129,6 +129,13 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — elementos de passaporte (correção de Patrícia)
+- Regras dela: o selo de nível é **quadrado** (postal), nunca recortado em círculo; nada de foto redonda/oval nem selo em arco "tipo LinkedIn"; nada de enfeite solto (o círculo pontilhado saiu); cartões com cantos suaves; o destaque do cartão é o selo e a pontuação, o botão de compartilhar é pequeno.
+- Foto agora é de passaporte (reta, moldura branca, levemente inclinada) com **carimbo** "ComuniCALI · DISPONÍVEL" (oliva) ou "RECRUTANDO" (vinho) no canto. Vale para Início, cartões da Rede e perfil.
+- Cartão do Início: nível, nome, função · empresa, temas, selo postal do nível no canto, e dentro do cartão o bloco de pontos (número, barra colorida, encontros e missões, linha MRZ). Perfil do colega usa o mesmo cartão vinho. Carimbos ficam numa "página" do passaporte. Cantos de 16px em todos os cartões.
+- Currículo: o campo de PDF já aparece no perfil quando a pessoa marca "Disponível".
+- Pendente: página Edições do Meu passaporte ainda pouco refinada.
+
 ### 03/11/2026, Claude Code — Início com impacto e selos na foto
 - Início do Meu passaporte: "Olá, Nome!", cartão de identidade em vinho com foto redonda, nível com selo, nome, função e empresa, temas, números (pontos, carimbos, selos) e compartilhar; o código saiu do cartão (fica em Indicar). Logo abaixo, "Para você" com os 3 alertas mais recentes (X para dispensar) e o resumo das reações recebidas. "Sugestões de conexão" sem repetir a mesma pessoa (motivos juntos) e com X para ocultar (guardado no navegador). RPC `communicali_meu_cartao` (migração `20261103280000`).
 - Selo na foto em arco, como no LinkedIn: **#DISPONÍVEL** (oliva) para aberto ao mercado e **#RECRUTANDO** (vinho) para recrutador, nos cartões da Rede, no perfil e no Início. Saiu a pílula "Disponível no mercado".
