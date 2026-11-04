@@ -43,7 +43,7 @@ const FAQ = [
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
   ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
-  ['Como acompanho minha participação?', 'Depois do primeiro encontro presencial, você entra no seu espaço online com o e-mail do check-in e acompanha carimbos, pontos, missões, indicações e fotos.'],
+  ['Como acompanho minha participação?', 'Depois do primeiro encontro presencial, você entra no seu passaporte online com o e-mail do check-in e acompanha carimbos, pontos, missões, indicações e fotos.'],
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 

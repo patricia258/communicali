@@ -8,7 +8,7 @@ export const Instagram = ({ size }: { size: number }) => (
 export function FooterLinks({ legalOnly = false }: { legalOnly?: boolean }) {
   return (
     <nav className="site-links" aria-label={legalOnly ? 'Documentos legais' : 'Navegação do rodapé'}>
-      {!legalOnly && <a href="/meu-espaco">Meu espaço</a>}
+      {!legalOnly && <a href="/meu-espaco">Meu passaporte</a>}
       <a href="/regras">Regras</a>
       <a href="/privacidade">Privacidade</a>
     </nav>

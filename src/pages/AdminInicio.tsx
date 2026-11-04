@@ -132,7 +132,7 @@ function Descadastros() {
   return (
     <section className="v2-forms-card">
       <header><small>E-MAILS</small><h2>Pararam de receber e-mails</h2></header>
-      <p className="adm-hint">Quem saiu continua com acesso ao espaço do membro. Deixa de receber só os avisos de conexão, sugestão e indicação.</p>
+      <p className="adm-hint">Quem saiu continua com acesso ao Meu passaporte. Deixa de receber só os avisos de conexão, sugestão e indicação.</p>
       <Tabela colunas={[{ id: 'nome', titulo: 'Nome', valor: (item) => item.nome }, { id: 'email', titulo: 'E-mail', valor: (item) => item.email, render: (item) => <Email email={item.email} /> }, { id: 'data', titulo: 'Desde', valor: (item) => item.criado_em, render: (item) => dataBr(item.criado_em) }]}
         linhas={linhas} chave={(item) => item.email} inicial={{ id: 'data', desc: true }} vazio="Ninguém pediu para sair até agora." />
     </section>

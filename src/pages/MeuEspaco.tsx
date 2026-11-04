@@ -108,7 +108,7 @@ function Pagina({ children, aba, setAba }: { children: ReactNode; aba?: Aba; set
       <div className="passe__faixa" aria-hidden="true"><span /><span /><span /><span /></div>
       <main className="passe__tela">{children}</main>
       {setAba && (
-        <nav className="passe__menu" aria-label="Abas do espaço do membro">
+        <nav className="passe__menu" aria-label="Abas do Meu passaporte">
           {ABAS.map(([id, nome]) => <button key={id} type="button" className={aba === id ? 'is-on' : ''} aria-pressed={aba === id} onClick={() => { setAba(id); window.scrollTo(0, 0); }}>{nome}</button>)}
         </nav>
       )}

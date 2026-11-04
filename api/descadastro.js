@@ -14,5 +14,5 @@ export default async function handler(req, res) {
   if (!valido) return res.status(400).send(pagina('Link inválido', 'Este link não está completo. Abra de novo pelo e-mail que você recebeu.'));
   const gravado = await banco('email_descadastro?on_conflict=email', { method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates' }, body: JSON.stringify({ email }) });
   if (!gravado.ok) return res.status(502).send(pagina('Não deu certo', 'Tente de novo em alguns minutos.'));
-  return res.status(200).send(pagina('Pronto, você saiu da lista', 'Você não vai mais receber os e-mails de conexões, sugestões e indicações do seu espaço na ComuniCALI. Seu espaço continua disponível no site.'));
+  return res.status(200).send(pagina('Pronto, você saiu da lista', 'Você não vai mais receber os e-mails de conexões, sugestões e indicações do seu passaporte na ComuniCALI. Seu passaporte continua disponível no site.'));
 }
