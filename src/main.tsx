@@ -19,6 +19,7 @@ import { Convidar, Convite } from './pages/Convidados';
 import { TelaoCheckin, TelaoVotacao } from './pages/Telao';
 import { Admin } from './pages/Admin';
 import { StaffForm } from './pages/Staff';
+import { FornecedorForm } from './pages/Fornecedor';
 import { EdicaoPage, InscricaoPage } from './pages/Edicao';
 import { ErrorBoundary, reportError } from './components/ErrorBoundary';
 import { PublicFormPage } from './forms/PublicFormPage';
@@ -44,6 +45,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/regras" element={<Page><TextoPagina tipo="regras" /></Page>} />
       <Route path="/privacidade" element={<Page><TextoPagina tipo="privacidade" /></Page>} />
       <Route path="/staff" element={<StaffForm />} />
+      <Route path="/fornecedor" element={<FornecedorForm />} />
       <Route path="/e/:slug" element={<EdicaoPage />} />
       <Route path="/inscricao/:slug" element={<InscricaoPage />} />
       <Route path="/votar" element={<ComEdicao><Page><Votar /></Page></ComEdicao>} />

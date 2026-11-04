@@ -10,6 +10,7 @@ import { MembersPanel, PollsPanel, TextsPanel, exportPresencasCsv } from './Admi
 import { GuestsPanel } from './Convidados';
 import { HomePanel, ProgramPanel } from './AdminInicio';
 import { StaffPanel } from './Staff';
+import { FornecedorPanel } from './Fornecedor';
 import { EmailsCard, chamar } from './AdminEmails';
 import { ImpactosPanel, IndicacoesPanel, MatchesPanel, RecommendationsPanel } from './AdminRecomendacoes';
 import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
@@ -437,7 +438,7 @@ const GRUPOS: Array<{ nome: string; itens: Array<[string, string]> }> = [
   { nome: 'Pessoas', itens: [['/admin/membros', 'Membros'], ['/admin/indicacoes', 'Indicações'], ['/admin/matches', 'Matches']] },
   { nome: 'Edições', itens: [['/admin/edicoes', 'Edições'], ['/admin/votacoes', 'Votações']] },
   { nome: 'Programa', itens: [['/admin/programa', 'Como funciona'], ['/admin/missoes', 'Missões'], ['/admin/impacto', 'Impacto']] },
-  { nome: 'Formulários', itens: [['/admin/formularios', 'Formulários'], ['/admin/staff', 'Staff']] },
+  { nome: 'Formulários', itens: [['/admin/formularios', 'Formulários'], ['/admin/staff', 'Staff'], ['/admin/fornecedores', 'Fornecedores']] },
   { nome: 'Parceiros', itens: [['/admin/parceiros', 'Parceiros']] },
 ];
 
@@ -498,6 +499,7 @@ export function Admin() {
         <Route path="indicacoes" element={<IndicacoesPanel />} />
         <Route path="impacto" element={<ImpactosPanel />} />
         <Route path="staff" element={<StaffPanel />} />
+        <Route path="fornecedores" element={<FornecedorPanel />} />
         <Route path="formularios" element={<AdminFormsPage />} />
         <Route path="edicoes" element={<EditionsPanel />} />
         <Route path="parceiros" element={<PartnersPanel />} />

@@ -36,7 +36,7 @@ function mensagemMembro(aviso, nome, missoes, edicoes) {
 const valor = (resposta) => (Array.isArray(resposta) ? resposta.join(', ') : resposta && typeof resposta === 'object' ? (resposta.name || resposta.nome || 'arquivo enviado') : String(resposta ?? ''));
 
 export default async function handler(req, res) {
-  const total = { membros: 0, formularios: 0, inscricoes: 0, staff: 0 };
+  const total = { membros: 0, formularios: 0, inscricoes: 0, staff: 0, fornecedores: 0 };
   const admins = ((await (await banco('admins?select=email')).json()) || []).map((item) => item.email);
 
   const avisos = await (await banco(`notifications?email_em=is.null&tipo=in.(nivel,missao,perfil,carimbo)&created_at=gte.${desde()}&select=id,tipo,texto,member:members!member_id(nome,email)&limit=30`)).json();
@@ -73,15 +73,26 @@ export default async function handler(req, res) {
     total.inscricoes += 1;
   }
   // Cadastro de staff: sem CPF nem endereço no e-mail; os dados completos ficam no painel.
-  const staff = await (await banco(`staff?admin_avisado_em=is.null&created_at=gte.${desde()}&select=id,nome,email,whatsapp,funcao,valor_combinado,comprovante,assistente_nome,assistente_funcao,pagamento_combinado&limit=20`)).json();
+  const staff = await (await banco(`staff?admin_avisado_em=is.null&created_at=gte.${desde()}&select=id,nome,email,whatsapp,funcao,valor_combinado,comprovante,assistente_nome,assistente_funcao,pagamento_combinado,quer_ser_acionado&limit=20`)).json();
   for (const item of Array.isArray(staff) ? staff : []) {
     if (!(await reservar('staff', item.id, 'admin_avisado_em'))) continue;
-    const itens = [['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo (pessoa física)' : ''], ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : 'Não vai levar']].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
+    const itens = [['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo (pessoa física)' : ''], ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : 'Não vai levar'], ['Próximos eventos', item.quer_ser_acionado ? 'Quer ser acionado' : 'Prefere não ser acionado']].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
     for (const email of admins) {
       await enviar(email, { assunto: `🧰 Novo cadastro de staff: ${item.nome}`, html: layoutSimples({ titulo: '🧰 Cadastro de staff', saudacao: 'Chegou um cadastro de staff.', linhas: [`<strong>${escape(item.nome)}</strong> preencheu o cadastro.`, ...itens.map((linha) => escape(linha))], botao: { texto: 'Ver no painel', href: `${PAINEL}/staff` } }) });
       await pausa();
     }
     total.staff += 1;
+  }
+  // Cadastro de fornecedor: sem documento, endereço ou Pix no e-mail; os dados completos ficam no painel.
+  const fornecedores = await (await banco(`fornecedores?admin_avisado_em=is.null&created_at=gte.${desde()}&select=id,nome,contato_nome,email,whatsapp,categoria,fornece,primeira_vez,atualizou_dados&limit=20`)).json();
+  for (const item of Array.isArray(fornecedores) ? fornecedores : []) {
+    if (!(await reservar('fornecedores', item.id, 'admin_avisado_em'))) continue;
+    const itens = [['Fornece', `${item.categoria}: ${item.fornece}`], ['Contato', item.contato_nome], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Cadastro', item.primeira_vez ? 'Primeira vez' : item.atualizou_dados ? 'Já forneceu, atualizou os dados' : 'Já forneceu, dados sem mudança']].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
+    for (const email of admins) {
+      await enviar(email, { assunto: `📦 Novo cadastro de fornecedor: ${item.nome}`, html: layoutSimples({ titulo: '📦 Cadastro de fornecedor', saudacao: 'Chegou um cadastro de fornecedor.', linhas: [`<strong>${escape(item.nome)}</strong> preencheu o cadastro.`, ...itens.map((linha) => escape(linha))], botao: { texto: 'Ver no painel', href: `${PAINEL}/fornecedores` } }) });
+      await pausa();
+    }
+    total.fornecedores += 1;
   }
   res.status(200).json(total);
 }

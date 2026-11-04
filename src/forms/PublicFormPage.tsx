@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent a
 import { useParams, useSearchParams } from 'react-router-dom';
 import { ArrowDown, ArrowRight, ArrowUp, Check, CornerDownLeft, Paperclip, X } from 'lucide-react';
 import { anonPublicRpc, anonStorage, supabase } from '../lib/supabase';
-import { type FormAnswer, type FormQuestion, FILE_ACCEPT, FILE_HINT, fileLabel, isAnswerable, nextQuestionIndex, richTextHtml, scaleRange, validateAnswer } from './formModel';
+import { type FormAnswer, type FormQuestion, applyMask, FILE_ACCEPT, FILE_HINT, fileLabel, isAnswerable, joinPhone, MASK_PLACEHOLDER, maskOf, nextQuestionIndex, phoneParts, richTextHtml, scaleRange, validateAnswer } from './formModel';
 import { FooterLinks } from '../components/SiteFooter';
 import './public-form.css';
 
@@ -67,9 +67,12 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
 
   const questions = useMemo(() => form?.questions ?? [], [form]);
   const answerable = useMemo(() => questions.filter(isAnswerable), [questions]);
+  // Na abertura, conta só o caminho básico: perguntas condicionadas a uma resposta não entram na estimativa.
+  const basicas = useMemo(() => { let total = 0; let i = questions.length ? 0 : -1; while (i >= 0) { if (isAnswerable(questions[i])) total += 1; i = nextQuestionIndex(questions, i, undefined, {}); } return total; }, [questions]);
   const question = questions[index];
   const progress = phase === 'done' ? 100 : phase === 'questions' && questions.length ? Math.round((index / questions.length) * 100) : 0;
-  const numberOf = (target: FormQuestion) => answerable.indexOf(target) + 1;
+  const caminho = useMemo(() => { const lista: FormQuestion[] = []; let i = questions.length ? 0 : -1; while (i >= 0) { if (isAnswerable(questions[i])) lista.push(questions[i]); i = nextQuestionIndex(questions, i, answers[questions[i].id], answers); } return lista; }, [questions, answers]);
+  const numberOf = (target: FormQuestion) => (caminho.includes(target) ? caminho.indexOf(target) : answerable.indexOf(target)) + 1;
 
   useEffect(() => {
     if (phase !== 'questions') return;
@@ -104,10 +107,32 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     if (problem) { setError(problem); return; }
     if (uploads[question.id]?.busy) { setError('Aguarde terminar o envio do arquivo.'); return; }
     setError('');
+    if (maskOf(question) === 'cep') preencherPeloCep(String(answers[question.id] || ''), index);
     const next = nextQuestionIndex(questions, index, answers[question.id], answers);
     if (next < 0) { void submit(); return; }
     setTrail((current) => [...current, index]); setDirection('next'); setIndex(next);
   }, [answers, index, question, questions, submit, uploads]);
+
+  // Endereço pelo CEP (ViaCEP): a pessoa vê a rua, o bairro e a cidade preenchidos e pode editar.
+  function preencherPeloCep(cep: string, desde: number) {
+    const numeros = cep.replace(/\D/g, '');
+    if (numeros.length !== 8) return;
+    void fetch(`https://viacep.com.br/ws/${numeros}/json/`).then((r) => r.json()).then((dados: { erro?: boolean; logradouro?: string; bairro?: string; localidade?: string; uf?: string }) => {
+      if (!dados || dados.erro) return;
+      const seguintes = questions.slice(desde + 1).filter((item) => item.kind === 'short_text');
+      const achar = (re: RegExp) => seguintes.find((item) => re.test(item.label));
+      const preencher: Array<[FormQuestion | undefined, string]> = [
+        [achar(/bairro/i), dados.bairro || ''],
+        [achar(/endere|logradouro|\brua\b/i), [dados.logradouro, achar(/bairro/i) ? '' : dados.bairro].filter(Boolean).join(', ')],
+        [achar(/cidade/i), [dados.localidade, dados.uf].filter(Boolean).join('/')],
+      ];
+      setAnswers((atual) => {
+        const novo = { ...atual };
+        for (const [item, valor] of preencher) if (item && valor && !String(novo[item.id] ?? '').trim()) novo[item.id] = valor;
+        return novo;
+      });
+    }).catch(() => null);
+  }
 
   const goBack = useCallback(() => {
     if (!trail.length) return;
@@ -220,10 +245,23 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
         return <input ref={(node) => { inputRef.current = node; }} className="cf-text" type="date" value={text} onChange={(event) => setAnswer(event.target.value)} />;
       case 'number':
         return <input ref={(node) => { inputRef.current = node; }} className="cf-text" inputMode="decimal" value={text} placeholder="Digite um número" onChange={(event) => { const raw = event.target.value.replace(',', '.'); setAnswer(raw === '' ? '' : Number.isFinite(Number(raw)) ? Number(raw) : event.target.value); }} />;
+      case 'phone': {
+        // DDD separado do número, só dígitos e no tamanho máximo de um telefone do Brasil.
+        const { ddd, numero } = phoneParts(text);
+        return <div className="cf-phone">
+          <label><small>DDD</small><input ref={(node) => { inputRef.current = node; }} className="cf-text cf-ddd" type="tel" inputMode="numeric" autoComplete="tel-area-code" value={ddd} placeholder="41" aria-label="DDD"
+            onChange={(event) => { const tudo = event.target.value.replace(/\D/g, ''); const d = tudo.slice(0, 2); setAnswer(joinPhone(d, tudo.length > 2 ? tudo.slice(2) : numero)); if (tudo.length >= 2) (event.target.closest('.cf-phone')?.querySelector('.cf-numero') as HTMLInputElement | null)?.focus(); }} /></label>
+          <label><small>Número</small><input className="cf-text cf-numero" type="tel" inputMode="numeric" autoComplete="tel-local" maxLength={10} value={numero.length > 4 ? `${numero.slice(0, numero.length - 4)}-${numero.slice(-4)}` : numero} placeholder="99999-9999" aria-label="Número"
+            onChange={(event) => setAnswer(joinPhone(ddd, event.target.value))} /></label>
+        </div>;
+      }
       default: {
-        const type = item.kind === 'email' ? 'email' : item.kind === 'phone' ? 'tel' : 'text';
-        const auto = item.kind === 'email' ? 'email' : item.kind === 'phone' ? 'tel' : item.kind === 'name' ? 'name' : 'off';
-        return <input ref={(node) => { inputRef.current = node; }} className="cf-text" type={type} autoComplete={auto} value={text} maxLength={item.kind === 'short_text' || item.kind === 'name' ? 300 : 200} placeholder={item.kind === 'email' ? 'nome@empresa.com' : item.kind === 'phone' ? '(11) 90000-0000' : 'Digite sua resposta aqui…'} onChange={(event) => setAnswer(event.target.value)} />;
+        const mask = maskOf(item);
+        if (mask) return <input ref={(node) => { inputRef.current = node; }} className="cf-text" type="text" inputMode={mask === 'pix_aleatoria' ? 'text' : 'numeric'} autoComplete={mask === 'cep' ? 'postal-code' : 'off'} autoCapitalize="none" spellCheck={false}
+          value={text} placeholder={MASK_PLACEHOLDER[mask]} onChange={(event) => setAnswer(applyMask(mask, event.target.value))} />;
+        const type = item.kind === 'email' ? 'email' : 'text';
+        const auto = item.kind === 'email' ? 'email' : item.kind === 'name' ? 'name' : 'off';
+        return <input ref={(node) => { inputRef.current = node; }} className="cf-text" type={type} autoComplete={auto} value={text} maxLength={item.kind === 'short_text' || item.kind === 'name' ? 300 : 200} placeholder={item.kind === 'email' ? 'nome@empresa.com' : 'Digite sua resposta aqui…'} autoCapitalize={item.kind === 'email' ? 'none' : undefined} spellCheck={item.kind === 'email' ? false : undefined} onChange={(event) => setAnswer(item.kind === 'email' ? event.target.value.replace(/\s/g, '') : event.target.value)} />;
       }
     }
   }
@@ -240,7 +278,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
         <h1>{form.title}</h1>
         {form.description && <p className="cf-desc" dangerouslySetInnerHTML={{ __html: richTextHtml(form.description) }} />}
         <div className="cf-actions"><button type="button" className="cf-primary" onClick={() => setPhase('questions')}>Começar <ArrowRight size={18} /></button><span className="cf-enter-hint">ou pressione <b>Enter <CornerDownLeft size={13} /></b></span></div>
-        <p className="cf-meta">{answerable.length} {answerable.length === 1 ? 'pergunta' : 'perguntas'} · cerca de {Math.max(1, Math.round(answerable.length * 0.4))} min</p>
+        <p className="cf-meta">{basicas} {basicas === 1 ? 'pergunta' : 'perguntas'} · cerca de {Math.max(1, Math.round(basicas * 0.4))} min</p>
       </div>}
       {(phase === 'questions' || phase === 'sending') && question && <div className={`cf-screen cf-q cf-${direction}${question.kind === 'statement' ? ' cf-statement' : ''}`} key={question.id}>
         <div className="cf-label">
@@ -269,7 +307,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
       </div>}
     </main>
     {phase === 'questions' && questions.length > 1 && <nav className="cf-nav" aria-label="Navegar entre perguntas">
-      <span>{index + 1} de {questions.length}</span>
+      <span>{question && caminho.includes(question) ? caminho.indexOf(question) + 1 : index + 1} de {caminho.length}</span>
       <button type="button" aria-label="Pergunta anterior" disabled={!trail.length} onClick={goBack}><ArrowUp size={18} /></button>
       <button type="button" aria-label="Próxima pergunta" disabled={isLast} onClick={goNext}><ArrowDown size={18} /></button>
     </nav>}

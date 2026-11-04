@@ -18,6 +18,8 @@ export type FormQuestion = {
   logic?: Array<{ when: string; goTo: string }>;
   /** Só aparece quando a resposta da pergunta `id` é uma das opções em `in` (ex.: condições de pagamento por função). */
   showIf?: { id: string; in: string[] };
+  /** Formato do campo de texto. CPF, CNPJ e CEP também são reconhecidos pelo título da pergunta. */
+  mask?: TextMask;
   /** Pergunta de arquivo: 'images_pdf' aceita só PDF e imagens; padrão aceita também documentos, áudio e vídeo. */
   accept?: 'images_pdf' | 'any';
   /** Tela de texto pode mostrar um material: capa, link e chamada. */
@@ -25,6 +27,67 @@ export type FormQuestion = {
 };
 
 export const END_OF_FORM = '__end';
+
+export type TextMask = 'cpf' | 'cnpj' | 'cep' | 'money' | 'pix_aleatoria';
+
+/** Formato do campo: o informado na pergunta ou, em texto curto, o que o título indica (vale para os formulários do painel). */
+export function maskOf(question: FormQuestion): TextMask | undefined {
+  if (question.mask) return question.mask;
+  if (question.kind !== 'short_text') return undefined;
+  if (/\bCNPJ\b/i.test(question.label)) return 'cnpj';
+  if (/\bCPF\b/i.test(question.label)) return 'cpf';
+  if (/\bCEP\b/i.test(question.label)) return 'cep';
+  return undefined;
+}
+
+const digitos = (value: string) => value.replace(/\D/g, '');
+const agrupar = (valor: string, partes: Array<[number, string]>) => {
+  let resto = valor; let saida = '';
+  for (const [tamanho, antes] of partes) { if (!resto) break; saida += (saida ? antes : '') + resto.slice(0, tamanho); resto = resto.slice(tamanho); }
+  return saida;
+};
+
+/** Aplica o formato enquanto a pessoa digita: só números (ou hexadecimal na chave aleatória) e no tamanho certo. */
+export function applyMask(mask: TextMask, raw: string) {
+  if (mask === 'cpf') return agrupar(digitos(raw).slice(0, 11), [[3, ''], [3, '.'], [3, '.'], [2, '-']]);
+  if (mask === 'cnpj') return agrupar(digitos(raw).slice(0, 14), [[2, ''], [3, '.'], [3, '.'], [4, '/'], [2, '-']]);
+  if (mask === 'cep') return agrupar(digitos(raw).slice(0, 8), [[5, ''], [3, '-']]);
+  if (mask === 'money') {
+    const centavos = digitos(raw).replace(/^0+/, '').slice(0, 11);
+    if (!centavos) return '';
+    const numero = Number(centavos) / 100;
+    return `R$ ${numero.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  return agrupar(raw.toLowerCase().replace(/[^0-9a-f]/g, '').slice(0, 32), [[8, ''], [4, '-'], [4, '-'], [4, '-'], [12, '-']]);
+}
+
+export const MASK_PLACEHOLDER: Record<TextMask, string> = { cpf: '000.000.000-00', cnpj: '00.000.000/0000-00', cep: '00000-000', money: 'R$ 0,00', pix_aleatoria: '00000000-0000-0000-0000-000000000000' };
+
+function cpfValido(valor: string) {
+  const n = digitos(valor);
+  if (n.length !== 11 || /^(\d)\1{10}$/.test(n)) return false;
+  const dv = (fim: number) => { let soma = 0; for (let i = 0; i < fim; i += 1) soma += Number(n[i]) * (fim + 1 - i); const resto = (soma * 10) % 11; return resto === 10 ? 0 : resto; };
+  return dv(9) === Number(n[9]) && dv(10) === Number(n[10]);
+}
+
+function cnpjValido(valor: string) {
+  const n = digitos(valor);
+  if (n.length !== 14 || /^(\d)\1{13}$/.test(n)) return false;
+  const dv = (fim: number) => { const pesos = fim === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]; const soma = pesos.reduce((total, peso, i) => total + Number(n[i]) * peso, 0); const resto = soma % 11; return resto < 2 ? 0 : 11 - resto; };
+  return dv(12) === Number(n[12]) && dv(13) === Number(n[13]);
+}
+
+/** Telefone do Brasil guardado como "(41) 98779-1933": DDD de 2 dígitos e número de 8 ou 9 (celular começa com 9). */
+export function phoneParts(value: string) {
+  const m = value.match(/^\((\d{0,2})\)\s?(.*)$/);
+  return m ? { ddd: m[1], numero: digitos(m[2]) } : { ddd: '', numero: digitos(value) };
+}
+export function joinPhone(ddd: string, numero: string) {
+  const d = digitos(ddd).slice(0, 2); const n = digitos(numero).slice(0, 9);
+  if (!d && !n) return '';
+  return `(${d}) ${n.length > 4 ? `${n.slice(0, n.length - 4)}-${n.slice(-4)}` : n}`;
+}
+export const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 
 export type FormStatus = 'draft' | 'open' | 'closed';
 export type FormAudience = 'cali' | 'client';
@@ -118,8 +181,20 @@ export function scaleRange(question: FormQuestion) {
 export function validateAnswer(question: FormQuestion, value: FormAnswer | undefined) {
   if (!isAnswerable(question)) return '';
   if (isEmpty(value)) return question.required ? 'Esta pergunta é obrigatória.' : '';
-  if (question.kind === 'email' && typeof value === 'string' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value.trim())) return 'Confira o e-mail digitado.';
-  if (question.kind === 'phone' && typeof value === 'string' && value.replace(/\D/g, '').length < 8) return 'Confira o número digitado.';
+  if (question.kind === 'email' && typeof value === 'string' && !EMAIL_RE.test(value.trim())) return 'Confira o e-mail: ele precisa ter o formato nome@provedor.com, sem espaços nem acentos.';
+  if (question.kind === 'phone' && typeof value === 'string') {
+    const { ddd, numero } = phoneParts(value);
+    if (!/^[1-9][1-9]$/.test(ddd)) return 'Confira o DDD: são 2 números, sem o zero.';
+    if (!(numero.length === 8 || (numero.length === 9 && numero.startsWith('9')))) return 'Confira o número: 9 dígitos para celular (começa com 9) ou 8 para fixo.';
+  }
+  const mask = maskOf(question);
+  if (mask && typeof value === 'string') {
+    if (mask === 'cpf' && !cpfValido(value)) return 'Confira o CPF: são 11 números.';
+    if (mask === 'cnpj' && !cnpjValido(value)) return 'Confira o CNPJ: são 14 números.';
+    if (mask === 'cep' && digitos(value).length !== 8) return 'Confira o CEP: são 8 números.';
+    if (mask === 'money' && !digitos(value).replace(/^0+/, '')) return 'Informe o valor.';
+    if (mask === 'pix_aleatoria' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value)) return 'Confira a chave aleatória: são 32 letras e números, no formato que o banco mostra.';
+  }
   return '';
 }
 
