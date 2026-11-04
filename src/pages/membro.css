@@ -513,3 +513,5 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__cartao,.passe__missao,.passe__empresa{transition:box-shadow .25s,transform .25s}
 @media (hover:hover){.passe__missao:hover,.passe__empresa:hover{box-shadow:0 10px 24px rgba(34,16,15,.08);transform:translateY(-2px)}}
 @media (prefers-reduced-motion:reduce){.passe *,.passe *::before,.passe *::after{animation:none!important;transition:none!important}}
+.passe__reagir-abrir{align-self:stretch;white-space:nowrap}
+.passe__reagir-abrir span{letter-spacing:2px}

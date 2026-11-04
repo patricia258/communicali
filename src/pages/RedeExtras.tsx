@@ -114,7 +114,7 @@ export function FeedbackPerfil({ membroId, proprio, nome = '' }: { membroId: str
           ))}
         </ul>
       )}
-      {dados.pode_comentar && !proprio && <button type="button" className="passe__reagir-abrir" onClick={abrir}>{dados.meu ? <>Trocar minha reação <span aria-hidden="true">{dados.meu.reacao}</span></> : <>Deixar uma reação para {primeiro} <span aria-hidden="true">❤️ 🚀 👏</span></>}</button>}
+      {dados.pode_comentar && !proprio && <button type="button" className="passe__reagir-abrir" onClick={abrir}>{dados.meu ? <>Trocar minha reação <span aria-hidden="true">{dados.meu.reacao}</span></> : <>Deixar uma reação <span aria-hidden="true">❤️ 🚀 👏</span></>}</button>}
       {aberto && (
         <div className="passe__modal" role="dialog" aria-modal="true" aria-label={`Reação para ${primeiro}`} onKeyDown={(event) => { if (event.key === 'Escape') setAberto(false); }}>
           <div className="passe__janela passe__reagir">
