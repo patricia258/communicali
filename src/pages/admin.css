@@ -186,3 +186,20 @@
 .adm-hint.adm-alerta{padding:6px 10px;border-left:3px solid #A9502E;border-radius:6px;background:rgba(169,80,46,.12);color:#A9502E;font-weight:600}
 /* Painel do administrador usa toda a largura da tela (04/11). */
 .adm .ap-content,.adm .ap-content:has(.adm-tabela){max-width:none}
+/* Apresentação: grade de slides com as enquetes entre eles. */
+.apr-envio .apr-botao{display:inline-flex;align-items:center;gap:8px;width:max-content;cursor:pointer}
+.apr-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;margin-top:18px}
+.apr-grade>.apr-pausas{grid-column:1/-1}
+.apr-item{display:grid;gap:8px;align-content:start}
+.apr-slide{position:relative;margin:0;border-radius:10px;overflow:hidden;border:1px solid #eadfd6;background:#1F0E14;aspect-ratio:16/9}
+.apr-slide img{width:100%;height:100%;object-fit:contain;display:block}
+.apr-slide figcaption{position:absolute;left:8px;top:8px;padding:2px 8px;border-radius:999px;background:rgba(31,14,20,.75);color:#F7F0EA;font:600 11px Inter,sans-serif}
+.apr-pausas{display:grid;gap:6px}
+.apr-mais{display:inline-flex;align-items:center;gap:6px;width:max-content;padding:5px 10px;border:1px dashed #C9973B;border-radius:999px;background:transparent;color:#8a6a2c;font:600 12px Inter,sans-serif;cursor:pointer}
+.apr-mais:hover{background:#fbf3e6}
+.apr-escolha{width:100%;padding:7px 9px;border:1px solid #C9973B;border-radius:8px;font:500 12px Inter,sans-serif}
+.apr-enquete{position:relative;display:grid;gap:2px;padding:10px 34px 10px 12px;border-radius:10px;background:#5A1E2D;color:#F7F0EA}
+.apr-enquete small{font:700 10px Inter,sans-serif;letter-spacing:.12em;color:#DDB160}
+.apr-enquete strong{font:600 13px/1.35 Inter,sans-serif}
+.apr-enquete button{position:absolute;top:8px;right:8px;display:grid;place-items:center;width:22px;height:22px;border:0;border-radius:50%;background:rgba(247,240,234,.15);color:#F7F0EA;cursor:pointer}
+.adm-link-botao{display:inline-flex;align-items:center;gap:4px;border:0;background:none;padding:0;color:#a9502e;font:inherit;text-decoration:underline;cursor:pointer}

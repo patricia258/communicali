@@ -11,6 +11,7 @@ import { GuestsPanel } from './Convidados';
 import { HomePanel, ProgramPanel } from './AdminInicio';
 import { StaffPanel } from './Staff';
 import { FornecedorPanel } from './Fornecedor';
+import { ApresentacaoPanel } from './AdminApresentacao';
 import { EmailsCard, chamar } from './AdminEmails';
 import { ImpactosPanel, IndicacoesPanel, MatchesPanel, RecommendationsPanel } from './AdminRecomendacoes';
 import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
@@ -436,7 +437,7 @@ function CounterPanel() {
 const GRUPOS: Array<{ nome: string; itens: Array<[string, string]> }> = [
   { nome: 'Início', itens: [['/admin', 'Início']] },
   { nome: 'Pessoas', itens: [['/admin/membros', 'Membros'], ['/admin/indicacoes', 'Indicações'], ['/admin/matches', 'Matches']] },
-  { nome: 'Edições', itens: [['/admin/edicoes', 'Edições'], ['/admin/votacoes', 'Votações']] },
+  { nome: 'Edições', itens: [['/admin/edicoes', 'Edições'], ['/admin/votacoes', 'Votações'], ['/admin/apresentacao', 'Apresentação']] },
   { nome: 'Programa', itens: [['/admin/programa', 'Como funciona'], ['/admin/missoes', 'Missões'], ['/admin/impacto', 'Impacto']] },
   { nome: 'Formulários', itens: [['/admin/formularios', 'Formulários'], ['/admin/staff', 'Staff'], ['/admin/fornecedores', 'Fornecedores']] },
   { nome: 'Parceiros', itens: [['/admin/parceiros', 'Parceiros']] },
@@ -507,6 +508,7 @@ export function Admin() {
         <Route path="membros" element={<MembersPanel />} />
         <Route path="convidados" element={<GuestsPanel />} />
         <Route path="votacoes" element={<PollsPanel />} />
+        <Route path="apresentacao" element={<ApresentacaoPanel />} />
         <Route path="textos" element={<TextsPanel />} />
       </Routes>
     </Frame>

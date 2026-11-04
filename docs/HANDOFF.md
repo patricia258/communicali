@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (noite, 9) | Modo apresentação com enquete ao vivo
+- Painel, Edições, Apresentação (`AdminApresentacao.tsx`): sobe o PDF do Canva (convertido no navegador em JPEG 1920 px com pdfjs-dist 4.10.38, `intent: 'print'` para não travar em aba oculta) ou as imagens; guarda em `site/apresentacoes/<id>/`. Entre os slides, "Enquete aqui" escolhe uma votação (criadas em Votações). Trocar os slides mantém as enquetes nos mesmos pontos.
+- `/apresentacao?id=` (`Apresentacao.tsx`, só admin): tela cheia (F), avança com passador, setas, espaço ou clique; volta com seta ou clique no canto esquerdo; guarda a posição se recarregar. Ao chegar numa enquete, abre a votação (`polls.status = ativa`, `apresentacoes.poll_atual`) e mostra QR Code e gráfico ao vivo (lê `poll_votes` a cada 2 s, sem esperar revelar); ao seguir, encerra.
+- Celular: `/votar?ao-vivo=<id>` (no QR) ou só `/votar` (função `communicali_ao_vivo_atual`) acompanha a enquete aberta; entre perguntas mostra "Fique por aqui". Migrações `20261104200000_apresentacoes.sql` e `20261104210000_ao_vivo_atual.sql`.
+- A apresentação da 1ª Edição já tem os 39 slides do PDF de 04/11; nenhuma enquete marcada ainda. Testado com enquete temporária e dois votos simulados; tudo apagado.
+
 ### 2026-11-04 (noite, 8) | Painel em largura total e cadastros no modelo de formulário
 - Painel do admin sem limite de largura (`admin.css`). Tabela de respostas com colunas mais largas; gaveta lateral com até 960px e campos em duas colunas (texto longo, várias opções e arquivo ocupam a linha toda).
 - Excluir uma resposta: lixeira em cada linha e "Excluir resposta" na gaveta, com a mesma confirmação da exclusão em lote.

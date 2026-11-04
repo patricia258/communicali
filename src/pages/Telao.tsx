@@ -33,7 +33,7 @@ export function TelaoCheckin() {
 
 const FAIXAS: Array<[string, number, number]> = [['0 a 4', 0, 4], ['5 a 7', 5, 7], ['8 a 10', 8, 10]];
 
-function Results({ poll }: { poll: Poll }) {
+export function Results({ poll }: { poll: Poll }) {
   const total = poll.votos || 1;
   const percent = (value: number) => `${Math.round((value / total) * 100)}%`;
   if (poll.tipo === 'nota') {

@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
 import { deviceCode, editionSlug, errorMessage, supabase, type Poll } from '../lib';
 
+// Com ?ao-vivo=<apresentação>, o mesmo link acompanha a pergunta aberta no telão. Sem parâmetro, se houver
+// apresentação com enquete aberta, entra nela; senão, vale a votação da edição.
+const PARAMS = new URLSearchParams(window.location.search);
+
 export function Votar() {
-  const slug = editionSlug();
+  const [AO_VIVO, setAoVivo] = useState<string | null>(() => PARAMS.get('ao-vivo'));
+  const [slug, setSlug] = useState<string | null>(() => (PARAMS.get('ao-vivo') || !PARAMS.has('edicao') ? null : editionSlug()));
+  const [aguardando, setAguardando] = useState(Boolean(PARAMS.get('ao-vivo')));
   const [poll, setPoll] = useState<Poll | null>(null);
   const [loadError, setLoadError] = useState('');
   const [nota, setNota] = useState<number | null>(null);
@@ -14,6 +20,27 @@ export function Votar() {
   const [sent, setSent] = useState<'novo' | 'repetido' | null>(null);
 
   useEffect(() => {
+    if (PARAMS.get('ao-vivo') || PARAMS.has('edicao')) return;
+    void supabase.rpc('communicali_ao_vivo_atual').then(({ data }) => { if (data) setAoVivo(String(data)); else setSlug(editionSlug()); });
+  }, []);
+
+  useEffect(() => {
+    if (!AO_VIVO) return;
+    const verificar = () => supabase.rpc('communicali_ao_vivo', { p_id: AO_VIVO }).then(({ data }) => {
+      const atual = (data as string | null) || null;
+      setAguardando(!atual);
+      setSlug((anterior) => {
+        if (anterior !== atual) { setPoll(null); setNota(null); setOpcao(''); setTexto(''); setSent(null); setError(''); }
+        return atual;
+      });
+    });
+    void verificar();
+    const timer = window.setInterval(verificar, 2500);
+    return () => window.clearInterval(timer);
+  }, [AO_VIVO]);
+
+  useEffect(() => {
+    if (!slug) return;
     supabase.rpc('communicali_votacao', { p_slug: slug }).then(({ data, error: failure }) => {
       if (failure || !data) setLoadError('Não foi possível abrir a votação. Recarregue a página.');
       else setPoll(data as Poll);
@@ -25,6 +52,7 @@ export function Votar() {
   async function submit() {
     if (!ready || sending) return;
     setSending(true); setError('');
+    if (!slug) return;
     const { data, error: failure } = await supabase.rpc('communicali_votar', { p_slug: slug, p_aparelho: deviceCode(), p_nota: nota, p_opcao: opcao, p_texto: texto, p_respondente: nome });
     setSending(false);
     if (failure) setError(errorMessage(failure));
@@ -36,7 +64,9 @@ export function Votar() {
       <section className="event-card">
         <p className="eyebrow">ComuniCALI</p>
         {loadError && <p className="notice notice--alert">{loadError}</p>}
+        {aguardando && !sent && <><h1 className="question">Fique por aqui!</h1><p className="notice">A próxima pergunta aparece nesta tela assim que for aberta no telão. Não precisa ler o QR Code de novo.</p></>}
         {sent === 'novo' && <h1 className="question">Sua resposta foi registrada. Obrigada por contribuir com essa conversa!</h1>}
+        {sent && AO_VIVO && <p className="notice">Deixe esta tela aberta: a próxima pergunta aparece aqui.</p>}
         {sent === 'repetido' && <h1 className="question">Este aparelho já respondeu a esta pergunta.</h1>}
         {!sent && poll && <h1 className="question">{poll.pergunta}</h1>}
         {!sent && poll?.situacao === 'rascunho' && <p className="notice">A votação ainda não abriu.</p>}
