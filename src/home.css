@@ -188,3 +188,5 @@
   .entrada__qr{width:88px;height:88px}
   .selos{grid-template-columns:repeat(2,118px);justify-content:center}
 }
+.trilha__texto{margin:22px auto 10px;max-width:620px;text-align:center;color:var(--soft);font-size:16px;line-height:1.7}
+.trilha__texto strong{color:var(--gold-2)}

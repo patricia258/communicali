@@ -48,7 +48,7 @@ function MemberEditor({ member, onBack, alternar, excluir }: { member: Member; o
   async function addPoints() {
     const valor = PONTOS.find(([key]) => key === kind)?.[2] || 0;
     if (!motivo.trim()) { setNote('Descreva o motivo do lançamento.'); return; }
-    if (!window.confirm(`Lançar +${valor} pontos para ${member.nome}?`)) return;
+    if (!window.confirm(`Lançar +${valor} milhas para ${member.nome}?`)) return;
     const { error } = await supabase.from('point_events').insert({ member_id: member.id, acao: `${kind}:${crypto.randomUUID()}`, pontos: valor, motivo: motivo.trim() });
     setNote(error ? `Não foi possível lançar: ${error.message}` : 'Pontos lançados.');
     if (!error) { setMotivo(''); setLaunch(launch + 1); }
@@ -70,7 +70,7 @@ function MemberEditor({ member, onBack, alternar, excluir }: { member: Member; o
         <div className="adm-ficha__dados">
           <div className="adm-ficha__titulo"><h1>{member.nome}</h1><Categoria id={draft.categoria} nome={CATEGORIAS[draft.categoria]} />{member.status === 'suspenso' && <Categoria id="suspenso" nome="Suspenso" />}{member.aberto_trabalho && <Categoria id="trabalho" nome="Open to work" />}{member.recrutador && <Categoria id="recrutador" nome="Recruta" />}</div>
           <p>{[member.cargo, member.empresa].filter(Boolean).join(', ') || 'Cargo não informado'} · {member.cidade_uf || member.regiao || 'Cidade não informada'}{member.segmento ? ` · ${member.segmento}` : ''}</p>
-          <div className="adm-ficha__numeros"><p><strong>{total}</strong> pontos</p><p><strong>{history.length}</strong> encontros</p><p><strong>{dataBr(member.created_at)}</strong> desde</p><p><strong>{faixa}</strong> pela pontuação</p></div>
+          <div className="adm-ficha__numeros"><p><strong>{total}</strong> milhas</p><p><strong>{history.length}</strong> encontros</p><p><strong>{dataBr(member.created_at)}</strong> desde</p><p><strong>{faixa}</strong> pela pontuação</p></div>
           <div className="adm-ficha__contatos"><Telefone numero={member.whatsapp} /><Email email={member.email} /><Rede valor={member.instagram} tipo="instagram" /><Rede valor={member.linkedin} tipo="linkedin" />{member.curriculo_path && <button type="button" className="adm-copiar" onClick={() => void supabase.storage.from('curriculos').createSignedUrl(member.curriculo_path!, 300).then(({ data }) => { if (data) window.open(data.signedUrl, '_blank', 'noopener'); })}>Abrir currículo</button>}</div>
         </div>
         <div className="adm-ficha__acoes"><button type="button" className="wf-primary" onClick={() => void save()}>Salvar alterações</button><button type="button" className="wf-secondary" onClick={alternar}>{member.status === 'suspenso' ? 'Reativar' : 'Suspender'}</button><button type="button" className="wf-secondary adm-danger" onClick={excluir}>Excluir</button></div>
@@ -95,13 +95,13 @@ function MemberEditor({ member, onBack, alternar, excluir }: { member: Member; o
         </div>
       </section>
       <section className="v2-forms-card">
-        <header><small>PONTOS</small><h2>Extrato: {total} pontos</h2></header>
+        <header><small>MILHAS</small><h2>Extrato: {total} milhas</h2></header>
         <div className="adm-list">{points.map((item) => <div className="adm-row adm-row--static" key={item.id}><strong>+{item.pontos}</strong><span>{label(item.acao)}{item.motivo ? ` · ${item.motivo}` : ''}</span><em>{new Date(item.created_at).toLocaleDateString('pt-BR')}</em></div>)}</div>
-        {!points.length && <p className="adm-hint">Nenhum ponto ainda. O cadastro não gera pontos; a primeira presença soma 10.</p>}
+        {!points.length && <p className="adm-hint">Nenhuma milha ainda. O cadastro não gera milhas; a primeira presença soma 10.</p>}
         <div className="v2-forms-grid">
-          <label><span>Lançar pontos</span><select value={kind} onChange={(event) => setKind(event.target.value)}>{PONTOS.filter(([key]) => key === 'contribuicao' || key === 'parceiro' || key === 'palestra').map(([key, text, value]) => <option key={key} value={key}>+{value} {text}</option>)}</select></label>
+          <label><span>Lançar milhas</span><select value={kind} onChange={(event) => setKind(event.target.value)}>{PONTOS.filter(([key]) => key === 'contribuicao' || key === 'parceiro' || key === 'palestra').map(([key, text, value]) => <option key={key} value={key}>+{value} {text}</option>)}</select></label>
           <label><span>Motivo</span><input value={motivo} onChange={(event) => setMotivo(event.target.value)} /></label>
-          <div className="adm-submit"><button type="button" className="wf-secondary" onClick={() => void addPoints()}>Lançar pontos</button></div>
+          <div className="adm-submit"><button type="button" className="wf-secondary" onClick={() => void addPoints()}>Lançar milhas</button></div>
         </div>
       </section>
       <section className="v2-forms-card">
@@ -143,7 +143,7 @@ export function MembersPanel() {
   }
 
   async function remove(item: Member) {
-    const typed = window.prompt(`Excluir ${item.nome} apaga cadastro, presenças e pontos e não pode ser desfeito. Para confirmar, digite o e-mail da pessoa:`);
+    const typed = window.prompt(`Excluir ${item.nome} apaga cadastro, presenças e milhas e não pode ser desfeito. Para confirmar, digite o e-mail da pessoa:`);
     if (typed === null) return;
     if (typed.trim().toLowerCase() !== item.email) { window.alert('O e-mail não confere. Nada foi excluído.'); return; }
     const { error } = await supabase.rpc('admin_excluir_membro', { p_member: item.id });
@@ -158,7 +158,7 @@ export function MembersPanel() {
   const colunas: Array<Coluna<Member>> = [
     { id: 'nome', titulo: 'Nome', valor: (item) => item.nome, render: (item) => <button type="button" className="adm-nome" onClick={() => setOpen(item)}>{item.foto_url ? <img src={item.foto_url} alt="" /> : <span>{item.nome.charAt(0)}</span>}{item.nome}</button> },
     { id: 'categoria', titulo: 'Categoria', valor: categoriaDe, render: (item) => <Categoria id={item.status === 'suspenso' ? 'suspenso' : item.categoria} nome={categoriaDe(item)} /> },
-    { id: 'pontos', titulo: 'Pontos', valor: (item) => points[item.id] || 0 },
+    { id: 'pontos', titulo: 'Milhas', valor: (item) => points[item.id] || 0 },
     { id: 'encontros', titulo: 'Encontros', valor: (item) => encontros[item.id]?.total || 0 },
     { id: 'desde', titulo: 'Desde', valor: (item) => item.created_at, render: (item) => dataBr(item.created_at) },
     { id: 'tempo', titulo: 'Tempo de casa', valor: (item) => dias(item.created_at), render: (item) => tempo(item.created_at) },

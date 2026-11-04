@@ -622,3 +622,5 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__agenda-cartao .passe__agenda-cabecalho:not(:has(.passe__agenda-capa)){min-height:76px}
 .passe__agenda-cartao--proximo .passe__encontro-resumo h4,.passe__agenda-cartao--proximo .passe__encontro-resumo p,.passe__agenda-cartao--proximo .passe__encontro-resumo .passe__aviso,.passe__agenda-cartao--proximo .passe__encontro-resumo li{color:#F7F0EA}
 .passe__agenda-cartao--proximo .passe__encontro-resumo a{color:#DDB160}
+.passe__agenda-embarque{position:absolute;top:118px;right:14px;z-index:2;display:grid;padding:6px 12px;border-radius:8px;background:#DDB160;color:#22100F;font:800 12px 'Funnel Display',sans-serif;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.passe__agenda-embarque small{font:700 9px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;opacity:.8}

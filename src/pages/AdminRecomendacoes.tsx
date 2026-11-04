@@ -37,7 +37,7 @@ export function RecommendationsPanel() {
   async function decidirRecomendacao(item: Recomendacao, status: 'validada' | 'recusada') {
     const justificativa = status === 'recusada' ? pedirJustificativa(`Por que recusar ${item.nome}?`) : null;
     if (status === 'recusada' && !justificativa) return;
-    if (status === 'validada' && !window.confirm(`Validar ${item.nome}? Soma 10 pontos para ${item.members?.nome}.`)) return;
+    if (status === 'validada' && !window.confirm(`Validar ${item.nome}? Soma 10 milhas para ${item.members?.nome}.`)) return;
     const { error } = await supabase.from('recommendations').update({ status, justificativa, decidido_em: new Date().toISOString(), decidido_por: await usuario() }).eq('id', item.id);
     if (!error && status === 'validada') await supabase.from('point_events').insert({ member_id: item.member_id, acao: `recomendacao:${item.id}`, pontos: 10, motivo: item.nome });
     setNote(error ? error.message : 'Recomendação atualizada.');
@@ -108,7 +108,7 @@ export function IndicacoesPanel() {
   ];
   return (
     <>
-      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Indicações</h1><p>Quem cada membro trouxe. A aprovação acontece na edição, e os 5 pontos entram depois do check-in da pessoa indicada.</p></div></div>
+      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Indicações</h1><p>Quem cada membro trouxe. A aprovação acontece na edição, e as 5 milhas entram depois do check-in da pessoa indicada.</p></div></div>
       <Tabela colunas={colunas} linhas={lista} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhuma indicação ainda." filtros={[{ id: 'situacao', titulo: 'Situação', valor: situacao }, { id: 'edicao', titulo: 'Edição', valor: (item) => item.editions?.titulo || '' }, { id: 'quem', titulo: 'Quem indicou', valor: (item) => item.members?.nome || '' }]} />
     </>
   );

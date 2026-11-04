@@ -12,7 +12,7 @@ export function TrilhaPrograma({ categoria, previa }: { categoria: string; previ
   const atual = ETAPAS[indice];
   const proximo = indice >= 0 ? ETAPAS[indice + 1] : null;
   return <>
-    <header className="passe__rede-titulo"><TrendingUp size={28} aria-hidden="true" /><h1>Programa</h1></header>
+    <header className="passe__rede-titulo"><TrendingUp size={28} aria-hidden="true" /><h1>Minha jornada</h1></header>
     <p>Uma trajetória de participação, contribuição e reconhecimento.</p>
     {previa && <p className="passe__previa-aviso" role="status">Prévia de Membro. Sua categoria e seu histórico permanecem iguais.</p>}
     <section className="passe__programa-atual" aria-label="Seu papel na comunidade">
@@ -24,9 +24,9 @@ export function TrilhaPrograma({ categoria, previa }: { categoria: string; previ
       <h2>{proximo?.nome || (indice === ETAPAS.length - 1 ? 'Seu papel continua em movimento' : 'Da primeira visita às contribuições para a comunidade')}</h2>
       <p>{proximo ? proximo.descricao : 'Cada etapa representa uma forma de participar e contribuir.'}</p>
       <div className="passe__requisitos">
-        <div><h3>Para ser Conector</h3><ul><li><strong>60 pontos</strong> no ciclo de 12 meses</li><li><strong>4 encontros</strong></li><li><strong>1 contribuição</strong> de conexão</li></ul></div>
-        <div><h3>Para ser Embaixador</h3><ul><li><strong>180 pontos</strong></li><li><strong>6 encontros</strong></li><li><strong>2 contribuições</strong> diferentes</li><li><strong>12 meses</strong> como Conector</li></ul></div>
-        <p>A organização avalia cada progressão.<br /><strong>Pontos sozinhos não mudam o nível.</strong></p>
+        <div><h3>Para ser Conector</h3><ul><li><strong>60 milhas</strong> no ciclo de 12 meses</li><li><strong>4 encontros</strong></li><li><strong>1 contribuição</strong> de conexão</li></ul></div>
+        <div><h3>Para ser Embaixador</h3><ul><li><strong>180 milhas</strong></li><li><strong>6 encontros</strong></li><li><strong>2 contribuições</strong> diferentes</li><li><strong>12 meses</strong> como Conector</li></ul></div>
+        <p>A organização avalia cada progressão.<br /><strong>Milhas sozinhas não mudam o nível.</strong></p>
       </div>
     </section>
     <ol className="passe__programa-trilha" aria-label="Etapas do programa">

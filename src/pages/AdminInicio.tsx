@@ -38,7 +38,7 @@ export function HomePanel() {
     [UserCheck, 'Chegada', 'A recepção confirma o nome na lista e indica a mesa. Ainda não entrega crachá.', '/admin/edicoes', false],
     [MonitorPlay, 'Check-in pelo QR Code', 'O QR Code fica no porta-mesa de cada mesa e também no telão. Abra o telão do check-in. Reserve cerca de 5 minutos na abertura.', `/telao/checkin?edicao=${slug}`, true],
     [IdCard, 'Crachás na mesa', 'Quem terminou o check-in levanta o celular com a tela final, e a equipe leva o crachá até a mesa. Quem chegar depois faz o check-in e recebe na hora.', '/admin/edicoes', false],
-    [Users, 'Pitches', 'Cada pessoa tem até 1 minuto para se apresentar.', '/admin/edicoes', false],
+    [Users, 'Guichê | Apresente-se', 'Cada pessoa tem até 1 minuto para se apresentar: nome, o que faz e o que veio buscar.', '/admin/edicoes', false],
     [Vote, 'Votação', 'Em Votações, ative a pergunta do dia e troque o telão para a votação. As respostas sobem sozinhas.', '/admin/votacoes', false],
     [Trophy, 'Resultado', 'Em Votações, clique em Revelar no telão para mostrar a média e o gráfico.', '/admin/votacoes', false],
   ];
@@ -103,17 +103,17 @@ export function ProgramPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Como funciona</h1><p>Os pontos entram sozinhos ou por lançamento em Membros. Mudar de categoria é decisão da organização: atingir a faixa não promove ninguém automaticamente.</p></div></div>
+      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Como funciona</h1><p>As milhas entram sozinhas ou por lançamento em Membros. Mudar de categoria é decisão da organização: atingir a faixa não promove ninguém automaticamente.</p></div></div>
       <section className="v2-forms-card">
-        <header><small>PONTUAÇÃO</small><h2>O que vale ponto</h2></header>
+        <header><small>MILHAS</small><h2>O que vale milha</h2></header>
         <div className="adm-list">
           {PONTOS.map(([key, label, value]) => <div className="adm-row adm-row--static" key={key}><strong>+{value}</strong><span>{label}</span><em>{key === 'presenca' || key === 'convidado' ? 'Automático' : key === 'recomendacao' ? 'Validado em Missões' : 'Lançado em Membros'}</em></div>)}
         </div>
       </section>
       <section className="v2-forms-card">
-        <header><small>CATEGORIAS</small><h2>{people} {people === 1 ? 'membro' : 'membros'} por faixa de pontos</h2></header>
+        <header><small>CATEGORIAS</small><h2>{people} {people === 1 ? 'membro' : 'membros'} por faixa de milhas</h2></header>
         <div className="adm-cards">
-          {FAIXAS.map((band) => <div className="adm-card" key={band.nome}><ClipboardList size={18} aria-hidden="true" /><strong>{totals[band.nome] || 0}</strong><span>{band.nome}</span><small>{band.ate === Infinity ? `${band.de} pontos ou mais` : `${band.de} a ${band.ate} pontos`}</small></div>)}
+          {FAIXAS.map((band) => <div className="adm-card" key={band.nome}><ClipboardList size={18} aria-hidden="true" /><strong>{totals[band.nome] || 0}</strong><span>{band.nome}</span><small>{band.ate === Infinity ? `${band.de} milhas ou mais` : `${band.de} a ${band.ate} milhas`}</small></div>)}
         </div>
       </section>
     </>

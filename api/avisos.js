@@ -27,7 +27,7 @@ function mensagemMembro(aviso, nome, missoes, edicoes) {
   if (aviso.tipo === 'carimbo') {
     const edicao = (aviso.texto.match(/passaporte: (.+?)\.$/) || [])[1] || 'o encontro';
     const carimbo = edicoes.find((item) => item.titulo === edicao)?.carimbo_url;
-    return { assunto: '📮 Novo carimbo no seu passaporte ComuniCALI', html: layoutSimples({ titulo: '📮 Novo carimbo', imagem: carimbo ? new URL(carimbo, 'https://comuni.calirh.com').href : undefined, saudacao, linhas: ['Que bom ter você com a gente!', 'Seu passaporte ganhou o carimbo de', `<strong>${escape(edicao)}</strong>`, 'Entre no Meu passaporte para ver seus carimbos,<br>pontos e missões.'], botao: { texto: 'Ver meu passaporte', href: MEU } }) };
+    return { assunto: '📮 Novo carimbo no seu passaporte ComuniCALI', html: layoutSimples({ titulo: '📮 Novo carimbo', imagem: carimbo ? new URL(carimbo, 'https://comuni.calirh.com').href : undefined, saudacao, linhas: ['Que bom ter você com a gente!', 'Seu passaporte ganhou o carimbo de', `<strong>${escape(edicao)}</strong>`, 'Entre no Meu passaporte para ver seus carimbos,<br>milhas e missões.'], botao: { texto: 'Ver meu passaporte', href: MEU } }) };
   }
   const [, quem, perfil, recado] = aviso.texto.match(/^(.+?) indicou o perfil de (.+?) para você\.(?: "(.*)")?$/) || [];
   return { assunto: `👤 ${quem || 'Alguém'} indicou um perfil para você`, html: layoutSimples({ titulo: '👤 Perfil indicado', saudacao, linhas: [`<strong>${escape(quem || 'Alguém da Rede')}</strong> indicou um perfil para você:`, `<strong>${escape(perfil || 'um membro da comunidade')}</strong>`, ...(recado ? [`<em>"${escape(recado)}"</em>`] : []), 'Abra seu passaporte para ver o perfil<br>e se conectar.'], botao: { texto: 'Ver o perfil', href: MEU } }) };

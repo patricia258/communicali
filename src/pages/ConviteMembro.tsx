@@ -108,7 +108,7 @@ function CartaoConvite({ nome, codigo, fechar }: { nome: string; codigo: string;
     if (event.shiftKey && document.activeElement === primeiro) { event.preventDefault(); ultimo?.focus(); }
     else if (!event.shiftKey && document.activeElement === ultimo) { event.preventDefault(); primeiro?.focus(); }
   }}><div className="passe__janela">
-    <h2>Seu cartão de convite</h2>
+    <h2>Convide para essa experiência</h2>
     {url ? <img className="passe__previa" src={url} alt={`Convite ${codigo} com QR para inscrição no próximo encontro`} /> : !erro && <p role="status">Montando seu cartão…</p>}
     {erro && <p className="passe__erro" role="alert">{erro}</p>}
     {!arquivo && erro && <button type="button" className="passe__botao" onClick={() => setTentativa((n) => n + 1)}>Tentar novamente</button>}

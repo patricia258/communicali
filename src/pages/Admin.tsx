@@ -237,7 +237,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
   }
 
   async function removeCheckin(person: Attendee) {
-    if (!window.confirm(`Tirar a presença de ${person.members.nome}? Os pontos desta edição saem junto.`)) return;
+    if (!window.confirm(`Tirar a presença de ${person.members.nome}? As milhas desta edição saem junto.`)) return;
     const { data: row } = await supabase.from('checkins').select('member_id').eq('id', person.id).single();
     await supabase.from('point_events').delete().eq('member_id', row?.member_id).eq('edition_id', edition.id).eq('acao', 'presenca');
     await supabase.from('checkins').delete().eq('id', person.id);
@@ -246,7 +246,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
 
   async function manualCheckin() {
     const email = window.prompt('E-mail do membro para registrar a presença:');
-    if (!email || !window.confirm(`Registrar presença de ${email} em ${edition.titulo}? Soma 10 pontos se ainda não tiver presença.`)) return;
+    if (!email || !window.confirm(`Registrar presença de ${email} em ${edition.titulo}? Soma 10 milhas se ainda não tiver presença.`)) return;
     const { error } = await supabase.rpc('admin_checkin_manual', { p_edition: edition.id, p_email: email });
     setNote(error ? error.message : 'Presença registrada.');
     await loadPeople();

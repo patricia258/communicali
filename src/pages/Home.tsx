@@ -43,7 +43,7 @@ const FAQ = [
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
   ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
-  ['Como acompanho minha participação?', 'Depois do primeiro encontro presencial, você entra no seu passaporte online com o e-mail do check-in e acompanha carimbos, pontos, missões, indicações e fotos.'],
+  ['Como acompanho minha participação?', 'Depois do primeiro encontro presencial, você entra no seu passaporte online com o e-mail do check-in e acompanha carimbos, milhas, missões, indicações e fotos.'],
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
@@ -72,7 +72,7 @@ function Arches({ photos }: { photos: Photo[] }) {
 
 const TRILHA = [
   ['visitante', 'Visitante', 'Quem chega pelo grupo ou pela inscrição em um encontro.'],
-  ['membro', 'Membro', 'Quem esteve presencialmente e começa a somar pontos.'],
+  ['membro', 'Membro', 'Quem esteve presencialmente e começa a somar milhas.'],
   ['conector', 'Conector', 'Quem aproxima pessoas e cumpre as missões de conexão.'],
   ['embaixador', 'Embaixador', 'Quem traz parceiros e representa a comunidade.'],
 ];
@@ -152,7 +152,7 @@ export function Home() {
         <div className="wrap hero__body">
           <p className="hero__sign">Café & Pessoas</p>
           <h1>Falar de pessoas <em>pode mudar o mundo.</em></h1>
-          <p className="hero__text">Uma comunidade para quem se interessa por gente, gestão e desenvolvimento humano, com pessoas do Brasil inteiro e encontros presenciais.</p>
+          <p className="hero__text">Cada pessoa chega com sua própria bagagem. Quando histórias diferentes se encontram, novos caminhos aparecem.</p>
           <div className="hero__actions">
             <a className="pill pill--large" href={joinHref}>Registrar interesse</a>
             <a className="link" href="#proximo">Ver a agenda</a>
@@ -218,6 +218,7 @@ export function Home() {
             </article>
           ))}
         </div>
+        <p className="trilha__texto">Seu Passaporte acompanha a jornada.<br />Os encontros vividos deixam <strong>carimbos</strong>. As contribuições reconhecidas recebem <strong>selos</strong>.<br />E a sua participação vira <strong>milhas</strong>, uma história que segue com você.</p>
         <a className="link" href="/meu-espaco">Já sou membro, quero entrar</a>
       </section>
 

@@ -22,7 +22,7 @@ function Success({ done }: { done: Done }) {
         <img className="pass__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
         <h1>Presença confirmada!</h1>
         <p className="pass__lead">Parabéns! Você faz parte da ComuniCALI.</p>
-        {done.repetido ? <p className="pass__hint">Sua presença neste encontro já estava registrada.</p> : <p className="pass__hint">Você conquistou 10 pontos pela participação neste encontro.</p>}
+        {done.repetido ? <p className="pass__hint">Sua presença neste encontro já estava registrada.</p> : <p className="pass__hint">Você conquistou 10 milhas pela participação neste encontro.</p>}
         <dl className="pass__data">
           <div><dt>Nome</dt><dd>{done.nome}</dd></div>
           <div><dt>Categoria</dt><dd>{CATEGORIAS[done.categoria] || done.categoria}</dd></div>

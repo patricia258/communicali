@@ -160,7 +160,7 @@ function Entrar() {
         <section className="passe__acesso">
           <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
           <h1>Seu passaporte está <em>te esperando</em></h1>
-          <p>{enviado ? `Enviamos um código para ${email.trim()}. Ele chega em instantes.` : 'Carimbos, pontos, missões e conexões da comunidade em um só lugar.'}</p>
+          <p>{enviado ? `Enviamos um código para ${email.trim()}. Ele chega em instantes.` : 'Carimbos, milhas, missões e conexões da comunidade em um só lugar.'}</p>
           <form className="passe__form" onSubmit={(event) => void enviar(event)}>
             {enviado
               ? <label>Código recebido<input required inputMode="numeric" autoComplete="one-time-code" autoFocus value={codigo} onChange={(event) => setCodigo(event.target.value)} /></label>
@@ -275,7 +275,7 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
         </div>
         <img className="passe__heroi-selo" src={`/selos/postal-${m.categoria === 'organizador' ? 'fundadora' : m.categoria}.png`} alt={`Selo ${NIVEIS[m.categoria] || m.categoria}`} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
         <div className="passe__heroi-pontos">
-          <p className="passe__numero"><strong>{espaco.pontos}</strong> pontos{meta ? <>, <b>{faltam ? `faltam ${faltam} para ${meta.nome}` : `pontos alcançados para ${meta.nome}`}</b></> : ''}</p>
+          <p className="passe__numero"><strong>{espaco.pontos}</strong> milhas{meta ? <>, <b>{faltam ? `faltam ${faltam} para ${meta.nome}` : `milhas alcançadas para ${meta.nome}`}</b></> : ''}</p>
           <div className="passe__barra" aria-hidden="true">
             {Array.from({ length: 10 }, (_, indice) => <span key={indice} className={`c${Math.min(Math.floor(indice / 2), 3)}`} style={{ '--fill': `${Math.max(Math.min(preenchidos - indice, 1), 0) * 100}%` } as React.CSSProperties} />)}
           </div>
@@ -316,7 +316,7 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
         </section>
       )}
       <section className="passe__carimbos passe__pagina">
-        <h2>Meus carimbos</h2>
+        <h2>Carimbos dos encontros</h2>
         <div className="passe__rolagem">
           {espaco.carimbos.map((carimbo, indice) => <CarimboEdicao key={carimbo.slug} carimbo={carimbo} indice={indice} />)}
           <div className="passe__vago">próximo<br />encontro</div>
@@ -359,13 +359,14 @@ function organizarAgenda(espaco: Espaco, publicadas: EncontroAgenda[], hoje: str
 }
 
 const MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-function EncontroCartao({ edicao, proximo, carregando, erro, estive = false }: { edicao: EncontroAgenda; proximo: boolean; carregando: boolean; erro: boolean; estive?: boolean }) {
+function EncontroCartao({ edicao, proximo, carregando, erro, estive = false, embarque = false }: { edicao: EncontroAgenda; proximo: boolean; carregando: boolean; erro: boolean; estive?: boolean; embarque?: boolean }) {
   const [, mes, dia] = edicao.data_evento.split('-');
   const fotos = linkEncontro(edicao.fotos_url);
   const inscricao = edicao.inscricoes_abertas ? linkEncontro(edicao.inscricao_url) || `/inscricao/${encodeURIComponent(edicao.slug)}` : '';
   return (
     <article className={`passe__agenda-cartao${proximo ? ' passe__agenda-cartao--proximo' : ''}${estive ? ' is-estive' : ''}`}>
       <div className="passe__agenda-data" aria-hidden="true"><strong>{dia}</strong><span>{MESES[Number(mes) - 1]}</span></div>
+      {embarque && !estive && <span className="passe__agenda-embarque"><small>Cartão de embarque</small>Inscrição confirmada</span>}
       {estive && <span className="passe__agenda-carimbado" aria-label="Você esteve neste encontro">Carimbado</span>}
       <div className="passe__agenda-cabecalho">
         {edicao.capa_url && <img className="passe__agenda-capa" src={edicao.capa_url} alt={`Local: ${edicao.local}`} loading="lazy" />}
@@ -412,6 +413,8 @@ function Edicoes({ espaco }: { espaco: Espaco }) {
   const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
   const { proximos, anteriores } = organizarAgenda(espaco, publicadas, hoje);
   const carimbados = new Set(espaco.carimbos.map((item) => item.slug));
+  const [confirmadas, setConfirmadas] = useState<string[]>([]);
+  useEffect(() => { void supabase.rpc('communicali_minhas_inscricoes').then(({ data }) => setConfirmadas((data as string[]) || [])); }, []);
   return (
     <>
       <header className="passe__agenda-titulo"><CalendarDays size={28} aria-hidden="true" /><h1>Edições</h1></header>
@@ -419,8 +422,8 @@ function Edicoes({ espaco }: { espaco: Espaco }) {
       {carregando && <p className="passe__aviso" role="status">Atualizando a agenda…</p>}
       {erro && <div className="passe__agenda-erro" role="alert"><p>Não foi possível atualizar a agenda. Os encontros já carregados continuam disponíveis.</p><button type="button" className="passe__link" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
       <section className="passe__agenda-grupo" aria-labelledby="agenda-proximos">
-        <h2 id="agenda-proximos">Próximos encontros</h2>
-        {proximos.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo carregando={carregando} erro={erro} estive={carimbados.has(edicao.slug)} />)}
+        <h2 id="agenda-proximos">Sua próxima escala</h2>
+        {proximos.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo carregando={carregando} erro={erro} estive={carimbados.has(edicao.slug)} embarque={confirmadas.includes(edicao.slug)} />)}
         {!proximos.length && !carregando && !erro && <p className="passe__aviso">Nenhum próximo encontro anunciado.</p>}
       </section>
       <section className="passe__agenda-grupo" aria-labelledby="agenda-anteriores">
@@ -492,7 +495,7 @@ function CartaoMissao({ missao, recarregar, liberada, comoMembro, abrirPrograma 
           <p>{missao.descricao}</p>
         </div>
       </div>
-      {bloqueada && <div className="passe__missao-requisito"><p>Libera no nível Conector: 60 pontos, 4 encontros e 1 contribuição de conexão. A organização confirma a mudança de nível.</p><button type="button" className="passe__link" onClick={abrirPrograma}>Ver requisitos do programa</button></div>}
+      {bloqueada && <div className="passe__missao-requisito"><p>Libera no nível Conector: 60 milhas, 4 encontros e 1 contribuição de conexão. A organização confirma a mudança de nível.</p><button type="button" className="passe__link" onClick={abrirPrograma}>Ver requisitos do programa</button></div>}
       {podeEnviar && !abrindo && <button type="button" className="passe__botao passe__botao--terra" onClick={() => setAbrindo(true)}>Enviar para análise</button>}
       {podeEnviar && abrindo && (
         <form className="passe__form" onSubmit={(event) => void enviar(event)}>
@@ -523,9 +526,9 @@ function Missoes({ espaco, recarregar, comoMembro, abrirPrograma }: { espaco: Es
   return (
     <>
       <header className="passe__missoes-titulo"><Target size={28} aria-hidden="true" /><h1>Missões</h1></header>
-      <p className="passe__missoes-intro">Cada missão cumprida vira um selo no seu passaporte e soma pontos no programa.</p>
+      <p className="passe__missoes-intro">Cada missão cumprida vira um selo no seu passaporte e soma milhas na sua jornada.</p>
       <div className="passe__missoes-progresso" aria-label="Seu progresso nas missões">
-        <strong>{concluidas}<span> de {espaco.missoes.length}</span></strong><small>missões concluídas</small>
+        <strong>{concluidas}<span> de {espaco.missoes.length}</span></strong><small>selos de contribuição conquistados</small>
         <div className="passe__missoes-barra"><i style={{ width: `${espaco.missoes.length ? (concluidas / espaco.missoes.length) * 100 : 0}%` }} /></div>
       </div>
       {podeSimular && !comoMembro && <label className="passe__previa-missoes">Visualização<select value={previa} onChange={(event) => setPrevia(event.target.value as typeof previa)}><option value="minhas">Minhas missões</option><option value="membro">Prévia: Membro</option><option value="conector">Prévia: Conector</option></select></label>}
@@ -551,7 +554,7 @@ function Indicar({ espaco, extra, recarregar }: { espaco: Espaco; extra: Extra |
     const { error } = await supabase.rpc('communicali_recomendar', { p_tipo: frente, p_nome: form.nome, p_instagram: form.instagram, p_linkedin: form.linkedin, p_telefone: form.telefone, p_pessoa: form.pessoa });
     if (error) { setErro(errorMessage(error)); return; }
     setForm({ nome: '', instagram: '', linkedin: '', telefone: '', pessoa: '' });
-    setAviso('Recomendação enviada. Os pontos entram depois da validação da organização.');
+    setAviso('Recomendação enviada. As milhas entram depois da validação da organização.');
     recarregar();
   }
 
@@ -581,7 +584,7 @@ function Indicar({ espaco, extra, recarregar }: { espaco: Espaco; extra: Extra |
       {frente === 'visitantes' ? (
         <>
           <ConviteMembro nome={espaco.membro!.nome} codigoAtual={espaco.membro!.codigo} recarregar={recarregar} />
-          <p><strong>A indicação só vale se a pessoa comparecer.</strong> A equipe avalia cada inscrição, e os 5 pontos entram depois do check-in. Quando ela for aprovada, você recebe as orientações para recebê-la no encontro.</p>
+          <p><strong>A indicação só vale se a pessoa comparecer.</strong> A equipe avalia cada inscrição, e as 5 milhas entram depois do check-in. Quando ela for aprovada, você recebe as orientações para recebê-la no encontro.</p>
           <form className="passe__form passe__cartao" onSubmit={(event) => void indicar(event)}>
             <h2>Indicar uma pessoa</h2>
             <label>Nome completo<input required value={pessoa.nome} onChange={(event) => setPessoa({ ...pessoa, nome: event.target.value })} /></label>
@@ -631,8 +634,8 @@ function Programa({ espaco, extra, compartilhar, comoMembro, setComoMembro, verP
     <>
       <TrilhaPrograma categoria={categoria} previa={comoMembro} />
       <section className="passe__cartao">
-        <h2>Minha pontuação</h2>
-        <p className="passe__numero"><strong>{espaco.pontos}</strong> pontos no total</p>
+        <h2>Minhas milhas</h2>
+        <p className="passe__numero"><strong>{espaco.pontos}</strong> milhas no total</p>
         <div className="passe__resumo">
           {RESUMO.map(([id, nome, prefixos]) => {
             const itens = extrato.filter((item) => prefixos.split('|').some((prefixo) => item.acao.startsWith(prefixo)));
@@ -646,11 +649,11 @@ function Programa({ espaco, extra, compartilhar, comoMembro, setComoMembro, verP
         <div className="passe__rota">
         {extrato.map((item, indice) => <div className="passe__ponto" key={`${item.acao}-${indice}`}><span><small>{item.data.split('-').reverse().join('/')}</small>{ROTULO(item.acao, item.titulo)}{item.motivo && item.motivo !== 'Demonstração' ? `: ${item.motivo}` : ''}</span><strong>+{item.pontos}</strong></div>)}
         </div>
-        {!extrato.length && <p className="passe__aviso">Seus pontos aparecem aqui.</p>}
+        {!extrato.length && <p className="passe__aviso">Suas milhas aparecem aqui.</p>}
       </details>
       <RelatoImpacto />
       <section className="passe__cartao">
-        <h2>Como ganhar pontos</h2>
+        <h2>Como ganhar milhas</h2>
         {PONTOS.map(([texto, valor]) => <div className="passe__ponto" key={texto}><span>{texto}</span><strong>+{valor}</strong></div>)}
       </section>
       {fundadora && (
@@ -926,7 +929,7 @@ function RedeBloqueada({ total, abrir }: { total: number; abrir: () => void }) {
         <div className="passe__bloqueio-texto">
           <svg className="passe__cadeado passe__cadeado--grande" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
           <h2>A Rede abre em Conector</h2>
-          <p>{total > 1 ? `${total} pessoas e parceiros` : 'Pessoas e parceiros'} esperam por você aqui. Continue somando pontos e cumprindo missões.</p>
+          <p>{total > 1 ? `${total} pessoas e parceiros` : 'Pessoas e parceiros'} esperam por você aqui. Continue somando milhas e cumprindo missões.</p>
           <button type="button" className="passe__botao" onClick={abrir}>Ver como chegar</button>
         </div>
       </section>
@@ -1027,7 +1030,7 @@ export function MeuEspaco() {
     <Pagina>
       <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
       <h1>Seu passaporte abre no primeiro encontro</h1>
-      <p>Quem participa de um encontro presencial se torna membro. Depois do check-in, este espaço libera seus carimbos, pontos e missões.</p>
+      <p>Quem participa de um encontro presencial se torna membro. Depois do check-in, este espaço libera seus carimbos, milhas e missões.</p>
       <a className="passe__botao" href="/#proximo">Ver o próximo encontro</a>
       <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
     </Pagina>
