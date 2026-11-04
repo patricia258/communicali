@@ -212,3 +212,7 @@ html:has(.legal),body:has(.legal){background:#1F0E14}
 .euvou__redes{display:flex;gap:8px}
 .euvou__redes button{flex:1;min-height:42px;border:1px solid rgba(247,240,234,.25);border-radius:10px;background:transparent;color:#F7F0EA;font:600 14px Inter,sans-serif;cursor:pointer}
 .euvou__redes button.is-on{border-color:#DDB160;background:rgba(221,177,96,.16);color:#DDB160}
+.euvou__formatos{display:flex;gap:6px;padding:4px;border-radius:12px;background:rgba(247,240,234,.06)}
+.euvou__formatos button{flex:1;min-height:38px;border:0;border-radius:9px;background:transparent;color:#CBB9B1;font:600 13px Inter,sans-serif;cursor:pointer}
+.euvou__formatos button.is-on{background:#DDB160;color:#22100F}
+.euvou__card--story{width:72%;justify-self:center}

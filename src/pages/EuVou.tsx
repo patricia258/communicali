@@ -22,13 +22,16 @@ export function EuVou() {
   const [identidade, setIdentidade] = useState<Record<string, string>>(CODIGO ? { c: CODIGO } : {});
   const [redes, setRedes] = useState<string[]>([]);
   const [mimo, setMimo] = useState<'' | 'enviando' | 'ok' | 'erro'>('');
+  // Feed e LinkedIn em 4:5; story do Instagram em 9:16, com a mesma arte.
+  const [formato, setFormato] = useState<'feed' | 'story'>('feed');
+  const [fotoPropria, setFotoPropria] = useState<string | null | undefined>(undefined);
 
-  async function montar(resposta: Resposta, foto?: string | null) {
+  async function montar(resposta: Resposta, foto?: string | null, qual: 'feed' | 'story' = formato) {
     if (!resposta.encontrado || !resposta.edicao) { setEstado(resposta.motivo === 'sem_encontro' ? 'erro' : 'nao'); return; }
     setDados(resposta);
     const { edicao } = resposta;
     const frase = edicao.numero === 1 ? 'Vou estar no primeiro encontro da ComuniCALI.' : 'Vou estar no próximo encontro da ComuniCALI.';
-    const blob = await gerarCartaoEuVou(resposta.nome || '', foto === undefined ? resposta.foto || null : foto, { titulo: edicao.titulo, data: longDate(edicao.data_evento), local: edicao.local }, frase);
+    const blob = await gerarCartaoEuVou(resposta.nome || '', foto === undefined ? resposta.foto || null : foto, { titulo: edicao.titulo, data: longDate(edicao.data_evento), local: edicao.local }, frase, qual);
     setCard((anterior) => { if (anterior) URL.revokeObjectURL(anterior.url); return { blob, url: URL.createObjectURL(blob) }; });
     setEstado('pronto');
   }
@@ -44,13 +47,13 @@ export function EuVou() {
 
   async function compartilhar() {
     if (!card) return;
-    const arquivo = new File([card.blob], 'eu-vou-comunicali.png', { type: 'image/png' });
+    const arquivo = new File([card.blob], formato === 'story' ? 'eu-vou-comunicali-story.png' : 'eu-vou-comunicali.png', { type: 'image/png' });
     if (navigator.canShare?.({ files: [arquivo] })) { await navigator.share({ files: [arquivo], title: 'Eu vou!' }).catch(() => null); return; }
     baixar();
   }
   function baixar() {
     if (!card) return;
-    const link = document.createElement('a'); link.href = card.url; link.download = 'eu-vou-comunicali.png'; link.click();
+    const link = document.createElement('a'); link.href = card.url; link.download = formato === 'story' ? 'eu-vou-comunicali-story.png' : 'eu-vou-comunicali.png'; link.click();
   }
   async function compartilhei() {
     setMimo('enviando');
@@ -65,7 +68,7 @@ export function EuVou() {
   function trocarFoto(arquivo?: File) {
     if (!arquivo || !dados) return;
     const leitor = new FileReader();
-    leitor.onload = () => void montar(dados, String(leitor.result));
+    leitor.onload = () => { setFotoPropria(String(leitor.result)); void montar(dados, String(leitor.result)); };
     leitor.readAsDataURL(arquivo);
   }
 
@@ -88,7 +91,12 @@ export function EuVou() {
         {estado === 'erro' && <p className="notice notice--alert">Não foi possível criar o card agora. Tente de novo em instantes.</p>}
         {estado === 'pronto' && card && <>
           <h1>Oi, {dados?.nome}! <em>Seu card está pronto.</em></h1>
-          <img className="euvou__card" src={card.url} alt="Seu card Eu vou!" />
+          <div className="euvou__formatos" role="group" aria-label="Formato do card">
+            {([['feed', 'Feed e LinkedIn'], ['story', 'Story do Instagram']] as const).map(([valor, rotulo]) => (
+              <button key={valor} type="button" className={formato === valor ? 'is-on' : ''} aria-pressed={formato === valor} onClick={() => { if (formato === valor || !dados) return; setFormato(valor); void montar(dados, fotoPropria, valor); }}>{rotulo}</button>
+            ))}
+          </div>
+          <img className={`euvou__card${formato === 'story' ? ' euvou__card--story' : ''}`} src={card.url} alt="Seu card Eu vou!" />
           <button className="button" type="button" onClick={() => void compartilhar()}>Compartilhar</button>
           <button className="button button--linha" type="button" onClick={baixar}>Baixar imagem</button>
           <label className="euvou__trocar">Usar outra foto<input type="file" accept="image/*" hidden onChange={(event) => trocarFoto(event.target.files?.[0])} /></label>

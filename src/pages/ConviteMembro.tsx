@@ -202,14 +202,17 @@ function carimboGasto(semente: string) {
   return tela;
 }
 
-export async function gerarCartaoEuVou(nome: string, foto: string | null, encontro: { titulo: string; data: string; local: string }, frase = 'Vou estar no próximo encontro da ComuniCALI.'): Promise<Blob> {
+export async function gerarCartaoEuVou(nome: string, foto: string | null, encontro: { titulo: string; data: string; local: string }, frase = 'Vou estar no próximo encontro da ComuniCALI.', formato: 'feed' | 'story' = 'feed'): Promise<Blob> {
   await Promise.all([document.fonts.load('700 72px "Funnel Display"'), document.fonts.load('400 36px Inter'), document.fonts.load('600 32px Inter'), document.fonts.load('700 20px Inter')]);
   const [logo, retrato] = await Promise.all([imagem('/brand/communicali-branco.png'), foto ? imagem(foto).catch(() => null) : Promise.resolve(null)]);
-  const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1350;
+  // Story (1080x1920): a mesma arte do feed, centralizada, longe das áreas que o Instagram cobre no topo e embaixo.
+  const story = formato === 'story'; const altura = story ? 1920 : 1350;
+  const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = altura;
   const c = canvas.getContext('2d'); if (!c) throw new Error('canvas');
-  const fundo = c.createLinearGradient(0, 0, 0, 1350); fundo.addColorStop(0, '#2A151C'); fundo.addColorStop(1, '#1F0E14');
-  c.fillStyle = fundo; c.fillRect(0, 0, 1080, 1350);
+  const fundo = c.createLinearGradient(0, 0, 0, altura); fundo.addColorStop(0, '#2A151C'); fundo.addColorStop(1, '#1F0E14');
+  c.fillStyle = fundo; c.fillRect(0, 0, 1080, altura);
   [['#7A1F3D', 0], ['#A9502E', 270], ['#C9973B', 540], ['#5F6238', 810]].forEach(([cor, x]) => { c.fillStyle = cor as string; c.fillRect(x as number, 0, 270, 12); });
+  if (story) c.translate(0, (1920 - 1350) / 2);
   // Rota pontilhada ao fundo, discreta.
   c.strokeStyle = 'rgba(221,177,96,.18)'; c.lineWidth = 3; c.setLineDash([2, 14]);
   c.beginPath(); c.moveTo(-20, 760); c.bezierCurveTo(260, 620, 820, 900, 1100, 700); c.stroke(); c.setLineDash([]);

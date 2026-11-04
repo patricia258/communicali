@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (5) | Card também em story
+- `/eu-vou`: escolha "Feed e LinkedIn" (1080x1350) ou "Story do Instagram" (1080x1920). O story usa a mesma arte, centralizada, deixando livres o topo e a base que o Instagram cobre. A foto escolhida no aparelho vale para os dois formatos.
+- PENDENTE combinado com a Patrícia: voltar à apresentação do Canva (fluxo dos slides e o slide da votação) depois do trabalho do card.
+
 ### 2026-11-05 (4) | Mimo em destaque e retirada pela lista
 - E-mail do card: o mimo vai num cartão destacado (`destaque` no `layout`), antes do botão "Criar meu card", com o passo "toque em Já compartilhei".
 - Retirada pela lista: ninguém precisa mostrar o post; o "Já compartilhei" coloca o nome na lista do painel (Mimos), onde a recepção marca a entrega. Textos da página e do painel ajustados. Teste reenviado para pclazumi@gmail.com; lote não enviado.
