@@ -129,11 +129,15 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — fotos, acesso de membro e animações
+- Fotos livres do Unsplash (licença gratuita) em `public/fotos/home/`: reuniao, virtual, palestra, jantar e experiencia no mosaico do topo; presencial, virtual, experiencia e jantar nas capas de "Sua próxima escala". IDs: 1542744173, 1588196749597, 1540575467063, 1581954548122, 1544928147, 1517048676732.
+- "Já sou membro" no topo do site, ao lado de "Registrar interesse"; saiu o link do fim da seção do passaporte. A trilha mostra só os selos (o texto embaixo repetia o selo).
+- Animações: entrada do topo, seções e cartões aparecem em sequência ao rolar (IntersectionObserver, classes `revelar`/`visivel`), tickets e capas reagem ao mouse, rolagem suave; tudo desligado com "reduzir movimento".
+
 ### 03/11/2026, Claude Code — home em nova ordem e ticket convencional
 - **Modelo de ticket de Patrícia:** quando ela diz "ticket" é o ingresso convencional, com bordas recortadas em meia-lua, moldura interna, estrelas e numeração lateral, em cor invertida (mostarda com texto vinho). Classe `.ticket` em `src/home.css`. Usado nos números do topo e em Carimbos, Selos e Milhas (com ícones Stamp, Award e Route).
 - Nova ordem da home: Hero → números → A comunidade → Comece a sua jornada → Sua próxima escala (formatos com capa) → Seu passaporte → Agenda "Próximo check-in" → Apoie este encontro → logos de quem apoia → Dúvidas.
 - Texto da comunidade com palavras-chave destacadas em mostarda.
-- Fotos dos formatos e do topo ainda são as neutras; Patrícia vai mandar exemplos (reunião online, presencial, palestra, experiências, almoço e jantar).
 
 ### 03/11/2026, Claude Code — home: tickets, comunidade e formatos de encontro
 - Números do topo (+300, 1ª edição, Brasil) em formato de ticket (recortes laterais e linha picotada). Cartão da fundadora com carimbo "ComuniCALI · Idealizadora" sobre a foto, no lugar das pílulas.
