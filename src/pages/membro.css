@@ -689,4 +689,22 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__heroi-temas span{display:inline-block;padding:6px 12px}
 /* Aplicativo na tela inicial: respeita a área da barra de gestos do iPhone. */
 @media (display-mode:standalone){body{overscroll-behavior:none}}
-@media (display-mode:standalone){.passe__menu{bottom:calc(10px + env(safe-area-inset-bottom))}}
+
+/* Perfil (04/11): sem etiqueta de categoria (o selo já diz); pílulas numa linha só, embaixo da foto, de ponta a ponta.
+   A linha tem altura fixa: a pílula que não cabe inteira desce e fica escondida. */
+.passe__heroi-temas{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:flex-start;gap:6px;height:32px;margin:0;overflow:hidden}
+.passe__heroi-temas span{flex:none;box-sizing:border-box;height:32px;display:inline-flex;align-items:center;padding:0 14px;font-size:13px}
+@media (max-width:420px){.passe__heroi-temas{justify-content:flex-start}}
+
+/* Tela entra de uma vez, sem blocos caindo um a um. */
+.passe__tela>*,.passe__tela>*:nth-child(n){animation:none}
+.passe__tela{animation:passe-aparece .22s ease-out both}
+@keyframes passe-aparece{from{opacity:0}to{opacity:1}}
+
+/* Aplicativo na tela inicial: faixa sólida atrás do relógio e da bateria, e menu perto da borda de baixo. */
+@media (display-mode:standalone){
+  html,body{background:#1F0E14}
+  body{padding-top:env(safe-area-inset-top)}
+  body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#1F0E14;z-index:150}
+  .passe__menu{bottom:max(8px,calc(env(safe-area-inset-bottom) - 14px))}
+}

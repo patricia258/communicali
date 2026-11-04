@@ -8,6 +8,11 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (tarde) | Perfil e modo aplicativo
+- Perfis (o próprio e o da Rede): saiu a etiqueta de categoria (FUNDADORA, CONECTOR...); o selo representa a pessoa e ganhou texto alternativo. Pílulas de temas/segmento numa linha só, embaixo da foto, de ponta a ponta do cartão; até 3, e a que não cabe inteira fica escondida (linha de altura fixa).
+- Telas da área do membro entram com um fade único de 0,22s, sem blocos caindo um a um.
+- Modo aplicativo (display-mode standalone): faixa sólida #1F0E14 atrás da barra de status (antes o topo ficava borrado) e menu inferior mais perto da borda.
+
 ### 2026-11-04 | Aplicativo na tela inicial (PWA) e pílulas
 - `public/manifest.webmanifest` (display standalone, início em /meu-passaporte, cores #1F0E14) e ícones em `public/app/` feitos a partir de `communicali-materiais/whatsapp/communicali-perfil-whatsapp.png`. `index.html`: manifest, apple-touch-icon, apple-mobile-web-app-capable, título ComuniCALI, barra de status preta, viewport-fit=cover. Menu inferior respeita a barra de gestos no modo aplicativo.
 - Quem já salvou o atalho antes precisa apagar e adicionar de novo para abrir em tela cheia.

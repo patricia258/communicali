@@ -268,11 +268,10 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
           {m.foto_url ? <FotoSelo url={m.foto_url} nome={m.nome} aberto={cartao?.aberto_trabalho} recruta={cartao?.recrutador} tamanho={116} /> : <button type="button" className="passe__heroi-sem-foto" onClick={() => abrir('perfil')}>Colocar foto</button>}
         </div>
         <div className="passe__heroi-texto">
-          <span className="passe__heroi-nivel">{NIVEIS[m.categoria] || m.categoria}</span>
           <h2>{m.nome}</h2>
           {(cartao?.cargo || cartao?.empresa) && <p>{[cartao.cargo, cartao.empresa].filter(Boolean).join(' · ')}</p>}
-          {!!cartao?.temas?.length && <div className="passe__heroi-temas">{cartao.temas.slice(0, 3).map((tema) => <span key={tema}>{tema}</span>)}</div>}
         </div>
+        {!!cartao?.temas?.length && <div className="passe__heroi-temas">{cartao.temas.slice(0, 3).map((tema) => <span key={tema}>{tema}</span>)}</div>}
         <img className="passe__heroi-selo" src={`/selos/postal-${m.categoria === 'organizador' ? 'fundadora' : m.categoria}.png`} alt={`Selo ${NIVEIS[m.categoria] || m.categoria}`} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
         <div className="passe__heroi-pontos">
           <p className="passe__numero"><strong>{espaco.pontos}</strong> milhas{meta ? <>, <b>{faltam ? `faltam ${faltam} para ${meta.nome}` : `milhas alcançadas para ${meta.nome}`}</b></> : ''}</p>
@@ -871,13 +870,12 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar, outras = [] }: 
       <section className="passe__heroi passe__heroi--perfil" aria-label={`Perfil de ${pessoa.nome}`}>
         <div className="passe__heroi-foto"><FotoSelo url={pessoa.foto_url} nome={pessoa.nome} aberto={pessoa.aberto_trabalho} recruta={pessoa.recrutador} tamanho={116} /></div>
         <div className="passe__heroi-texto">
-          <span className="passe__heroi-nivel">{NIVEIS[pessoa.categoria] || pessoa.categoria}</span>
           <h2>{pessoa.nome}</h2>
           {(pessoa.cargo || pessoa.empresa) && <p>{[pessoa.cargo, pessoa.empresa].filter(Boolean).join(' · ')}</p>}
           {(pessoa.cidade_uf || pessoa.regiao) && <p>{pessoa.cidade_uf || pessoa.regiao}</p>}
-          {pessoa.segmento && <div className="passe__heroi-temas"><span>{pessoa.segmento}</span></div>}
         </div>
-        <img className="passe__heroi-selo" src={`/selos/postal-${pessoa.categoria === 'organizador' ? 'fundadora' : pessoa.categoria}.png`} alt="" onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+        {pessoa.segmento && <div className="passe__heroi-temas"><span>{pessoa.segmento}</span></div>}
+        <img className="passe__heroi-selo" src={`/selos/postal-${pessoa.categoria === 'organizador' ? 'fundadora' : pessoa.categoria}.png`} alt={`Selo ${NIVEIS[pessoa.categoria] || pessoa.categoria}`} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
       </section>
       {!eu && (conexao
         ? <p className="passe__ok" role="status">{conexao}</p>
