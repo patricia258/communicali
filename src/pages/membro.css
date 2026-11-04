@@ -681,3 +681,12 @@ img.passe__carimbo{transform:rotate(-8deg)}
 @keyframes selo-gira-entra{from{transform:perspective(1200px) rotateY(-90deg);visibility:hidden}to{transform:perspective(1200px) rotateY(0);visibility:visible}}
 @media (prefers-reduced-motion:reduce){.selo-zoom,.selo-zoom__giro,.selo-zoom__verso{animation:none}.selo-zoom__frente{animation:none;visibility:hidden}}
 .passe__validade{margin:0;padding:10px 12px;border-left:3px solid #C9973B;border-radius:6px;background:#FBF3EA;font-size:13px;line-height:1.6;color:#5A4740}
+/* Janelas abrem direto no body (portal): levam a fonte da área do membro e cobrem a tela inteira. */
+.passe__modal,.selo-zoom{color:#22100F;text-align:left;font:400 15px/1.5 Inter,Helvetica,Arial,sans-serif}
+.passe__modal{z-index:300}
+/* Pílulas nunca quebram em duas linhas. */
+.passe__temas button,.passe__temas span,.passe__heroi-temas span{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.passe__heroi-temas span{display:inline-block;padding:6px 12px}
+/* Aplicativo na tela inicial: respeita a área da barra de gestos do iPhone. */
+@media (display-mode:standalone){body{overscroll-behavior:none}}
+@media (display-mode:standalone){.passe__menu{bottom:calc(10px + env(safe-area-inset-bottom))}}

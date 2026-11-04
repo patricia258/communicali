@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 | Aplicativo na tela inicial (PWA) e pílulas
+- `public/manifest.webmanifest` (display standalone, início em /meu-passaporte, cores #1F0E14) e ícones em `public/app/` feitos a partir de `communicali-materiais/whatsapp/communicali-perfil-whatsapp.png`. `index.html`: manifest, apple-touch-icon, apple-mobile-web-app-capable, título ComuniCALI, barra de status preta, viewport-fit=cover. Menu inferior respeita a barra de gestos no modo aplicativo.
+- Quem já salvou o atalho antes precisa apagar e adicionar de novo para abrir em tela cheia.
+- Janela "Como foi conhecer..." e o selo ampliado do Programa abrem via portal no body (antes a janela ficava presa dentro do cartão, com fundo cinza parcial).
+- Pílulas (O que faz, Está buscando, segmento do perfil) não quebram mais em duas linhas.
+
 ### 2026-11-04 | Programa: selos que giram e abrem os detalhes
 - `TrilhaPrograma.tsx`: saiu o bloco "Conheça a trilha / Da primeira visita...". Cada etapa virou botão; ao tocar, o selo amplia, gira (frente até 90°, verso de -90° a 0, sem 3D real, porque o 3D achatava e espelhava o texto) e mostra no verso os requisitos (Doc Mestre v22, critérios v21), avaliação e aceite, revalidação anual e "Milhas sozinhas não mudam o nível". Fecha com X, Esc ou toque fora. Respeita movimento reduzido.
 - Cores: cartão do papel atual em vinho com borda dourada; números e linha da trilha em dourado; etapa atual com faixa dourada. Mais respiro entre ícones e textos (título, check dos requisitos, selo e texto).

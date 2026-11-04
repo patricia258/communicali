@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Flag, TrendingUp, X } from 'lucide-react';
 
 // Requisitos conforme o Documento Mestre v22 (critérios v21, confirmados em 03/11).
@@ -26,7 +27,7 @@ function SeloDetalhe({ etapa, estado, fechar }: { etapa: Etapa; estado: string; 
     window.addEventListener('keydown', tecla);
     return () => window.removeEventListener('keydown', tecla);
   }, [fechar]);
-  return (
+  return createPortal(
     <div className="selo-zoom" role="dialog" aria-modal="true" aria-label={`Etapa ${etapa.nome}`} onClick={fechar}>
       <div className="selo-zoom__cartao" onClick={(event) => event.stopPropagation()}>
         <div className="selo-zoom__giro">
@@ -42,7 +43,7 @@ function SeloDetalhe({ etapa, estado, fechar }: { etapa: Etapa; estado: string; 
           </div>
         </div>
       </div>
-    </div>
+    </div>, document.body
   );
 }
 

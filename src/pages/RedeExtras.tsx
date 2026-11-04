@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Copy, Globe, Mail } from 'lucide-react';
 import { supabase } from '../lib';
 
@@ -115,7 +116,7 @@ export function FeedbackPerfil({ membroId, proprio, nome = '' }: { membroId: str
         </ul>
       )}
       {dados.pode_comentar && !proprio && <button type="button" className="passe__reagir-abrir" onClick={abrir}>{dados.meu ? <>Trocar minha reação <span aria-hidden="true">{dados.meu.reacao}</span></> : <>Deixar uma reação <span aria-hidden="true">❤️ 🚀 👏</span></>}</button>}
-      {aberto && (
+      {aberto && createPortal(
         <div className="passe__modal" role="dialog" aria-modal="true" aria-label={`Reação para ${primeiro}`} onKeyDown={(event) => { if (event.key === 'Escape') setAberto(false); }}>
           <div className="passe__janela passe__reagir">
             {!confirmar ? <>
@@ -134,7 +135,7 @@ export function FeedbackPerfil({ membroId, proprio, nome = '' }: { membroId: str
             </>}
           </div>
         </div>
-      )}
+      , document.body)}
     </section>
   );
 }
