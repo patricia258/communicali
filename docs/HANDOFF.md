@@ -129,6 +129,12 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — refinamento do Meu espaço
+- Reações: nome e data em linhas separadas, botão discreto "Deixar uma reação ❤️ 🚀 👏". 18 reações de exemplo entre perfis @demo e no perfil contato@ (Patrícia); `scripts/demo.py limpar` agora apaga reações e auditoria antes dos membros demo.
+- Meu histórico e Minhas indicações viraram listas suspensas em formato de rota (linha pontilhada com pontos). Requisitos de Conector e Embaixador em itens separados com destaque.
+- Movimento: telas e cartões entram em sequência, botões respondem ao toque, listas abrem com animação, clique sonoro suave (WebAudio) em botões e listas; tudo desligado com "reduzir movimento" do aparelho. Conferido no celular com Conector de teste (removido).
+- Ideia em aberto para Patrícia: renomear "Meu espaço" para "Meu passaporte".
+
 ### 03/11/2026, Claude Code — selos nos e-mails
 - Selos redondos das missões gerados em imagem (`public/selos/missao-<slug>.png`, a partir do mesmo desenho do Meu espaço). E-mail de missão concluída mostra o selo da missão; e-mail de novo nível mostra o selo postal do nível.
 - Novo e-mail "Novo carimbo": gatilho em `checkins` cria alerta `carimbo` (exceto edições teste e demo) e `api/avisos.js` envia com a imagem de `editions.carimbo_url`. Migração `20261103260000`. Publicado `dpl_B2g1ucdpCNCsYgopRYcvy5AtKijg`; tela de acesso do painel conferida; 3 testes enviados a Patrícia.
