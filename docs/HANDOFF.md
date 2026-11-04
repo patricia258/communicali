@@ -129,6 +129,12 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — Início com impacto e selos na foto
+- Início do Meu passaporte: "Olá, Nome!", cartão de identidade em vinho com foto redonda, nível com selo, nome, função e empresa, temas, números (pontos, carimbos, selos) e compartilhar; o código saiu do cartão (fica em Indicar). Logo abaixo, "Para você" com os 3 alertas mais recentes (X para dispensar) e o resumo das reações recebidas. "Sugestões de conexão" sem repetir a mesma pessoa (motivos juntos) e com X para ocultar (guardado no navegador). RPC `communicali_meu_cartao` (migração `20261103280000`).
+- Selo na foto em arco, como no LinkedIn: **#DISPONÍVEL** (oliva) para aberto ao mercado e **#RECRUTANDO** (vinho) para recrutador, nos cartões da Rede, no perfil e no Início. Saiu a pílula "Disponível no mercado".
+- Código do convite em Indicar sem pulo: mesmo tamanho com ou sem edição e sem animação.
+- Conferido no celular com Conector de teste (removido).
+
 ### 03/11/2026, Claude Code — nome "Meu passaporte"
 - Decisão de Patrícia: a área do membro se chama **Meu passaporte** em todo texto visível (rodapé, home, e-mails, página de descadastro, privacidade e regras; migração `20261103270000`). O endereço continua `/meu-espaco` e o código mantém o nome técnico `MeuEspaco`.
 
