@@ -200,3 +200,19 @@
 .passaporte strong{display:block;margin-bottom:8px;font:700 22px var(--display);color:var(--gold-2)}
 .passaporte p{margin:0;color:var(--soft);font-size:15px;line-height:1.6}
 @media (max-width:900px){.passaporte{grid-template-columns:1fr}.trilha::before{display:none}}
+
+/* Números do topo como tickets: recortes laterais e linha picotada. */
+.stat{position:relative;overflow:visible;border-radius:14px;background:linear-gradient(160deg,var(--panel-2),var(--panel))}
+.stat::before,.stat::after{content:'';position:absolute;top:62%;width:22px;height:22px;border-radius:50%;background:var(--bg,#1F0E14);border:1px solid var(--edge)}
+.stat::before{left:-12px;clip-path:inset(0 0 0 50%)}
+.stat::after{right:-12px;clip-path:inset(0 50% 0 0)}
+.stat h3{padding-top:10px;border-top:1.5px dashed rgba(221,177,96,.3);width:100%}
+/* Carimbo da idealizadora sobre a foto, como na Rede. */
+.person__carimbo{position:absolute;left:18px;bottom:18px;display:grid;justify-items:center;padding:6px 12px;border:2px solid #7A1F3D;border-radius:4px;outline:1px dashed #7A1F3D;outline-offset:-6px;background:rgba(255,253,250,.94);color:#7A1F3D;font:800 15px/1.1 'Funnel Display',sans-serif;letter-spacing:.1em;text-transform:uppercase;transform:rotate(-8deg);box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.person__carimbo small{font:700 8px Inter,sans-serif;letter-spacing:.2em}
+/* Formatos de encontro como bilhetes pequenos. */
+.formatos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 22px;padding:0;list-style:none}
+.formatos li{position:relative;display:grid;gap:4px;padding:14px 16px;border:1px dashed rgba(221,177,96,.4);border-radius:12px;background:rgba(201,151,59,.06)}
+.formatos strong{font:700 16px var(--display);color:var(--gold-2)}
+.formatos span{font-size:13px;line-height:1.5;color:var(--soft)}
+@media (max-width:900px){.formatos{grid-template-columns:repeat(2,minmax(0,1fr))}}

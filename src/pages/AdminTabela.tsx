@@ -75,7 +75,8 @@ export function Rede({ valor, tipo }: { valor: string | null; tipo: 'instagram' 
   return <a href={url} target="_blank" rel="noopener noreferrer">{valor}</a>;
 }
 
-export const dataBr = (iso: string | null | undefined) => (iso ? iso.slice(0, 10).split('-').reverse().join('/') : '-');
+// Datas só com dia (AAAA-MM-DD) ficam como estão; horários do banco (UTC) aparecem no fuso de São Paulo.
+export const dataBr = (iso: string | null | undefined) => (!iso ? '-' : iso.length <= 10 ? iso.split('-').reverse().join('/') : new Date(iso).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
 
 export function Categoria({ id, nome }: { id: string; nome: string }) {
   return <span className={`adm-pill adm-pill--${id}`}>{nome}</span>;

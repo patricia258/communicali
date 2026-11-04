@@ -76,6 +76,12 @@ const TRILHA = [
   ['conector', 'Conector', 'Ajuda a criar pontes entre trajetórias.'],
   ['embaixador', 'Embaixador', 'Leva a comunidade a novos horizontes.'],
 ];
+const FORMATOS = [
+  ['Encontros presenciais', 'Em Curitiba e região, com café e conversa.'],
+  ['Encontros virtuais', 'Online, para quem está em qualquer lugar do Brasil.'],
+  ['Experiências', 'Vivências e visitas que ampliam o olhar.'],
+  ['Almoços e jantares', 'Conversas à mesa, em grupos menores.'],
+];
 const PASSAPORTE = [
   ['Carimbos', 'Cada encontro vivido deixa um carimbo no seu passaporte.'],
   ['Selos', 'Cada contribuição reconhecida, como trazer alguém ou fazer uma conexão dar certo, vira um selo.'],
@@ -92,7 +98,7 @@ function People({ joinHref }: { joinHref: string }) {
         <article className={`person${current === 0 ? ' is-on' : ''}`}>
           <div className="person__photo">
             <img src="/fotos/patricia-lima.jpg" alt="Patrícia Lima" />
-            <div className="person__tags"><span>Idealizadora</span><span className="line">CALI RH</span></div>
+            <span className="person__carimbo"><small>ComuniCALI</small>Idealizadora</span>
           </div>
           <div className="person__body">
             <h3>Patrícia Lima</h3>
@@ -174,10 +180,11 @@ export function Home() {
       <section className="wrap founder" id="comunidade">
         <div className="founder__text">
           <p className="eyebrow">A comunidade</p>
-          <h2>Relações que continuam <em>depois do café.</em></h2>
-          <p>A ComuniCALI é uma comunidade para quem se interessa por gente: profissionais de RH, lideranças, empresários, empreendedores e todas as pessoas que querem falar de gestão e desenvolvimento humano.</p>
-          <p>Ela nasceu nos canais digitais, do cansaço com conversas superficiais e grupos feitos só para repassar informação. Dentro do próprio grupo surgiu a vontade de sair da tela e se encontrar para escutar, aprender e debater assuntos difíceis com respeito.</p>
-          <p>Quem organiza é a CALI RH, que liga a gestão de pessoas às decisões do negócio sem perder a responsabilidade humana.</p>
+          <h2>Caminhos que se cruzam <em>e seguem juntos.</em></h2>
+          <p>A ComuniCALI reúne quem se interessa por gente: profissionais de RH, lideranças, empreendedores e todas as pessoas que querem falar de gestão e desenvolvimento humano.</p>
+          <p>Cada pessoa chega com a sua bagagem, com histórias, escolhas e vivências próprias. Quando escutamos alguém, descobrimos caminhos que talvez nunca percorreríamos sozinhos. É isso que acontece nos encontros e continua entre um encontro e outro.</p>
+          <p>A comunidade nasceu nos canais digitais e ganhou vida nos encontros, com escuta, respeito e coragem para debater temas difíceis. Quem organiza é a CALI RH.</p>
+          <p>Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com fé e integridade, e damos toda honra a Deus por cada caminho que se cruza aqui.</p>
         </div>
         <People joinHref={joinHref} />
       </section>
@@ -186,21 +193,21 @@ export function Home() {
         <div className="block__head">
           <div>
             <p className="eyebrow">Primeira vez?</p>
-            <h2>Venha nos <em>conhecer.</em></h2>
+            <h2>Comece a sua <em>jornada.</em></h2>
           </div>
         </div>
         <div className="entrada">
           <article className="entrada__visita">
             <span className="entrada__icone"><UserPlus size={22} aria-hidden="true" /></span>
             <h3>Visite a comunidade</h3>
-            <p>Na primeira vez, você participa como visitante. Cadastre seu interesse e avisamos sobre os próximos encontros, online ou presenciais em Curitiba e região.</p>
+            <p>Toda jornada começa com uma primeira visita. Na primeira vez, você participa como visitante. Cadastre seu interesse e avisamos sobre os próximos encontros, online ou presenciais em Curitiba e região.</p>
             <a className="pill" href="/f/quero-ser-membro">Cadastrar meu interesse</a>
           </article>
           <article className="entrada__grupo">
             <div>
               <span className="entrada__icone"><MessageCircle size={22} aria-hidden="true" /></span>
               <h3>Grupo no WhatsApp</h3>
-              <p>Pessoas do Brasil inteiro trocando vagas, contatos, dúvidas e experiências.</p>
+              <p>É onde a conversa continua entre um encontro e outro: vagas, contatos, dúvidas e experiências de pessoas do Brasil inteiro.</p>
               <a className="link" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>
             </div>
             {qr && <img className="entrada__qr" src={qr} alt="QR Code do grupo da comunidade" />}
@@ -236,6 +243,9 @@ export function Home() {
             <h2>Sua próxima <em>escala.</em></h2>
           </div>
         </div>
+        <ul className="formatos" aria-label="Formatos de encontro">
+          {FORMATOS.map(([titulo, texto]) => <li key={titulo}><strong>{titulo}</strong><span>{texto}</span></li>)}
+        </ul>
         {next ? <EditionCard edition={next} badge="Próximo encontro" /> : <p className="muted">A próxima data sai em breve. Quem está no grupo da comunidade fica sabendo primeiro.</p>}
         {upcoming.length > 1 && (
           <div className="past">
