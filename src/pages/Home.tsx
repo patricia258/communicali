@@ -71,10 +71,15 @@ function Arches({ photos }: { photos: Photo[] }) {
 }
 
 const TRILHA = [
-  ['visitante', 'Visitante', 'Quem chega pelo grupo ou pela inscrição em um encontro.'],
-  ['membro', 'Membro', 'Quem esteve presencialmente e começa a somar milhas.'],
-  ['conector', 'Conector', 'Quem aproxima pessoas e cumpre as missões de conexão.'],
-  ['embaixador', 'Embaixador', 'Quem traz parceiros e representa a comunidade.'],
+  ['visitante', 'Visitante', 'Chega para conhecer o caminho.'],
+  ['membro', 'Membro', 'Assume o pertencimento e constrói sua história.'],
+  ['conector', 'Conector', 'Ajuda a criar pontes entre trajetórias.'],
+  ['embaixador', 'Embaixador', 'Leva a comunidade a novos horizontes.'],
+];
+const PASSAPORTE = [
+  ['Carimbos', 'Cada encontro vivido deixa um carimbo no seu passaporte.'],
+  ['Selos', 'Cada contribuição reconhecida, como trazer alguém ou fazer uma conexão dar certo, vira um selo.'],
+  ['Milhas', 'Tudo o que você vive na comunidade soma milhas e mostra até onde a sua jornada já chegou.'],
 ];
 
 const PEOPLE_CARDS = ['fundadora', 'embaixadores'] as const;
@@ -206,8 +211,8 @@ export function Home() {
       <section className="wrap block" id="programa">
         <div className="block__head">
           <div>
-            <p className="eyebrow">Programa de membros</p>
-            <h2>Seu passaporte, <em>sempre online.</em></h2>
+            <p className="eyebrow">Seu passaporte</p>
+            <h2>Cada pessoa, uma jornada. <em>Cada encontro, novos horizontes.</em></h2>
           </div>
         </div>
         <div className="trilha">
@@ -218,7 +223,9 @@ export function Home() {
             </article>
           ))}
         </div>
-        <p className="trilha__texto">Seu Passaporte acompanha a jornada.<br />Os encontros vividos deixam <strong>carimbos</strong>. As contribuições reconhecidas recebem <strong>selos</strong>.<br />E a sua participação vira <strong>milhas</strong>, uma história que segue com você.</p>
+        <div className="passaporte">
+          {PASSAPORTE.map(([titulo, texto]) => <article key={titulo}><strong>{titulo}</strong><p>{texto}</p></article>)}
+        </div>
         <a className="link" href="/meu-espaco">Já sou membro, quero entrar</a>
       </section>
 
@@ -226,7 +233,7 @@ export function Home() {
         <div className="block__head">
           <div>
             <p className="eyebrow">Agenda</p>
-            <h2>Encontros para <em>sair da tela.</em></h2>
+            <h2>Sua próxima <em>escala.</em></h2>
           </div>
         </div>
         {next ? <EditionCard edition={next} badge="Próximo encontro" /> : <p className="muted">A próxima data sai em breve. Quem está no grupo da comunidade fica sabendo primeiro.</p>}

@@ -190,3 +190,13 @@
 }
 .trilha__texto{margin:22px auto 10px;max-width:620px;text-align:center;color:var(--soft);font-size:16px;line-height:1.7}
 .trilha__texto strong{color:var(--gold-2)}
+
+/* Trilha como rota: os selos ligados por uma linha pontilhada. */
+.trilha{position:relative}
+.trilha::before{content:'';position:absolute;left:8%;right:8%;top:38%;border-top:2px dashed rgba(221,177,96,.35);z-index:0}
+.trilha>article{position:relative;z-index:1}
+.passaporte{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px}
+.passaporte article{padding:22px 24px;border:1px solid var(--edge);border-radius:16px;background:linear-gradient(160deg,var(--panel-2),var(--panel))}
+.passaporte strong{display:block;margin-bottom:8px;font:700 22px var(--display);color:var(--gold-2)}
+.passaporte p{margin:0;color:var(--soft);font-size:15px;line-height:1.6}
+@media (max-width:900px){.passaporte{grid-template-columns:1fr}.trilha::before{display:none}}
