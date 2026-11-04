@@ -8,6 +8,11 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (noite, 6) | Pix por documento, e-mails sem emoji na frente
+- Motor: `showIf` aceita `{ any: [...] }` (basta uma condição); `{id}` no título/ajuda mostra a resposta já dada (`comRespostas`).
+- STAFF: Fotografia e vídeo e Facilitação emitem sempre nota fiscal; Palestrante e Outro escolhem; Apoio e Auxiliar emitem recibo. Pix por documento (`perguntasPix`/`chavePix` em `Staff.tsx`, usados também no fornecedor): quem tem CNPJ vê CNPJ, e-mail, telefone ou aleatória; pessoa física vê CPF, e-mail, telefone ou aleatória. CNPJ e CPF são confirmados ("A chave Pix é o CNPJ ...?"), e-mail e telefone também; só digita se for outro.
+- E-mails: nenhum assunto ou pílula começa com emoji (38 trocas em api/). Emojis só dentro do texto, com moderação. E-mails de STAFF reescritos com mais vida; no aviso da organização, nome e participação ficam dentro do cartão. Aviso de fornecedor no mesmo formato (`emailFornecedorOrganizacao`). Teste reenviado em 04/11 para pclazumi@gmail.com e admins; registro apagado.
+
 ### 2026-11-04 (noite, 5) | STAFF que volta, e-mails de STAFF, Quero conhecer
 - "Quero conhecer a ComuniCALI" (forms.slug quero-ser-membro): texto de abertura novo, com visitante ou convidado, online/presencial e Curitiba e região em negrito e "gratuito" em destaque. Os formatos de e-mail e telefone já valem para ele.
 - Regras e Privacidade no rodapé dos formulários abrem em nova aba (antes a pessoa saía e perdia o preenchimento).

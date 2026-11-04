@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent a
 import { useParams, useSearchParams } from 'react-router-dom';
 import { ArrowDown, ArrowRight, ArrowUp, Check, CornerDownLeft, Paperclip, X } from 'lucide-react';
 import { anonPublicRpc, anonStorage, supabase } from '../lib/supabase';
-import { type FormAnswer, type FormQuestion, applyMask, FILE_ACCEPT, FILE_HINT, fileLabel, isAnswerable, joinPhone, MASK_PLACEHOLDER, maskOf, nextQuestionIndex, phoneParts, richTextHtml, scaleRange, validateAnswer, visivel } from './formModel';
+import { type FormAnswer, type FormQuestion, applyMask, FILE_ACCEPT, FILE_HINT, fileLabel, isAnswerable, joinPhone, MASK_PLACEHOLDER, maskOf, nextQuestionIndex, phoneParts, richTextHtml, scaleRange, validateAnswer, visivel, comRespostas } from './formModel';
 import { FooterLinks } from '../components/SiteFooter';
 import './public-form.css';
 
@@ -292,9 +292,9 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
       {(phase === 'questions' || phase === 'sending') && question && <div className={`cf-screen cf-q cf-${direction}${question.kind === 'statement' ? ' cf-statement' : ''}`} key={question.id}>
         <div className="cf-label">
           {isAnswerable(question) && <span className="cf-num">{numberOf(question)}<ArrowRight size={14} /></span>}
-          <h2>{question.label}{isAnswerable(question) && (question.required ? <em className="cf-req" aria-label="obrigatória">*</em> : <span className="cf-optional">Opcional</span>)}</h2>
+          <h2>{comRespostas(question.label, answers)}{isAnswerable(question) && (question.required ? <em className="cf-req" aria-label="obrigatória">*</em> : <span className="cf-optional">Opcional</span>)}</h2>
         </div>
-        {question.help && <p className="cf-help" dangerouslySetInnerHTML={{ __html: richTextHtml(question.help) }} />}
+        {question.help && <p className="cf-help" dangerouslySetInnerHTML={{ __html: richTextHtml(comRespostas(question.help, answers)) }} />}
         {question.attachment && <a className="cf-anexo" href={question.attachment.url} target="_blank" rel="noopener noreferrer"><img src={question.attachment.cover} alt="" /><span><strong>{question.attachment.title}</strong>{question.attachment.text && <small>{question.attachment.text}</small>}<em>Abrir apresentação <ArrowRight size={14} /></em></span></a>}
         {renderInput(question)}
         {error && <p className="cf-error" role="alert">{error}</p>}

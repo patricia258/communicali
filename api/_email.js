@@ -151,32 +151,49 @@ const comprovanteTexto = (item) => (item.comprovante === 'nota' ? 'Nota fiscal' 
 export function emailStaff(item) {
   const nome = escape(primeiroNome(item.nome));
   return {
-    assunto: '🎉 Boas-vindas ao STAFF da ComuniCALI',
+    assunto: 'Boas-vindas ao STAFF da ComuniCALI!',
     html: layoutCartao({
-      previa: 'Seu cadastro de STAFF chegou. Que alegria ter você com a gente!',
-      titulo: '🎉 Boas-vindas ao STAFF', cor: FAIXA.boasvindas, saudacao: nome ? `Oi, ${nome}!` : 'Oi!',
+      previa: 'Seu cadastro chegou e você já faz parte do time deste encontro.',
+      titulo: 'Boas-vindas ao STAFF', cor: FAIXA.boasvindas, saudacao: nome ? `Oi, ${nome}!` : 'Oi!',
       paragrafos: [
-        'Que alegria ter você<br>no <strong>STAFF da ComuniCALI</strong>!',
-        'Seu cadastro chegou para a organização.<br>Neste encontro, você faz parte do time<br>que recebe as pessoas e faz tudo acontecer.',
+        'Que alegria ter você com a gente! 🎉',
+        'Seu cadastro chegou, e agora você faz parte<br>do <strong>STAFF da ComuniCALI</strong> neste encontro.',
+        'É com esse time que a gente recebe as pessoas,<br>cuida de cada detalhe e transforma<br>um café em boas conversas. ☕',
       ],
       itens: [['Sua função', item.funcao], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', comprovanteTexto(item)]],
-      depois: `<strong>Para os próximos encontros</strong><br>O STAFF é formado a cada evento.<br>Se a organização chamar você de novo,<br>é só preencher o cadastro outra vez.<br>Se nada tiver mudado, ele fica bem mais curto.<br><br>Dúvidas? Fale com a organização pelo <a href="${WHATS}" style="color:${COR.vivo}">WhatsApp</a>.`,
+      depois: `<strong>E nos próximos encontros?</strong><br>O STAFF é montado a cada evento.<br>Se a gente chamar você de novo, é só preencher<br>o cadastro outra vez. Se nada tiver mudado,<br>ele fica bem mais rapidinho. 😉<br><br>Ficou alguma dúvida? Chama a organização<br>no <a href="${WHATS}" style="color:${COR.vivo}">WhatsApp</a>.`,
     }),
   };
 }
 
 /** Aviso para a organização a cada cadastro de STAFF. Sem CPF, endereço nem Pix: os dados completos ficam no painel. */
 export function emailStaffOrganizacao(item, painel) {
-  const historico = item.primeira_vez === false ? (item.atualizou_dados ? 'Já participou antes e atualizou os dados.' : 'Já participou antes. Dados de empresa, endereço e Pix vieram do cadastro anterior.') : 'Primeira vez no STAFF.';
+  const voltou = item.primeira_vez === false;
+  const participacao = voltou ? (item.atualizou_dados ? 'Já participou antes e atualizou os dados' : 'Já participou antes, com os mesmos dados de empresa, endereço e Pix') : 'Primeira vez no STAFF';
   return {
-    assunto: `🧰 Novo cadastro de STAFF: ${item.nome}`,
+    assunto: `Novo cadastro de STAFF: ${item.nome}`,
     html: layoutCartao({
-      previa: `${item.nome} preencheu o cadastro de STAFF.`,
-      titulo: '🧰 Cadastro de STAFF', cor: FAIXA.confirmacao, saudacao: 'Chegou um cadastro!',
-      paragrafos: [`<strong>${escape(item.nome)}</strong> preencheu<br>o cadastro de STAFF.`, escape(historico)],
+      previa: `${item.nome} acabou de entrar para o STAFF.`,
+      titulo: 'Cadastro de STAFF', cor: FAIXA.confirmacao, saudacao: voltou ? 'Olha quem voltou!' : 'Tem gente nova no time!',
+      paragrafos: [voltou ? 'Mais um cadastro de STAFF chegou,<br>de alguém que já esteve com a gente. 💛' : 'Acabou de chegar um cadastro de STAFF. 💛', 'Os dados completos, com CPF,<br>endereço e chave Pix, estão no painel.'],
       aviso: item.conferir || '',
-      itens: [['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', comprovanteTexto(item)],
-        ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : ''], ['Próximos eventos', item.quer_ser_acionado ? 'Quer ser acionado' : 'Prefere não ser acionado']],
+      itens: [['Nome', item.nome], ['Participação', participacao], ['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', comprovanteTexto(item)],
+        ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : 'Não vai levar'], ['Próximos eventos', item.quer_ser_acionado ? 'Quer ser chamado de novo' : 'Prefere não ser chamado']],
+      botao: { texto: 'Ver no painel', href: painel },
+    }),
+  };
+}
+
+/** Aviso para a organização a cada cadastro de fornecedor. Sem documento, endereço nem Pix: os dados completos ficam no painel. */
+export function emailFornecedorOrganizacao(item, painel) {
+  const cadastro = item.primeira_vez ? 'Primeira vez' : item.atualizou_dados ? 'Já forneceu antes e atualizou os dados' : 'Já forneceu antes, com os mesmos dados';
+  return {
+    assunto: `Novo cadastro de fornecedor: ${item.nome}`,
+    html: layoutCartao({
+      previa: `${item.nome} se cadastrou como fornecedor.`,
+      titulo: 'Cadastro de fornecedor', cor: FAIXA.convite, saudacao: 'Novo fornecedor por aqui!',
+      paragrafos: ['Chegou um cadastro de fornecedor. 📦', 'Os dados completos, com documento,<br>endereço e chave Pix, estão no painel.'],
+      itens: [['Nome', item.nome], ['Cadastro', cadastro], ['Fornece', `${item.categoria}: ${item.fornece}`], ['Contato', item.contato_nome], ['WhatsApp', item.whatsapp], ['E-mail', item.email]],
       botao: { texto: 'Ver no painel', href: painel },
     }),
   };
@@ -204,13 +221,13 @@ export function montar(tipo, edition, pessoa) {
   const agenda = { texto: 'Colocar na minha agenda', href: linkGoogle(edition) };
   const responder = `Se não puder ir, avise a gente pelo <a href="${WHATS}" style="color:${COR.vivo}">WhatsApp</a> para liberarmos o seu lugar.`;
   const textos = {
-    recebido: { assunto: `💌 Recebemos sua inscrição: ${edition.titulo}`, previa: 'A equipe vai analisar e você recebe a confirmação por e-mail.', titulo: '💌 Inscrição recebida', saudacao, paragrafos: ['Ficamos muito felizes com o seu interesse!', `Recebemos sua inscrição para o encontro<br><strong>${titulo}</strong>`, 'A equipe vai analisar e você recebe<br>a <strong>confirmação por e-mail</strong>.'], detalhes: false, anexo: false },
-    confirmacao: { assunto: `🎉 Reserva confirmada: ${edition.titulo}`, previa: 'Sua vaga está reservada.', titulo: '🎉 Reserva confirmada!', saudacao, paragrafos: ['Boa notícia!', `Sua vaga no encontro<br><strong>${titulo}</strong><br>está reservada.`, 'Coloque na sua agenda pelo botão abaixo.'], botao: agenda, depois: `Para Outlook ou celular, use o convite anexo. ${responder}`, anexo: true },
-    espera: { assunto: `⏳ Lista de espera: ${edition.titulo}`, previa: 'Avisaremos você se abrir um lugar.', titulo: '⏳ Lista de espera', saudacao, paragrafos: ['Ficamos muito felizes com o seu interesse!', `As vagas do encontro<br><strong>${titulo}</strong><br>estão preenchidas.`, 'Seu nome entrou na <strong>lista de espera</strong>.', 'Se abrir um lugar, avisamos você por e-mail.'], detalhes: false, anexo: false },
-    lembrete: { assunto: `⏰ É amanhã: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: '⏰ É amanhã!', saudacao, paragrafos: ['Amanhã é dia de ComuniCALI!', '<strong>Na chegada</strong>, a recepção confirma o seu nome<br>e indica a sua mesa.', '<strong>Na mesa</strong>, é só fazer o check-in<br>pelo QR Code.'], botao: agenda, depois: responder, anexo: true },
+    recebido: { assunto: `Recebemos sua inscrição: ${edition.titulo}`, previa: 'A equipe vai analisar e você recebe a confirmação por e-mail.', titulo: 'Inscrição recebida', saudacao, paragrafos: ['Ficamos muito felizes com o seu interesse!', `Recebemos sua inscrição para o encontro<br><strong>${titulo}</strong>`, 'A equipe vai analisar e você recebe<br>a <strong>confirmação por e-mail</strong>.'], detalhes: false, anexo: false },
+    confirmacao: { assunto: `Reserva confirmada: ${edition.titulo}`, previa: 'Sua vaga está reservada.', titulo: 'Reserva confirmada!', saudacao, paragrafos: ['Boa notícia!', `Sua vaga no encontro<br><strong>${titulo}</strong><br>está reservada.`, 'Coloque na sua agenda pelo botão abaixo.'], botao: agenda, depois: `Para Outlook ou celular, use o convite anexo. ${responder}`, anexo: true },
+    espera: { assunto: `Lista de espera: ${edition.titulo}`, previa: 'Avisaremos você se abrir um lugar.', titulo: 'Lista de espera', saudacao, paragrafos: ['Ficamos muito felizes com o seu interesse!', `As vagas do encontro<br><strong>${titulo}</strong><br>estão preenchidas.`, 'Seu nome entrou na <strong>lista de espera</strong>.', 'Se abrir um lugar, avisamos você por e-mail.'], detalhes: false, anexo: false },
+    lembrete: { assunto: `É amanhã: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: 'É amanhã!', saudacao, paragrafos: ['Amanhã é dia de ComuniCALI!', '<strong>Na chegada</strong>, a recepção confirma o seu nome<br>e indica a sua mesa.', '<strong>Na mesa</strong>, é só fazer o check-in<br>pelo QR Code.'], botao: agenda, depois: responder, anexo: true },
     boasvindas: { assunto: `Boas-vindas à ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Estamos ansiosos para ver você no nosso encontro!', titulo: 'Uhull! Boas-vindas', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Ficamos <em>muito felizes</em> que você esteja com a gente nessa jornada!', 'A <strong>ComuniCALI</strong> nasceu sem pretensão, era pra ser só "um cafezinho entre colegas de trabalho". Ainda não sabemos onde isso vai chegar, mas temos certeza de que vai trazer <em>grandes contribuições</em> para cada pessoa que faz parte dela.', '<strong><u>Estamos ansiosos para ver você no nosso encontro!</u></strong>', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong>'], botao: { texto: 'Acesse o site', href: SITE }, detalhes: false, anexo: false },
     agradecimento: { assunto: `Obrigado pelo interesse na ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Essa é só a primeira de muitas edições.', titulo: 'Obrigado pelo interesse', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Muito obrigado pelo seu interesse na <strong>ComuniCALI</strong>!', 'As vagas da nossa <em>primeira edição</em> já estão fechadas, e que pena que desta vez você não vai poder estar com a gente.', '<strong><u>Mas essa é só a primeira de muitas!</u></strong> Queremos muito conhecer você nos próximos encontros.', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong> Lá você conhece a comunidade e registra seu interesse para as próximas edições.'], botao: { texto: 'Conheça a ComuniCALI', href: SITE }, detalhes: false, comFoto: false, anexo: false },
-    convite: { assunto: `🗓️ Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: '🗓️ Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
+    convite: { assunto: `Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: 'Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
   }[tipo];
   return { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null };
 }

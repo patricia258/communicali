@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { errorMessage, supabase } from '../lib';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 import { downloadXlsx } from '../forms/formExports';
-import { CONFERI, PERGUNTAS_PIX, PIX_CAMPO, PIX_TIPOS } from './Staff';
+import { CONFERI, chavePix, perguntasPix } from './Staff';
 
 const ACEITE = 'Autorizo';
 const EMPRESA = 'Empresa (CNPJ)';
@@ -38,8 +38,7 @@ Seus dados ficam restritos à organização.`,
     { id: 'numero', kind: 'short_text', label: 'Número', required: true },
     { id: 'complemento', kind: 'short_text', label: 'Complemento', help: 'Apartamento, bloco ou sala. Se não tiver, deixe em branco.' },
     { id: 'cidade', kind: 'short_text', label: 'Cidade e estado', required: true },
-    { id: 'pix_tipo', kind: 'single_choice', label: 'Qual é o tipo da chave Pix?', help: 'A chave precisa ser da mesma titularidade do cadastro: o CNPJ da empresa ou o CPF da pessoa física.', options: PIX_TIPOS, required: true },
-    ...PERGUNTAS_PIX,
+    ...perguntasPix({ id: 'tipo', in: [EMPRESA] }, { id: 'tipo', in: [PESSOA] }),
     { id: 'acionado', kind: 'yes_no', label: 'Podemos acionar você para os próximos eventos?', required: true },
     { id: 'observacoes', kind: 'long_text', label: 'Quer acrescentar alguma informação?', help: 'Opcional.' },
     { id: 'aceite', kind: 'single_choice', label: 'Uso dos dados', help: 'Autorizo a CALI RH a guardar estes dados para contato e pagamentos relacionados aos encontros, conforme a [política de privacidade](https://comuni.calirh.com/privacidade).', options: [ACEITE], required: true },
@@ -56,7 +55,7 @@ Seus dados ficam restritos à organização.`,
       p_email: value('email'), p_whatsapp: value('whatsapp'), p_categoria: value('categoria'), p_fornece: value('fornece'),
       p_atualizar: dados, p_cep: dados ? value('cep') : null,
       p_endereco: dados ? [value('endereco'), value('numero'), value('complemento')].filter(Boolean).join(', ') : null, p_cidade: dados ? value('cidade') : null,
-      p_pix_tipo: dados ? value('pix_tipo') : null, p_pix: dados ? value(PIX_CAMPO[value('pix_tipo')] || '') : null, p_banco: dados ? value('banco') : null,
+      p_pix_tipo: dados ? chavePix(answers).tipo : null, p_pix: dados ? chavePix(answers).chave : null, p_banco: dados ? value('banco') : null,
       p_acionado: answers.acionado === 'Sim', p_observacoes: value('observacoes') || null, p_aceite: answers.aceite === ACEITE,
     });
     return error ? errorMessage(error) : '';

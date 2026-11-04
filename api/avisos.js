@@ -1,6 +1,6 @@
 // Envia os avisos pendentes: nível, missão e perfil indicado para o membro; formulário preenchido, inscrição em encontro e cadastro de staff para a organização.
 // Pode ser chamado a qualquer momento: cada aviso é marcado antes do envio e vai uma vez só.
-import { banco, emailStaff, emailStaffOrganizacao, enviar, escape, layoutSimples, pausa } from './_email.js';
+import { banco, emailFornecedorOrganizacao, emailStaff, emailStaffOrganizacao, enviar, escape, layoutSimples, pausa } from './_email.js';
 
 const MEU = 'https://comuni.calirh.com/meu-passaporte';
 const PAINEL = 'https://comuni.calirh.com/admin';
@@ -17,20 +17,20 @@ function mensagemMembro(aviso, nome, missoes, edicoes) {
   if (aviso.tipo === 'nivel') {
     const nivel = (aviso.texto.match(/agora é (.+?)\.?$/) || [])[1] || 'um novo nível';
     const selo = { Conector: 'conector', Embaixador: 'embaixador', Membro: 'membro' }[nivel];
-    return { assunto: `🎉 Parabéns! Você agora é ${nivel} na ComuniCALI`, html: layoutSimples({ titulo: '🎉 Novo nível conquistado', imagem: selo ? `https://comuni.calirh.com/selos/postal-${selo}.png` : undefined, saudacao: `Parabéns, ${primeiro(nome)}!`, linhas: ['Você subiu de nível na comunidade!', `Agora você é<br><strong>${escape(nivel)}</strong>`, 'Abra seu passaporte para ver o novo selo<br>e o que muda para você.'], botao: { texto: 'Ver meu passaporte', href: MEU } }) };
+    return { assunto: `Parabéns! Você agora é ${nivel} na ComuniCALI`, html: layoutSimples({ titulo: 'Novo nível conquistado', imagem: selo ? `https://comuni.calirh.com/selos/postal-${selo}.png` : undefined, saudacao: `Parabéns, ${primeiro(nome)}!`, linhas: ['Você subiu de nível na comunidade!', `Agora você é<br><strong>${escape(nivel)}</strong>`, 'Abra seu passaporte para ver o novo selo<br>e o que muda para você.'], botao: { texto: 'Ver meu passaporte', href: MEU } }) };
   }
   if (aviso.tipo === 'missao') {
     const missao = (aviso.texto.match(/^Missão concluída: (.+?)\. O selo/) || [])[1] || 'uma missão';
     const slug = missoes.find((item) => item.titulo === missao)?.slug;
-    return { assunto: '🏅 Missão concluída! Seu selo novo chegou', html: layoutSimples({ titulo: '🏅 Missão concluída', imagem: slug ? `https://comuni.calirh.com/selos/missao-${slug}.png` : undefined, saudacao: `Parabéns, ${primeiro(nome)}!`, linhas: ['Você concluiu uma missão!', `<strong>${escape(missao)}</strong>`, 'O selo já está no seu passaporte.'], botao: { texto: 'Ver meus selos', href: MEU } }) };
+    return { assunto: 'Missão concluída! Seu selo novo chegou', html: layoutSimples({ titulo: 'Missão concluída', imagem: slug ? `https://comuni.calirh.com/selos/missao-${slug}.png` : undefined, saudacao: `Parabéns, ${primeiro(nome)}!`, linhas: ['Você concluiu uma missão!', `<strong>${escape(missao)}</strong>`, 'O selo já está no seu passaporte.'], botao: { texto: 'Ver meus selos', href: MEU } }) };
   }
   if (aviso.tipo === 'carimbo') {
     const edicao = (aviso.texto.match(/passaporte: (.+?)\.$/) || [])[1] || 'o encontro';
     const carimbo = edicoes.find((item) => item.titulo === edicao)?.carimbo_url;
-    return { assunto: '📮 Novo carimbo no seu passaporte ComuniCALI', html: layoutSimples({ titulo: '📮 Novo carimbo', imagem: carimbo ? new URL(carimbo, 'https://comuni.calirh.com').href : undefined, saudacao, linhas: ['Que bom ter você com a gente!', 'Seu passaporte ganhou o carimbo de', `<strong>${escape(edicao)}</strong>`, 'Entre no Meu passaporte para ver seus carimbos,<br>milhas e missões.'], botao: { texto: 'Ver meu passaporte', href: MEU } }) };
+    return { assunto: 'Novo carimbo no seu passaporte ComuniCALI', html: layoutSimples({ titulo: 'Novo carimbo', imagem: carimbo ? new URL(carimbo, 'https://comuni.calirh.com').href : undefined, saudacao, linhas: ['Que bom ter você com a gente!', 'Seu passaporte ganhou o carimbo de', `<strong>${escape(edicao)}</strong>`, 'Entre no Meu passaporte para ver seus carimbos,<br>milhas e missões.'], botao: { texto: 'Ver meu passaporte', href: MEU } }) };
   }
   const [, quem, perfil, recado] = aviso.texto.match(/^(.+?) indicou o perfil de (.+?) para você\.(?: "(.*)")?$/) || [];
-  return { assunto: `👤 ${quem || 'Alguém'} indicou um perfil para você`, html: layoutSimples({ titulo: '👤 Perfil indicado', saudacao, linhas: [`<strong>${escape(quem || 'Alguém da Rede')}</strong> indicou um perfil para você:`, `<strong>${escape(perfil || 'um membro da comunidade')}</strong>`, ...(recado ? [`<em>"${escape(recado)}"</em>`] : []), 'Abra seu passaporte para ver o perfil<br>e se conectar.'], botao: { texto: 'Ver o perfil', href: MEU } }) };
+  return { assunto: `${quem || 'Alguém'} indicou um perfil para você`, html: layoutSimples({ titulo: 'Perfil indicado', saudacao, linhas: [`<strong>${escape(quem || 'Alguém da Rede')}</strong> indicou um perfil para você:`, `<strong>${escape(perfil || 'um membro da comunidade')}</strong>`, ...(recado ? [`<em>"${escape(recado)}"</em>`] : []), 'Abra seu passaporte para ver o perfil<br>e se conectar.'], botao: { texto: 'Ver o perfil', href: MEU } }) };
 }
 
 const valor = (resposta) => (Array.isArray(resposta) ? resposta.join(', ') : resposta && typeof resposta === 'object' ? (resposta.name || resposta.nome || 'arquivo enviado') : String(resposta ?? ''));
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     const itens = perguntas.filter((q) => item.answers?.[q.id] !== undefined && valor(item.answers[q.id]) !== '').map((q) => `${q.label}: ${valor(item.answers[q.id])}`.slice(0, 220));
     const quem = item.respondent_name || item.respondent_email || 'Alguém';
     for (const email of admins) {
-      await enviar(email, { assunto: `📝 Novo preenchimento: ${item.form?.title || 'formulário'}`, html: layoutSimples({ titulo: '📝 Formulário preenchido', saudacao: 'Mais um preenchimento!', linhas: [`<strong>${escape(quem)}</strong> preencheu`, `<strong>${escape(item.form?.title || 'um formulário')}</strong>`], itens, botao: { texto: 'Ver no painel', href: `${PAINEL}/formularios` }, semSair: true }) });
+      await enviar(email, { assunto: `Novo preenchimento: ${item.form?.title || 'formulário'}`, html: layoutSimples({ titulo: 'Formulário preenchido', saudacao: 'Mais um preenchimento!', linhas: [`<strong>${escape(quem)}</strong> preencheu`, `<strong>${escape(item.form?.title || 'um formulário')}</strong>`], itens, botao: { texto: 'Ver no painel', href: `${PAINEL}/formularios` }, semSair: true }) });
       await pausa();
     }
     total.formularios += 1;
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     if (item.email?.endsWith('.test') || !(await reservar('registrations', item.id, 'admin_avisado_em'))) continue;
     const itens = [['Nome', item.nome], ['E-mail', item.email], ['WhatsApp', item.whatsapp], ['Cargo', item.cargo], ['Empresa', item.empresa]].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
     for (const email of admins) {
-      await enviar(email, { assunto: `🙋 Nova inscrição: ${item.edition?.titulo || 'encontro'}`, html: layoutSimples({ titulo: '🙋 Nova inscrição', saudacao: 'Mais uma pessoa quer vir!', linhas: [`<strong>${escape(item.nome)}</strong> se inscreveu no encontro`, `<strong>${escape(item.edition?.titulo || '')}</strong>`, 'Aprove, coloque em espera ou recuse no painel.'], itens, botao: { texto: 'Abrir Edições', href: `${PAINEL}/edicoes` }, semSair: true }) });
+      await enviar(email, { assunto: `Nova inscrição: ${item.edition?.titulo || 'encontro'}`, html: layoutSimples({ titulo: 'Nova inscrição', saudacao: 'Mais uma pessoa quer vir!', linhas: [`<strong>${escape(item.nome)}</strong> se inscreveu no encontro`, `<strong>${escape(item.edition?.titulo || '')}</strong>`, 'Aprove, coloque em espera ou recuse no painel.'], itens, botao: { texto: 'Abrir Edições', href: `${PAINEL}/edicoes` }, semSair: true }) });
       await pausa();
     }
     total.inscricoes += 1;
@@ -85,11 +85,7 @@ export default async function handler(req, res) {
   const fornecedores = await (await banco(`fornecedores?admin_avisado_em=is.null&created_at=gte.${desde()}&select=id,nome,contato_nome,email,whatsapp,categoria,fornece,primeira_vez,atualizou_dados&limit=20`)).json();
   for (const item of Array.isArray(fornecedores) ? fornecedores : []) {
     if (!(await reservar('fornecedores', item.id, 'admin_avisado_em'))) continue;
-    const itens = [['Fornece', `${item.categoria}: ${item.fornece}`], ['Contato', item.contato_nome], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Cadastro', item.primeira_vez ? 'Primeira vez' : item.atualizou_dados ? 'Já forneceu, atualizou os dados' : 'Já forneceu, dados sem mudança']].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
-    for (const email of admins) {
-      await enviar(email, { assunto: `📦 Novo cadastro de fornecedor: ${item.nome}`, html: layoutSimples({ titulo: '📦 Cadastro de fornecedor', saudacao: 'Chegou um cadastro de fornecedor.', linhas: [`<strong>${escape(item.nome)}</strong> preencheu o cadastro.`, ...itens.map((linha) => escape(linha))], botao: { texto: 'Ver no painel', href: `${PAINEL}/fornecedores` } }) });
-      await pausa();
-    }
+    for (const email of admins) { await enviar(email, emailFornecedorOrganizacao(item, `${PAINEL}/fornecedores`)); await pausa(); }
     total.fornecedores += 1;
   }
   res.status(200).json(total);

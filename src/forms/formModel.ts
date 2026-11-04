@@ -29,13 +29,21 @@ export type FormQuestion = {
 
 export const END_OF_FORM = '__end';
 
-export type ShowIf = { id: string; in: string[] };
+type Condicao = { id: string; in: string[] };
+/** Uma condição, ou `any` quando basta uma delas bater. */
+export type ShowIf = Condicao | { any: Condicao[] };
 
 /** A pergunta aparece com as respostas dadas até aqui? */
 export function visivel(question: FormQuestion, answers: Record<string, FormAnswer | undefined>) {
   if (!question.showIf) return true;
+  const bate = (regra: Condicao) => regra.in.includes(String(answers[regra.id] ?? ''));
   const regras = Array.isArray(question.showIf) ? question.showIf : [question.showIf];
-  return regras.every((regra) => regra.in.includes(String(answers[regra.id] ?? '')));
+  return regras.every((regra) => ('any' in regra ? regra.any.some(bate) : bate(regra)));
+}
+
+/** Troca {id} no título ou na ajuda pela resposta já dada (ex.: "A chave Pix é o CNPJ {cnpj}?"). */
+export function comRespostas(texto: string, answers: Record<string, FormAnswer | undefined>) {
+  return texto.replace(/\{(\w+)\}/g, (marca, id: string) => (answers[id] !== undefined && String(answers[id]).trim() ? String(answers[id]) : marca));
 }
 
 export type TextMask = 'cpf' | 'cnpj' | 'cep' | 'money' | 'pix_aleatoria';

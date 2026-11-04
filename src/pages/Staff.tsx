@@ -10,33 +10,58 @@ const DE_ACORDO = 'Estou de acordo';
 export const CONFERI = 'Conferi meus dados';
 const OUTRO = 'Outro';
 const FOTO_VIDEO = ['Fotografia e vídeo'];
+const FACILITACAO = 'Facilitação de oficina ou experiência';
 // Apoio cobre recepção, produção e o que mais o encontro pedir no dia. Pagamento integral, mediante recibo.
 const APOIO = ['Apoio', 'Auxiliar de organização'];
-// Quem tem condições próprias: descreve o combinado e escolhe entre nota fiscal e recibo.
-const LIVRE = ['Palestrante', 'Facilitação de oficina ou experiência', OUTRO];
-const FUNCOES = [...FOTO_VIDEO, ...APOIO, ...LIVRE];
-const COM_ASSISTENTE = [...FOTO_VIDEO, ...LIVRE];
+// Fotografia e facilitação emitem sempre nota fiscal (CNPJ). Palestrante e "Outro" escolhem entre nota e recibo.
+const NOTA_OBRIGATORIA = [...FOTO_VIDEO, FACILITACAO];
+const ESCOLHE = ['Palestrante', OUTRO];
+// Quem tem condições próprias descreve o que foi combinado.
+const LIVRE = [FACILITACAO, ...ESCOLHE];
+const FUNCOES = [...FOTO_VIDEO, ...APOIO, 'Palestrante', FACILITACAO, OUTRO];
+const COM_ASSISTENTE = [...NOTA_OBRIGATORIA, ...ESCOLHE];
 const PAGAMENTO_APOIO = 'Integral por Pix no primeiro dia útil após o evento.';
 const TITULARIDADE = 'em chave da **mesma titularidade** (seu CPF ou, com nota fiscal, o CNPJ da empresa), mediante **nota fiscal** ou, para pessoa física, **recibo**.';
 const TITULARIDADE_FOTO = 'em chave da **mesma titularidade do CNPJ** da empresa, mediante **nota fiscal**.';
 const TITULARIDADE_APOIO = 'em chave **no seu nome** (o mesmo CPF do cadastro), mediante **recibo**. Caso você não saiba como emitir o recibo, não se preocupe: nós ajudamos você.';
 const NOTA = 'Nota fiscal (tenho CNPJ)';
 const RECIBO = 'Recibo (pessoa física)';
+const COM_NOTA = { any: [{ id: 'funcao', in: NOTA_OBRIGATORIA }, { id: 'comprovante', in: [NOTA] }] };
+const COM_RECIBO = { any: [{ id: 'funcao', in: APOIO }, { id: 'comprovante', in: [RECIBO] }] };
 // Quem volta e diz que nada mudou pula empresa, endereço e Pix: usamos o cadastro anterior.
 export const MUDOU = { id: 'atualizar', in: ['Sim', ''] };
-export const PIX_TIPOS = ['CPF', 'CNPJ', 'E-mail', 'Telefone', 'Chave aleatória'];
-export const PIX_CAMPO: Record<string, string> = { CPF: 'pix_cpf', CNPJ: 'pix_cnpj', 'E-mail': 'pix_email', Telefone: 'pix_telefone', 'Chave aleatória': 'pix_aleatoria' };
+const ESTA_CHAVE = 'Sim, é esta chave';
+const pixTipo = (tipo: string) => ({ any: [{ id: 'pix_tipo_pj', in: [tipo] }, { id: 'pix_tipo_pf', in: [tipo] }] });
 
-/** Chave Pix por tipo, banco e o aviso de conferência. Também usado no cadastro de fornecedor. */
-export const PERGUNTAS_PIX: FormQuestion[] = [
-    { id: 'pix_cpf', kind: 'short_text', label: 'Chave Pix: CPF', mask: 'cpf', required: true, showIf: [{ id: 'pix_tipo', in: ['CPF'] }, MUDOU] },
-    { id: 'pix_cnpj', kind: 'short_text', label: 'Chave Pix: CNPJ', mask: 'cnpj', required: true, showIf: [{ id: 'pix_tipo', in: ['CNPJ'] }, MUDOU] },
-    { id: 'pix_email', kind: 'email', label: 'Chave Pix: e-mail', required: true, showIf: [{ id: 'pix_tipo', in: ['E-mail'] }, MUDOU] },
-    { id: 'pix_telefone', kind: 'phone', label: 'Chave Pix: telefone', required: true, showIf: [{ id: 'pix_tipo', in: ['Telefone'] }, MUDOU] },
-    { id: 'pix_aleatoria', kind: 'short_text', label: 'Chave Pix: chave aleatória', help: 'Copie a chave do aplicativo do banco e cole aqui.', mask: 'pix_aleatoria', required: true, showIf: [{ id: 'pix_tipo', in: ['Chave aleatória'] }, MUDOU] },
+/** Chave Pix: quem emite nota (CNPJ) não vê a opção CPF, e quem é pessoa física não vê CNPJ.
+    CNPJ, CPF, e-mail e telefone já informados são confirmados, sem digitar de novo. Também usado no cadastro de fornecedor. */
+export function perguntasPix(pj: FormQuestion['showIf'], pf: FormQuestion['showIf']): FormQuestion[] {
+  const juntar = (regra: FormQuestion['showIf'], ...outras: NonNullable<FormQuestion['showIf']>[]) => [...(Array.isArray(regra) ? regra : regra ? [regra] : []), ...outras.flat()] as FormQuestion['showIf'];
+  return [
+    { id: 'pix_tipo_pj', kind: 'single_choice', label: 'Qual é o tipo da chave Pix?', help: 'A chave precisa estar no **CNPJ da empresa**.', options: ['CNPJ', 'E-mail', 'Telefone', 'Chave aleatória'], required: true, showIf: juntar(pj, MUDOU) },
+    { id: 'pix_tipo_pf', kind: 'single_choice', label: 'Qual é o tipo da chave Pix?', help: 'A chave precisa estar **no seu nome**, no mesmo CPF do cadastro.', options: ['CPF', 'E-mail', 'Telefone', 'Chave aleatória'], required: true, showIf: juntar(pf, MUDOU) },
+    { id: 'pix_cnpj_ok', kind: 'single_choice', label: 'A chave Pix é o CNPJ {cnpj}?', help: 'É o mesmo CNPJ informado no cadastro. Se a chave for outra, volte e escolha outro tipo.', options: [ESTA_CHAVE], required: true, showIf: [pixTipo('CNPJ'), MUDOU] },
+    { id: 'pix_cpf_ok', kind: 'single_choice', label: 'A chave Pix é o CPF {cpf}?', help: 'É o mesmo CPF informado no cadastro. Se a chave for outra, volte e escolha outro tipo.', options: [ESTA_CHAVE], required: true, showIf: [pixTipo('CPF'), MUDOU] },
+    { id: 'pix_email_ok', kind: 'yes_no', label: 'A chave Pix é o e-mail {email}?', required: true, showIf: [pixTipo('E-mail'), MUDOU] },
+    { id: 'pix_email', kind: 'email', label: 'Qual é o e-mail da chave Pix?', required: true, showIf: [pixTipo('E-mail'), { id: 'pix_email_ok', in: ['Não'] }, MUDOU] },
+    { id: 'pix_telefone_ok', kind: 'yes_no', label: 'A chave Pix é o telefone {whatsapp}?', required: true, showIf: [pixTipo('Telefone'), MUDOU] },
+    { id: 'pix_telefone', kind: 'phone', label: 'Qual é o telefone da chave Pix?', required: true, showIf: [pixTipo('Telefone'), { id: 'pix_telefone_ok', in: ['Não'] }, MUDOU] },
+    { id: 'pix_aleatoria', kind: 'short_text', label: 'Qual é a chave aleatória?', help: 'Copie a chave do aplicativo do banco e cole aqui.', mask: 'pix_aleatoria', required: true, showIf: [pixTipo('Chave aleatória'), MUDOU] },
     { id: 'banco', kind: 'short_text', label: 'Qual é o banco ou a instituição da chave Pix?', required: true, showIf: MUDOU },
     { id: 'conferi', kind: 'single_choice', label: 'Confira seus dados', help: 'Revise o CPF, o CNPJ e a chave Pix antes de enviar. A CALI RH não se responsabiliza por pagamentos enviados de forma equivocada por erro de digitação ou por falta de algum dado.', options: [CONFERI], required: true, showIf: MUDOU },
-];
+  ];
+}
+
+/** Tipo e chave Pix a partir das respostas (a chave confirmada vem do que já foi preenchido). */
+export function chavePix(answers: Record<string, unknown>) {
+  const valor = (id: string) => String(answers[id] ?? '').trim();
+  const tipo = valor('pix_tipo_pj') || valor('pix_tipo_pf');
+  const chave = tipo === 'CNPJ' ? valor('cnpj') : tipo === 'CPF' ? valor('cpf')
+    : tipo === 'E-mail' ? (answers.pix_email_ok === 'Sim' ? valor('email') : valor('pix_email'))
+    : tipo === 'Telefone' ? (answers.pix_telefone_ok === 'Sim' ? valor('whatsapp') : valor('pix_telefone'))
+    : tipo === 'Chave aleatória' ? valor('pix_aleatoria') : '';
+  return { tipo, chave };
+}
 
 export const PRESET_STAFF: FormPreset = {
   title: 'Cadastro de STAFF',
@@ -63,16 +88,15 @@ Seus dados ficam restritos à organização.`,
     { id: 'assistente_cpf', kind: 'short_text', label: 'CPF do assistente', mask: 'cpf', required: true, showIf: { id: 'assistente', in: ['Sim'] } },
     { id: 'assistente_whatsapp', kind: 'phone', label: 'WhatsApp do assistente', required: true, showIf: { id: 'assistente', in: ['Sim'] } },
     { id: 'assistente_funcao', kind: 'long_text', label: 'O que o assistente vai fazer?', help: 'Uma descrição breve.', required: true, showIf: { id: 'assistente', in: ['Sim'] } },
-    { id: 'comprovante', kind: 'single_choice', label: 'Como você vai emitir o comprovante dos pagamentos?', options: [NOTA, RECIBO], required: true, logic: [{ when: RECIBO, goTo: 'cep' }], showIf: { id: 'funcao', in: LIVRE } },
-    { id: 'empresa', kind: 'short_text', label: 'Qual é o nome da sua empresa?', help: 'O pagamento é feito mediante nota fiscal.', required: true, showIf: [{ id: 'funcao', in: COM_ASSISTENTE }, MUDOU] },
-    { id: 'cnpj', kind: 'short_text', label: 'Qual é o número do CNPJ registrado da empresa?', help: 'Os 14 números do cartão do CNPJ. É este CNPJ que vai na nota fiscal.', mask: 'cnpj', required: true, showIf: [{ id: 'funcao', in: COM_ASSISTENTE }, MUDOU] },
+    { id: 'comprovante', kind: 'single_choice', label: 'Como você vai emitir o comprovante dos pagamentos?', options: [NOTA, RECIBO], required: true, showIf: { id: 'funcao', in: ESCOLHE } },
+    { id: 'empresa', kind: 'short_text', label: 'Qual é o nome da sua empresa?', help: 'O pagamento é feito mediante nota fiscal.', required: true, showIf: [COM_NOTA, MUDOU] },
+    { id: 'cnpj', kind: 'short_text', label: 'Qual é o número do CNPJ registrado da empresa?', help: 'Os 14 números do cartão do CNPJ. É este CNPJ que vai na nota fiscal.', mask: 'cnpj', required: true, showIf: [COM_NOTA, MUDOU] },
     { id: 'cep', kind: 'short_text', label: 'Qual é o seu CEP?', help: 'Com o CEP, preenchemos a rua, o bairro e a cidade para você conferir.', mask: 'cep', required: true, showIf: MUDOU },
     { id: 'endereco', kind: 'short_text', label: 'Endereço: rua e bairro', help: 'Confira e corrija se precisar.', required: true, showIf: MUDOU },
     { id: 'numero', kind: 'short_text', label: 'Número', required: true, showIf: MUDOU },
     { id: 'complemento', kind: 'short_text', label: 'Complemento', help: 'Apartamento, bloco ou sala. Se não tiver, deixe em branco.', showIf: MUDOU },
     { id: 'cidade', kind: 'short_text', label: 'Cidade e estado', required: true, showIf: MUDOU },
-    { id: 'pix_tipo', kind: 'single_choice', label: 'Qual é o tipo da sua chave Pix?', help: 'A chave precisa ser da mesma titularidade do cadastro: no seu nome (o CPF informado) ou, com nota fiscal, no CNPJ da empresa.', options: PIX_TIPOS, required: true, showIf: MUDOU },
-    ...PERGUNTAS_PIX,
+    ...perguntasPix(COM_NOTA, COM_RECIBO),
     { id: 'valor', kind: 'short_text', label: 'Qual foi o valor combinado com a organização?', mask: 'money', required: true },
     // Condições de pagamento conforme a função escolhida.
     { id: 'combinado_foto', kind: 'long_text', label: 'O que ficou combinado sobre o pagamento?', help: 'O padrão é 50% na reserva e 50% após a entrega dos materiais. Descreva como ficou no seu caso, com datas se houver.', required: true, showIf: { id: 'funcao', in: FOTO_VIDEO } },
@@ -88,8 +112,8 @@ Seus dados ficam restritos à organização.`,
     const value = (key: string) => String(answers[key] ?? '').trim();
     const funcao = value('funcao');
     const assistente = answers.assistente === 'Sim';
-    const nota = FOTO_VIDEO.includes(funcao) || (LIVRE.includes(funcao) && answers.comprovante === NOTA);
-    const pixTipo = value('pix_tipo');
+    const nota = NOTA_OBRIGATORIA.includes(funcao) || (ESCOLHE.includes(funcao) && answers.comprovante === NOTA);
+    const pix = chavePix(answers);
     const primeira = answers.primeira_vez !== 'Não';
     const dados = primeira || answers.atualizar === 'Sim';
     const { error } = await supabase.rpc('communicali_cadastrar_staff', {
@@ -97,13 +121,13 @@ Seus dados ficam restritos à organização.`,
       p_funcao: funcao === OUTRO ? value('funcao_outra') : funcao,
       p_empresa: nota ? value('empresa') : '', p_cnpj: nota ? value('cnpj') : '', p_cep: value('cep'),
       p_endereco: [value('endereco'), value('numero'), value('complemento')].filter(Boolean).join(', '), p_cidade: value('cidade'),
-      p_pix: value(PIX_CAMPO[pixTipo] || ''), p_aceite: answers.aceite === ACEITE,
+      p_pix: dados ? pix.chave : null, p_aceite: answers.aceite === ACEITE,
       p_assistente_nome: assistente ? value('assistente_nome') : null, p_assistente_cpf: assistente ? value('assistente_cpf') : null,
       p_assistente_whatsapp: assistente ? value('assistente_whatsapp') : null, p_assistente_funcao: assistente ? value('assistente_funcao') : null,
       p_comprovante: nota ? 'nota' : 'recibo', p_valor: value('valor'),
       p_aceite_pagamento: [answers.pagamento_foto, answers.pagamento_apoio, answers.pagamento_outro].includes(DE_ACORDO) && (!dados || answers.conferi === CONFERI),
       p_combinado: APOIO.includes(funcao) ? PAGAMENTO_APOIO : value('combinado_foto') || value('combinado_outro'),
-      p_pix_tipo: dados ? pixTipo : null, p_banco: dados ? value('banco') : null, p_primeira_vez: primeira, p_atualizar: dados, p_acionado: answers.acionado === 'Sim', p_observacoes: value('observacoes') || null,
+      p_pix_tipo: dados ? pix.tipo : null, p_banco: dados ? value('banco') : null, p_primeira_vez: primeira, p_atualizar: dados, p_acionado: answers.acionado === 'Sim', p_observacoes: value('observacoes') || null,
     });
     return error ? errorMessage(error) : '';
   },
