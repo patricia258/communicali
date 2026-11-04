@@ -395,6 +395,9 @@ function ResponsesPanel({ form }: { form: FormRecord }) {
     setRows((current) => current.map((item) => item.id === noteFor.row.id ? { ...item, admin_note } : item)); setNoteFor(null);
   }
 
+  // Excluir uma resposta só (teste, duplicada): usa a mesma confirmação da exclusão em lote.
+  function excluirUma(row: ResponseRow) { setSelected(new Set([row.id])); setEditing(null); setConfirmDelete(true); }
+
   async function removeSelected() {
     if (!supabase || !selected.size) return;
     setDeleting(true);
@@ -421,7 +424,7 @@ function ResponsesPanel({ form }: { form: FormRecord }) {
       : <div className="v2-forms-table-wrap"><table className="v2-forms-table">
         <thead><tr>
           <th className="v2-forms-check-col"><input type="checkbox" aria-label="Selecionar todas" checked={allChecked} onChange={() => setSelected(allChecked ? new Set() : new Set(filtered.map((row) => row.id)))} /></th>
-          <th className="v2-forms-edit-col" aria-label="Editar" />
+          <th className="v2-forms-edit-col" aria-label="Editar ou excluir" />
           <th className="v2-forms-date-col"><button type="button" onClick={() => sortBy('date')}>Data{sortMark('date')}</button></th>
           {stages.length > 0 && <th><button type="button" onClick={() => sortBy('stage')}>Situação{sortMark('stage')}</button></th>}
           {stages.length > 0 && <th><button type="button" onClick={() => sortBy('owner')}>Responsável{sortMark('owner')}</button></th>}
@@ -431,7 +434,7 @@ function ResponsesPanel({ form }: { form: FormRecord }) {
         </tr></thead>
         <tbody>{filtered.map((row) => <tr key={row.id} className={selected.has(row.id) ? 'is-selected' : ''}>
           <td className="v2-forms-check-col"><input type="checkbox" aria-label="Selecionar resposta" checked={selected.has(row.id)} onChange={() => toggle(row.id)} /></td>
-          <td className="v2-forms-edit-col"><button type="button" className="v2-forms-edit" title="Editar resposta" aria-label="Editar resposta" onClick={() => setEditing(row)}><Pencil size={13} /></button></td>
+          <td className="v2-forms-edit-col"><span className="v2-forms-row-actions"><button type="button" className="v2-forms-edit" title="Editar resposta" aria-label="Editar resposta" onClick={() => setEditing(row)}><Pencil size={13} /></button><button type="button" className="v2-forms-edit v2-forms-edit--excluir" title="Excluir resposta" aria-label="Excluir resposta" onClick={() => excluirUma(row)}><Trash2 size={13} /></button></span></td>
           <td className="v2-forms-date v2-forms-date-col">{dateTime(row.submitted_at)}</td>
           {stages.length > 0 && <td><select className={`v2-forms-stage s${Math.max(0, stages.indexOf(row.stage || stages[0]))}`} aria-label="Situação" value={row.stage || stages[0]} onChange={(event) => void updateRow(row, { stage: event.target.value })}>{stages.map((item) => <option key={item}>{item}</option>)}</select></td>}
           {stages.length > 0 && <td><input className="v2-forms-owner" defaultValue={row.owner || ''} placeholder="Definir" maxLength={120} onBlur={(event) => { const owner = event.target.value.trim() || null; if (owner !== (row.owner || null)) void updateRow(row, { owner }); }} onKeyDown={(event) => { if (event.key === 'Enter') (event.target as HTMLInputElement).blur(); }} /></td>}
@@ -440,7 +443,7 @@ function ResponsesPanel({ form }: { form: FormRecord }) {
           {columns.map((question) => { const raw = row.answers[question.id]; const text = textOf(question, row); if (question.kind === 'file' && raw) return <td key={question.id}><FileLink value={String(raw)} /></td>; return <td key={question.id} className={text ? 'v2-forms-copy' : ''} title={text ? `${text}\n\nClique para copiar` : undefined} onClick={() => copy(text)}>{text || <span className="v2-forms-empty">—</span>}{text && <Copy size={12} className="v2-forms-copy-ico" aria-hidden="true" />}</td>; })}
         </tr>)}</tbody>
       </table></div>}
-    {editing && <EditResponse form={form} row={editing} onClose={() => setEditing(null)} onSaved={(saved) => { setRows((current) => current.map((item) => item.id === saved.id ? saved : item)); setEditing(null); flash('Resposta atualizada'); }} />}
+    {editing && <EditResponse form={form} row={editing} onDelete={() => excluirUma(editing)} onClose={() => setEditing(null)} onSaved={(saved) => { setRows((current) => current.map((item) => item.id === saved.id ? saved : item)); setEditing(null); flash('Resposta atualizada'); }} />}
     {toast && <div className="v2-forms-toast" role="status"><Check size={14} /> {toast}</div>}
     {noteFor && <div className="ap-pd-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !noteFor.busy) setNoteFor(null); }}><section className="ap-status-confirm" role="dialog" aria-modal="true" aria-label="Nota interna">
       <div><small>NOTA INTERNA · SÓ VOCÊ VÊ</small><h2>{noteFor.row.respondent_name || 'Resposta'}</h2><p>{dateTime(noteFor.row.submitted_at)}{noteFor.row.respondent_email ? ` · ${noteFor.row.respondent_email}` : ''}</p></div>
@@ -504,7 +507,7 @@ function FileLink({ value }: { value: string }) {
 }
 
 /** Edição pela administradora: completa ou corrige uma resposta (ex.: pitch e foto enviados por fora). */
-function EditResponse({ form, row, onClose, onSaved }: { form: FormRecord; row: ResponseRow; onClose: () => void; onSaved: (row: ResponseRow) => void }) {
+function EditResponse({ form, row, onClose, onSaved, onDelete }: { form: FormRecord; row: ResponseRow; onClose: () => void; onSaved: (row: ResponseRow) => void; onDelete: () => void }) {
   const [answers, setAnswers] = useState<Record<string, unknown>>({ ...row.answers });
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState('');
@@ -556,9 +559,9 @@ function EditResponse({ form, row, onClose, onSaved }: { form: FormRecord; row: 
   return <div className="ap-pd-overlay v2-forms-drawer-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) onClose(); }}>
     <aside className="v2-forms-drawer" role="dialog" aria-modal="true" aria-label="Editar resposta">
       <header><div><small>EDITAR RESPOSTA · {dateTime(row.submitted_at)}</small><h2>{row.respondent_name || 'Resposta'}</h2><p>Complete ou corrija o que chegou por fora (texto, foto, arquivo). Fica registrado como resposta desta pessoa.</p></div><button type="button" aria-label="Fechar" onClick={onClose}><X size={18} /></button></header>
-      <div className="v2-forms-drawer-body">{questions.map((question) => <div className="v2-forms-edit-field" key={question.id}><span>{stripRichText(question.label)}</span>{field(question)}</div>)}</div>
+      <div className="v2-forms-drawer-body">{questions.map((question) => <div className={`v2-forms-edit-field${['long_text', 'multi_choice', 'file'].includes(question.kind) ? ' is-largo' : ''}`} key={question.id}><span>{stripRichText(question.label)}</span>{field(question)}</div>)}</div>
       {error && <p className="v2-forms-error" role="alert">{error}</p>}
-      <footer><button type="button" className="wf-secondary" disabled={busy} onClick={onClose}>Cancelar</button><button type="button" className="wf-primary" disabled={busy || Boolean(uploading)} onClick={() => void save()}>{busy ? 'Salvando…' : 'Salvar resposta'}</button></footer>
+      <footer><button type="button" className="v2-forms-delete v2-forms-drawer-excluir" disabled={busy} onClick={onDelete}><Trash2 size={14} /> Excluir resposta</button><button type="button" className="wf-secondary" disabled={busy} onClick={onClose}>Cancelar</button><button type="button" className="wf-primary" disabled={busy || Boolean(uploading)} onClick={() => void save()}>{busy ? 'Salvando…' : 'Salvar resposta'}</button></footer>
     </aside>
   </div>;
 }

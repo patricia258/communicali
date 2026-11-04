@@ -1,8 +1,8 @@
 /* Fornecedor: cadastro simples para a organização acionar quem fornece para os encontros. O formulário só grava; os dados ficam no painel. */
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { errorMessage, supabase } from '../lib';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
-import { downloadXlsx } from '../forms/formExports';
+import { RegistrosPainel, type Campo } from './RegistrosPainel';
 import { CONFERI, chavePix, perguntasPix } from './Staff';
 
 const ACEITE = 'Autorizo';
@@ -73,37 +73,32 @@ const formatarDoc = (item: Fornecedor) => item.tipo === 'empresa'
   ? item.documento.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
   : item.documento.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
 
+const CAMPOS_FORNECEDOR: Array<Campo<Fornecedor>> = [
+  { id: 'nome', titulo: 'Nome', valor: (item) => item.nome, coluna: 'nome' },
+  { id: 'categoria', titulo: 'Categoria', valor: (item) => item.categoria, coluna: 'categoria' },
+  { id: 'fornece', titulo: 'O que fornece', valor: (item) => item.fornece, coluna: 'fornece', longo: true },
+  { id: 'contato', titulo: 'Contato', valor: (item) => item.contato_nome || '', coluna: 'contato_nome' },
+  { id: 'whatsapp', titulo: 'WhatsApp', valor: (item) => item.whatsapp, coluna: 'whatsapp' },
+  { id: 'email', titulo: 'E-mail', valor: (item) => item.email, coluna: 'email' },
+  { id: 'cadastro', titulo: 'Cadastro', valor: (item) => (item.primeira_vez ? 'Primeira vez' : item.atualizou_dados ? 'Voltou, atualizou dados' : 'Voltou, mesmos dados') },
+  { id: 'acionado', titulo: 'Pode ser acionado', valor: (item) => (item.quer_ser_acionado ? 'Sim' : 'Não') },
+  { id: 'tipo', titulo: 'Tipo', valor: (item) => (item.tipo === 'empresa' ? 'Empresa' : 'Pessoa física'), soDetalhe: true },
+  { id: 'documento', titulo: 'CPF/CNPJ', valor: formatarDoc, soDetalhe: true },
+  { id: 'cep', titulo: 'CEP', valor: (item) => item.cep || '', coluna: 'cep', soDetalhe: true },
+  { id: 'endereco', titulo: 'Endereço', valor: (item) => item.endereco || '', coluna: 'endereco', soDetalhe: true },
+  { id: 'cidade', titulo: 'Cidade/UF', valor: (item) => item.cidade_uf || '', coluna: 'cidade_uf', soDetalhe: true },
+  { id: 'pix_tipo', titulo: 'Tipo da chave Pix', valor: (item) => item.pix_tipo || '', coluna: 'pix_tipo', soDetalhe: true },
+  { id: 'pix', titulo: 'Chave Pix', valor: (item) => item.pix || '', coluna: 'pix', soDetalhe: true },
+  { id: 'banco', titulo: 'Banco', valor: (item) => item.banco || '', coluna: 'banco', soDetalhe: true },
+  { id: 'observacoes', titulo: 'Observações', valor: (item) => item.observacoes || '', coluna: 'observacoes', longo: true, soDetalhe: true },
+];
+
 export function FornecedorPanel() {
-  const [list, setList] = useState<Fornecedor[]>([]);
-  const [query, setQuery] = useState('');
-  const [open, setOpen] = useState('');
   const [note, setNote] = useState('');
-  const load = () => supabase.from('fornecedores').select('*').order('created_at', { ascending: false }).then(({ data }) => setList((data || []) as Fornecedor[]));
-  useEffect(() => { void load(); }, []);
-  const visible = useMemo(() => { const term = query.trim().toLowerCase(); return list.filter((item) => !term || `${item.nome} ${item.categoria} ${item.fornece} ${item.email}`.toLowerCase().includes(term)); }, [list, query]);
   const link = `${window.location.origin}/fornecedor`;
-  // Quem voltou sem mudar nada aparece com os dados do cadastro anterior.
-  const base = (item: Fornecedor) => (item.atualizou_dados ? item : list.find((outro) => outro.id === item.anterior_id) || item);
-
-  async function toggle(item: Fornecedor) {
-    await supabase.from('fornecedores').update({ status: item.status === 'ativo' ? 'inativo' : 'ativo', updated_at: new Date().toISOString() }).eq('id', item.id);
-    void load();
-  }
-
-  async function remove(item: Fornecedor) {
-    if (!window.confirm(`Excluir o cadastro de ${item.nome}? Esta ação não pode ser desfeita.`)) return;
-    await supabase.from('fornecedores').delete().eq('id', item.id);
-    void load();
-  }
-
-  function exportAll() {
-    downloadXlsx('communicali-fornecedores.xlsx', 'Fornecedores', ['Nome', 'Tipo', 'CPF/CNPJ', 'Contato', 'E-mail', 'WhatsApp', 'Categoria', 'O que fornece', 'Endereço', 'Cidade/UF', 'CEP', 'Tipo da chave Pix', 'Pix', 'Banco', 'Pode ser acionado', 'Observações', 'Primeira vez', 'Data', 'Situação'],
-      visible.map((item) => { const dados = base(item); return [item.nome, item.tipo === 'empresa' ? 'Empresa' : 'Pessoa física', formatarDoc(item), item.contato_nome || '', item.email, item.whatsapp, item.categoria, item.fornece, dados.endereco || '', dados.cidade_uf || '', dados.cep || '', dados.pix_tipo || '', dados.pix || '', dados.banco || '', item.quer_ser_acionado ? 'Sim' : 'Não', item.observacoes || '', item.primeira_vez ? 'Sim' : 'Não', new Date(item.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }), item.status]; }));
-  }
-
   return (
     <>
-      <div className="wf-head"><div><small>FORNECEDORES</small><h1>Quem fornece para os encontros</h1><p>Alimentos, brindes, decoração, espaço, equipamentos e serviços. Envie o link para o fornecedor preencher. Documento, endereço e Pix só aparecem aqui.</p></div><div className="v2-head-actions"><button type="button" className="wf-secondary" disabled={!visible.length} onClick={exportAll}>Exportar Excel</button></div></div>
+      <div className="wf-head"><div><small>FORNECEDORES</small><h1>Quem fornece para os encontros</h1><p>Alimentos, brindes, decoração, espaço, equipamentos e serviços. Envie o link para o fornecedor preencher. Documento, endereço e Pix só aparecem aqui.</p></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <section className="v2-forms-card">
         <header><small>FORMULÁRIO DE CADASTRO</small><h2>Link para enviar ao fornecedor</h2></header>
@@ -113,29 +108,9 @@ export function FornecedorPanel() {
           <a className="wf-secondary" href={link} target="_blank" rel="noopener noreferrer">Abrir formulário</a>
         </div>
       </section>
-      <div className="wf-controls"><input aria-label="Buscar fornecedor" placeholder="Buscar por nome, categoria ou e-mail" value={query} onChange={(event) => setQuery(event.target.value)} /></div>
-      <div className="adm-list">
-        {visible.map((item) => {
-          const dados = base(item);
-          return (
-            <div className="adm-row adm-row--static adm-row--stack" key={item.id}>
-              <div className="adm-row__line">
-                <strong>{item.nome}</strong>
-                <span>{item.categoria} · {item.whatsapp}</span>
-                <em>{item.status === 'ativo' ? 'Ativo' : 'Inativo'}</em>
-                <button type="button" onClick={() => setOpen(open === item.id ? '' : item.id)}>{open === item.id ? 'Fechar' : 'Ver dados'}</button>
-                <button type="button" onClick={() => void toggle(item)}>{item.status === 'ativo' ? 'Inativar' : 'Reativar'}</button>
-                <button type="button" className="adm-danger" onClick={() => void remove(item)}>Excluir</button>
-              </div>
-              <p className="adm-hint">{item.fornece}</p>
-              {open === item.id && <p className="adm-hint">{item.tipo === 'empresa' ? 'CNPJ' : 'CPF'} {formatarDoc(item)}{item.contato_nome ? ` · Contato: ${item.contato_nome}` : ''} · {item.email}{item.quer_ser_acionado ? ' · Pode ser acionado para próximos eventos' : ''}</p>}
-              {open === item.id && <p className="adm-hint">{!item.atualizou_dados ? (item.anterior_id ? 'Sem mudanças desde o cadastro anterior. ' : 'Disse que nada mudou, mas não há cadastro anterior com este documento. Peça os dados. ') : ''}{dados.endereco ? `${dados.endereco}, ${dados.cidade_uf}${dados.cep ? ` · CEP ${dados.cep}` : ''}` : ''}{dados.pix ? ` · Pix (${dados.pix_tipo}) ${dados.pix}${dados.banco ? `, ${dados.banco}` : ''}` : ''}</p>}
-              {open === item.id && item.observacoes && <p className="adm-hint">Observações: {item.observacoes}</p>}
-            </div>
-          );
-        })}
-        {!visible.length && <p className="adm-hint">Nenhum cadastro de fornecedor ainda.</p>}
-      </div>
+      <RegistrosPainel<Fornecedor> tabela="fornecedores" campos={CAMPOS_FORNECEDOR} nome={(item) => item.nome}
+        alerta={(item) => (!item.atualizou_dados && !item.anterior_id ? 'Disse que nada mudou, mas não há cadastro anterior com este documento. Peça os dados.' : null)}
+        filtro={{ titulo: 'Categoria', valor: (item) => item.categoria }} arquivo="communicali-fornecedores.xlsx" vazio="Nenhum cadastro de fornecedor ainda." />
     </>
   );
 }

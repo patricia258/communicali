@@ -184,3 +184,5 @@
 .adm-login__acesso .adm-login__outro:hover{background:none}
 /* Aviso de conferência em cadastros (Pix diferente do anterior, dado faltando). */
 .adm-hint.adm-alerta{padding:6px 10px;border-left:3px solid #A9502E;border-radius:6px;background:rgba(169,80,46,.12);color:#A9502E;font-weight:600}
+/* Painel do administrador usa toda a largura da tela (04/11). */
+.adm .ap-content,.adm .ap-content:has(.adm-tabela){max-width:none}

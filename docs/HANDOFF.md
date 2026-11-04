@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (noite, 8) | Painel em largura total e cadastros no modelo de formulário
+- Painel do admin sem limite de largura (`admin.css`). Tabela de respostas com colunas mais largas; gaveta lateral com até 960px e campos em duas colunas (texto longo, várias opções e arquivo ocupam a linha toda).
+- Excluir uma resposta: lixeira em cada linha e "Excluir resposta" na gaveta, com a mesma confirmação da exclusão em lote.
+- STAFF e Fornecedores usam `src/pages/RegistrosPainel.tsx`: mesmo visual das respostas (busca, filtro por função/categoria, Atualizar, Exportar Excel, seleção em lote, editar na gaveta, excluir). Campos de conferência aparecem só para leitura na gaveta; "Conferir" sinaliza na data.
+- Fornecedor que volta sem mudanças agora copia endereço e Pix do cadastro anterior (migração `20261104190000_fornecedor_copia_anterior.sql`).
+
 ### 2026-11-04 (noite, 7) | STAFF recupera cadastro e marca encontros
 - STAFF começa por "É a primeira vez?". Quem já foi informa CPF e e-mail; `onAdvance` (novo gancho de `FormPreset`) chama `communicali_staff_reencontrar` (só responde se CPF e e-mail batem; devolve nome, WhatsApp, banco e o final da chave Pix). Encontrou: "Que bom ter você de volta, {nome}!" e "Algum dado mudou?". Não encontrou: avisa e segue o cadastro completo. Respostas internas com `_` vão no envio e não são descartadas.
 - Encontros: `StaffForm` busca as edições públicas futuras. Com mais de uma, pergunta "Em quais encontros você vai trabalhar?" (várias); com uma, liga direto; sem nenhuma, pula. Coluna `staff.eventos` (migração `20261104180000_staff_eventos_reencontro.sql`), no painel, Excel e e-mails.

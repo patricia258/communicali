@@ -1,9 +1,9 @@
 /* Staff: cadastro de quem presta serviço nos encontros. O formulário só grava; a lista com CPF e endereço fica no painel. */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { errorMessage, supabase } from '../lib';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 import type { FormAnswer, FormQuestion } from '../forms/formModel';
-import { downloadXlsx } from '../forms/formExports';
+import { RegistrosPainel, type Campo } from './RegistrosPainel';
 
 const ACEITE = 'Autorizo';
 const DE_ACORDO = 'Estou de acordo';
@@ -167,71 +167,50 @@ export function StaffForm() {
 
 type Staff = { id: string; nome: string; cpf: string; email: string; whatsapp: string; funcao: string; empresa: string | null; cnpj: string | null; cep: string | null; endereco: string; cidade_uf: string; pix: string | null; status: string; created_at: string; assistente_nome: string | null; assistente_cpf: string | null; assistente_whatsapp: string | null; assistente_funcao: string | null; comprovante: string | null; valor_combinado: string | null; pagamento_combinado: string | null; aceite_pagamento_em: string | null; pix_tipo: string | null; banco: string | null; quer_ser_acionado: boolean | null; observacoes: string | null; primeira_vez: boolean | null; atualizou_dados: boolean; conferir: string | null; eventos: string[] | null };
 
-const maskCpf = (cpf: string) => `***.${cpf.slice(3, 6)}.${cpf.slice(6, 9)}-**`;
+const sn = (valor: boolean | null | undefined) => (valor ? 'Sim' : valor === false ? 'Não' : '');
+const CAMPOS_STAFF: Array<Campo<Staff>> = [
+  { id: 'nome', titulo: 'Nome', valor: (item) => item.nome, coluna: 'nome' },
+  { id: 'funcao', titulo: 'Função', valor: (item) => item.funcao, coluna: 'funcao' },
+  { id: 'eventos', titulo: 'Encontro', valor: (item) => (item.eventos || []).join(', ') },
+  { id: 'whatsapp', titulo: 'WhatsApp', valor: (item) => item.whatsapp, coluna: 'whatsapp' },
+  { id: 'email', titulo: 'E-mail', valor: (item) => item.email, coluna: 'email' },
+  { id: 'valor', titulo: 'Valor combinado', valor: (item) => item.valor_combinado || '', coluna: 'valor_combinado' },
+  { id: 'participacao', titulo: 'Participação', valor: (item) => (item.primeira_vez === false ? (item.atualizou_dados ? 'Voltou, atualizou dados' : 'Voltou, mesmos dados') : 'Primeira vez') },
+  { id: 'acionado', titulo: 'Próximos eventos', valor: (item) => sn(item.quer_ser_acionado) },
+  { id: 'comprovante', titulo: 'Comprovante', valor: (item) => (item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo' : '') },
+  { id: 'pagamento', titulo: 'Pagamento combinado', valor: (item) => item.pagamento_combinado || '', coluna: 'pagamento_combinado', longo: true, soDetalhe: true },
+  { id: 'cpf', titulo: 'CPF', valor: (item) => item.cpf, coluna: 'cpf', soDetalhe: true },
+  { id: 'empresa', titulo: 'Empresa', valor: (item) => item.empresa || '', coluna: 'empresa', soDetalhe: true },
+  { id: 'cnpj', titulo: 'CNPJ', valor: (item) => item.cnpj || '', coluna: 'cnpj', soDetalhe: true },
+  { id: 'cep', titulo: 'CEP', valor: (item) => item.cep || '', coluna: 'cep', soDetalhe: true },
+  { id: 'endereco', titulo: 'Endereço', valor: (item) => item.endereco, coluna: 'endereco', soDetalhe: true },
+  { id: 'cidade', titulo: 'Cidade/UF', valor: (item) => item.cidade_uf, coluna: 'cidade_uf', soDetalhe: true },
+  { id: 'pix_tipo', titulo: 'Tipo da chave Pix', valor: (item) => item.pix_tipo || '', coluna: 'pix_tipo', soDetalhe: true },
+  { id: 'pix', titulo: 'Chave Pix', valor: (item) => item.pix || '', coluna: 'pix', soDetalhe: true },
+  { id: 'banco', titulo: 'Banco', valor: (item) => item.banco || '', coluna: 'banco', soDetalhe: true },
+  { id: 'assistente', titulo: 'Assistente', valor: (item) => item.assistente_nome || '', coluna: 'assistente_nome', soDetalhe: true },
+  { id: 'assistente_cpf', titulo: 'CPF do assistente', valor: (item) => item.assistente_cpf || '', coluna: 'assistente_cpf', soDetalhe: true },
+  { id: 'assistente_whatsapp', titulo: 'WhatsApp do assistente', valor: (item) => item.assistente_whatsapp || '', coluna: 'assistente_whatsapp', soDetalhe: true },
+  { id: 'assistente_funcao', titulo: 'O que o assistente faz', valor: (item) => item.assistente_funcao || '', coluna: 'assistente_funcao', longo: true, soDetalhe: true },
+  { id: 'observacoes', titulo: 'Observações', valor: (item) => item.observacoes || '', coluna: 'observacoes', longo: true, soDetalhe: true },
+];
 
 export function StaffPanel() {
-  const [list, setList] = useState<Staff[]>([]);
-  const [query, setQuery] = useState('');
-  const [open, setOpen] = useState('');
   const [note, setNote] = useState('');
-  const load = () => supabase.from('staff').select('*').order('created_at', { ascending: false }).then(({ data }) => setList((data || []) as Staff[]));
-  useEffect(() => { void load(); }, []);
-  const visible = useMemo(() => { const term = query.trim().toLowerCase(); return list.filter((item) => !term || `${item.nome} ${item.funcao} ${item.email}`.toLowerCase().includes(term)); }, [list, query]);
   const link = `${window.location.origin}/staff`;
-  // Cada participação é um registro: conta quantas vezes o mesmo CPF já veio até esta.
-  const participacoes = (item: Staff) => list.filter((outro) => outro.cpf === item.cpf && outro.created_at <= item.created_at).length;
-
-  async function toggle(item: Staff) {
-    await supabase.from('staff').update({ status: item.status === 'ativo' ? 'inativo' : 'ativo', updated_at: new Date().toISOString() }).eq('id', item.id);
-    void load();
-  }
-
-  async function remove(item: Staff) {
-    if (!window.confirm(`Excluir o cadastro de ${item.nome}? Esta ação não pode ser desfeita.`)) return;
-    await supabase.from('staff').delete().eq('id', item.id);
-    void load();
-  }
-
-  function exportAll() {
-    downloadXlsx('communicali-staff.xlsx', 'Staff', ['Nome', 'CPF', 'Função', 'E-mail', 'WhatsApp', 'Empresa', 'CNPJ', 'CEP', 'Endereço', 'Cidade/UF', 'Tipo da chave Pix', 'Pix', 'Banco', 'Valor combinado', 'Pagamento combinado', 'Comprovante', 'Assistente', 'CPF do assistente', 'WhatsApp do assistente', 'O que o assistente faz', 'Quer ser acionado', 'Observações', 'Primeira vez', 'Conferir', 'Encontros', 'Data', 'Situação'],
-      visible.map((item) => [item.nome, item.cpf, item.funcao, item.email, item.whatsapp, item.empresa || '', item.cnpj || '', item.cep || '', item.endereco, item.cidade_uf, item.pix_tipo || '', item.pix || '', item.banco || '', item.valor_combinado || '', item.pagamento_combinado || '', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo' : '', item.assistente_nome || '', item.assistente_cpf || '', item.assistente_whatsapp || '', item.assistente_funcao || '', item.quer_ser_acionado ? 'Sim' : item.quer_ser_acionado === false ? 'Não' : '', item.observacoes || '', item.primeira_vez === false ? 'Não' : 'Sim', item.conferir || '', (item.eventos || []).join(', '), new Date(item.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }), item.status]));
-  }
-
   return (
     <>
-      <div className="wf-head"><div><small>STAFF</small><h1>Quem trabalha nos encontros</h1><p>Fotógrafos, vídeo, recepção e demais prestadores. Envie o link para a pessoa preencher. CPF e endereço só aparecem aqui.</p></div><div className="v2-head-actions"><button type="button" className="wf-secondary" disabled={!visible.length} onClick={exportAll}>Exportar Excel</button></div></div>
+      <div className="wf-head"><div><small>STAFF</small><h1>Quem trabalha nos encontros</h1><p>Fotografia, apoio, palestrantes, facilitação e demais prestadores. Envie o link para a pessoa preencher. Cada participação fica registrada; CPF, endereço e Pix só aparecem aqui.</p></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <section className="v2-forms-card">
-        <header><small>FORMULÁRIO DE CADASTRO</small><h2>Link para enviar ao staff</h2></header>
+        <header><small>FORMULÁRIO DE CADASTRO</small><h2>Link para enviar ao STAFF</h2></header>
         <div className="adm-links">
-          <input readOnly aria-label="Link do cadastro de staff" value={link} onFocus={(event) => event.target.select()} />
+          <input readOnly aria-label="Link do cadastro de STAFF" value={link} onFocus={(event) => event.target.select()} />
           <button type="button" className="wf-primary" onClick={() => { void navigator.clipboard.writeText(link); setNote('Link copiado.'); }}>Copiar link</button>
           <a className="wf-secondary" href={link} target="_blank" rel="noopener noreferrer">Abrir formulário</a>
         </div>
       </section>
-      <div className="wf-controls"><input aria-label="Buscar staff" placeholder="Buscar por nome, função ou e-mail" value={query} onChange={(event) => setQuery(event.target.value)} /></div>
-      <div className="adm-list">
-        {visible.map((item) => (
-          <div className="adm-row adm-row--static adm-row--stack" key={item.id}>
-            <div className="adm-row__line">
-              <strong>{item.nome}</strong>
-              <span>{item.funcao}{item.assistente_nome ? ' + assistente' : ''}{item.eventos?.length ? ` · ${item.eventos.join(', ')}` : ''} · {item.whatsapp} · {new Date(item.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}{participacoes(item) > 1 ? ` · ${participacoes(item)}ª participação` : ''}</span>
-              <em>{item.status === 'ativo' ? 'Ativo' : 'Inativo'}</em>
-              <button type="button" onClick={() => setOpen(open === item.id ? '' : item.id)}>{open === item.id ? 'Fechar' : 'Ver dados'}</button>
-              <button type="button" onClick={() => void toggle(item)}>{item.status === 'ativo' ? 'Inativar' : 'Reativar'}</button>
-              <button type="button" className="adm-danger" onClick={() => void remove(item)}>Excluir</button>
-            </div>
-            {open === item.id && <p className="adm-hint">CPF {item.cpf} · {item.email} · {item.endereco}, {item.cidade_uf}{item.cep ? ` · CEP ${item.cep}` : ''}{item.empresa ? ` · ${item.empresa}` : ''}{item.cnpj ? ` · CNPJ ${item.cnpj}` : ''}{item.pix ? ` · Pix (${item.pix_tipo || 'chave'}) ${item.pix}${item.banco ? `, ${item.banco}` : ''}` : ''}{item.quer_ser_acionado ? ' · Quer ser acionado para próximos eventos' : ''}</p>}
-            {open === item.id && item.observacoes && <p className="adm-hint">Observações: {item.observacoes}</p>}
-            {item.conferir && <p className="adm-hint adm-alerta" role="note">Conferir: {item.conferir}</p>}
-            {open === item.id && item.primeira_vez === false && <p className="adm-hint">{item.atualizou_dados ? 'Já participou antes e atualizou os dados neste cadastro.' : 'Já participou antes. Dados de empresa, endereço e Pix vieram do cadastro anterior.'}</p>}
-            {open === item.id && <p className="adm-hint">{item.valor_combinado ? `Valor combinado: ${item.valor_combinado}` : 'Valor não informado'} · {item.comprovante === 'nota' ? 'Emite nota fiscal' : item.comprovante === 'recibo' ? 'Emite recibo' : 'Comprovante não informado'}{item.aceite_pagamento_em ? ' · Aceitou as condições de pagamento' : ''}{item.pagamento_combinado ? ` · Combinado: ${item.pagamento_combinado}` : ''}</p>}
-            {open === item.id && item.assistente_nome && <p className="adm-hint">Assistente: {item.assistente_nome} · CPF {item.assistente_cpf} · {item.assistente_whatsapp} · {item.assistente_funcao}</p>}
-            {open !== item.id && <p className="adm-hint">CPF {maskCpf(item.cpf)}</p>}
-          </div>
-        ))}
-        {!visible.length && <p className="adm-hint">Nenhum cadastro de staff ainda.</p>}
-      </div>
+      <RegistrosPainel<Staff> tabela="staff" campos={CAMPOS_STAFF} nome={(item) => item.nome} alerta={(item) => item.conferir} filtro={{ titulo: 'Função', valor: (item) => item.funcao }} arquivo="communicali-staff.xlsx" vazio="Nenhum cadastro de STAFF ainda." />
     </>
   );
 }

@@ -218,3 +218,18 @@ html[data-workspace-ui='v2'] .v2-forms-trash .wf-record-row:not(.header):hover{b
   html[data-workspace-ui='v2'] .v2-forms-trash .wf-record-row>span:nth-child(2){display:block;grid-column:1/-1;order:3;font-size:12px}
   html[data-workspace-ui='v2'] .v2-forms-trash .wf-record-row>span:nth-child(5){display:flex}
 }
+
+/* Painel em largura total (04/11): tabela usa a tela inteira, gaveta mais larga com campos em duas colunas. */
+html[data-workspace-ui='v2'] .v2-forms-table td{max-width:360px}
+html[data-workspace-ui='v2'] .v2-forms-table .v2-forms-edit-col{width:66px;min-width:66px;max-width:66px}
+html[data-workspace-ui='v2'] .v2-forms-table .v2-forms-date-col{left:102px!important}
+html[data-workspace-ui='v2'] .v2-forms-row-actions{display:inline-flex;gap:4px}
+html[data-workspace-ui='v2'] .v2-forms-edit--excluir{color:#a9502e}
+html[data-workspace-ui='v2'] .v2-forms-edit--excluir:hover{border-color:#a9502e;background:#fbede6}
+html[data-workspace-ui='v2'] .v2-forms-drawer{width:min(960px,100vw)}
+html[data-workspace-ui='v2'] .v2-forms-drawer-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;align-content:start}
+html[data-workspace-ui='v2'] .v2-forms-drawer-body .is-largo{grid-column:1/-1}
+html[data-workspace-ui='v2'] .v2-forms-drawer>footer .v2-forms-drawer-excluir{margin-right:auto}
+@media (max-width:760px){html[data-workspace-ui='v2'] .v2-forms-drawer-body{grid-template-columns:1fr}}
+html[data-workspace-ui='v2'] .v2-forms-leitura{margin:0;padding:9px 11px;border:1px dashed #eadfd6;border-radius:8px;background:#fbf7f3;font-size:13px;line-height:1.5;color:#3e3533;white-space:pre-wrap}
+html[data-workspace-ui='v2'] .v2-forms-alerta{color:#a9502e;font-weight:700}
