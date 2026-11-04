@@ -160,7 +160,7 @@ export function emailStaff(item) {
         'Seu cadastro chegou, e agora você faz parte<br>do <strong>STAFF da ComuniCALI</strong> neste encontro.',
         'É com esse time que a gente recebe as pessoas,<br>cuida de cada detalhe e transforma<br>um café em boas conversas. ☕',
       ],
-      itens: [['Sua função', item.funcao], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', comprovanteTexto(item)]],
+      itens: [['Encontro', (item.eventos || []).join(', ')], ['Sua função', item.funcao], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', comprovanteTexto(item)]],
       depois: `<strong>E nos próximos encontros?</strong><br>O STAFF é montado a cada evento.<br>Se a gente chamar você de novo, é só preencher<br>o cadastro outra vez. Se nada tiver mudado,<br>ele fica bem mais rapidinho. 😉<br><br>Ficou alguma dúvida? Chama a organização<br>no <a href="${WHATS}" style="color:${COR.vivo}">WhatsApp</a>.`,
     }),
   };
@@ -177,7 +177,7 @@ export function emailStaffOrganizacao(item, painel) {
       titulo: 'Cadastro de STAFF', cor: FAIXA.confirmacao, saudacao: voltou ? 'Olha quem voltou!' : 'Tem gente nova no time!',
       paragrafos: [voltou ? 'Mais um cadastro de STAFF chegou,<br>de alguém que já esteve com a gente. 💛' : 'Acabou de chegar um cadastro de STAFF. 💛', 'Os dados completos, com CPF,<br>endereço e chave Pix, estão no painel.'],
       aviso: item.conferir || '',
-      itens: [['Nome', item.nome], ['Participação', participacao], ['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', comprovanteTexto(item)],
+      itens: [['Nome', item.nome], ['Participação', participacao], ['Encontro', (item.eventos || []).join(', ')], ['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', comprovanteTexto(item)],
         ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : 'Não vai levar'], ['Próximos eventos', item.quer_ser_acionado ? 'Quer ser chamado de novo' : 'Prefere não ser chamado']],
       botao: { texto: 'Ver no painel', href: painel },
     }),

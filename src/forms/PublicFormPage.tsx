@@ -24,6 +24,8 @@ export type FormPreset = {
   skipWelcome?: boolean;
   /** Devolve a mensagem de erro, ou vazio quando deu certo. */
   submit: (answers: Record<string, FormAnswer>) => Promise<string>;
+  /** Ao avançar de uma pergunta, pode buscar dados e devolver respostas para preencher (ex.: cadastro anterior). */
+  onAdvance?: (questionId: string, answers: Record<string, FormAnswer>) => Promise<Record<string, FormAnswer> | null>;
 };
 
 export function PublicFormPage({ preset }: { preset?: FormPreset }) {
@@ -86,7 +88,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     if (preview) { setConfirmation(false); setPhase('done'); return; }
     setPhase('sending'); setSendError('');
     const visited = [...trail, index].map((position) => questions[position]?.id).filter(Boolean) as string[];
-    const sent: Record<string, unknown> = Object.fromEntries(Object.entries(answers).filter(([id]) => visited.includes(id)));
+    const sent: Record<string, unknown> = Object.fromEntries(Object.entries(answers).filter(([id]) => visited.includes(id) || id.startsWith('_')));
     if (preset) {
       const problem = await preset.submit(sent as Record<string, FormAnswer>);
       if (problem) { setSendError(problem); setPhase('questions'); return; }
@@ -101,17 +103,25 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     void fetch('/api/avisos', { method: 'POST' }).catch(() => null);
   }, [answers, form, preset, preview, trail, index, questions]);
 
-  const goNext = useCallback(() => {
-    if (!question) return;
+  const [buscando, setBuscando] = useState(false);
+  const goNext = useCallback(async () => {
+    if (!question || buscando) return;
     const problem = validateAnswer(question, answers[question.id]);
     if (problem) { setError(problem); return; }
     if (uploads[question.id]?.busy) { setError('Aguarde terminar o envio do arquivo.'); return; }
     setError('');
     if (maskOf(question) === 'cep') preencherPeloCep(String(answers[question.id] || ''), index);
-    const next = nextQuestionIndex(questions, index, answers[question.id], answers);
+    let atuais = answers;
+    if (preset?.onAdvance) {
+      setBuscando(true);
+      const extra = await preset.onAdvance(question.id, answers).catch(() => null);
+      setBuscando(false);
+      if (extra) { atuais = { ...answers, ...extra }; setAnswers(atuais); }
+    }
+    const next = nextQuestionIndex(questions, index, atuais[question.id], atuais);
     if (next < 0) { void submit(); return; }
     setTrail((current) => [...current, index]); setDirection('next'); setIndex(next);
-  }, [answers, index, question, questions, submit, uploads]);
+  }, [answers, buscando, index, preset, question, questions, submit, uploads]);
 
   // Endereço pelo CEP (ViaCEP): a pessoa vê a rua, o bairro e a cidade preenchidos e pode editar.
   function preencherPeloCep(cep: string, desde: number) {

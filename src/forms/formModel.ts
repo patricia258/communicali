@@ -43,7 +43,8 @@ export function visivel(question: FormQuestion, answers: Record<string, FormAnsw
 
 /** Troca {id} no título ou na ajuda pela resposta já dada (ex.: "A chave Pix é o CNPJ {cnpj}?"). */
 export function comRespostas(texto: string, answers: Record<string, FormAnswer | undefined>) {
-  return texto.replace(/\{(\w+)\}/g, (marca, id: string) => (answers[id] !== undefined && String(answers[id]).trim() ? String(answers[id]) : marca));
+  // {a|b}: usa a primeira resposta preenchida.
+  return texto.replace(/\{([\w|]+)\}/g, (marca, ids: string) => { const id = ids.split('|').find((item) => answers[item] !== undefined && String(answers[item]).trim()); return id ? String(answers[id]) : marca; });
 }
 
 export type TextMask = 'cpf' | 'cnpj' | 'cep' | 'money' | 'pix_aleatoria';

@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (noite, 7) | STAFF recupera cadastro e marca encontros
+- STAFF começa por "É a primeira vez?". Quem já foi informa CPF e e-mail; `onAdvance` (novo gancho de `FormPreset`) chama `communicali_staff_reencontrar` (só responde se CPF e e-mail batem; devolve nome, WhatsApp, banco e o final da chave Pix). Encontrou: "Que bom ter você de volta, {nome}!" e "Algum dado mudou?". Não encontrou: avisa e segue o cadastro completo. Respostas internas com `_` vão no envio e não são descartadas.
+- Encontros: `StaffForm` busca as edições públicas futuras. Com mais de uma, pergunta "Em quais encontros você vai trabalhar?" (várias); com uma, liga direto; sem nenhuma, pula. Coluna `staff.eventos` (migração `20261104180000_staff_eventos_reencontro.sql`), no painel, Excel e e-mails.
+- Aviso de formulário preenchido para a organização: só nome, formulário e botão do painel, sem as respostas.
+- `{a|b}` no título usa a primeira resposta preenchida.
+
 ### 2026-11-04 (noite, 6) | Pix por documento, e-mails sem emoji na frente
 - Motor: `showIf` aceita `{ any: [...] }` (basta uma condição); `{id}` no título/ajuda mostra a resposta já dada (`comRespostas`).
 - STAFF: Fotografia e vídeo e Facilitação emitem sempre nota fiscal; Palestrante e Outro escolhem; Apoio e Auxiliar emitem recibo. Pix por documento (`perguntasPix`/`chavePix` em `Staff.tsx`, usados também no fornecedor): quem tem CNPJ vê CNPJ, e-mail, telefone ou aleatória; pessoa física vê CPF, e-mail, telefone ou aleatória. CNPJ e CPF são confirmados ("A chave Pix é o CNPJ ...?"), e-mail e telefone também; só digita se for outro.

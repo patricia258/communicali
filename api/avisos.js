@@ -52,11 +52,10 @@ export default async function handler(req, res) {
   const respostas = await (await banco(`form_responses?admin_avisado_em=is.null&submitted_at=gte.${desde()}&select=id,answers,respondent_name,respondent_email,form:forms!form_id(title,questions)&limit=20`)).json();
   for (const item of Array.isArray(respostas) ? respostas : []) {
     if (!(await reservar('form_responses', item.id, 'admin_avisado_em'))) continue;
-    const perguntas = (item.form?.questions || []).filter((q) => q.kind !== 'statement');
-    const itens = perguntas.filter((q) => item.answers?.[q.id] !== undefined && valor(item.answers[q.id]) !== '').map((q) => `${q.label}: ${valor(item.answers[q.id])}`.slice(0, 220));
+    // Só o aviso: as respostas completas ficam no painel.
     const quem = item.respondent_name || item.respondent_email || 'Alguém';
     for (const email of admins) {
-      await enviar(email, { assunto: `Novo preenchimento: ${item.form?.title || 'formulário'}`, html: layoutSimples({ titulo: 'Formulário preenchido', saudacao: 'Mais um preenchimento!', linhas: [`<strong>${escape(quem)}</strong> preencheu`, `<strong>${escape(item.form?.title || 'um formulário')}</strong>`], itens, botao: { texto: 'Ver no painel', href: `${PAINEL}/formularios` }, semSair: true }) });
+      await enviar(email, { assunto: `Novo preenchimento: ${item.form?.title || 'formulário'}`, html: layoutSimples({ titulo: 'Formulário preenchido', saudacao: 'Mais um preenchimento!', linhas: [`<strong>${escape(quem)}</strong> preencheu o formulário`, `<strong>${escape(item.form?.title || 'um formulário')}</strong>.`, 'As respostas estão no painel.'], botao: { texto: 'Ver no painel', href: `${PAINEL}/formularios` }, semSair: true }) });
       await pausa();
     }
     total.formularios += 1;
@@ -73,7 +72,7 @@ export default async function handler(req, res) {
     total.inscricoes += 1;
   }
   // Cadastro de STAFF: boas-vindas para a pessoa e aviso para a organização (sem CPF, endereço nem Pix no e-mail).
-  const staff = await (await banco(`staff?or=(admin_avisado_em.is.null,staff_avisado_em.is.null)&created_at=gte.${desde()}&select=id,nome,email,whatsapp,funcao,valor_combinado,pagamento_combinado,comprovante,assistente_nome,assistente_funcao,quer_ser_acionado,primeira_vez,atualizou_dados,conferir,admin_avisado_em,staff_avisado_em&limit=20`)).json();
+  const staff = await (await banco(`staff?or=(admin_avisado_em.is.null,staff_avisado_em.is.null)&created_at=gte.${desde()}&select=id,nome,email,whatsapp,funcao,valor_combinado,pagamento_combinado,comprovante,assistente_nome,assistente_funcao,quer_ser_acionado,primeira_vez,atualizou_dados,conferir,admin_avisado_em,staff_avisado_em,eventos&limit=20`)).json();
   for (const item of Array.isArray(staff) ? staff : []) {
     if (!item.staff_avisado_em && !item.email?.endsWith('.test') && (await reservar('staff', item.id, 'staff_avisado_em'))) { await enviar(item.email, emailStaff(item)); await pausa(); }
     if (item.admin_avisado_em || !(await reservar('staff', item.id, 'admin_avisado_em'))) continue;

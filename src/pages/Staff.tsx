@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { errorMessage, supabase } from '../lib';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
-import type { FormQuestion } from '../forms/formModel';
+import type { FormAnswer, FormQuestion } from '../forms/formModel';
 import { downloadXlsx } from '../forms/formExports';
 
 const ACEITE = 'Autorizo';
@@ -44,7 +44,7 @@ export function perguntasPix(pj: FormQuestion['showIf'], pf: FormQuestion['showI
     { id: 'pix_cpf_ok', kind: 'single_choice', label: 'A chave Pix é o CPF {cpf}?', help: 'É o mesmo CPF informado no cadastro. Se a chave for outra, volte e escolha outro tipo.', options: [ESTA_CHAVE], required: true, showIf: [pixTipo('CPF'), MUDOU] },
     { id: 'pix_email_ok', kind: 'yes_no', label: 'A chave Pix é o e-mail {email}?', required: true, showIf: [pixTipo('E-mail'), MUDOU] },
     { id: 'pix_email', kind: 'email', label: 'Qual é o e-mail da chave Pix?', required: true, showIf: [pixTipo('E-mail'), { id: 'pix_email_ok', in: ['Não'] }, MUDOU] },
-    { id: 'pix_telefone_ok', kind: 'yes_no', label: 'A chave Pix é o telefone {whatsapp}?', required: true, showIf: [pixTipo('Telefone'), MUDOU] },
+    { id: 'pix_telefone_ok', kind: 'yes_no', label: 'A chave Pix é o telefone {whatsapp|_whatsapp}?', required: true, showIf: [pixTipo('Telefone'), MUDOU] },
     { id: 'pix_telefone', kind: 'phone', label: 'Qual é o telefone da chave Pix?', required: true, showIf: [pixTipo('Telefone'), { id: 'pix_telefone_ok', in: ['Não'] }, MUDOU] },
     { id: 'pix_aleatoria', kind: 'short_text', label: 'Qual é a chave aleatória?', help: 'Copie a chave do aplicativo do banco e cole aqui.', mask: 'pix_aleatoria', required: true, showIf: [pixTipo('Chave aleatória'), MUDOU] },
     { id: 'banco', kind: 'short_text', label: 'Qual é o banco ou a instituição da chave Pix?', required: true, showIf: MUDOU },
@@ -58,12 +58,13 @@ export function chavePix(answers: Record<string, unknown>) {
   const tipo = valor('pix_tipo_pj') || valor('pix_tipo_pf');
   const chave = tipo === 'CNPJ' ? valor('cnpj') : tipo === 'CPF' ? valor('cpf')
     : tipo === 'E-mail' ? (answers.pix_email_ok === 'Sim' ? valor('email') : valor('pix_email'))
-    : tipo === 'Telefone' ? (answers.pix_telefone_ok === 'Sim' ? valor('whatsapp') : valor('pix_telefone'))
+    : tipo === 'Telefone' ? (answers.pix_telefone_ok === 'Sim' ? valor('whatsapp') || valor('_whatsapp') : valor('pix_telefone'))
     : tipo === 'Chave aleatória' ? valor('pix_aleatoria') : '';
   return { tipo, chave };
 }
 
-export const PRESET_STAFF: FormPreset = {
+/** Monta o cadastro com os encontros abertos: com mais de um, a pessoa marca em quais vai trabalhar. */
+export const presetStaff = (eventos: string[]): FormPreset => ({
   title: 'Cadastro de STAFF',
   description: `Olá! Que alegria ter você no time da ComuniCALI. Obrigada por fazer parte deste encontro.
 
@@ -73,14 +74,18 @@ Seus dados ficam restritos à organização.`,
   submitLabel: 'Enviar cadastro',
   successText: 'Cadastro recebido! Obrigada por fazer parte do STAFF. A organização vai entrar em contato com os próximos passos.',
   questions: [
-    { id: 'nome', kind: 'name', label: 'Qual é o seu nome completo?', required: true },
-    { id: 'cpf', kind: 'short_text', label: 'Qual é o seu CPF?', mask: 'cpf', required: true },
-    { id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', required: true },
-    { id: 'whatsapp', kind: 'phone', label: 'Qual é o seu WhatsApp?', required: true },
+    // Começa pela primeira vez: quem já foi STAFF informa CPF e e-mail e recuperamos o cadastro anterior.
     { id: 'primeira_vez', kind: 'yes_no', label: 'É a primeira vez que você faz parte do STAFF da ComuniCALI?', required: true },
-    { id: 'atualizar', kind: 'yes_no', label: 'Algum dado mudou desde o seu último cadastro?', help: 'Empresa, CNPJ, endereço, chave Pix ou banco. Se nada mudou, usamos o seu cadastro anterior e você responde só sobre este encontro.', required: true, showIf: { id: 'primeira_vez', in: ['Não'] } },
+    { id: 'cpf', kind: 'short_text', label: 'Qual é o seu CPF?', mask: 'cpf', required: true },
+    { id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', help: 'Se você já foi STAFF, use o mesmo e-mail do último cadastro.', required: true },
+    { id: 'reencontro', kind: 'statement', label: 'Que bom ter você de volta, {_primeiro}!', help: 'Encontramos o seu último cadastro, de **{_ultima}**. Chave Pix ({_pix_tipo}) com final **{_pix_final}**, no **{_banco}**.', showIf: { id: '_encontrado', in: ['Sim'] } },
+    { id: 'sem_cadastro', kind: 'statement', label: 'Não encontramos um cadastro com este CPF e e-mail', help: 'Sem problema: vamos fazer o cadastro completo, bem rapidinho.', showIf: { id: '_encontrado', in: ['Não'] } },
+    { id: 'nome', kind: 'name', label: 'Qual é o seu nome completo?', required: true, showIf: { id: '_encontrado', in: ['Não', ''] } },
+    { id: 'whatsapp', kind: 'phone', label: 'Qual é o seu WhatsApp?', required: true, showIf: { id: '_encontrado', in: ['Não', ''] } },
+    { id: 'atualizar', kind: 'yes_no', label: 'Algum dado mudou desde o último cadastro?', help: 'Empresa, CNPJ, endereço, chave Pix ou banco. Se nada mudou, usamos o cadastro anterior e você responde só sobre este encontro.', required: true, showIf: { id: '_encontrado', in: ['Sim'] } },
     // Quem escolhe uma função da lista pula a pergunta "Outro".
-    { id: 'funcao', kind: 'single_choice', label: 'Qual será a sua função no encontro?', options: FUNCOES, required: true,
+    ...(eventos.length > 1 ? [{ id: 'eventos', kind: 'multi_choice' as const, label: 'Em quais encontros você vai trabalhar?', options: eventos, required: true }] : []),
+    { id: 'funcao', kind: 'single_choice', label: 'Qual será a sua função neste encontro?', options: FUNCOES, required: true,
       logic: FUNCOES.filter((item) => item !== OUTRO).map((item) => ({ when: item, goTo: 'assistente' })) },
     { id: 'funcao_outra', kind: 'short_text', label: 'Conte qual será a sua função', required: true },
     { id: 'assistente', kind: 'yes_no', label: 'Você vai levar assistente?', required: true, logic: [{ when: 'Não', goTo: 'comprovante' }], showIf: { id: 'funcao', in: COM_ASSISTENTE } },
@@ -115,9 +120,10 @@ Seus dados ficam restritos à organização.`,
     const nota = NOTA_OBRIGATORIA.includes(funcao) || (ESCOLHE.includes(funcao) && answers.comprovante === NOTA);
     const pix = chavePix(answers);
     const primeira = answers.primeira_vez !== 'Não';
-    const dados = primeira || answers.atualizar === 'Sim';
+    // Quem é novo ou não foi encontrado preenche tudo; quem foi encontrado e disse que nada mudou, não.
+    const dados = answers.atualizar !== 'Não';
     const { error } = await supabase.rpc('communicali_cadastrar_staff', {
-      p_nome: value('nome'), p_cpf: value('cpf'), p_email: value('email'), p_whatsapp: value('whatsapp'),
+      p_nome: value('nome') || value('_nome'), p_cpf: value('cpf'), p_email: value('email'), p_whatsapp: value('whatsapp') || value('_whatsapp'),
       p_funcao: funcao === OUTRO ? value('funcao_outra') : funcao,
       p_empresa: nota ? value('empresa') : '', p_cnpj: nota ? value('cnpj') : '', p_cep: value('cep'),
       p_endereco: [value('endereco'), value('numero'), value('complemento')].filter(Boolean).join(', '), p_cidade: value('cidade'),
@@ -127,17 +133,39 @@ Seus dados ficam restritos à organização.`,
       p_comprovante: nota ? 'nota' : 'recibo', p_valor: value('valor'),
       p_aceite_pagamento: [answers.pagamento_foto, answers.pagamento_apoio, answers.pagamento_outro].includes(DE_ACORDO) && (!dados || answers.conferi === CONFERI),
       p_combinado: APOIO.includes(funcao) ? PAGAMENTO_APOIO : value('combinado_foto') || value('combinado_outro'),
-      p_pix_tipo: dados ? pix.tipo : null, p_banco: dados ? value('banco') : null, p_primeira_vez: primeira, p_atualizar: dados, p_acionado: answers.acionado === 'Sim', p_observacoes: value('observacoes') || null,
+      p_pix_tipo: dados ? pix.tipo : null, p_banco: dados ? value('banco') : null, p_primeira_vez: primeira, p_atualizar: dados,
+      p_eventos: eventos.length > 1 ? (Array.isArray(answers.eventos) ? answers.eventos : []) : eventos, p_acionado: answers.acionado === 'Sim', p_observacoes: value('observacoes') || null,
     });
     return error ? errorMessage(error) : '';
   },
-};
+  // Depois do e-mail, quem disse que já foi STAFF tem o cadastro procurado por CPF e e-mail.
+  onAdvance: async (id, answers): Promise<Record<string, FormAnswer> | null> => {
+    if (id !== 'email' || answers.primeira_vez !== 'Não') return id === 'email' ? { _encontrado: '' } : null;
+    const { data } = await supabase.rpc('communicali_staff_reencontrar', { p_cpf: String(answers.cpf || ''), p_email: String(answers.email || '') });
+    const achou = data as { encontrado: boolean; nome?: string; whatsapp?: string; pix_tipo?: string; pix_final?: string; banco?: string; ultima?: string } | null;
+    if (!achou?.encontrado) return { _encontrado: 'Não' };
+    return { _encontrado: 'Sim', _nome: achou.nome || '', _primeiro: (achou.nome || '').trim().split(/\s+/)[0] || '', _whatsapp: achou.whatsapp || '', _pix_tipo: achou.pix_tipo || '', _pix_final: achou.pix_final || '', _banco: achou.banco || '', _ultima: achou.ultima || '' };
+  },
+});
+
+export const PRESET_STAFF = presetStaff([]);
+
+type Encontro = { titulo: string; data_evento: string };
+// Encontros públicos que ainda vão acontecer, no formato "1ª Edição Coffee RH (14/11)".
+const rotuloEncontro = (item: Encontro) => `${item.titulo} (${item.data_evento.slice(8, 10)}/${item.data_evento.slice(5, 7)})`;
 
 export function StaffForm() {
-  return <PublicFormPage preset={PRESET_STAFF} />;
+  const [eventos, setEventos] = useState<string[] | null>(null);
+  useEffect(() => {
+    const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+    void supabase.from('editions').select('titulo,data_evento').eq('publica', true).gte('data_evento', hoje).order('data_evento')
+      .then(({ data }) => setEventos(((data || []) as Encontro[]).map(rotuloEncontro)), () => setEventos([]));
+  }, []);
+  if (!eventos) return <div className="cali-form-page" aria-busy="true" />;
+  return <PublicFormPage preset={presetStaff(eventos)} />;
 }
 
-type Staff = { id: string; nome: string; cpf: string; email: string; whatsapp: string; funcao: string; empresa: string | null; cnpj: string | null; cep: string | null; endereco: string; cidade_uf: string; pix: string | null; status: string; created_at: string; assistente_nome: string | null; assistente_cpf: string | null; assistente_whatsapp: string | null; assistente_funcao: string | null; comprovante: string | null; valor_combinado: string | null; pagamento_combinado: string | null; aceite_pagamento_em: string | null; pix_tipo: string | null; banco: string | null; quer_ser_acionado: boolean | null; observacoes: string | null; primeira_vez: boolean | null; atualizou_dados: boolean; conferir: string | null };
+type Staff = { id: string; nome: string; cpf: string; email: string; whatsapp: string; funcao: string; empresa: string | null; cnpj: string | null; cep: string | null; endereco: string; cidade_uf: string; pix: string | null; status: string; created_at: string; assistente_nome: string | null; assistente_cpf: string | null; assistente_whatsapp: string | null; assistente_funcao: string | null; comprovante: string | null; valor_combinado: string | null; pagamento_combinado: string | null; aceite_pagamento_em: string | null; pix_tipo: string | null; banco: string | null; quer_ser_acionado: boolean | null; observacoes: string | null; primeira_vez: boolean | null; atualizou_dados: boolean; conferir: string | null; eventos: string[] | null };
 
 const maskCpf = (cpf: string) => `***.${cpf.slice(3, 6)}.${cpf.slice(6, 9)}-**`;
 
@@ -165,8 +193,8 @@ export function StaffPanel() {
   }
 
   function exportAll() {
-    downloadXlsx('communicali-staff.xlsx', 'Staff', ['Nome', 'CPF', 'Função', 'E-mail', 'WhatsApp', 'Empresa', 'CNPJ', 'CEP', 'Endereço', 'Cidade/UF', 'Tipo da chave Pix', 'Pix', 'Banco', 'Valor combinado', 'Pagamento combinado', 'Comprovante', 'Assistente', 'CPF do assistente', 'WhatsApp do assistente', 'O que o assistente faz', 'Quer ser acionado', 'Observações', 'Primeira vez', 'Conferir', 'Data', 'Situação'],
-      visible.map((item) => [item.nome, item.cpf, item.funcao, item.email, item.whatsapp, item.empresa || '', item.cnpj || '', item.cep || '', item.endereco, item.cidade_uf, item.pix_tipo || '', item.pix || '', item.banco || '', item.valor_combinado || '', item.pagamento_combinado || '', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo' : '', item.assistente_nome || '', item.assistente_cpf || '', item.assistente_whatsapp || '', item.assistente_funcao || '', item.quer_ser_acionado ? 'Sim' : item.quer_ser_acionado === false ? 'Não' : '', item.observacoes || '', item.primeira_vez === false ? 'Não' : 'Sim', item.conferir || '', new Date(item.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }), item.status]));
+    downloadXlsx('communicali-staff.xlsx', 'Staff', ['Nome', 'CPF', 'Função', 'E-mail', 'WhatsApp', 'Empresa', 'CNPJ', 'CEP', 'Endereço', 'Cidade/UF', 'Tipo da chave Pix', 'Pix', 'Banco', 'Valor combinado', 'Pagamento combinado', 'Comprovante', 'Assistente', 'CPF do assistente', 'WhatsApp do assistente', 'O que o assistente faz', 'Quer ser acionado', 'Observações', 'Primeira vez', 'Conferir', 'Encontros', 'Data', 'Situação'],
+      visible.map((item) => [item.nome, item.cpf, item.funcao, item.email, item.whatsapp, item.empresa || '', item.cnpj || '', item.cep || '', item.endereco, item.cidade_uf, item.pix_tipo || '', item.pix || '', item.banco || '', item.valor_combinado || '', item.pagamento_combinado || '', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo' : '', item.assistente_nome || '', item.assistente_cpf || '', item.assistente_whatsapp || '', item.assistente_funcao || '', item.quer_ser_acionado ? 'Sim' : item.quer_ser_acionado === false ? 'Não' : '', item.observacoes || '', item.primeira_vez === false ? 'Não' : 'Sim', item.conferir || '', (item.eventos || []).join(', '), new Date(item.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }), item.status]));
   }
 
   return (
@@ -187,7 +215,7 @@ export function StaffPanel() {
           <div className="adm-row adm-row--static adm-row--stack" key={item.id}>
             <div className="adm-row__line">
               <strong>{item.nome}</strong>
-              <span>{item.funcao}{item.assistente_nome ? ' + assistente' : ''} · {item.whatsapp} · {new Date(item.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}{participacoes(item) > 1 ? ` · ${participacoes(item)}ª participação` : ''}</span>
+              <span>{item.funcao}{item.assistente_nome ? ' + assistente' : ''}{item.eventos?.length ? ` · ${item.eventos.join(', ')}` : ''} · {item.whatsapp} · {new Date(item.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}{participacoes(item) > 1 ? ` · ${participacoes(item)}ª participação` : ''}</span>
               <em>{item.status === 'ativo' ? 'Ativo' : 'Inativo'}</em>
               <button type="button" onClick={() => setOpen(open === item.id ? '' : item.id)}>{open === item.id ? 'Fechar' : 'Ver dados'}</button>
               <button type="button" onClick={() => void toggle(item)}>{item.status === 'ativo' ? 'Inativar' : 'Reativar'}</button>
