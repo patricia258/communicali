@@ -6,7 +6,7 @@ import { errorMessage, supabase } from '../lib';
 import { longDate } from './Edicao';
 import { JanelaCartao } from './MembroCartao';
 import { FeedbackPerfil, ParceiroRede, usePerfisParceiros } from './RedeExtras';
-import { ConviteMembro } from './ConviteMembro';
+import { CartaoConvite, ConviteMembro, gerarCartaoEuVou } from './ConviteMembro';
 import { ParceirosExemplos } from './ParceirosExemplos';
 import { TrilhaPrograma } from './TrilhaPrograma';
 import './membro.css';
@@ -359,7 +359,8 @@ function organizarAgenda(espaco: Espaco, publicadas: EncontroAgenda[], hoje: str
 }
 
 const MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-function EncontroCartao({ edicao, proximo, carregando, erro, estive = false, embarque = false }: { edicao: EncontroAgenda; proximo: boolean; carregando: boolean; erro: boolean; estive?: boolean; embarque?: boolean }) {
+function EncontroCartao({ edicao, proximo, carregando, erro, estive = false, embarque = false, pessoa }: { edicao: EncontroAgenda; proximo: boolean; carregando: boolean; erro: boolean; estive?: boolean; embarque?: boolean; pessoa?: { nome: string; foto_url: string | null } }) {
+  const [euVou, setEuVou] = useState(false);
   const [, mes, dia] = edicao.data_evento.split('-');
   const fotos = linkEncontro(edicao.fotos_url);
   const inscricao = edicao.inscricoes_abertas ? linkEncontro(edicao.inscricao_url) || `/inscricao/${encodeURIComponent(edicao.slug)}` : '';
@@ -384,7 +385,9 @@ function EncontroCartao({ edicao, proximo, carregando, erro, estive = false, emb
             {fotos && <a className="passe__encontro-fotos" href={fotos} target="_blank" rel="noopener noreferrer"><Images size={16} aria-hidden="true" />Ver as fotos<ExternalLink size={13} aria-hidden="true" /></a>}
           </div>
         </details>
-        {proximo && inscricao && <a className="passe__botao" href={inscricao}>Quero me inscrever</a>}
+        {proximo && embarque && pessoa && <button type="button" className="passe__botao" onClick={() => setEuVou(true)}>Criar meu card "Eu vou!"</button>}
+        {proximo && !embarque && inscricao && <a className="passe__botao" href={inscricao}>Quero me inscrever</a>}
+        {euVou && pessoa && <CartaoConvite nome={pessoa.nome} codigo="eu-vou" titulo="Seu card Eu vou!" arquivoNome={`eu-vou-${edicao.slug}.png`} texto={`Eu vou ao encontro ${edicao.titulo} da ComuniCALI! comuni.calirh.com`} gerar={() => gerarCartaoEuVou(pessoa.nome, pessoa.foto_url, { titulo: edicao.titulo, data: longDate(edicao.data_evento) + (edicao.horario ? ` · ${edicao.horario}` : ''), local: [edicao.local, edicao.cidade].filter(Boolean).join(', ') })} fechar={() => setEuVou(false)} />}
       </div>
     </article>
   );
@@ -423,7 +426,7 @@ function Edicoes({ espaco }: { espaco: Espaco }) {
       {erro && <div className="passe__agenda-erro" role="alert"><p>Não foi possível atualizar a agenda. Os encontros já carregados continuam disponíveis.</p><button type="button" className="passe__link" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
       <section className="passe__agenda-grupo" aria-labelledby="agenda-proximos">
         <h2 id="agenda-proximos">Sua próxima escala</h2>
-        {proximos.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo carregando={carregando} erro={erro} estive={carimbados.has(edicao.slug)} embarque={confirmadas.includes(edicao.slug)} />)}
+        {proximos.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo carregando={carregando} erro={erro} estive={carimbados.has(edicao.slug)} embarque={confirmadas.includes(edicao.slug)} pessoa={espaco.membro || undefined} />)}
         {!proximos.length && !carregando && !erro && <p className="passe__aviso">Nenhum próximo encontro anunciado.</p>}
       </section>
       <section className="passe__agenda-grupo" aria-labelledby="agenda-anteriores">

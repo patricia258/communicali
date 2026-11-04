@@ -8,7 +8,7 @@ export const linkConvite = (codigo: string) => `https://comuni.calirh.com/c/${en
 export const textoConvite = (codigo: string) => `Quero te convidar para fazer parte da nossa comunidade ComuniCALI. Use meu convite ${codigo}: ${linkConvite(codigo)}`;
 type Config = { codigo: string; alteracoes: number; restantes: number };
 const imagem = (url: string) => new Promise<HTMLImageElement>((resolve, reject) => {
-  const img = new Image(); img.onload = () => resolve(img); img.onerror = () => reject(new Error('imagem')); img.src = url;
+  const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = () => resolve(img); img.onerror = () => reject(new Error('imagem')); img.src = url;
 });
 
 // Carimbo redondo do canto superior: texto em volta e "Café & Pessoas" no meio.
@@ -70,7 +70,7 @@ export async function gerarCartaoConvite(nome: string, codigo: string): Promise<
   return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('imagem')), 'image/png'));
 }
 
-function CartaoConvite({ nome, codigo, fechar }: { nome: string; codigo: string; fechar: () => void }) {
+export function CartaoConvite({ nome, codigo, fechar, gerar, titulo = 'Convide para essa experiência', texto, arquivoNome }: { nome: string; codigo: string; fechar: () => void; gerar?: () => Promise<Blob>; titulo?: string; texto?: string; arquivoNome?: string }) {
   const [arquivo, setArquivo] = useState<Blob | null>(null);
   const [url, setUrl] = useState('');
   const [erro, setErro] = useState('');
@@ -86,34 +86,35 @@ function CartaoConvite({ nome, codigo, fechar }: { nome: string; codigo: string;
   }, [fechar]);
   useEffect(() => {
     let ativo = true; let objeto = ''; setErro(''); setArquivo(null); setUrl('');
-    void gerarCartaoConvite(nome, codigo).then((blob) => {
+    void (gerar ? gerar() : gerarCartaoConvite(nome, codigo)).then((blob) => {
       if (!ativo) return;
       objeto = URL.createObjectURL(blob); setArquivo(blob); setUrl(objeto);
     }).catch(() => { if (ativo) setErro('Não foi possível montar o cartão. Tente novamente.'); });
     return () => { ativo = false; if (objeto) URL.revokeObjectURL(objeto); };
   }, [nome, codigo, tentativa]);
-  const file = arquivo ? new File([arquivo], `convite-${codigo}.png`, { type: 'image/png' }) : null;
+  const nomeArquivo = arquivoNome || `convite-${codigo}.png`;
+  const file = arquivo ? new File([arquivo], nomeArquivo, { type: 'image/png' }) : null;
   const podeCompartilhar = !!file && !!navigator.canShare?.({ files: [file] });
   async function compartilhar() {
     if (!file || busy) return;
     setBusy(true); setErro('');
-    try { await navigator.share({ files: [file], text: textoConvite(codigo) }); }
+    try { await navigator.share({ files: [file], text: texto ?? textoConvite(codigo) }); }
     catch (error) { if (!(error instanceof Error && error.name === 'AbortError')) setErro('Não foi possível compartilhar. Você pode baixar a imagem.'); }
     finally { setBusy(false); }
   }
-  return <div className="passe__modal" role="dialog" aria-modal="true" aria-label="Seu cartão de convite" onKeyDown={(event) => {
+  return <div className="passe__modal" role="dialog" aria-modal="true" aria-label={titulo} onKeyDown={(event) => {
     if (event.key !== 'Tab') return;
     const botoes = event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]');
     const primeiro = botoes[0], ultimo = botoes[botoes.length - 1];
     if (event.shiftKey && document.activeElement === primeiro) { event.preventDefault(); ultimo?.focus(); }
     else if (!event.shiftKey && document.activeElement === ultimo) { event.preventDefault(); primeiro?.focus(); }
   }}><div className="passe__janela">
-    <h2>Convide para essa experiência</h2>
-    {url ? <img className="passe__previa" src={url} alt={`Convite ${codigo} com QR para inscrição no próximo encontro`} /> : !erro && <p role="status">Montando seu cartão…</p>}
+    <h2>{titulo}</h2>
+    {url ? <img className="passe__previa" src={url} alt={titulo} /> : !erro && <p role="status">Montando seu cartão…</p>}
     {erro && <p className="passe__erro" role="alert">{erro}</p>}
     {!arquivo && erro && <button type="button" className="passe__botao" onClick={() => setTentativa((n) => n + 1)}>Tentar novamente</button>}
     {podeCompartilhar && <button type="button" className="passe__botao" disabled={busy} onClick={() => void compartilhar()}>Compartilhar imagem</button>}
-    {url && <a className="passe__botao passe__botao--linha" href={url} download={`convite-${codigo}.png`}>Baixar imagem</a>}
+    {url && <a className="passe__botao passe__botao--linha" href={url} download={nomeArquivo}>Baixar imagem</a>}
     <button ref={fecharRef} type="button" className="passe__link" onClick={fechar}>Fechar</button>
   </div></div>;
 }
@@ -168,4 +169,38 @@ export function ConviteMembro({ nome, codigoAtual, recarregar }: { nome: string;
     {aviso && <p className="passe__ok" role="status">{aviso}</p>}{erro && <p className="passe__erro" role="alert">{erro}</p>}
     {cartao && <CartaoConvite nome={nome} codigo={atual} fechar={() => setCartao(false)} />}
   </section>;
+}
+
+// Card "Eu vou!" para quem tem inscrição confirmada: foto de passaporte, encontro e carimbo de embarque, nas cores do site.
+export async function gerarCartaoEuVou(nome: string, foto: string | null, encontro: { titulo: string; data: string; local: string }): Promise<Blob> {
+  await Promise.all([document.fonts.load('700 72px "Funnel Display"'), document.fonts.load('400 36px Inter'), document.fonts.load('600 32px Inter')]);
+  const [logo, retrato] = await Promise.all([imagem('/brand/communicali-branco.png'), foto ? imagem(foto).catch(() => null) : Promise.resolve(null)]);
+  const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1350;
+  const c = canvas.getContext('2d'); if (!c) throw new Error('canvas');
+  const fundo = c.createLinearGradient(0, 0, 1080, 1350); fundo.addColorStop(0, '#2A151C'); fundo.addColorStop(1, '#1F0E14');
+  c.fillStyle = fundo; c.fillRect(0, 0, 1080, 1350);
+  [['#7A1F3D', 0], ['#A9502E', 270], ['#C9973B', 540], ['#5F6238', 810]].forEach(([cor, x]) => { c.fillStyle = cor as string; c.fillRect(x as number, 0, 270, 14); });
+  c.drawImage(logo, 80, 80, 360, 360 * logo.height / logo.width);
+  // Foto de passaporte, reta e levemente inclinada.
+  c.save(); c.translate(300, 560); c.rotate(-0.05);
+  c.fillStyle = '#FFFFFF'; c.fillRect(-190, -235, 380, 470);
+  if (retrato) { const lado = Math.min(retrato.width, retrato.height * 0.8); c.drawImage(retrato, (retrato.width - lado) / 2, (retrato.height - lado / 0.8) / 2, lado, lado / 0.8, -172, -217, 344, 430); }
+  else { c.fillStyle = '#F3E9E0'; c.fillRect(-172, -217, 344, 430); c.fillStyle = '#7A1F3D'; c.font = '700 160px "Funnel Display", sans-serif'; c.textAlign = 'center'; c.fillText(nome.charAt(0), 0, 60); }
+  c.restore();
+  c.textAlign = 'left';
+  c.fillStyle = '#DDB160'; c.font = '700 150px "Funnel Display", sans-serif'; c.fillText('Eu vou!', 540, 470);
+  c.fillStyle = '#F7F0EA'; c.font = '400 34px Inter, sans-serif';
+  c.fillText('Vou estar no encontro', 545, 540); c.fillText('da ComuniCALI.', 545, 585);
+  c.fillStyle = '#C9973B'; c.font = '700 22px Inter, sans-serif'; c.fillText('CARTÃO DE EMBARQUE', 545, 660);
+  c.fillStyle = '#FFFFFF'; c.font = '700 44px "Funnel Display", sans-serif'; c.fillText(encontro.titulo, 545, 715, 470);
+  c.fillStyle = '#E9DDD5'; c.font = '400 30px Inter, sans-serif'; c.fillText(encontro.data, 545, 765, 470); c.fillText(encontro.local, 545, 808, 470);
+  // Bilhete com picote e a frase da comunidade.
+  c.fillStyle = 'rgba(247,240,234,.06)'; c.beginPath(); c.roundRect(80, 900, 920, 250, 24); c.fill();
+  c.strokeStyle = 'rgba(221,177,96,.55)'; c.lineWidth = 2; c.setLineDash([3, 10]); c.beginPath(); c.moveTo(110, 1025); c.lineTo(970, 1025); c.stroke(); c.setLineDash([]);
+  c.fillStyle = '#1F0E14'; for (const x of [80, 1000]) { c.beginPath(); c.arc(x, 1025, 20, 0, Math.PI * 2); c.fill(); }
+  c.textAlign = 'center'; c.fillStyle = '#F7F0EA'; c.font = 'italic 400 40px Inter, sans-serif'; c.fillText('Falar de pessoas pode mudar o mundo.', 540, 985);
+  c.fillStyle = '#DDB160'; c.font = '600 30px Inter, sans-serif'; c.fillText('Cada pessoa, uma jornada. Cada encontro, novos horizontes.', 540, 1095, 860);
+  c.fillStyle = '#CBB9B1'; c.font = '600 26px Inter, sans-serif'; c.fillText('comuni.calirh.com', 540, 1250);
+  c.font = '400 24px Inter, sans-serif'; c.fillText('Toda honra a Deus!', 540, 1295);
+  return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('imagem')), 'image/png'));
 }
