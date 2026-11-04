@@ -102,6 +102,8 @@ delete from public.point_events where member_id in (select id from public.member
 delete from public.registrations where email like '%@demo.communicali.test';
 delete from public.checkins where edition_id in (select id from public.editions where slug like 'demo-%');
 delete from public.checkins where member_id in (select id from public.members where email like '%@demo.communicali.test');
+delete from public.communicali_feedback_audit where feedback_id in (select f.id from public.communicali_feedback f join public.members m on m.id in (f.autor_id, f.perfil_id) where m.email like '%@demo.communicali.test');
+delete from public.communicali_feedback where autor_id in (select id from public.members where email like '%@demo.communicali.test') or perfil_id in (select id from public.members where email like '%@demo.communicali.test');
 delete from public.members where email like '%@demo.communicali.test';
 delete from public.editions where slug like 'demo-%';
 select (select count(*) from public.members) membros, (select count(*) from public.editions) edicoes"""))

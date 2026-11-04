@@ -471,3 +471,45 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__reagir p{margin:0;font-size:14px;line-height:1.55;color:#5A4740}
 .passe__admin-link{align-self:flex-end;margin-top:6px;font:600 12px Inter,sans-serif;color:#8A7A72;text-decoration:none}
 .passe__admin-link:hover{color:#7A1F3D;text-decoration:underline}
+
+/* Reações: nome e data em linhas separadas, ação discreta. */
+.passe__reacoes-lista li>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.passe__reacoes-lista li .passe__link{align-self:center;font-size:12px;color:#8A7A72}
+.passe__reacoes-lista li:first-child{border-top:0}
+.passe__reacao-emoji{animation:passe-pulo .5s ease both}
+.passe__reagir-abrir{display:inline-flex;align-items:center;justify-content:center;gap:8px;align-self:flex-start;min-height:42px;padding:0 18px;border:1.5px solid #E3D3C6;border-radius:999px;background:#FFFDFA;color:#7A1F3D;font:600 14px Inter,sans-serif;cursor:pointer;transition:transform .15s,border-color .15s}
+.passe__reagir-abrir:hover{border-color:#7A1F3D;transform:translateY(-1px)}
+
+/* Listas suspensas em formato de rota: pontos ligados por linha pontilhada. */
+.passe__suspensa>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none}
+.passe__suspensa>summary::-webkit-details-marker{display:none}
+.passe__suspensa>summary h2{margin:0}
+.passe__suspensa>summary span{display:inline-flex;align-items:center;gap:8px;padding:4px 12px;border-radius:999px;background:#F7F0EA;color:#5A1E2D;font:600 12px Inter,sans-serif}
+.passe__suspensa>summary span::after{content:'';width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .25s}
+.passe__suspensa[open]>summary span::after{transform:rotate(-135deg) translateY(-1px)}
+.passe__suspensa[open]>*:not(summary){animation:passe-entra .35s ease both}
+.passe__rota{position:relative;display:flex;flex-direction:column;gap:2px;margin-top:12px;padding-left:22px}
+.passe__rota::before{content:'';position:absolute;left:7px;top:10px;bottom:10px;border-left:2px dotted #D8C2B3}
+.passe__rota>*{position:relative}
+.passe__rota>*::before{content:'';position:absolute;left:-21px;top:16px;width:12px;height:12px;border-radius:50%;background:#FFFDFA;border:2px solid #A9502E;box-shadow:0 0 0 3px #FFFDFA}
+.passe__rota>*:first-child::before{background:#C9973B;border-color:#C9973B}
+
+/* Requisitos do programa em itens separados. */
+.passe__requisitos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:6px}
+.passe__requisitos>div{padding:12px 14px;border-radius:12px;background:#F7F0EA}
+.passe__requisitos h3{margin:0 0 6px;font:700 14px 'Funnel Display',sans-serif;color:#5A1E2D}
+.passe__requisitos ul{display:grid;gap:4px;margin:0;padding:0;list-style:none;font-size:13px;color:#4A3A34}
+.passe__requisitos li::before{content:'✓ ';color:#A9502E;font-weight:700}
+.passe__requisitos p{grid-column:1/-1;margin:0;font-size:13px;line-height:1.55;color:#5A4740}
+@media (max-width:420px){.passe__requisitos{grid-template-columns:1fr}}
+
+/* Movimento suave: telas entram, cartões aparecem em sequência, botões respondem ao toque. */
+@keyframes passe-entra{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes passe-pulo{0%{transform:scale(.6)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
+.passe__tela>*{animation:passe-entra .45s cubic-bezier(.2,.7,.2,1) both}
+.passe__tela>*:nth-child(2){animation-delay:.04s}.passe__tela>*:nth-child(3){animation-delay:.08s}.passe__tela>*:nth-child(4){animation-delay:.12s}.passe__tela>*:nth-child(5){animation-delay:.16s}.passe__tela>*:nth-child(n+6){animation-delay:.2s}
+.passe button,.passe a{transition:transform .12s ease,background-color .2s,color .2s,border-color .2s,box-shadow .2s}
+.passe button:active:not(:disabled),.passe a:active{transform:scale(.97)}
+.passe__cartao,.passe__missao,.passe__empresa{transition:box-shadow .25s,transform .25s}
+@media (hover:hover){.passe__missao:hover,.passe__empresa:hover{box-shadow:0 10px 24px rgba(34,16,15,.08);transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){.passe *,.passe *::before,.passe *::after{animation:none!important;transition:none!important}}

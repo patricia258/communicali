@@ -23,7 +23,11 @@ export function TrilhaPrograma({ categoria, previa }: { categoria: string; previ
       <span>{proximo ? 'PRÓXIMA ETAPA' : indice === ETAPAS.length - 1 ? 'CONTINUE SUA TRAJETÓRIA' : 'CONHEÇA A TRILHA'}</span>
       <h2>{proximo?.nome || (indice === ETAPAS.length - 1 ? 'Seu papel continua em movimento' : 'Da primeira visita às contribuições para a comunidade')}</h2>
       <p>{proximo ? proximo.descricao : 'Cada etapa representa uma forma de participar e contribuir.'}</p>
-      <p className="passe__aviso">Conector: 60 pontos no ciclo de 12 meses, 4 encontros e 1 contribuição de conexão. Embaixador: 180 pontos, 6 encontros, 2 contribuições diferentes e 12 meses como Conector. A organização avalia cada progressão; pontos sozinhos não mudam o nível.</p>
+      <div className="passe__requisitos">
+        <div><h3>Para ser Conector</h3><ul><li><strong>60 pontos</strong> no ciclo de 12 meses</li><li><strong>4 encontros</strong></li><li><strong>1 contribuição</strong> de conexão</li></ul></div>
+        <div><h3>Para ser Embaixador</h3><ul><li><strong>180 pontos</strong></li><li><strong>6 encontros</strong></li><li><strong>2 contribuições</strong> diferentes</li><li><strong>12 meses</strong> como Conector</li></ul></div>
+        <p>A organização avalia cada progressão.<br /><strong>Pontos sozinhos não mudam o nível.</strong></p>
+      </div>
     </section>
     <ol className="passe__programa-trilha" aria-label="Etapas do programa">
       {ETAPAS.map((etapa, n) => <li key={etapa.id} className={`${n === indice ? 'is-atual' : n < indice ? 'is-anterior' : 'is-proxima'}`} aria-current={n === indice ? 'step' : undefined}>

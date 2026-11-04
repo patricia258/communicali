@@ -83,7 +83,26 @@ const ROTULO = (acao: string, titulo: string | null) => {
   return 'Ajuste da organização';
 };
 
+// Clique suave nos botões e abas. Fica mudo para quem pede menos movimento no aparelho.
+let audio: AudioContext | null = null;
+function tique() {
+  try {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    audio = audio || new AudioContext();
+    const osc = audio.createOscillator(); const ganho = audio.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(880, audio.currentTime); osc.frequency.exponentialRampToValueAtTime(1320, audio.currentTime + 0.03);
+    ganho.gain.setValueAtTime(0.0001, audio.currentTime); ganho.gain.exponentialRampToValueAtTime(0.035, audio.currentTime + 0.005); ganho.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 0.06);
+    osc.connect(ganho).connect(audio.destination); osc.start(); osc.stop(audio.currentTime + 0.07);
+  } catch { /* sem som neste aparelho */ }
+}
+
 function Pagina({ children, aba, setAba }: { children: ReactNode; aba?: Aba; setAba?: (aba: Aba) => void }) {
+  useEffect(() => {
+    const ouvir = (event: PointerEvent) => { if ((event.target as HTMLElement).closest('.passe button:not(:disabled), .passe summary')) tique(); };
+    document.addEventListener('pointerdown', ouvir);
+    return () => document.removeEventListener('pointerdown', ouvir);
+  }, []);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [aba]);
   return (
     <div className="passe">
       <div className="passe__faixa" aria-hidden="true"><span /><span /><span /><span /></div>
@@ -516,15 +535,19 @@ function Indicar({ espaco, extra, recarregar }: { espaco: Espaco; extra: Extra |
             <label>Cargo<input value={pessoa.cargo} onChange={(event) => setPessoa({ ...pessoa, cargo: event.target.value })} /></label>
             <button type="submit" className="passe__botao">Enviar indicação</button>
           </form>
-          <h2>Minhas indicações</h2>
+          <details className="passe__cartao passe__suspensa">
+          <summary><h2>Minhas indicações</h2><span>{extra?.indicados.length || 0}</span></summary>
           <p className="passe__aviso">Acompanhe a avaliação da inscrição e a presença no encontro.</p>
+          <div className="passe__rota">
           {[...(extra?.indicados || [])].sort((a, b) => b.data.localeCompare(a.data)).map((item, indice) => (
             <article className="passe__indicado" key={`${item.nome}-${indice}`}>
               <div><strong>{item.nome}</strong><span>{[item.cargo, item.empresa].filter(Boolean).join(', ') || 'Cargo não informado'}</span><span>{item.edicao} · {item.data.split('-').reverse().join('/')}</span></div>
               <em className={item.compareceu ? 'ok' : ''}>{item.compareceu ? 'Compareceu, +5' : { analise: 'Em análise', inscrito: 'Aprovada', espera: 'Lista de espera', cancelado: 'Não aprovada' }[item.status] || item.status}</em>
             </article>
           ))}
+          </div>
           {!extra?.indicados.length && <p className="passe__aviso">Suas indicações aparecem aqui.</p>}
+          </details>
         </>
       ) : (
         <>
@@ -563,11 +586,13 @@ function Programa({ espaco, extra, compartilhar, comoMembro, setComoMembro, verP
         </div>
         <button type="button" className="passe__botao passe__botao--linha" onClick={compartilhar}>Compartilhar meu selo</button>
       </section>
-      <section className="passe__cartao">
-        <h2>Meu histórico</h2>
+      <details className="passe__cartao passe__suspensa">
+        <summary><h2>Meu histórico</h2><span>{extrato.length} {extrato.length === 1 ? 'registro' : 'registros'}</span></summary>
+        <div className="passe__rota">
         {extrato.map((item, indice) => <div className="passe__ponto" key={`${item.acao}-${indice}`}><span><small>{item.data.split('-').reverse().join('/')}</small>{ROTULO(item.acao, item.titulo)}{item.motivo && item.motivo !== 'Demonstração' ? `: ${item.motivo}` : ''}</span><strong>+{item.pontos}</strong></div>)}
+        </div>
         {!extrato.length && <p className="passe__aviso">Seus pontos aparecem aqui.</p>}
-      </section>
+      </details>
       <RelatoImpacto />
       <section className="passe__cartao">
         <h2>Como ganhar pontos</h2>
