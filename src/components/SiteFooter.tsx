@@ -9,8 +9,9 @@ export function FooterLinks({ legalOnly = false }: { legalOnly?: boolean }) {
   return (
     <nav className="site-links" aria-label={legalOnly ? 'Documentos legais' : 'Navegação do rodapé'}>
       {!legalOnly && <a href="/meu-passaporte">Meu passaporte</a>}
-      <a href="/regras">Regras</a>
-      <a href="/privacidade">Privacidade</a>
+      {/* Nos formulários abre em outra aba, para não perder o que já foi preenchido. */}
+      <a href="/regras" {...(legalOnly ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>Regras</a>
+      <a href="/privacidade" {...(legalOnly ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>Privacidade</a>
     </nav>
   );
 }

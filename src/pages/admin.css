@@ -182,3 +182,5 @@
 .adm-login__acesso input[inputmode=numeric]{font:700 26px 'Funnel Display',sans-serif;letter-spacing:.3em;text-align:center}
 .adm-login__acesso .adm-login__outro{min-height:0;padding:6px 0;background:none;color:#7A1F3D;font:600 13px Inter,sans-serif;text-decoration:underline}
 .adm-login__acesso .adm-login__outro:hover{background:none}
+/* Aviso de conferência em cadastros (Pix diferente do anterior, dado faltando). */
+.adm-hint.adm-alerta{padding:6px 10px;border-left:3px solid #A9502E;border-radius:6px;background:rgba(169,80,46,.12);color:#A9502E;font-weight:600}

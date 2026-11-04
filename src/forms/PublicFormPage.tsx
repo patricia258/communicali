@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent a
 import { useParams, useSearchParams } from 'react-router-dom';
 import { ArrowDown, ArrowRight, ArrowUp, Check, CornerDownLeft, Paperclip, X } from 'lucide-react';
 import { anonPublicRpc, anonStorage, supabase } from '../lib/supabase';
-import { type FormAnswer, type FormQuestion, applyMask, FILE_ACCEPT, FILE_HINT, fileLabel, isAnswerable, joinPhone, MASK_PLACEHOLDER, maskOf, nextQuestionIndex, phoneParts, richTextHtml, scaleRange, validateAnswer } from './formModel';
+import { type FormAnswer, type FormQuestion, applyMask, FILE_ACCEPT, FILE_HINT, fileLabel, isAnswerable, joinPhone, MASK_PLACEHOLDER, maskOf, nextQuestionIndex, phoneParts, richTextHtml, scaleRange, validateAnswer, visivel } from './formModel';
 import { FooterLinks } from '../components/SiteFooter';
 import './public-form.css';
 
@@ -142,7 +142,16 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
 
   function setAnswer(value: FormAnswer, autoAdvance = false) {
     if (!question) return;
-    setAnswers((current) => ({ ...current, [question.id]: value }));
+    // Ao mudar uma resposta, descarta as das perguntas que deixaram de valer (ex.: voltou e trocou "primeira vez").
+    setAnswers((current) => {
+      const novo: Record<string, FormAnswer> = { ...current, [question.id]: value };
+      for (let volta = 0; volta < 3; volta += 1) {
+        let mudou = false;
+        for (const item of questions) if (item.showIf && novo[item.id] !== undefined && !visivel(item, novo)) { delete novo[item.id]; mudou = true; }
+        if (!mudou) break;
+      }
+      return novo;
+    });
     setError('');
     if (autoAdvance) {
       window.clearTimeout(advanceTimer.current);

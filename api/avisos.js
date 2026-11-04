@@ -1,6 +1,6 @@
 // Envia os avisos pendentes: nível, missão e perfil indicado para o membro; formulário preenchido, inscrição em encontro e cadastro de staff para a organização.
 // Pode ser chamado a qualquer momento: cada aviso é marcado antes do envio e vai uma vez só.
-import { banco, enviar, escape, layoutSimples, pausa } from './_email.js';
+import { banco, emailStaff, emailStaffOrganizacao, enviar, escape, layoutSimples, pausa } from './_email.js';
 
 const MEU = 'https://comuni.calirh.com/meu-passaporte';
 const PAINEL = 'https://comuni.calirh.com/admin';
@@ -72,17 +72,15 @@ export default async function handler(req, res) {
     }
     total.inscricoes += 1;
   }
-  // Cadastro de staff: sem CPF nem endereço no e-mail; os dados completos ficam no painel.
-  const staff = await (await banco(`staff?admin_avisado_em=is.null&created_at=gte.${desde()}&select=id,nome,email,whatsapp,funcao,valor_combinado,comprovante,assistente_nome,assistente_funcao,pagamento_combinado,quer_ser_acionado&limit=20`)).json();
+  // Cadastro de STAFF: boas-vindas para a pessoa e aviso para a organização (sem CPF, endereço nem Pix no e-mail).
+  const staff = await (await banco(`staff?or=(admin_avisado_em.is.null,staff_avisado_em.is.null)&created_at=gte.${desde()}&select=id,nome,email,whatsapp,funcao,valor_combinado,pagamento_combinado,comprovante,assistente_nome,assistente_funcao,quer_ser_acionado,primeira_vez,atualizou_dados,conferir,admin_avisado_em,staff_avisado_em&limit=20`)).json();
   for (const item of Array.isArray(staff) ? staff : []) {
-    if (!(await reservar('staff', item.id, 'admin_avisado_em'))) continue;
-    const itens = [['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo (pessoa física)' : ''], ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : 'Não vai levar'], ['Próximos eventos', item.quer_ser_acionado ? 'Quer ser acionado' : 'Prefere não ser acionado']].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
-    for (const email of admins) {
-      await enviar(email, { assunto: `🧰 Novo cadastro de staff: ${item.nome}`, html: layoutSimples({ titulo: '🧰 Cadastro de staff', saudacao: 'Chegou um cadastro de staff.', linhas: [`<strong>${escape(item.nome)}</strong> preencheu o cadastro.`, ...itens.map((linha) => escape(linha))], botao: { texto: 'Ver no painel', href: `${PAINEL}/staff` } }) });
-      await pausa();
-    }
+    if (!item.staff_avisado_em && !item.email?.endsWith('.test') && (await reservar('staff', item.id, 'staff_avisado_em'))) { await enviar(item.email, emailStaff(item)); await pausa(); }
+    if (item.admin_avisado_em || !(await reservar('staff', item.id, 'admin_avisado_em'))) continue;
+    for (const email of admins) { await enviar(email, emailStaffOrganizacao(item, `${PAINEL}/staff`)); await pausa(); }
     total.staff += 1;
   }
+
   // Cadastro de fornecedor: sem documento, endereço ou Pix no e-mail; os dados completos ficam no painel.
   const fornecedores = await (await banco(`fornecedores?admin_avisado_em=is.null&created_at=gte.${desde()}&select=id,nome,contato_nome,email,whatsapp,categoria,fornece,primeira_vez,atualizou_dados&limit=20`)).json();
   for (const item of Array.isArray(fornecedores) ? fornecedores : []) {

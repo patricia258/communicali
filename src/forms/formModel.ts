@@ -16,8 +16,9 @@ export type FormQuestion = {
   maxLabel?: string;
   /** Pergunta condicional: se a resposta for `when`, segue para a pergunta `goTo` (id) ou END_OF_FORM. */
   logic?: Array<{ when: string; goTo: string }>;
-  /** Só aparece quando a resposta da pergunta `id` é uma das opções em `in` (ex.: condições de pagamento por função). */
-  showIf?: { id: string; in: string[] };
+  /** Só aparece quando a resposta da pergunta `id` é uma das opções em `in` (ex.: condições de pagamento por função).
+      Com uma lista, todas as condições precisam bater. Resposta vazia conta como ''. */
+  showIf?: ShowIf | ShowIf[];
   /** Formato do campo de texto. CPF, CNPJ e CEP também são reconhecidos pelo título da pergunta. */
   mask?: TextMask;
   /** Pergunta de arquivo: 'images_pdf' aceita só PDF e imagens; padrão aceita também documentos, áudio e vídeo. */
@@ -27,6 +28,15 @@ export type FormQuestion = {
 };
 
 export const END_OF_FORM = '__end';
+
+export type ShowIf = { id: string; in: string[] };
+
+/** A pergunta aparece com as respostas dadas até aqui? */
+export function visivel(question: FormQuestion, answers: Record<string, FormAnswer | undefined>) {
+  if (!question.showIf) return true;
+  const regras = Array.isArray(question.showIf) ? question.showIf : [question.showIf];
+  return regras.every((regra) => regra.in.includes(String(answers[regra.id] ?? '')));
+}
 
 export type TextMask = 'cpf' | 'cnpj' | 'cep' | 'money' | 'pix_aleatoria';
 
@@ -243,7 +253,7 @@ export function nextQuestionIndex(questions: FormQuestion[], index: number, answ
   }
   // Pula as perguntas condicionadas a outra resposta que não bate.
   const todas = { ...answers, [current?.id ?? '']: answer };
-  while (next < questions.length && questions[next].showIf && !questions[next].showIf!.in.includes(String(todas[questions[next].showIf!.id] ?? ''))) next += 1;
+  while (next < questions.length && !visivel(questions[next], todas)) next += 1;
   return next < questions.length ? next : -1;
 }
 

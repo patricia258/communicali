@@ -22,18 +22,20 @@ const TITULARIDADE_FOTO = 'em chave da **mesma titularidade do CNPJ** da empresa
 const TITULARIDADE_APOIO = 'em chave **no seu nome** (o mesmo CPF do cadastro), mediante **recibo**. Caso você não saiba como emitir o recibo, não se preocupe: nós ajudamos você.';
 const NOTA = 'Nota fiscal (tenho CNPJ)';
 const RECIBO = 'Recibo (pessoa física)';
+// Quem volta e diz que nada mudou pula empresa, endereço e Pix: usamos o cadastro anterior.
+export const MUDOU = { id: 'atualizar', in: ['Sim', ''] };
 export const PIX_TIPOS = ['CPF', 'CNPJ', 'E-mail', 'Telefone', 'Chave aleatória'];
 export const PIX_CAMPO: Record<string, string> = { CPF: 'pix_cpf', CNPJ: 'pix_cnpj', 'E-mail': 'pix_email', Telefone: 'pix_telefone', 'Chave aleatória': 'pix_aleatoria' };
 
 /** Chave Pix por tipo, banco e o aviso de conferência. Também usado no cadastro de fornecedor. */
 export const PERGUNTAS_PIX: FormQuestion[] = [
-    { id: 'pix_cpf', kind: 'short_text', label: 'Chave Pix: CPF', mask: 'cpf', required: true, showIf: { id: 'pix_tipo', in: ['CPF'] } },
-    { id: 'pix_cnpj', kind: 'short_text', label: 'Chave Pix: CNPJ', mask: 'cnpj', required: true, showIf: { id: 'pix_tipo', in: ['CNPJ'] } },
-    { id: 'pix_email', kind: 'email', label: 'Chave Pix: e-mail', required: true, showIf: { id: 'pix_tipo', in: ['E-mail'] } },
-    { id: 'pix_telefone', kind: 'phone', label: 'Chave Pix: telefone', required: true, showIf: { id: 'pix_tipo', in: ['Telefone'] } },
-    { id: 'pix_aleatoria', kind: 'short_text', label: 'Chave Pix: chave aleatória', help: 'Copie a chave do aplicativo do banco e cole aqui.', mask: 'pix_aleatoria', required: true, showIf: { id: 'pix_tipo', in: ['Chave aleatória'] } },
-    { id: 'banco', kind: 'short_text', label: 'Qual é o banco ou a instituição da chave Pix?', required: true },
-    { id: 'conferi', kind: 'single_choice', label: 'Confira seus dados', help: 'Revise o CPF, o CNPJ e a chave Pix antes de enviar. A CALI RH não se responsabiliza por pagamentos enviados de forma equivocada por erro de digitação ou por falta de algum dado.', options: [CONFERI], required: true },
+    { id: 'pix_cpf', kind: 'short_text', label: 'Chave Pix: CPF', mask: 'cpf', required: true, showIf: [{ id: 'pix_tipo', in: ['CPF'] }, MUDOU] },
+    { id: 'pix_cnpj', kind: 'short_text', label: 'Chave Pix: CNPJ', mask: 'cnpj', required: true, showIf: [{ id: 'pix_tipo', in: ['CNPJ'] }, MUDOU] },
+    { id: 'pix_email', kind: 'email', label: 'Chave Pix: e-mail', required: true, showIf: [{ id: 'pix_tipo', in: ['E-mail'] }, MUDOU] },
+    { id: 'pix_telefone', kind: 'phone', label: 'Chave Pix: telefone', required: true, showIf: [{ id: 'pix_tipo', in: ['Telefone'] }, MUDOU] },
+    { id: 'pix_aleatoria', kind: 'short_text', label: 'Chave Pix: chave aleatória', help: 'Copie a chave do aplicativo do banco e cole aqui.', mask: 'pix_aleatoria', required: true, showIf: [{ id: 'pix_tipo', in: ['Chave aleatória'] }, MUDOU] },
+    { id: 'banco', kind: 'short_text', label: 'Qual é o banco ou a instituição da chave Pix?', required: true, showIf: MUDOU },
+    { id: 'conferi', kind: 'single_choice', label: 'Confira seus dados', help: 'Revise o CPF, o CNPJ e a chave Pix antes de enviar. A CALI RH não se responsabiliza por pagamentos enviados de forma equivocada por erro de digitação ou por falta de algum dado.', options: [CONFERI], required: true, showIf: MUDOU },
 ];
 
 export const PRESET_STAFF: FormPreset = {
@@ -50,6 +52,8 @@ Seus dados ficam restritos à organização.`,
     { id: 'cpf', kind: 'short_text', label: 'Qual é o seu CPF?', mask: 'cpf', required: true },
     { id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', required: true },
     { id: 'whatsapp', kind: 'phone', label: 'Qual é o seu WhatsApp?', required: true },
+    { id: 'primeira_vez', kind: 'yes_no', label: 'É a primeira vez que você faz parte do STAFF da ComuniCALI?', required: true },
+    { id: 'atualizar', kind: 'yes_no', label: 'Algum dado mudou desde o seu último cadastro?', help: 'Empresa, CNPJ, endereço, chave Pix ou banco. Se nada mudou, usamos o seu cadastro anterior e você responde só sobre este encontro.', required: true, showIf: { id: 'primeira_vez', in: ['Não'] } },
     // Quem escolhe uma função da lista pula a pergunta "Outro".
     { id: 'funcao', kind: 'single_choice', label: 'Qual será a sua função no encontro?', options: FUNCOES, required: true,
       logic: FUNCOES.filter((item) => item !== OUTRO).map((item) => ({ when: item, goTo: 'assistente' })) },
@@ -60,14 +64,14 @@ Seus dados ficam restritos à organização.`,
     { id: 'assistente_whatsapp', kind: 'phone', label: 'WhatsApp do assistente', required: true, showIf: { id: 'assistente', in: ['Sim'] } },
     { id: 'assistente_funcao', kind: 'long_text', label: 'O que o assistente vai fazer?', help: 'Uma descrição breve.', required: true, showIf: { id: 'assistente', in: ['Sim'] } },
     { id: 'comprovante', kind: 'single_choice', label: 'Como você vai emitir o comprovante dos pagamentos?', options: [NOTA, RECIBO], required: true, logic: [{ when: RECIBO, goTo: 'cep' }], showIf: { id: 'funcao', in: LIVRE } },
-    { id: 'empresa', kind: 'short_text', label: 'Qual é o nome da sua empresa?', help: 'O pagamento é feito mediante nota fiscal.', required: true, showIf: { id: 'funcao', in: COM_ASSISTENTE } },
-    { id: 'cnpj', kind: 'short_text', label: 'Qual é o número do CNPJ registrado da empresa?', help: 'Os 14 números do cartão do CNPJ. É este CNPJ que vai na nota fiscal.', mask: 'cnpj', required: true, showIf: { id: 'funcao', in: COM_ASSISTENTE } },
-    { id: 'cep', kind: 'short_text', label: 'Qual é o seu CEP?', help: 'Com o CEP, preenchemos a rua, o bairro e a cidade para você conferir.', mask: 'cep', required: true },
-    { id: 'endereco', kind: 'short_text', label: 'Endereço: rua e bairro', help: 'Confira e corrija se precisar.', required: true },
-    { id: 'numero', kind: 'short_text', label: 'Número', required: true },
-    { id: 'complemento', kind: 'short_text', label: 'Complemento', help: 'Apartamento, bloco ou sala. Se não tiver, deixe em branco.' },
-    { id: 'cidade', kind: 'short_text', label: 'Cidade e estado', required: true },
-    { id: 'pix_tipo', kind: 'single_choice', label: 'Qual é o tipo da sua chave Pix?', help: 'A chave precisa ser da mesma titularidade do cadastro: no seu nome (o CPF informado) ou, com nota fiscal, no CNPJ da empresa.', options: PIX_TIPOS, required: true },
+    { id: 'empresa', kind: 'short_text', label: 'Qual é o nome da sua empresa?', help: 'O pagamento é feito mediante nota fiscal.', required: true, showIf: [{ id: 'funcao', in: COM_ASSISTENTE }, MUDOU] },
+    { id: 'cnpj', kind: 'short_text', label: 'Qual é o número do CNPJ registrado da empresa?', help: 'Os 14 números do cartão do CNPJ. É este CNPJ que vai na nota fiscal.', mask: 'cnpj', required: true, showIf: [{ id: 'funcao', in: COM_ASSISTENTE }, MUDOU] },
+    { id: 'cep', kind: 'short_text', label: 'Qual é o seu CEP?', help: 'Com o CEP, preenchemos a rua, o bairro e a cidade para você conferir.', mask: 'cep', required: true, showIf: MUDOU },
+    { id: 'endereco', kind: 'short_text', label: 'Endereço: rua e bairro', help: 'Confira e corrija se precisar.', required: true, showIf: MUDOU },
+    { id: 'numero', kind: 'short_text', label: 'Número', required: true, showIf: MUDOU },
+    { id: 'complemento', kind: 'short_text', label: 'Complemento', help: 'Apartamento, bloco ou sala. Se não tiver, deixe em branco.', showIf: MUDOU },
+    { id: 'cidade', kind: 'short_text', label: 'Cidade e estado', required: true, showIf: MUDOU },
+    { id: 'pix_tipo', kind: 'single_choice', label: 'Qual é o tipo da sua chave Pix?', help: 'A chave precisa ser da mesma titularidade do cadastro: no seu nome (o CPF informado) ou, com nota fiscal, no CNPJ da empresa.', options: PIX_TIPOS, required: true, showIf: MUDOU },
     ...PERGUNTAS_PIX,
     { id: 'valor', kind: 'short_text', label: 'Qual foi o valor combinado com a organização?', mask: 'money', required: true },
     // Condições de pagamento conforme a função escolhida.
@@ -86,6 +90,8 @@ Seus dados ficam restritos à organização.`,
     const assistente = answers.assistente === 'Sim';
     const nota = FOTO_VIDEO.includes(funcao) || (LIVRE.includes(funcao) && answers.comprovante === NOTA);
     const pixTipo = value('pix_tipo');
+    const primeira = answers.primeira_vez !== 'Não';
+    const dados = primeira || answers.atualizar === 'Sim';
     const { error } = await supabase.rpc('communicali_cadastrar_staff', {
       p_nome: value('nome'), p_cpf: value('cpf'), p_email: value('email'), p_whatsapp: value('whatsapp'),
       p_funcao: funcao === OUTRO ? value('funcao_outra') : funcao,
@@ -95,9 +101,9 @@ Seus dados ficam restritos à organização.`,
       p_assistente_nome: assistente ? value('assistente_nome') : null, p_assistente_cpf: assistente ? value('assistente_cpf') : null,
       p_assistente_whatsapp: assistente ? value('assistente_whatsapp') : null, p_assistente_funcao: assistente ? value('assistente_funcao') : null,
       p_comprovante: nota ? 'nota' : 'recibo', p_valor: value('valor'),
-      p_aceite_pagamento: [answers.pagamento_foto, answers.pagamento_apoio, answers.pagamento_outro].includes(DE_ACORDO) && answers.conferi === CONFERI,
+      p_aceite_pagamento: [answers.pagamento_foto, answers.pagamento_apoio, answers.pagamento_outro].includes(DE_ACORDO) && (!dados || answers.conferi === CONFERI),
       p_combinado: APOIO.includes(funcao) ? PAGAMENTO_APOIO : value('combinado_foto') || value('combinado_outro'),
-      p_pix_tipo: pixTipo, p_banco: value('banco'), p_acionado: answers.acionado === 'Sim', p_observacoes: value('observacoes') || null,
+      p_pix_tipo: dados ? pixTipo : null, p_banco: dados ? value('banco') : null, p_primeira_vez: primeira, p_atualizar: dados, p_acionado: answers.acionado === 'Sim', p_observacoes: value('observacoes') || null,
     });
     return error ? errorMessage(error) : '';
   },
@@ -107,7 +113,7 @@ export function StaffForm() {
   return <PublicFormPage preset={PRESET_STAFF} />;
 }
 
-type Staff = { id: string; nome: string; cpf: string; email: string; whatsapp: string; funcao: string; empresa: string | null; cnpj: string | null; cep: string | null; endereco: string; cidade_uf: string; pix: string | null; status: string; created_at: string; assistente_nome: string | null; assistente_cpf: string | null; assistente_whatsapp: string | null; assistente_funcao: string | null; comprovante: string | null; valor_combinado: string | null; pagamento_combinado: string | null; aceite_pagamento_em: string | null; pix_tipo: string | null; banco: string | null; quer_ser_acionado: boolean | null; observacoes: string | null };
+type Staff = { id: string; nome: string; cpf: string; email: string; whatsapp: string; funcao: string; empresa: string | null; cnpj: string | null; cep: string | null; endereco: string; cidade_uf: string; pix: string | null; status: string; created_at: string; assistente_nome: string | null; assistente_cpf: string | null; assistente_whatsapp: string | null; assistente_funcao: string | null; comprovante: string | null; valor_combinado: string | null; pagamento_combinado: string | null; aceite_pagamento_em: string | null; pix_tipo: string | null; banco: string | null; quer_ser_acionado: boolean | null; observacoes: string | null; primeira_vez: boolean | null; atualizou_dados: boolean; conferir: string | null };
 
 const maskCpf = (cpf: string) => `***.${cpf.slice(3, 6)}.${cpf.slice(6, 9)}-**`;
 
@@ -120,6 +126,8 @@ export function StaffPanel() {
   useEffect(() => { void load(); }, []);
   const visible = useMemo(() => { const term = query.trim().toLowerCase(); return list.filter((item) => !term || `${item.nome} ${item.funcao} ${item.email}`.toLowerCase().includes(term)); }, [list, query]);
   const link = `${window.location.origin}/staff`;
+  // Cada participação é um registro: conta quantas vezes o mesmo CPF já veio até esta.
+  const participacoes = (item: Staff) => list.filter((outro) => outro.cpf === item.cpf && outro.created_at <= item.created_at).length;
 
   async function toggle(item: Staff) {
     await supabase.from('staff').update({ status: item.status === 'ativo' ? 'inativo' : 'ativo', updated_at: new Date().toISOString() }).eq('id', item.id);
@@ -133,8 +141,8 @@ export function StaffPanel() {
   }
 
   function exportAll() {
-    downloadXlsx('communicali-staff.xlsx', 'Staff', ['Nome', 'CPF', 'Função', 'E-mail', 'WhatsApp', 'Empresa', 'CNPJ', 'CEP', 'Endereço', 'Cidade/UF', 'Tipo da chave Pix', 'Pix', 'Banco', 'Valor combinado', 'Pagamento combinado', 'Comprovante', 'Assistente', 'CPF do assistente', 'WhatsApp do assistente', 'O que o assistente faz', 'Quer ser acionado', 'Observações', 'Situação'],
-      visible.map((item) => [item.nome, item.cpf, item.funcao, item.email, item.whatsapp, item.empresa || '', item.cnpj || '', item.cep || '', item.endereco, item.cidade_uf, item.pix_tipo || '', item.pix || '', item.banco || '', item.valor_combinado || '', item.pagamento_combinado || '', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo' : '', item.assistente_nome || '', item.assistente_cpf || '', item.assistente_whatsapp || '', item.assistente_funcao || '', item.quer_ser_acionado ? 'Sim' : item.quer_ser_acionado === false ? 'Não' : '', item.observacoes || '', item.status]));
+    downloadXlsx('communicali-staff.xlsx', 'Staff', ['Nome', 'CPF', 'Função', 'E-mail', 'WhatsApp', 'Empresa', 'CNPJ', 'CEP', 'Endereço', 'Cidade/UF', 'Tipo da chave Pix', 'Pix', 'Banco', 'Valor combinado', 'Pagamento combinado', 'Comprovante', 'Assistente', 'CPF do assistente', 'WhatsApp do assistente', 'O que o assistente faz', 'Quer ser acionado', 'Observações', 'Primeira vez', 'Conferir', 'Data', 'Situação'],
+      visible.map((item) => [item.nome, item.cpf, item.funcao, item.email, item.whatsapp, item.empresa || '', item.cnpj || '', item.cep || '', item.endereco, item.cidade_uf, item.pix_tipo || '', item.pix || '', item.banco || '', item.valor_combinado || '', item.pagamento_combinado || '', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo' : '', item.assistente_nome || '', item.assistente_cpf || '', item.assistente_whatsapp || '', item.assistente_funcao || '', item.quer_ser_acionado ? 'Sim' : item.quer_ser_acionado === false ? 'Não' : '', item.observacoes || '', item.primeira_vez === false ? 'Não' : 'Sim', item.conferir || '', new Date(item.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }), item.status]));
   }
 
   return (
@@ -155,7 +163,7 @@ export function StaffPanel() {
           <div className="adm-row adm-row--static adm-row--stack" key={item.id}>
             <div className="adm-row__line">
               <strong>{item.nome}</strong>
-              <span>{item.funcao}{item.assistente_nome ? ' + assistente' : ''} · {item.whatsapp}</span>
+              <span>{item.funcao}{item.assistente_nome ? ' + assistente' : ''} · {item.whatsapp} · {new Date(item.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}{participacoes(item) > 1 ? ` · ${participacoes(item)}ª participação` : ''}</span>
               <em>{item.status === 'ativo' ? 'Ativo' : 'Inativo'}</em>
               <button type="button" onClick={() => setOpen(open === item.id ? '' : item.id)}>{open === item.id ? 'Fechar' : 'Ver dados'}</button>
               <button type="button" onClick={() => void toggle(item)}>{item.status === 'ativo' ? 'Inativar' : 'Reativar'}</button>
@@ -163,6 +171,8 @@ export function StaffPanel() {
             </div>
             {open === item.id && <p className="adm-hint">CPF {item.cpf} · {item.email} · {item.endereco}, {item.cidade_uf}{item.cep ? ` · CEP ${item.cep}` : ''}{item.empresa ? ` · ${item.empresa}` : ''}{item.cnpj ? ` · CNPJ ${item.cnpj}` : ''}{item.pix ? ` · Pix (${item.pix_tipo || 'chave'}) ${item.pix}${item.banco ? `, ${item.banco}` : ''}` : ''}{item.quer_ser_acionado ? ' · Quer ser acionado para próximos eventos' : ''}</p>}
             {open === item.id && item.observacoes && <p className="adm-hint">Observações: {item.observacoes}</p>}
+            {item.conferir && <p className="adm-hint adm-alerta" role="note">Conferir: {item.conferir}</p>}
+            {open === item.id && item.primeira_vez === false && <p className="adm-hint">{item.atualizou_dados ? 'Já participou antes e atualizou os dados neste cadastro.' : 'Já participou antes. Dados de empresa, endereço e Pix vieram do cadastro anterior.'}</p>}
             {open === item.id && <p className="adm-hint">{item.valor_combinado ? `Valor combinado: ${item.valor_combinado}` : 'Valor não informado'} · {item.comprovante === 'nota' ? 'Emite nota fiscal' : item.comprovante === 'recibo' ? 'Emite recibo' : 'Comprovante não informado'}{item.aceite_pagamento_em ? ' · Aceitou as condições de pagamento' : ''}{item.pagamento_combinado ? ` · Combinado: ${item.pagamento_combinado}` : ''}</p>}
             {open === item.id && item.assistente_nome && <p className="adm-hint">Assistente: {item.assistente_nome} · CPF {item.assistente_cpf} · {item.assistente_whatsapp} · {item.assistente_funcao}</p>}
             {open !== item.id && <p className="adm-hint">CPF {maskCpf(item.cpf)}</p>}

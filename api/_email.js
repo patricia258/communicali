@@ -125,6 +125,63 @@ ${rodape()}
 </table></td></tr></table></body></html>`;
 }
 
+// Cartão de STAFF: etiqueta colorida, saudação, texto e um bloco com os dados combinados. Sem foto de encontro.
+function layoutCartao({ previa, titulo, cor, saudacao, paragrafos, itens = [], aviso, botao, depois }) {
+  const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${semViuva(item)}</p>`).join('');
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">${FONTES}<title>${escape(titulo)}</title></head>
+<body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">${escape(previa)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="background:#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
+<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="ComuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
+<tr><td align="center" style="padding:0 0 14px"><span style="display:inline-block;padding:8px 18px;border-radius:999px;background-color:${cor.etiqueta};background-image:${cor.fundo};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
+<tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.vivo}">${saudacao}</td></tr>
+<tr><td style="padding:0 0 8px">${texto}</td></tr>
+${aviso ? `<tr><td style="padding:0 0 16px"><div style="padding:14px 18px;border-radius:14px;background:#FBEDE6;border-left:4px solid ${COR.terra};font-family:${TEXTO};font-size:15px;line-height:23px;font-weight:600;color:${COR.terra}">${semViuva(escape(aviso))}</div></td></tr>` : ''}
+${itens.length ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:22px 24px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${itens.filter(([, valor]) => valor).map(([rotulo, valor]) => detalhe(rotulo, valor)).join('')}</table></td></tr>` : ''}
+${botao ? `<tr><td align="center" style="padding:24px 0 4px"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.vivo};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
+${depois ? `<tr><td style="padding:22px 0 0"><div style="padding:18px 22px;border-radius:20px;border:1px dashed ${COR.mostarda};font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${depois}</div></td></tr>` : ''}
+${rodape()}
+</table></td></tr></table></body></html>`;
+}
+
+const comprovanteTexto = (item) => (item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo de pessoa física' : '');
+
+/** Boas-vindas para quem acabou de se cadastrar no STAFF. Não confirma data de encontro: é só o cadastro. */
+export function emailStaff(item) {
+  const nome = escape(primeiroNome(item.nome));
+  return {
+    assunto: '🎉 Boas-vindas ao STAFF da ComuniCALI',
+    html: layoutCartao({
+      previa: 'Seu cadastro de STAFF chegou. Que alegria ter você com a gente!',
+      titulo: '🎉 Boas-vindas ao STAFF', cor: FAIXA.boasvindas, saudacao: nome ? `Oi, ${nome}!` : 'Oi!',
+      paragrafos: [
+        'Que alegria ter você<br>no <strong>STAFF da ComuniCALI</strong>!',
+        'Seu cadastro chegou para a organização.<br>Neste encontro, você faz parte do time<br>que recebe as pessoas e faz tudo acontecer.',
+      ],
+      itens: [['Sua função', item.funcao], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', comprovanteTexto(item)]],
+      depois: `<strong>Para os próximos encontros</strong><br>O STAFF é formado a cada evento.<br>Se a organização chamar você de novo,<br>é só preencher o cadastro outra vez.<br>Se nada tiver mudado, ele fica bem mais curto.<br><br>Dúvidas? Fale com a organização pelo <a href="${WHATS}" style="color:${COR.vivo}">WhatsApp</a>.`,
+    }),
+  };
+}
+
+/** Aviso para a organização a cada cadastro de STAFF. Sem CPF, endereço nem Pix: os dados completos ficam no painel. */
+export function emailStaffOrganizacao(item, painel) {
+  const historico = item.primeira_vez === false ? (item.atualizou_dados ? 'Já participou antes e atualizou os dados.' : 'Já participou antes. Dados de empresa, endereço e Pix vieram do cadastro anterior.') : 'Primeira vez no STAFF.';
+  return {
+    assunto: `🧰 Novo cadastro de STAFF: ${item.nome}`,
+    html: layoutCartao({
+      previa: `${item.nome} preencheu o cadastro de STAFF.`,
+      titulo: '🧰 Cadastro de STAFF', cor: FAIXA.confirmacao, saudacao: 'Chegou um cadastro!',
+      paragrafos: [`<strong>${escape(item.nome)}</strong> preencheu<br>o cadastro de STAFF.`, escape(historico)],
+      aviso: item.conferir || '',
+      itens: [['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', comprovanteTexto(item)],
+        ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : ''], ['Próximos eventos', item.quer_ser_acionado ? 'Quer ser acionado' : 'Prefere não ser acionado']],
+      botao: { texto: 'Ver no painel', href: painel },
+    }),
+  };
+}
+
 export function layoutSimples({ titulo, saudacao, texto, destaque, linhas, botao, itens = [], semSair = false, imagem }) {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">${FONTES}<title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
