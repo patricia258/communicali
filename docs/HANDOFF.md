@@ -8,6 +8,11 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (noite, 2) | Staff: pagamento por função
+- Motor de formulários: `showIf: { id, in }` em `FormQuestion` faz a pergunta aparecer só quando outra resposta bate; `nextQuestionIndex` recebe todas as respostas.
+- Staff: fotografia e vídeo descrevem o que foi combinado (padrão 50% na reserva e 50% após a entrega dos materiais) e aceitam as condições; recepção e apoio aceitam pagamento integral por Pix no primeiro dia útil após o evento; "Outro" descreve o combinado. Pix precisa ser da mesma titularidade (CPF do cadastro ou, com nota fiscal, CNPJ da empresa).
+- Coluna `staff.pagamento_combinado` (migração `20261104130000_staff_pagamento_combinado.sql`), no painel, no Excel e no e-mail à organização. Caminhos conferidos por simulação: fotografia com assistente e recibo, recepção com nota fiscal, Outro.
+
 ### 2026-11-04 (noite) | Staff completo e telas sem piscar
 - Staff (`/staff`, `Staff.tsx`, migração `20261104120000_staff_assistente_pagamento.sql`): função em lista (Fotografia, Vídeo, Fotografia e vídeo, Recepção, Apoio de produção, Outro); "Outro" pede a função por escrito. Pergunta se leva assistente; se sim, nome, CPF, WhatsApp e o que vai fazer. Comprovante: nota fiscal (pede empresa e CNPJ de 14 dígitos) ou recibo de pessoa física. Valor combinado e aceite das condições: 50% na entrada e 50% na entrega do trabalho (fotografia e vídeo: na entrega das fotos e vídeos), mediante nota fiscal ou recibo. Chave Pix agora obrigatória. Servidor valida tudo de novo.
 - Painel Staff mostra e exporta valor, comprovante e dados do assistente. `api/avisos.js` envia e-mail para os admins a cada cadastro de staff (sem CPF nem endereço no e-mail).

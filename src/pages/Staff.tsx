@@ -8,10 +8,14 @@ const ACEITE = 'Autorizo';
 const DE_ACORDO = 'Estou de acordo';
 const OUTRO = 'Outro';
 const FUNCOES = ['Fotografia', 'Vídeo', 'Fotografia e vídeo', 'Recepção', 'Apoio de produção', OUTRO];
+const FOTO_VIDEO = ['Fotografia', 'Vídeo', 'Fotografia e vídeo'];
+const APOIO = ['Recepção', 'Apoio de produção'];
+const PAGAMENTO_APOIO = 'Integral por Pix no primeiro dia útil após o evento.';
+const TITULARIDADE = 'em chave da **mesma titularidade** (seu CPF ou, com nota fiscal, o CNPJ da empresa), mediante **nota fiscal** ou, para pessoa física, **recibo**.';
 const NOTA = 'Nota fiscal (tenho CNPJ)';
 const RECIBO = 'Recibo (pessoa física)';
 
-const PRESET: FormPreset = {
+export const PRESET_STAFF: FormPreset = {
   title: 'Cadastro de staff',
   description: 'Para quem vai trabalhar nos encontros, como fotografia, vídeo, recepção e apoio. Seus dados ficam restritos à organização.',
   submitLabel: 'Enviar cadastro',
@@ -36,9 +40,14 @@ const PRESET: FormPreset = {
     { id: 'cep', kind: 'short_text', label: 'Qual é o seu CEP?' },
     { id: 'endereco', kind: 'short_text', label: 'Qual é o seu endereço completo?', help: 'Rua, número, complemento e bairro.', required: true },
     { id: 'cidade', kind: 'short_text', label: 'Em qual cidade e estado?', required: true },
-    { id: 'pix', kind: 'short_text', label: 'Qual é a sua chave Pix?', help: 'Para os pagamentos combinados com a organização.', required: true },
+    { id: 'pix', kind: 'short_text', label: 'Qual é a sua chave Pix?', help: 'A chave precisa ser da mesma titularidade do cadastro: no seu nome (o CPF informado) ou, se você emite nota fiscal, no CNPJ da empresa.', required: true },
     { id: 'valor', kind: 'short_text', label: 'Qual foi o valor combinado com a organização?', help: 'Ex.: R$ 800,00.', required: true },
-    { id: 'pagamento', kind: 'single_choice', label: 'Condições de pagamento', help: 'O pagamento é feito em duas partes: **50% na entrada** e **50% na entrega do trabalho**. Na fotografia e no vídeo, a segunda parte é paga na entrega das fotos e vídeos. Cada pagamento é feito mediante **nota fiscal** ou, para pessoa física, **recibo**.', options: [DE_ACORDO], required: true },
+    // Condições de pagamento conforme a função escolhida.
+    { id: 'combinado_foto', kind: 'long_text', label: 'O que ficou combinado sobre o pagamento?', help: 'O padrão é 50% na reserva e 50% após a entrega dos materiais. Descreva como ficou no seu caso, com datas se houver.', required: true, showIf: { id: 'funcao', in: FOTO_VIDEO } },
+    { id: 'pagamento_foto', kind: 'single_choice', label: 'Condições de pagamento', help: `Pagamento conforme o combinado com a organização. O padrão é **50% na reserva** e **50% após a entrega dos materiais**, por **Pix** ${TITULARIDADE}`, options: [DE_ACORDO], required: true, showIf: { id: 'funcao', in: FOTO_VIDEO } },
+    { id: 'pagamento_apoio', kind: 'single_choice', label: 'Condições de pagamento', help: `Pagamento **integral** por **Pix** no **primeiro dia útil após o evento**, ${TITULARIDADE}`, options: [DE_ACORDO], required: true, showIf: { id: 'funcao', in: APOIO } },
+    { id: 'combinado_outro', kind: 'long_text', label: 'O que ficou combinado sobre o pagamento?', help: 'Descreva como e quando será pago, com datas se houver.', required: true, showIf: { id: 'funcao', in: [OUTRO] } },
+    { id: 'pagamento_outro', kind: 'single_choice', label: 'Condições de pagamento', help: `Pagamento conforme o combinado com a organização, por **Pix** ${TITULARIDADE}`, options: [DE_ACORDO], required: true, showIf: { id: 'funcao', in: [OUTRO] } },
     { id: 'aceite', kind: 'single_choice', label: 'Uso dos dados', help: 'Autorizo a CALI RH a guardar estes dados para organizar minha participação nos encontros, conforme a [política de privacidade](https://comuni.calirh.com/privacidade).', options: [ACEITE], required: true },
   ],
   submit: async (answers) => {
@@ -51,17 +60,19 @@ const PRESET: FormPreset = {
       p_empresa: nota ? value('empresa') : '', p_cnpj: nota ? value('cnpj') : '', p_cep: value('cep'), p_endereco: value('endereco'), p_cidade: value('cidade'), p_pix: value('pix'), p_aceite: answers.aceite === ACEITE,
       p_assistente_nome: assistente ? value('assistente_nome') : null, p_assistente_cpf: assistente ? value('assistente_cpf') : null,
       p_assistente_whatsapp: assistente ? value('assistente_whatsapp') : null, p_assistente_funcao: assistente ? value('assistente_funcao') : null,
-      p_comprovante: nota ? 'nota' : answers.comprovante === RECIBO ? 'recibo' : '', p_valor: value('valor'), p_aceite_pagamento: answers.pagamento === DE_ACORDO,
+      p_comprovante: nota ? 'nota' : answers.comprovante === RECIBO ? 'recibo' : '', p_valor: value('valor'),
+      p_aceite_pagamento: [answers.pagamento_foto, answers.pagamento_apoio, answers.pagamento_outro].includes(DE_ACORDO),
+      p_combinado: APOIO.includes(value('funcao')) ? PAGAMENTO_APOIO : value('combinado_foto') || value('combinado_outro'),
     });
     return error ? errorMessage(error) : '';
   },
 };
 
 export function StaffForm() {
-  return <PublicFormPage preset={PRESET} />;
+  return <PublicFormPage preset={PRESET_STAFF} />;
 }
 
-type Staff = { id: string; nome: string; cpf: string; email: string; whatsapp: string; funcao: string; empresa: string | null; cnpj: string | null; cep: string | null; endereco: string; cidade_uf: string; pix: string | null; status: string; created_at: string; assistente_nome: string | null; assistente_cpf: string | null; assistente_whatsapp: string | null; assistente_funcao: string | null; comprovante: string | null; valor_combinado: string | null; aceite_pagamento_em: string | null };
+type Staff = { id: string; nome: string; cpf: string; email: string; whatsapp: string; funcao: string; empresa: string | null; cnpj: string | null; cep: string | null; endereco: string; cidade_uf: string; pix: string | null; status: string; created_at: string; assistente_nome: string | null; assistente_cpf: string | null; assistente_whatsapp: string | null; assistente_funcao: string | null; comprovante: string | null; valor_combinado: string | null; pagamento_combinado: string | null; aceite_pagamento_em: string | null };
 
 const maskCpf = (cpf: string) => `***.${cpf.slice(3, 6)}.${cpf.slice(6, 9)}-**`;
 
@@ -87,8 +98,8 @@ export function StaffPanel() {
   }
 
   function exportAll() {
-    downloadXlsx('communicali-staff.xlsx', 'Staff', ['Nome', 'CPF', 'Função', 'E-mail', 'WhatsApp', 'Empresa', 'CNPJ', 'CEP', 'Endereço', 'Cidade/UF', 'Pix', 'Valor combinado', 'Comprovante', 'Assistente', 'CPF do assistente', 'WhatsApp do assistente', 'O que o assistente faz', 'Situação'],
-      visible.map((item) => [item.nome, item.cpf, item.funcao, item.email, item.whatsapp, item.empresa || '', item.cnpj || '', item.cep || '', item.endereco, item.cidade_uf, item.pix || '', item.valor_combinado || '', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo' : '', item.assistente_nome || '', item.assistente_cpf || '', item.assistente_whatsapp || '', item.assistente_funcao || '', item.status]));
+    downloadXlsx('communicali-staff.xlsx', 'Staff', ['Nome', 'CPF', 'Função', 'E-mail', 'WhatsApp', 'Empresa', 'CNPJ', 'CEP', 'Endereço', 'Cidade/UF', 'Pix', 'Valor combinado', 'Pagamento combinado', 'Comprovante', 'Assistente', 'CPF do assistente', 'WhatsApp do assistente', 'O que o assistente faz', 'Situação'],
+      visible.map((item) => [item.nome, item.cpf, item.funcao, item.email, item.whatsapp, item.empresa || '', item.cnpj || '', item.cep || '', item.endereco, item.cidade_uf, item.pix || '', item.valor_combinado || '', item.pagamento_combinado || '', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo' : '', item.assistente_nome || '', item.assistente_cpf || '', item.assistente_whatsapp || '', item.assistente_funcao || '', item.status]));
   }
 
   return (
@@ -116,7 +127,7 @@ export function StaffPanel() {
               <button type="button" className="adm-danger" onClick={() => void remove(item)}>Excluir</button>
             </div>
             {open === item.id && <p className="adm-hint">CPF {item.cpf} · {item.email} · {item.endereco}, {item.cidade_uf}{item.cep ? ` · CEP ${item.cep}` : ''}{item.empresa ? ` · ${item.empresa}` : ''}{item.cnpj ? ` · CNPJ ${item.cnpj}` : ''}{item.pix ? ` · Pix ${item.pix}` : ''}</p>}
-            {open === item.id && <p className="adm-hint">{item.valor_combinado ? `Valor combinado: ${item.valor_combinado}` : 'Valor não informado'} · {item.comprovante === 'nota' ? 'Emite nota fiscal' : item.comprovante === 'recibo' ? 'Emite recibo' : 'Comprovante não informado'}{item.aceite_pagamento_em ? ' · Aceitou as condições de pagamento' : ''}</p>}
+            {open === item.id && <p className="adm-hint">{item.valor_combinado ? `Valor combinado: ${item.valor_combinado}` : 'Valor não informado'} · {item.comprovante === 'nota' ? 'Emite nota fiscal' : item.comprovante === 'recibo' ? 'Emite recibo' : 'Comprovante não informado'}{item.aceite_pagamento_em ? ' · Aceitou as condições de pagamento' : ''}{item.pagamento_combinado ? ` · Combinado: ${item.pagamento_combinado}` : ''}</p>}
             {open === item.id && item.assistente_nome && <p className="adm-hint">Assistente: {item.assistente_nome} · CPF {item.assistente_cpf} · {item.assistente_whatsapp} · {item.assistente_funcao}</p>}
             {open !== item.id && <p className="adm-hint">CPF {maskCpf(item.cpf)}</p>}
           </div>

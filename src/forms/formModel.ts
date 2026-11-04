@@ -16,6 +16,8 @@ export type FormQuestion = {
   maxLabel?: string;
   /** Pergunta condicional: se a resposta for `when`, segue para a pergunta `goTo` (id) ou END_OF_FORM. */
   logic?: Array<{ when: string; goTo: string }>;
+  /** Só aparece quando a resposta da pergunta `id` é uma das opções em `in` (ex.: condições de pagamento por função). */
+  showIf?: { id: string; in: string[] };
   /** Pergunta de arquivo: 'images_pdf' aceita só PDF e imagens; padrão aceita também documentos, áudio e vídeo. */
   accept?: 'images_pdf' | 'any';
   /** Tela de texto pode mostrar um material: capa, link e chamada. */
@@ -155,15 +157,19 @@ export function stripRichText(value: string) {
 }
 
 /** Próxima pergunta, respeitando a lógica condicional da atual. Devolve -1 para encerrar. */
-export function nextQuestionIndex(questions: FormQuestion[], index: number, answer: FormAnswer | undefined) {
+export function nextQuestionIndex(questions: FormQuestion[], index: number, answer: FormAnswer | undefined, answers: Record<string, FormAnswer | undefined> = {}) {
   const current = questions[index];
   const rule = current?.logic?.find((item) => item.goTo && (Array.isArray(answer) ? answer.includes(item.when) : String(answer ?? '') === item.when));
+  let next = index + 1;
   if (rule) {
     if (rule.goTo === END_OF_FORM) return -1;
     const target = questions.findIndex((question) => question.id === rule.goTo);
-    if (target > index) return target;
+    if (target > index) next = target;
   }
-  return index + 1 < questions.length ? index + 1 : -1;
+  // Pula as perguntas condicionadas a outra resposta que não bate.
+  const todas = { ...answers, [current?.id ?? '']: answer };
+  while (next < questions.length && questions[next].showIf && !questions[next].showIf!.in.includes(String(todas[questions[next].showIf!.id] ?? ''))) next += 1;
+  return next < questions.length ? next : -1;
 }
 
 export function choiceOptions(question: FormQuestion) {

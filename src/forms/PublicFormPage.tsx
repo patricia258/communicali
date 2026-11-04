@@ -104,7 +104,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     if (problem) { setError(problem); return; }
     if (uploads[question.id]?.busy) { setError('Aguarde terminar o envio do arquivo.'); return; }
     setError('');
-    const next = nextQuestionIndex(questions, index, answers[question.id]);
+    const next = nextQuestionIndex(questions, index, answers[question.id], answers);
     if (next < 0) { void submit(); return; }
     setTrail((current) => [...current, index]); setDirection('next'); setIndex(next);
   }, [answers, index, question, questions, submit, uploads]);
@@ -121,7 +121,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     setError('');
     if (autoAdvance) {
       window.clearTimeout(advanceTimer.current);
-      const next = nextQuestionIndex(questions, index, value);
+      const next = nextQuestionIndex(questions, index, value, answers);
       advanceTimer.current = window.setTimeout(() => {
         if (next < 0) return;
         setTrail((current) => [...current, index]); setDirection('next'); setIndex(next);
@@ -160,7 +160,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     if (event.key === 'Enter' && event.shiftKey) event.stopPropagation();
   }
 
-  const isLast = question ? nextQuestionIndex(questions, index, answers[question.id]) < 0 : false;
+  const isLast = question ? nextQuestionIndex(questions, index, answers[question.id], answers) < 0 : false;
 
   async function chooseFile(item: FormQuestion, file: File | undefined) {
     if (!file || !form) return;

@@ -73,10 +73,10 @@ export default async function handler(req, res) {
     total.inscricoes += 1;
   }
   // Cadastro de staff: sem CPF nem endereço no e-mail; os dados completos ficam no painel.
-  const staff = await (await banco(`staff?admin_avisado_em=is.null&created_at=gte.${desde()}&select=id,nome,email,whatsapp,funcao,valor_combinado,comprovante,assistente_nome,assistente_funcao&limit=20`)).json();
+  const staff = await (await banco(`staff?admin_avisado_em=is.null&created_at=gte.${desde()}&select=id,nome,email,whatsapp,funcao,valor_combinado,comprovante,assistente_nome,assistente_funcao,pagamento_combinado&limit=20`)).json();
   for (const item of Array.isArray(staff) ? staff : []) {
     if (!(await reservar('staff', item.id, 'admin_avisado_em'))) continue;
-    const itens = [['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Comprovante', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo (pessoa física)' : ''], ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : 'Não vai levar']].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
+    const itens = [['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Pagamento', item.pagamento_combinado], ['Comprovante', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo (pessoa física)' : ''], ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : 'Não vai levar']].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
     for (const email of admins) {
       await enviar(email, { assunto: `🧰 Novo cadastro de staff: ${item.nome}`, html: layoutSimples({ titulo: '🧰 Cadastro de staff', saudacao: 'Chegou um cadastro de staff.', linhas: [`<strong>${escape(item.nome)}</strong> preencheu o cadastro.`, ...itens.map((linha) => escape(linha))], botao: { texto: 'Ver no painel', href: `${PAINEL}/staff` } }) });
       await pausa();
