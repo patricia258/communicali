@@ -129,6 +129,13 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — milhas e linguagem de jornada (v22 + complemento v23)
+- Fontes: Documento Mestre v22 "Narrativa Passaporte" no Drive (id 10ifqSQL0N6uBtC2hgJ0O9g7RV8r0fZC3) e o complemento "Universo Narrativo e Visual da Jornada" (v23, Downloads). Patrícia aprovou "aplicar tudo".
+- **Pontos viraram milhas** em todo texto visível (site, Meu passaporte, painel, e-mails, check-in, privacidade e regras; migração `20261103300000`). Nomes técnicos e cálculos não mudaram. Conector 60 milhas, Embaixador 180. Milhas não têm resgate nem valor em dinheiro.
+- Microtextos: aba Programa virou "Minha jornada"; "Carimbos dos encontros"; "Sua próxima escala"; missões contam "selos de contribuição"; "Convide para essa experiência" no cartão de convite; selo dourado "Cartão de embarque · Inscrição confirmada" nos próximos encontros em que a pessoa está aprovada (RPC `communicali_minhas_inscricoes`, migração `20261103290000`). Roteiro do dia: "Guichê | Apresente-se" no pitch.
+- Site: abertura da home com "Cada pessoa chega com sua própria bagagem. Quando histórias diferentes se encontram, novos caminhos aparecem." e texto do passaporte abaixo da trilha.
+- Mantidos: nomes Visitante, Membro, Conector e Embaixador; selos oficiais (os selos de paisagem da outra IA não foram usados, porque o v23 pede não redesenhar selos e eles saem da paleta).
+
 ### 03/11/2026, Claude Code — Edições como páginas do passaporte
 - Aba Edições do Meu passaporte: frase "Cada encontro é uma página do seu passaporte" com a contagem de carimbos; próximos encontros em bilhete vinho com picote, data em bloco (dia e mês) e botão dourado; encontros anteriores numa rota (linha pontilhada), com foto esmaecida quando a pessoa não foi e carimbo "CARIMBADO" quando esteve. Conferido no celular.
 
