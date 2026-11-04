@@ -299,5 +299,7 @@ html{scroll-behavior:smooth}
   .nav__row{gap:10px}
   .nav__logo img{height:24px}
   .nav__acoes{margin-left:auto}
-  .nav__acoes .pill{min-height:34px;padding:0 12px;white-space:nowrap}
 }
+
+/* No celular o topo mostra só "Já sou membro"; o Registrar interesse já aparece no hero. */
+@media (max-width:640px){.nav__acoes .pill{display:none}.nav__acoes .nav__membro{font-size:13px}}

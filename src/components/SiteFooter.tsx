@@ -27,6 +27,11 @@ export function SiteFooter() {
           <a href="https://wa.me/554187879244" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp da CALI" title="WhatsApp"><MessageCircle size={20} aria-hidden="true" /></a>
         </nav>
       </div>
+      <div className="site-footer__legal">
+        <p>© {new Date().getFullYear()} ComuniCALI, uma iniciativa da CALI RH. Todos os direitos reservados.</p>
+        <p>Marca, logotipo, selos, carimbos, textos e materiais deste site pertencem à CALI RH e são protegidos pela Lei de Direitos Autorais (Lei nº 9.610/1998). A reprodução, total ou parcial, depende de autorização prévia e por escrito.</p>
+        <p>Conteúdo, design e desenvolvimento: CALI RH.</p>
+      </div>
       <p className="site-footer__faith">Toda honra a Deus!</p>
     </footer>
   );

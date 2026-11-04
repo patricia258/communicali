@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 | Rodapé com direitos e topo do celular
+- Rodapé (`SiteFooter.tsx`): © ano atual, "uma iniciativa da CALI RH", todos os direitos reservados, proteção pela Lei 9.610/1998 e crédito de conteúdo, design e desenvolvimento. Fotos ficaram fora da frase de titularidade porque as atuais são do Unsplash. Sem CNPJ (não consta no projeto).
+- Celular: o topo mostra só "Já sou membro"; "Registrar interesse" continua no hero.
+
 ### 2026-11-03 (noite) | Tickets mais sutis, endereço Meu passaporte, ticket serrilhado
 - Tickets do topo (+300, 1ª edição, Brasil): agora escuros, compactos, com moldura tracejada dourada. No celular ficam lado a lado, só número e rótulo.
 - Carimbos, Selos e Milhas: ticket vazado com canhoto do ícone à esquerda, diferente do topo.
