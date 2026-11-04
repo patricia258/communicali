@@ -206,3 +206,9 @@ html:has(.legal),body:has(.legal){background:#1F0E14}
 .euvou__card{display:block;width:100%;height:auto;border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.35)}
 .euvou .button--linha{background:transparent;border:1px solid rgba(221,177,96,.6);color:#DDB160}
 .euvou__trocar{justify-self:center;color:#CBB9B1;font:500 13px Inter,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.euvou__mimo{display:grid;gap:10px;margin-top:8px;padding:16px;border:1px dashed rgba(221,177,96,.55);border-radius:14px;background:rgba(201,151,59,.08)}
+.euvou__mimo h2{margin:0;font:700 20px 'Funnel Display',sans-serif;color:#DDB160}
+.euvou__mimo p{margin:0;color:#E6D9D4;line-height:1.55;font-size:14px}
+.euvou__redes{display:flex;gap:8px}
+.euvou__redes button{flex:1;min-height:42px;border:1px solid rgba(247,240,234,.25);border-radius:10px;background:transparent;color:#F7F0EA;font:600 14px Inter,sans-serif;cursor:pointer}
+.euvou__redes button.is-on{border-color:#DDB160;background:rgba(221,177,96,.16);color:#DDB160}

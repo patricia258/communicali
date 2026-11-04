@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (3) | Mimo para quem compartilha e topo dos e-mails no modo escuro
+- Sem sorteio (Lei 5.768/1971): mimo para todos que postarem o card marcando a CALI RH (@calirh_) e mostrarem na recepção. `/eu-vou` mostra as regras, a pessoa marca Instagram/LinkedIn e toca em "Já compartilhei"; `api/eu-vou.js` (acao compartilhei) grava em `compartilhamentos` (migração `20261105110000_compartilhamentos.sql`), só para quem está confirmado.
+- Painel, E-mails da edição: "Mimos: N pessoas compartilharam · M retirados", com caixinha para marcar a entrega na recepção.
+- E-mail do card: sem capa do local e sem Quando/Onde; fala só do card e do mimo. Teste reenviado para pclazumi@gmail.com; lote não enviado.
+- Todos os e-mails: o topo virou a imagem `public/email/topo.png` (fundo vinho, logo branco, faixa de cores), que não é invertida no modo escuro do Gmail; antes o logo vinho sumia no fundo escuro. `color-scheme: light only` para os aplicativos que respeitam.
+
 ### 2026-11-05 (2) | Carimbo do card com falhas
 - Card Eu vou!: saiu a linha picotada e os recortes do meio do ticket; carimbo "PRESENÇA CONFIRMADA" afastado da borda (centro em x=855), girado, com anel irregular e falhas de tinta (`carimboGasto`, padrão fixo pelo nome, então o card sai igual se gerar de novo).
 - Sorteio para quem compartilhar: proposto, aguardando decisão da Patrícia (ponto legal da Lei 5.768/1971).

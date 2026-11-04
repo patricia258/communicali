@@ -20,7 +20,7 @@ async function fotoAssinada(caminho) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST.' });
-  const { email, c, edicao } = req.body || {};
+  const { email, c, edicao, acao, redes } = req.body || {};
   const filtro = edicao ? `slug=eq.${String(edicao).replace(/[^a-z0-9-]/g, '')}` : `publica=eq.true&data_evento=gte.${hoje()}`;
   const edicoes = await (await banco(`editions?${filtro}&select=id,slug,numero,titulo,data_evento,horario,local,cidade,form_inscricao&order=data_evento&limit=1`)).json();
   const edition = Array.isArray(edicoes) ? edicoes[0] : null;
@@ -34,6 +34,14 @@ export default async function handler(req, res) {
   const alvo = String(email || '').trim().toLowerCase();
   const pessoa = c ? pessoas.find((item) => assinatura(item.email) === String(c)) : pessoas.find((item) => item.email === alvo);
   if (!pessoa) return res.status(200).json({ encontrado: false, motivo: 'nao_confirmado' });
+
+  // Mimo: a pessoa avisa que compartilhou o card marcando a CALI. Uma linha por pessoa e edição.
+  if (acao === 'compartilhei') {
+    const lista = (Array.isArray(redes) ? redes : []).filter((rede) => ['Instagram', 'LinkedIn'].includes(rede));
+    if (!lista.length) return res.status(400).json({ error: 'Marque onde você compartilhou.' });
+    const salvo = await banco('compartilhamentos?on_conflict=edition_id,email', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ edition_id: edition.id, email: pessoa.email, nome: pessoa.nome, redes: lista }) });
+    return salvo.ok ? res.status(200).json({ ok: true }) : res.status(502).json({ error: 'Não foi possível anotar agora.' });
+  }
 
   // Foto: a do formulário de inscrição; se não houver, a do passaporte.
   let foto = null;

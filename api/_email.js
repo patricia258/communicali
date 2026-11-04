@@ -7,7 +7,8 @@ const FROM = 'ComuniCALI <comuni@calirh.com>';
 const REPLY_TO = 'contato@calirh.com';
 export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,lembrete_ativo,publica';
 
-// Página branca, sem moldura. A cor de cada tipo aparece na etiqueta e no botão; os blocos têm cantos arredondados.
+// Topo em imagem (fundo vinho, logo branco, faixa de cores): nenhum aplicativo inverte imagem, então a marca
+// aparece igual no modo claro e no escuro. Página branca, sem moldura. A cor de cada tipo aparece na etiqueta e no botão; os blocos têm cantos arredondados.
 const COR = { tinta: '#22100F', bordo: '#5A1E2D', vivo: '#7A1F3D', mostarda: '#C9973B', clara: '#DDB160', suave: '#CBB9B1', marfim: '#F7F0EA', rose: '#FBF1EC', oliva: '#5F6238', terra: '#A9502E' };
 const VIVAS = { ouro: 'linear-gradient(135deg,#E8B954,#C9973B)', vinho: 'linear-gradient(135deg,#A8275A,#7A1F3D)', terra: 'linear-gradient(135deg,#D9673A,#A9502E)', oliva: 'linear-gradient(135deg,#8A9A3E,#5F6238)', rosa: 'linear-gradient(135deg,#E86A8E,#B83A62)' };
 const FAIXA = {
@@ -107,12 +108,12 @@ function rodape() {
 
 function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, cor, detalhes = true, comFoto = true }) {
   const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${semViuva(item)}</p>`).join('');
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">${FONTES}<title>${escape(titulo)}</title></head>
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">${FONTES}<title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escape(previa)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="background:#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
-<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="ComuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
+<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:14px"></td></tr>
 ${comFoto ? foto(edition) : ''}
 <tr><td align="center" style="padding:0 0 14px"><span style="display:inline-block;padding:8px 18px;border-radius:999px;background-color:${cor.etiqueta};background-image:${cor.fundo};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
 <tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.vivo}">${saudacao}</td></tr>
@@ -129,12 +130,12 @@ ${rodape()}
 // Cartão de STAFF: etiqueta colorida, saudação, texto e um bloco com os dados combinados. Sem foto de encontro.
 function layoutCartao({ previa, titulo, cor, saudacao, paragrafos, itens = [], aviso, botao, depois }) {
   const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${semViuva(item)}</p>`).join('');
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">${FONTES}<title>${escape(titulo)}</title></head>
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">${FONTES}<title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escape(previa)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="background:#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
-<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="ComuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
+<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:14px"></td></tr>
 <tr><td align="center" style="padding:0 0 14px"><span style="display:inline-block;padding:8px 18px;border-radius:999px;background-color:${cor.etiqueta};background-image:${cor.fundo};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
 <tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.vivo}">${saudacao}</td></tr>
 <tr><td style="padding:0 0 8px">${texto}</td></tr>
@@ -201,9 +202,9 @@ export function emailFornecedorOrganizacao(item, painel) {
 }
 
 export function layoutSimples({ titulo, saudacao, texto, destaque, linhas, botao, itens = [], semSair = false, imagem }) {
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">${FONTES}<title>${escape(titulo)}</title></head>
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">${FONTES}<title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
-<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/brand/communicali-horizontal.png" width="300" alt="ComuniCALI" style="display:block;width:300px;max-width:100%;height:auto;border:0"></td></tr>
+<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:14px"></td></tr>
 ${imagem ? `<tr><td align="center" style="padding:0 0 18px"><img src="${escape(imagem)}" width="200" alt="" style="display:block;width:200px;max-width:70%;height:auto;border:0"></td></tr>` : ''}
 <tr><td align="center" style="padding:0 0 12px"><span style="display:inline-block;padding:7px 16px;border-radius:999px;background:${COR.mostarda};font-family:${TEXTO};font-size:14px;font-weight:600;color:${COR.tinta}">${escape(titulo)}</span></td></tr>
 <tr><td align="center" style="padding:0 0 12px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;color:${COR.vivo}">${escape(saudacao)}</td></tr>
@@ -228,9 +229,9 @@ export function montar(tipo, edition, pessoa) {
     lembrete: { assunto: `É amanhã: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: 'É amanhã!', saudacao, paragrafos: ['Amanhã é dia de ComuniCALI!', '<strong>Na chegada</strong>, a recepção confirma o seu nome<br>e indica a sua mesa.', '<strong>Na mesa</strong>, é só fazer o check-in<br>pelo QR Code.'], botao: agenda, depois: responder, anexo: true },
     boasvindas: { assunto: `Boas-vindas à ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Estamos ansiosos para ver você no nosso encontro!', titulo: 'Uhull! Boas-vindas', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Ficamos <em>muito felizes</em> que você esteja com a gente nessa jornada!', 'A <strong>ComuniCALI</strong> nasceu sem pretensão, era pra ser só "um cafezinho entre colegas de trabalho". Ainda não sabemos onde isso vai chegar, mas temos certeza de que vai trazer <em>grandes contribuições</em> para cada pessoa que faz parte dela.', '<strong><u>Estamos ansiosos para ver você no nosso encontro!</u></strong>', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong>'], botao: { texto: 'Acesse o site', href: SITE }, detalhes: false, anexo: false },
     agradecimento: { assunto: `Obrigado pelo interesse na ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Essa é só a primeira de muitas edições.', titulo: 'Obrigado pelo interesse', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Muito obrigado pelo seu interesse na <strong>ComuniCALI</strong>!', 'As vagas da nossa <em>primeira edição</em> já estão fechadas, e que pena que desta vez você não vai poder estar com a gente.', '<strong><u>Mas essa é só a primeira de muitas!</u></strong> Queremos muito conhecer você nos próximos encontros.', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong> Lá você conhece a comunidade e registra seu interesse para as próximas edições.'], botao: { texto: 'Conheça a ComuniCALI', href: SITE }, detalhes: false, comFoto: false, anexo: false },
-    card: { assunto: `Seu card "Eu vou!" está pronto, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Mostre para todo mundo que você vai estar com a gente.', titulo: 'Eu vou!', saudacao: nome ? `Olá, ${nome}!` : 'Olá!',
-      paragrafos: [`Faltam poucos dias para o nosso <strong>${edition.numero === 1 ? 'primeiro encontro' : 'próximo encontro'}</strong>, e a gente já está na contagem regressiva! 🎉`, 'Preparamos um <strong>card especial</strong> para você mostrar que vai estar com a gente. Ele já sai pronto, com a <em>sua foto</em>, a data e o local.', '<strong><u>Compartilhe nas suas redes e no grupo!</u></strong> Quanto mais gente souber, mais bonita fica essa história. 💛'],
-      botao: { texto: 'Criar meu card', href: `${SITE}/eu-vou?c=${assinatura(pessoa.cardEmail || pessoa.email)}` }, anexo: false },
+    card: { assunto: `Seu card "Eu vou!" está pronto, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Crie o seu card, poste marcando a CALI e ganhe um mimo no encontro.', titulo: 'Eu vou!', saudacao: nome ? `Olá, ${nome}!` : 'Olá!',
+      paragrafos: [`Faltam poucos dias para o nosso <strong>${edition.numero === 1 ? 'primeiro encontro' : 'próximo encontro'}</strong>, e a gente já está na contagem regressiva! 🎉`, 'Preparamos um <strong>card especial</strong> para você mostrar que vai estar com a gente. Ele já sai pronto, com a <em>sua foto</em>.', '<strong><u>E tem mimo!</u></strong>', 'Poste o seu card no <strong>Instagram</strong> ou no <strong>LinkedIn</strong> marcando a <strong>CALI RH</strong> (no Instagram, <strong>@calirh_</strong>). No dia do encontro, mostre o post na recepção e retire o seu <em>mimo surpresa</em>. 💛'],
+      botao: { texto: 'Criar meu card', href: `${SITE}/eu-vou?c=${assinatura(pessoa.cardEmail || pessoa.email)}` }, detalhes: false, comFoto: false, anexo: false },
     convite: { assunto: `Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: 'Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
   }[tipo];
   return { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null };

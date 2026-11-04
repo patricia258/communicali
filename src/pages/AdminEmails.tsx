@@ -7,6 +7,30 @@ type Resumo = { todos: number; acionados: number; confirmacoes: number; lembrete
 type Linha = { email: string; nome: string; tipo: string; situacao: string; created_at: string; aberto_em: string | null; clicado_em: string | null };
 const NOMES: Record<string, string> = { recebido: 'Inscrição recebida', confirmacao: 'Reserva confirmada', espera: 'Lista de espera', lembrete: 'Lembrete', convite: 'Convite de agenda', boasvindas: 'Boas-vindas', agradecimento: 'Agradecimento', card: 'Card Eu vou' };
 
+type Compartilhou = { id: string; nome: string | null; email: string; redes: string[]; entregue_em: string | null; created_at: string };
+
+/** Quem disse que compartilhou o card marcando a CALI: quantos mimos preparar e, na recepção, quem já retirou. */
+function Mimos({ editionId }: { editionId: string }) {
+  const [lista, setLista] = useState<Compartilhou[]>([]);
+  const carregar = () => supabase.from('compartilhamentos').select('id,nome,email,redes,entregue_em,created_at').eq('edition_id', editionId).order('created_at').then(({ data }) => setLista((data || []) as Compartilhou[]));
+  useEffect(() => { void carregar(); }, [editionId]);
+  async function entregar(item: Compartilhou) {
+    await supabase.from('compartilhamentos').update({ entregue_em: item.entregue_em ? null : new Date().toISOString() }).eq('id', item.id);
+    void carregar();
+  }
+  const entregues = lista.filter((item) => item.entregue_em).length;
+  return <details className="adm-suspensa">
+    <summary>Mimos: {lista.length} {lista.length === 1 ? 'pessoa compartilhou' : 'pessoas compartilharam'}{lista.length ? ` · ${entregues} retirados` : ''}</summary>
+    {lista.length ? <div className="adm-list">{lista.map((item) => (
+      <label className="adm-row adm-row--static adm-mimo" key={item.id}>
+        <input type="checkbox" checked={Boolean(item.entregue_em)} onChange={() => void entregar(item)} aria-label={`Mimo entregue para ${item.nome || item.email}`} />
+        <strong>{item.nome || item.email}</strong><span>{item.redes.join(' e ')} · {dataBr(item.created_at)}</span><em>{item.entregue_em ? 'Mimo retirado' : 'Aguardando'}</em>
+      </label>
+    ))}</div> : <p className="adm-hint">Quando alguém tocar em "Já compartilhei" na página do card, aparece aqui.</p>}
+    <p className="adm-hint">Confira o post na recepção antes de entregar e marque a caixinha.</p>
+  </details>;
+}
+
 export async function chamar(body: Record<string, string>) {
   const { data } = await supabase.auth.getSession();
   const response = await fetch('/api/email-admin', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session?.access_token || ''}` }, body: JSON.stringify(body) });
@@ -92,6 +116,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
         {faltamCard > 0 && <button type="button" className="wf-primary" disabled={busy} onClick={() => void enviarLote('card', faltamCard)}>{`Enviar card para os confirmados (${faltamCard})`}</button>}
         <a className="wf-secondary" href="/eu-vou" target="_blank" rel="noopener noreferrer">Link para o grupo: comuni.calirh.com/eu-vou</a>
       </div>
+      <Mimos editionId={edition.id} />
       {pendentes > 0 && <div className="adm-links">
         {faltamBoasVindas > 0 && <button type="button" className="wf-primary" disabled={busy} onClick={() => void enviarLote('boasvindas', faltamBoasVindas)}>{busy ? 'Enviando...' : `Enviar boas-vindas (${faltamBoasVindas})`}</button>}
         {faltamAgradecimento > 0 && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void enviarLote('agradecimento', faltamAgradecimento)}>{`Enviar agradecimento (${faltamAgradecimento})`}</button>}

@@ -19,6 +19,9 @@ export function EuVou() {
   const [estado, setEstado] = useState<'inicio' | 'buscando' | 'pronto' | 'nao' | 'erro'>(CODIGO ? 'buscando' : 'inicio');
   const [dados, setDados] = useState<Resposta | null>(null);
   const [card, setCard] = useState<{ blob: Blob; url: string } | null>(null);
+  const [identidade, setIdentidade] = useState<Record<string, string>>(CODIGO ? { c: CODIGO } : {});
+  const [redes, setRedes] = useState<string[]>([]);
+  const [mimo, setMimo] = useState<'' | 'enviando' | 'ok' | 'erro'>('');
 
   async function montar(resposta: Resposta, foto?: string | null) {
     if (!resposta.encontrado || !resposta.edicao) { setEstado(resposta.motivo === 'sem_encontro' ? 'erro' : 'nao'); return; }
@@ -35,6 +38,7 @@ export function EuVou() {
   async function enviar(event: FormEvent) {
     event.preventDefault();
     setEstado('buscando');
+    setIdentidade({ email });
     try { await montar(await buscar({ email })); } catch { setEstado('erro'); }
   }
 
@@ -48,6 +52,15 @@ export function EuVou() {
     if (!card) return;
     const link = document.createElement('a'); link.href = card.url; link.download = 'eu-vou-comunicali.png'; link.click();
   }
+  async function compartilhei() {
+    setMimo('enviando');
+    try {
+      const r = await fetch('/api/eu-vou', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...identidade, acao: 'compartilhei', redes }) });
+      setMimo(r.ok ? 'ok' : 'erro');
+    } catch { setMimo('erro'); }
+  }
+  const alternarRede = (rede: string) => setRedes((atual) => (atual.includes(rede) ? atual.filter((item) => item !== rede) : [...atual, rede]));
+
   // Quem preferir outra foto escolhe do celular; a imagem não sai do aparelho.
   function trocarFoto(arquivo?: File) {
     if (!arquivo || !dados) return;
@@ -79,6 +92,20 @@ export function EuVou() {
           <button className="button" type="button" onClick={() => void compartilhar()}>Compartilhar</button>
           <button className="button button--linha" type="button" onClick={baixar}>Baixar imagem</button>
           <label className="euvou__trocar">Usar outra foto<input type="file" accept="image/*" hidden onChange={(event) => trocarFoto(event.target.files?.[0])} /></label>
+          <div className="euvou__mimo">
+            <h2>Tem mimo! 🎁</h2>
+            <p>Poste o seu card no <strong>Instagram</strong> ou no <strong>LinkedIn</strong> marcando a <strong>CALI RH</strong> (no Instagram, <strong>@calirh_</strong>).</p>
+            <p>No dia do encontro, mostre o post na recepção e retire o seu <strong>mimo surpresa</strong>. Um mimo por pessoa.</p>
+            {mimo === 'ok'
+              ? <p className="notice">Anotado! Leve o post no celular para mostrar na recepção. 💛</p>
+              : <>
+                <div className="euvou__redes" role="group" aria-label="Onde você compartilhou">
+                  {['Instagram', 'LinkedIn'].map((rede) => <button key={rede} type="button" className={redes.includes(rede) ? 'is-on' : ''} aria-pressed={redes.includes(rede)} onClick={() => alternarRede(rede)}>{rede}</button>)}
+                </div>
+                <button className="button" type="button" disabled={!redes.length || mimo === 'enviando'} onClick={() => void compartilhei()}>{mimo === 'enviando' ? 'Anotando…' : 'Já compartilhei e marquei a CALI'}</button>
+                {mimo === 'erro' && <p className="notice notice--alert">Não foi possível anotar agora. Tente de novo.</p>}
+              </>}
+          </div>
         </>}
       </section>
     </main>
