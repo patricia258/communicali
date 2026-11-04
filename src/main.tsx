@@ -23,10 +23,12 @@ import { FornecedorForm } from './pages/Fornecedor';
 import { EdicaoPage, InscricaoPage } from './pages/Edicao';
 import { ErrorBoundary, reportError } from './components/ErrorBoundary';
 import { PublicFormPage } from './forms/PublicFormPage';
-import { SiteFooter } from './components/SiteFooter';
+import { FooterLinks, SiteFooter } from './components/SiteFooter';
 import type { ReactNode } from 'react';
 
 const Page = ({ children }: { children: ReactNode }) => <>{children}<SiteFooter /></>;
+// Telas do dia do encontro (votar, check-in): rodapé de uma linha, para não roubar a tela do celular.
+const PageEvento = ({ children }: { children: ReactNode }) => <>{children}<footer className="site-footer site-footer--mini"><FooterLinks legalOnly /></footer></>;
 
 sessionStorage.removeItem('comuni-reload');
 window.addEventListener('error', (event) => { if (event.message) reportError(event.message); });
@@ -36,7 +38,7 @@ createRoot(document.getElementById('root')!).render(
   <ErrorBoundary><BrowserRouter>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/checkin" element={<ComEdicao><Page><Checkin /></Page></ComEdicao>} />
+      <Route path="/checkin" element={<ComEdicao><PageEvento><Checkin /></PageEvento></ComEdicao>} />
       <Route path="/validar/:codigo" element={<Page><Validar /></Page>} />
       <Route path="/cadastro" element={<Navigate to="/#fazer-parte" replace />} />
       <Route path="/meu-passaporte" element={<MeuEspaco />} />
@@ -48,7 +50,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/fornecedor" element={<FornecedorForm />} />
       <Route path="/e/:slug" element={<EdicaoPage />} />
       <Route path="/inscricao/:slug" element={<InscricaoPage />} />
-      <Route path="/votar" element={<ComEdicao><Page><Votar /></Page></ComEdicao>} />
+      <Route path="/votar" element={<ComEdicao><PageEvento><Votar /></PageEvento></ComEdicao>} />
       <Route path="/convidar" element={<ComEdicao><Convidar /></ComEdicao>} />
       <Route path="/convite/:token" element={<Page><Convite /></Page>} />
       <Route path="/telao/checkin" element={<ComEdicao><TelaoCheckin /></ComEdicao>} />

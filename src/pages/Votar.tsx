@@ -7,6 +7,8 @@ export function Votar() {
   const [loadError, setLoadError] = useState('');
   const [nota, setNota] = useState<number | null>(null);
   const [nota2, setNota2] = useState<number | null>(null);
+  // Com duas perguntas, a segunda só aparece depois de responder a primeira.
+  const [etapa, setEtapa] = useState<1 | 2>(1);
   const [opcao, setOpcao] = useState('');
   const [texto, setTexto] = useState('');
   const [nome, setNome] = useState('');
@@ -35,31 +37,28 @@ export function Votar() {
   return (
     <main className="event-page">
       <section className="event-card">
-        <p className="eyebrow">ComuniCALI</p>
+        <p className="eyebrow">{poll?.pergunta_2 && !sent && poll.situacao === 'ativa' ? `Pergunta ${etapa} de 2` : 'ComuniCALI'}</p>
         {loadError && <p className="notice notice--alert">{loadError}</p>}
         {sent === 'novo' && <h1 className="question">Sua resposta foi registrada. Obrigada por contribuir com essa conversa!</h1>}
         {sent === 'repetido' && <h1 className="question">Este aparelho já respondeu a esta pergunta.</h1>}
-        {!sent && poll && <h1 className="question">{poll.pergunta}</h1>}
+        {!sent && poll && <h1 className="question">{etapa === 2 && poll.pergunta_2 ? poll.pergunta_2 : poll.pergunta}</h1>}
         {!sent && poll?.situacao === 'rascunho' && <p className="notice">A votação ainda não abriu.</p>}
         {!sent && poll?.situacao === 'encerrada' && <p className="notice">A votação foi encerrada.</p>}
         {!sent && poll?.situacao === 'ativa' && (
           <>
-            {poll.tipo === 'nota' && (
+            {poll.tipo === 'nota' && etapa === 1 && (
               <div className="scale" role="radiogroup" aria-label="Nota de 0 a 10">
                 {Array.from({ length: 11 }, (_, value) => (
                   <button key={value} type="button" role="radio" aria-checked={nota === value} className={nota === value ? 'is-on' : ''} onClick={() => setNota(value)}>{value}</button>
                 ))}
               </div>
             )}
-            {poll.tipo === 'nota' && poll.pergunta_2 && (
-              <>
-                <h2 className="question question--segunda">{poll.pergunta_2}</h2>
-                <div className="scale" role="radiogroup" aria-label="Segunda pergunta, nota de 0 a 10">
-                  {Array.from({ length: 11 }, (_, value) => (
-                    <button key={value} type="button" role="radio" aria-checked={nota2 === value} className={nota2 === value ? 'is-on' : ''} onClick={() => setNota2(value)}>{value}</button>
-                  ))}
-                </div>
-              </>
+            {poll.tipo === 'nota' && poll.pergunta_2 && etapa === 2 && (
+              <div className="scale" role="radiogroup" aria-label="Nota de 0 a 10">
+                {Array.from({ length: 11 }, (_, value) => (
+                  <button key={value} type="button" role="radio" aria-checked={nota2 === value} className={nota2 === value ? 'is-on' : ''} onClick={() => setNota2(value)}>{value}</button>
+                ))}
+              </div>
             )}
             {poll.tipo === 'multipla' && (
               <div className="options" role="radiogroup" aria-label="Opções">
@@ -69,7 +68,10 @@ export function Votar() {
             {poll.tipo === 'aberta' && <textarea className="answer" rows={4} maxLength={500} aria-label="Sua resposta" value={texto} onChange={(event) => setTexto(event.target.value)} />}
             {!poll.anonima && <label className="field">Seu nome<input value={nome} autoComplete="name" onChange={(event) => setNome(event.target.value)} /></label>}
             {error && <p className="notice notice--alert">{error}</p>}
-            <button className="button" type="button" disabled={!ready || sending} onClick={submit}>{sending ? 'Enviando...' : 'Enviar resposta'}</button>
+            {poll.pergunta_2 && etapa === 1
+              ? <button className="button" type="button" disabled={nota === null} onClick={() => setEtapa(2)}>Continuar</button>
+              : <button className="button" type="button" disabled={!ready || sending} onClick={submit}>{sending ? 'Enviando...' : 'Enviar resposta'}</button>}
+            {poll.pergunta_2 && etapa === 2 && <button className="link-voltar" type="button" onClick={() => setEtapa(1)}>Voltar para a primeira pergunta</button>}
           </>
         )}
       </section>

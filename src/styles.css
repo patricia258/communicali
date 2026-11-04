@@ -141,8 +141,6 @@ html:has(.legal),body:has(.legal){background:#1F0E14}
   .site-footer__faith{padding:0 16px 24px;text-align:center}
   .site-links{column-gap:20px}
 }
-/* Segunda pergunta da votação, logo abaixo da primeira escala. */
-.event-card h2.question--segunda{color:#F7F0EA;margin:22px 0 0;padding-top:18px;border-top:1px solid rgba(247,240,234,.14);font-size:19px;line-height:1.35}
 
 /* Tela de resultado: no tom dos slides (fundo escuro, logo no topo, título branco com destaque dourado). */
 .resultado{min-height:100dvh;box-sizing:border-box;display:grid;grid-template-rows:auto 1fr;padding:3.2vw 5vw 4vw;background:#1F0E14;color:#F7F0EA;font-family:Inter,sans-serif}
@@ -178,3 +176,9 @@ html:has(.legal),body:has(.legal){background:#1F0E14}
 .resultado__ponto--pratica{background:#F7F0EA}
 .resultado__vazio{position:absolute;inset:0 0 3em;display:grid;place-items:center;margin:0;font-size:clamp(14px,1.3vw,22px);color:#CBB9B1}
 @media (max-width:900px){.resultado__corpo{grid-template-columns:1fr}}
+
+/* Rodapé de uma linha nas telas do encontro. */
+.site-footer--mini{padding:14px 16px 18px;font-size:12px}
+.site-footer--mini .site-links{justify-content:center;gap:18px}
+/* Voltar para a primeira pergunta da votação. */
+.link-voltar{justify-self:center;border:0;background:none;padding:4px;color:#CBB9B1;font:500 13px Inter,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}

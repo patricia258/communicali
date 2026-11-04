@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (noite, 11) | Votação uma pergunta por vez e rodapé curto
+- `/votar`: com segunda pergunta, mostra "Pergunta 1 de 2", botão Continuar e só então a segunda ("Pergunta 2 de 2", Enviar, Voltar para a primeira).
+- `/votar` e `/checkin` usam `PageEvento` (main.tsx): rodapé de uma linha só com Regras e Privacidade (abrem em nova aba).
+
 ### 2026-11-04 (noite, 10) | Votação com duas perguntas e tela de resultado; modo apresentação removido
 - Modo apresentação saiu inteiro (a apresentação fica no Canva): páginas, rota, menu, pdfjs-dist, tabela `apresentacoes`, funções `communicali_ao_vivo*` (migração `20261104220000_remove_apresentacoes.sql`) e os 39 slides do bucket.
 - Votação: `polls.pergunta_2` e `poll_votes.nota_2` (migração `20261104230000_votacao_duas_perguntas.sql`). O celular mostra as duas escalas na mesma tela e exige as duas. Editor de Votações ganhou "Segunda pergunta" e o botão "Abrir tela de resultado".
