@@ -241,3 +241,33 @@
 @media (max-width:900px){.escalas{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:520px){.escalas{grid-template-columns:1fr}}
 .founder__text strong{color:var(--gold-2);font-weight:600}
+
+/* Topo: acesso de quem já é membro. */
+.nav__acoes{display:flex;align-items:center;gap:18px}
+.nav__membro{color:var(--gold-2);font:600 14px Inter,sans-serif;text-decoration:none;white-space:nowrap}
+.nav__membro:hover{text-decoration:underline;text-underline-offset:4px}
+@media (max-width:700px){.nav__membro{font-size:12px}.nav__acoes{gap:10px}}
+
+/* Animações: entrada do topo, revelação ao rolar, cartões em sequência e respostas ao passar o mouse. */
+@keyframes home-sobe{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+.hero .eyebrow,.hero h1,.hero__text,.hero__actions{animation:home-sobe .9s cubic-bezier(.2,.7,.2,1) both}
+.hero h1{animation-delay:.08s}.hero__text{animation-delay:.2s}.hero__actions{animation-delay:.32s}
+.revelar{opacity:0;transform:translateY(34px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.revelar.visivel{opacity:1;transform:none}
+.revelar :is(.stat,.escala,.passaporte>article,.trilha>article,.door,.entrada>article,.faq details){opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.revelar.visivel :is(.stat,.escala,.passaporte>article,.trilha>article,.door,.entrada>article,.faq details){opacity:1;transform:none}
+.revelar.visivel :is(.stat,.escala,.passaporte>article,.trilha>article,.entrada>article):nth-child(2){transition-delay:.1s}
+.revelar.visivel :is(.stat,.escala,.passaporte>article,.trilha>article,.entrada>article):nth-child(3){transition-delay:.2s}
+.revelar.visivel :is(.stat,.escala,.passaporte>article,.trilha>article,.entrada>article):nth-child(4){transition-delay:.3s}
+.ticket,.escala,.trilha>article img,.entrada>article{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.ticket:hover{transform:translateY(-4px) rotate(-.6deg)}
+.trilha>article img:hover{transform:rotate(-3deg) scale(1.04)}
+.escala__capa{transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.escala{overflow:hidden}
+.escala:hover .escala__capa{transform:scale(1.06)}
+.escala:hover{box-shadow:0 18px 36px rgba(0,0,0,.35);transform:translateY(-3px)}
+.pill{transition:transform .15s,background-color .2s}
+.pill:hover{transform:translateY(-2px)}
+.pill:active{transform:scale(.97)}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){.revelar,.revelar *{opacity:1!important;transform:none!important;transition:none!important}.hero *{animation:none!important}html{scroll-behavior:auto}}

@@ -48,7 +48,8 @@ const FAQ = [
 ];
 
 // Fotos de banco, sem rostos, até as edições terem fotos próprias.
-const NEUTRAS = [1, 2, 3, 4, 5].map((index) => ({ id: `neutra-${index}`, url: `/fotos/neutras/${index}.jpg`, legenda: null }));
+// Fotos livres (Unsplash) que mostram os formatos: reunião, online, palestra, jantar e oficina.
+const NEUTRAS = ['reuniao', 'virtual', 'palestra', 'jantar', 'experiencia'].map((nome) => ({ id: `home-${nome}`, url: `/fotos/home/${nome}.jpg`, legenda: null }));
 
 const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 
@@ -76,12 +77,11 @@ const TRILHA = [
   ['conector', 'Conector', 'Ajuda a criar pontes entre trajetórias.'],
   ['embaixador', 'Embaixador', 'Leva a comunidade a novos horizontes.'],
 ];
-// Fotos provisórias até chegarem as escolhidas por Patrícia.
 const FORMATOS = [
-  ['Encontros presenciais', 'Em Curitiba e região, com café, conversa e troca de experiências.', '/fotos/neutras/1.jpg'],
-  ['Encontros virtuais', 'Online, para quem está em qualquer lugar do Brasil.', '/fotos/neutras/2.jpg'],
-  ['Experiências', 'Vivências, visitas e palestras que ampliam o olhar.', '/fotos/neutras/4.jpg'],
-  ['Almoços e jantares', 'Conversas à mesa, em grupos menores.', '/fotos/neutras/5.jpg'],
+  ['Encontros presenciais', 'Em Curitiba e região, com café, conversa e troca de experiências.', '/fotos/home/presencial.jpg'],
+  ['Encontros virtuais', 'Online, para quem está em qualquer lugar do Brasil.', '/fotos/home/virtual.jpg'],
+  ['Experiências', 'Vivências, visitas e palestras que ampliam o olhar.', '/fotos/home/experiencia.jpg'],
+  ['Almoços e jantares', 'Conversas à mesa, em grupos menores.', '/fotos/home/jantar.jpg'],
 ];
 const PASSAPORTE = [
   ['Carimbos', 'Cada encontro vivido deixa um carimbo no seu passaporte.'],
@@ -131,6 +131,16 @@ export function Home() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [members, setMembers] = useState(0);
 
+  // Seções e cartões aparecem suavemente ao entrar na tela.
+  useEffect(() => {
+    const alvos = document.querySelectorAll('.home .stats, .home .founder, .home .block, .home .sponsors__body, .home .logos');
+    alvos.forEach((item) => item.classList.add('revelar'));
+    if (!('IntersectionObserver' in window)) { alvos.forEach((item) => item.classList.add('visivel')); return; }
+    const observador = new IntersectionObserver((entradas) => entradas.forEach((entrada) => { if (entrada.isIntersecting) { entrada.target.classList.add('visivel'); observador.unobserve(entrada.target); } }), { threshold: 0.12 });
+    alvos.forEach((item) => observador.observe(item));
+    return () => observador.disconnect();
+  }, []);
+
   useEffect(() => {
     QRCode.toDataURL(COMMUNITY_URL, { width: 360, margin: 1, color: { dark: '#2B1A20', light: '#FFFFFF' } }).then(setQr);
     supabase.from('editions').select(EDITION_FIELDS).eq('publica', true).order('data_evento').then(({ data }) => setEditions((data || []) as EditionRow[]));
@@ -155,7 +165,7 @@ export function Home() {
             <a href="#proximo">Agenda</a>
             <a href="#parceiros">Parceiros</a>
           </div>
-          <a className="pill" href={joinHref}>Registrar interesse</a>
+          <div className="nav__acoes"><a className="nav__membro" href="/meu-espaco">Já sou membro</a><a className="pill" href={joinHref}>Registrar interesse</a></div>
         </div>
       </nav>
 
@@ -241,17 +251,15 @@ export function Home() {
           </div>
         </div>
         <div className="trilha">
-          {TRILHA.map(([id, nome, texto]) => (
+          {TRILHA.map(([id, nome]) => (
             <article key={id}>
               <img src={`/selos/postal-${id}.png`} alt={`Selo ${nome}`} />
-              <p>{texto}</p>
             </article>
           ))}
         </div>
         <div className="passaporte">
           {PASSAPORTE.map(([titulo, texto], indice) => { const Icone = [Stamp, Award, Route][indice]; return <article className="ticket" key={titulo}><span className="ticket__numero" aria-hidden="true">Nº 000{indice + 1}</span><Icone size={30} strokeWidth={1.6} aria-hidden="true" /><span className="ticket__estrelas" aria-hidden="true">★ ★ ★</span><strong>{titulo}</strong><p>{texto}</p></article>; })}
         </div>
-        <a className="link" href="/meu-espaco">Já sou membro, quero entrar</a>
       </section>
 
       <section className="wrap block" id="proximo">
