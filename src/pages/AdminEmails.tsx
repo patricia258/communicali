@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Tabela, dataBr } from './AdminTabela';
 
-type Resumo = { todos: number; acionados: number; confirmacoes: number; lembretes: number; convites: number; agradecimentos: number; erros: number };
+type Resumo = { todos: number; acionados: number; confirmacoes: number; lembretes: number; convites: number; cards?: number; agradecimentos: number; erros: number };
 type Linha = { email: string; nome: string; tipo: string; situacao: string; created_at: string; aberto_em: string | null; clicado_em: string | null };
-const NOMES: Record<string, string> = { recebido: 'Inscrição recebida', confirmacao: 'Reserva confirmada', espera: 'Lista de espera', lembrete: 'Lembrete', convite: 'Convite de agenda', boasvindas: 'Boas-vindas', agradecimento: 'Agradecimento' };
+const NOMES: Record<string, string> = { recebido: 'Inscrição recebida', confirmacao: 'Reserva confirmada', espera: 'Lista de espera', lembrete: 'Lembrete', convite: 'Convite de agenda', boasvindas: 'Boas-vindas', agradecimento: 'Agradecimento', card: 'Card Eu vou' };
 
 export async function chamar(body: Record<string, string>) {
   const { data } = await supabase.auth.getSession();
@@ -24,6 +24,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
   useEffect(() => { void carregar(); }, [edition.id]);
 
   const faltamBoasVindas = resumo ? Math.max(resumo.acionados - resumo.convites, 0) : 0;
+  const faltamCard = resumo ? Math.max(resumo.acionados - (resumo.cards || 0), 0) : 0;
   const faltamAgradecimento = resumo ? Math.max(resumo.todos - resumo.acionados - resumo.agradecimentos, 0) : 0;
   const diaLembrete = new Date(new Date(`${edition.data_evento}T12:00:00Z`).getTime() - 1 * 86400000).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   const quando = (iso: string | null) => (iso ? `${dataBr(iso)} ${new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}` : '-');
@@ -35,14 +36,21 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
     setBusy(false);
   }
 
-  async function enviarLote(tipo: 'boasvindas' | 'agradecimento', faltam: number) {
-    const nome = tipo === 'boasvindas' ? 'as boas-vindas para os contatados' : 'o agradecimento para quem ainda está sem contato';
+  async function testeCard() {
+    setBusy(true); setNote('');
+    try { const result = await chamar({ acao: 'teste_card', edicao: edition.id, para: 'pclazumi@gmail.com' }); setNote(`Teste do card enviado para ${result.para}.`); }
+    catch (error) { setNote((error as Error).message); }
+    setBusy(false);
+  }
+
+  async function enviarLote(tipo: 'boasvindas' | 'agradecimento' | 'card', faltam: number) {
+    const nome = tipo === 'boasvindas' ? 'as boas-vindas para os contatados' : tipo === 'card' ? 'o convite do card Eu vou! para quem está confirmado' : 'o agradecimento para quem ainda está sem contato';
     if (!window.confirm(`Enviar ${nome} (${faltam} ${faltam === 1 ? 'pessoa' : 'pessoas'})? Quem já recebeu não recebe de novo.`)) return;
     setBusy(true); setNote('');
     let enviados = 0;
     try {
       for (;;) {
-        const result = await chamar({ acao: 'convite', edicao: edition.id, tipo, publico: tipo === 'boasvindas' ? 'acionados' : 'sem_contato' });
+        const result = await chamar({ acao: 'convite', edicao: edition.id, tipo, publico: tipo === 'agradecimento' ? 'sem_contato' : 'acionados' });
         enviados += result.enviados;
         setNote(`${enviados} e-mails enviados...`);
         if (!result.restantes) break;
@@ -78,13 +86,20 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
 
       <label className="v2-forms-check"><input type="checkbox" checked={lembrete} onChange={(event) => onLembrete(event.target.checked)} /><span><strong>Lembrete automático em {diaLembrete}</strong><small>Vai na véspera, pela manhã, com local e agenda, para quem foi aprovado e para os contatados.</small></span></label>
 
+      <div className="adm-links adm-card-euvou">
+        <span><strong>Card Eu vou!</strong> {resumo ? `${resumo.cards || 0} de ${resumo.acionados} confirmados já receberam` : ''}</span>
+        <button type="button" className="wf-secondary" disabled={busy} onClick={() => void testeCard()}>Testar card (pclazumi@gmail.com)</button>
+        {faltamCard > 0 && <button type="button" className="wf-primary" disabled={busy} onClick={() => void enviarLote('card', faltamCard)}>{`Enviar card para os confirmados (${faltamCard})`}</button>}
+        <a className="wf-secondary" href="/eu-vou" target="_blank" rel="noopener noreferrer">Link para o grupo: comuni.calirh.com/eu-vou</a>
+      </div>
       {pendentes > 0 && <div className="adm-links">
         {faltamBoasVindas > 0 && <button type="button" className="wf-primary" disabled={busy} onClick={() => void enviarLote('boasvindas', faltamBoasVindas)}>{busy ? 'Enviando...' : `Enviar boas-vindas (${faltamBoasVindas})`}</button>}
         {faltamAgradecimento > 0 && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void enviarLote('agradecimento', faltamAgradecimento)}>{`Enviar agradecimento (${faltamAgradecimento})`}</button>}
       </div>}
       {note && <p className="adm-hint" role="status">{note}</p>}
 
-      {linhas.length > 0 && <>
+      {linhas.length > 0 && <details className="adm-suspensa">
+        <summary>Ver os e-mails enviados ({linhas.length})</summary>
         <Tabela colunas={[
           { id: 'nome', titulo: 'Nome', valor: (item: Linha) => item.nome || '-' },
           { id: 'email', titulo: 'E-mail', valor: (item: Linha) => item.email },
@@ -94,7 +109,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
           { id: 'clicado', titulo: 'Clicou', valor: (item: Linha) => item.clicado_em || '', render: (item: Linha) => marca(item.clicado_em) },
         ]} filtros={[{ id: 'tipo', titulo: 'Qual e-mail', valor: (item: Linha) => NOMES[item.tipo] || item.tipo }]} linhas={linhas} chave={(item) => `${item.email}-${item.tipo}`} inicial={{ id: 'enviado', desc: true }} vazio="Nenhum e-mail enviado." />
         <p className="adm-hint">A abertura é aproximada: o Apple Mail marca sozinho e alguns programas bloqueiam a contagem. O clique é o sinal seguro.</p>
-      </>}
+      </details>}
     </section>
   );
 }

@@ -44,9 +44,10 @@ export default async function handler(req, res) {
   if (!edition) return res.status(404).json({ error: 'Edição não encontrada.' });
 
   if (acao === 'teste') {
-    const tipos = tipo === 'todos' ? ['recebido', 'confirmacao', 'espera', 'lembrete', 'boasvindas', 'agradecimento'] : [tipo];
+    const tipos = tipo === 'todos' ? ['recebido', 'confirmacao', 'espera', 'lembrete', 'boasvindas', 'agradecimento', 'card'] : [tipo];
     for (const item of tipos) {
-      const result = await enviar(email, montar(item, edition, { nome: 'Patrícia', email }));
+      // No teste, o botão do card abre o card da própria fundadora (contato@calirh.com), para dar para conferir.
+      const result = await enviar(email, montar(item, edition, { nome: 'Patrícia', email, cardEmail: 'contato@calirh.com' }));
       if (result.erro) return res.status(502).json({ error: result.erro });
       await pausa();
     }
@@ -54,6 +55,14 @@ export default async function handler(req, res) {
     const exemplo = await enviar(email, { assunto: '[Teste] Ana quer se conectar com você', html: layoutSimples({ titulo: 'Nova conexão', saudacao: 'Oi, Patrícia!', linhas: ['<strong>Ana</strong> quer se conectar com você<br>na ComuniCALI!', '<strong>Abra seu passaporte</strong> para ver o perfil<br>e se conectar de volta.'], botao: { texto: 'Abrir meu passaporte', href: 'https://comuni.calirh.com/meu-passaporte' } }) });
     if (exemplo.erro) return res.status(502).json({ error: exemplo.erro });
     return res.status(200).json({ para: email, enviados: tipos.length + (exemplo.pulado ? 0 : 1) });
+  }
+
+  if (acao === 'teste_card') {
+    // Teste só para endereços da própria organização.
+    const para = ['pclazumi@gmail.com', 'patricia@calirh.com', 'contato@calirh.com'].includes(String(req.body?.para || '')) ? req.body.para : email;
+    const result = await enviar(para, montar('card', edition, { nome: 'Patrícia', email: para, cardEmail: 'contato@calirh.com' }));
+    if (result.erro) return res.status(502).json({ error: result.erro });
+    return res.status(200).json({ para, enviados: 1 });
   }
 
   if (acao === 'decidir') {
@@ -81,7 +90,7 @@ export default async function handler(req, res) {
   const enviados = (item) => new Set(log.filter((row) => row.tipo === item && row.situacao === 'enviado').map((row) => row.email));
 
   if (acao === 'resumo') {
-    return res.status(200).json({ todos: pessoas.length, acionados: pessoas.filter((item) => item.acionado).length, confirmacoes: enviados('confirmacao').size, lembretes: enviados('lembrete').size, convites: enviados('boasvindas').size, agradecimentos: enviados('agradecimento').size, erros: log.filter((row) => row.situacao === 'erro').length });
+    return res.status(200).json({ todos: pessoas.length, acionados: pessoas.filter((item) => item.acionado).length, confirmacoes: enviados('confirmacao').size, lembretes: enviados('lembrete').size, convites: enviados('boasvindas').size, cards: enviados('card').size, agradecimentos: enviados('agradecimento').size, erros: log.filter((row) => row.situacao === 'erro').length });
   }
 
   if (acao === 'acompanhar') {
@@ -90,7 +99,7 @@ export default async function handler(req, res) {
   }
 
   if (acao === 'convite') {
-    const modelo = tipo === 'agradecimento' ? 'agradecimento' : 'boasvindas';
+    const modelo = tipo === 'agradecimento' || tipo === 'card' ? tipo : 'boasvindas';
     const ja = enviados(modelo);
     const fila = pessoas.filter((item) => (publico === 'todos' || (publico === 'sem_contato' ? !item.acionado : item.acionado)) && !ja.has(item.email));
     let erros = 0;

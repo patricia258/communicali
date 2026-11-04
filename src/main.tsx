@@ -15,6 +15,7 @@ import { TextoPagina } from './pages/Cadastro';
 import { MeuEspaco } from './pages/MeuEspaco';
 import { CodigoConvite } from './pages/Edicao';
 import { Votar } from './pages/Votar';
+import { EuVou } from './pages/EuVou';
 import { Convidar, Convite } from './pages/Convidados';
 import { TelaoCheckin, TelaoResultado, TelaoVotacao } from './pages/Telao';
 import { Admin } from './pages/Admin';
@@ -51,6 +52,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/e/:slug" element={<EdicaoPage />} />
       <Route path="/inscricao/:slug" element={<InscricaoPage />} />
       <Route path="/votar" element={<ComEdicao><PageEvento><Votar /></PageEvento></ComEdicao>} />
+      <Route path="/eu-vou" element={<PageEvento><EuVou /></PageEvento>} />
       <Route path="/convidar" element={<ComEdicao><Convidar /></ComEdicao>} />
       <Route path="/convite/:token" element={<Page><Convite /></Page>} />
       <Route path="/telao/checkin" element={<ComEdicao><TelaoCheckin /></ComEdicao>} />

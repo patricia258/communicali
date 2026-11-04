@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
-import { MembersPanel, PollsPanel, TextsPanel, exportPresencasCsv } from './AdminPrograma';
+import { MembersPanel, PollsPanel, TextsPanel, VotacoesDaEdicao, exportPresencasCsv } from './AdminPrograma';
 import { GuestsPanel } from './Convidados';
 import { HomePanel, ProgramPanel } from './AdminInicio';
 import { StaffPanel } from './Staff';
@@ -245,6 +245,16 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
     await loadPeople();
   }
 
+  // Para testes e demonstrações: apaga a edição com votações, presenças, milhas da edição, inscrições e fotos.
+  async function excluirEdicao() {
+    const digitado = window.prompt(`Excluir "${edition.titulo}" e tudo o que pertence a ela (inscrições, presenças, milhas desta edição, votações e fotos)? Esta ação não pode ser desfeita.\n\nPara confirmar, digite o nome da edição:`);
+    if (digitado === null) return;
+    if (digitado.trim().toLowerCase() !== edition.titulo.trim().toLowerCase()) { setNote('O nome digitado não confere. Nada foi excluído.'); return; }
+    const { error } = await supabase.rpc('communicali_excluir_edicao', { p_id: edition.id });
+    if (error) { setNote(`Não foi possível excluir: ${error.message}`); return; }
+    onBack();
+  }
+
   async function manualCheckin() {
     const email = window.prompt('E-mail do membro para registrar a presença:');
     if (!email || !window.confirm(`Registrar presença de ${email} em ${edition.titulo}? Soma 10 milhas se ainda não tiver presença.`)) return;
@@ -276,7 +286,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
   return (
     <>
       <button type="button" className="v2-forms-back" onClick={onBack}>Voltar para edições</button>
-      <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
+      <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <section className="v2-forms-card">
         <div className="v2-forms-grid">
@@ -325,11 +335,11 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         <Tabela colunas={colunasInscritos} linhas={signups} chave={(item) => item.id} vazio="Nenhuma inscrição pelo site." filtros={[{ id: 'situacao', titulo: 'Situação', valor: (item) => SITUACAO_INSCRICAO[item.status] || item.status }]} />
       </section>
       <EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} />
+      <VotacoesDaEdicao editionId={edition.id} editionSlug={edition.slug} />
       <section className="v2-forms-card">
         <header><small>PRESENÇAS</small><h2>{people.length} {people.length === 1 ? 'check-in' : 'check-ins'}</h2></header>
         <div className="adm-links">
           <a className="wf-secondary" href={`${origin}/telao/checkin?edicao=${edition.slug}`} target="_blank" rel="noopener noreferrer">Telão do check-in</a>
-          <a className="wf-secondary" href={`${origin}/telao/votacao?edicao=${edition.slug}`} target="_blank" rel="noopener noreferrer">Telão da votação</a>
           <button type="button" className="wf-secondary" title="Para quem não conseguiu fazer o check-in pelo celular" onClick={() => void manualCheckin()}>Registrar presença manualmente</button>
           <button type="button" className="wf-secondary" disabled={!people.length} onClick={exportCsv}>Exportar CSV</button>
           <button type="button" className="wf-secondary" disabled={!people.length} onClick={exportPeople}>Exportar Excel</button>
@@ -436,7 +446,7 @@ function CounterPanel() {
 const GRUPOS: Array<{ nome: string; itens: Array<[string, string]> }> = [
   { nome: 'Início', itens: [['/admin', 'Início']] },
   { nome: 'Pessoas', itens: [['/admin/membros', 'Membros'], ['/admin/indicacoes', 'Indicações'], ['/admin/matches', 'Matches']] },
-  { nome: 'Edições', itens: [['/admin/edicoes', 'Edições'], ['/admin/votacoes', 'Votações']] },
+  { nome: 'Edições', itens: [['/admin/edicoes', 'Edições']] },
   { nome: 'Programa', itens: [['/admin/programa', 'Como funciona'], ['/admin/missoes', 'Missões'], ['/admin/impacto', 'Impacto']] },
   { nome: 'Formulários', itens: [['/admin/formularios', 'Formulários'], ['/admin/staff', 'Staff'], ['/admin/fornecedores', 'Fornecedores']] },
   { nome: 'Parceiros', itens: [['/admin/parceiros', 'Parceiros']] },

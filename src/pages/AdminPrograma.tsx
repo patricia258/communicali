@@ -11,7 +11,7 @@ type Member = { segmento: string | null; regiao: string | null; busca: string[];
 type History = { id: string; checked_in_at: string; codigo: string; editions: { titulo: string } };
 type Point = { id: string; acao: string; pontos: number; created_at: string; motivo: string | null };
 type Poll = { id: string; slug: string; titulo: string; pergunta: string; pergunta_2: string | null; tipo: 'nota' | 'multipla' | 'aberta'; opcoes: string[]; anonima: boolean; status: 'rascunho' | 'ativa' | 'encerrada'; revelada: boolean; edition_id: string };
-type Vote = { nota: number | null; opcao: string | null; texto: string | null; respondente: string | null; created_at: string };
+type Vote = { nota: number | null; nota_2?: number | null; opcao: string | null; texto: string | null; respondente: string | null; created_at: string };
 
 const CRACHA: Record<string, string> = { nao_disponivel: 'Sem presença ainda', disponivel: 'Disponível para retirada', entregue: 'Entregue' };
 const csv = (name: string, rows: Array<Array<string | number>>) => {
@@ -178,10 +178,17 @@ export function MembersPanel() {
 }
 
 function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
+  async function excluir() {
+    if (!window.confirm(`Excluir a votação "${draft.titulo}" e todas as respostas? Esta ação não pode ser desfeita.`)) return;
+    await supabase.from('poll_votes').delete().eq('poll_id', poll.id);
+    const { error } = await supabase.from('polls').delete().eq('id', poll.id);
+    if (error) { setNote(`Não foi possível excluir: ${error.message}`); return; }
+    onBack();
+  }
   const [draft, setDraft] = useState({ ...poll, pergunta_2: poll.pergunta_2 || '', opcoesTexto: poll.opcoes.join('\n') });
   const [votes, setVotes] = useState<Vote[]>([]);
   const [note, setNote] = useState('');
-  const load = () => supabase.from('poll_votes').select('nota,opcao,texto,respondente,created_at').eq('poll_id', poll.id).order('created_at').then(({ data }) => setVotes((data || []) as Vote[]));
+  const load = () => supabase.from('poll_votes').select('nota,nota_2,opcao,texto,respondente,created_at').eq('poll_id', poll.id).order('created_at').then(({ data }) => setVotes((data || []) as Vote[]));
   useEffect(() => { void load(); const timer = window.setInterval(load, 4000); return () => window.clearInterval(timer); }, [poll.id]);
 
   async function persist(extra: Partial<Poll> = {}) {
@@ -193,16 +200,18 @@ function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
   }
 
   const notas = votes.filter((vote) => vote.nota !== null).map((vote) => vote.nota as number);
+  const notas2 = votes.filter((vote) => vote.nota_2 !== null && vote.nota_2 !== undefined).map((vote) => vote.nota_2 as number);
+  const media2 = notas2.length ? (notas2.reduce((sum, value) => sum + value, 0) / notas2.length).toFixed(1).replace('.', ',') : '-';
   const media = notas.length ? (notas.reduce((sum, value) => sum + value, 0) / notas.length).toFixed(1).replace('.', ',') : '-';
   const origin = window.location.origin;
   return (
     <>
       <button type="button" className="v2-forms-back" onClick={onBack}>Voltar para votações</button>
-      <div className="wf-head"><div><small>VOTAÇÃO · {{ rascunho: 'RASCUNHO', ativa: 'RECEBENDO RESPOSTAS', encerrada: 'ENCERRADA' }[draft.status]}</small><h1>{draft.titulo}</h1><p>{votes.length} {votes.length === 1 ? 'resposta' : 'respostas'}{draft.tipo === 'nota' ? ` · média ${media}` : ''}</p></div>
+      <div className="wf-head"><div><small>VOTAÇÃO · {{ rascunho: 'RASCUNHO', ativa: 'RECEBENDO RESPOSTAS', encerrada: 'ENCERRADA' }[draft.status]}</small><h1>{draft.titulo}</h1><p>{votes.length} {votes.length === 1 ? 'resposta' : 'respostas'}{draft.tipo === 'nota' ? (draft.pergunta_2 ? ` · na opinião ${media} · na prática ${media2}` : ` · média ${media}`) : ''}</p></div>
         <div className="v2-head-actions">
           {draft.status !== 'ativa' && <button type="button" className="wf-primary" onClick={() => void persist({ status: 'ativa' })}>Ativar votação</button>}
           {draft.status === 'ativa' && <button type="button" className="wf-secondary" onClick={() => void persist({ status: 'encerrada' })}>Encerrar votação</button>}
-          <button type="button" className="wf-secondary" onClick={() => void persist({ revelada: !draft.revelada })}>{draft.revelada ? 'Esconder resultado' : 'Revelar no telão'}</button>
+          {draft.tipo === 'nota' && <a className="wf-primary" href={`${window.location.origin}/telao/resultado?edicao=${poll.slug}`} target="_blank" rel="noopener noreferrer">Abrir tela ao vivo</a>}
         </div>
       </div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
@@ -218,16 +227,38 @@ function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
         </div>
       </section>
       <section className="v2-forms-card">
-        <header><small>TELÃO</small><h2>Links desta dinâmica</h2></header>
+        <header><small>LINKS</small><h2>Para usar no dia</h2></header>
+        <p className="adm-hint">A tela ao vivo mostra o QR Code e o resultado mudando enquanto a sala vota. Abrindo por aqui, logada, a votação abre sozinha.</p>
         <div className="adm-links">
-          <a className="wf-secondary" href={`${origin}/telao/votacao?edicao=${poll.slug}`} target="_blank" rel="noopener noreferrer">Abrir telão</a>
           <a className="wf-secondary" href={`${origin}/votar?edicao=${poll.slug}`} target="_blank" rel="noopener noreferrer">Abrir tela de resposta</a>
-          {draft.tipo === 'nota' && <a className="wf-primary" href={`${origin}/telao/resultado?edicao=${poll.slug}`} target="_blank" rel="noopener noreferrer">Abrir tela de resultado</a>}
           <button type="button" className="wf-secondary" disabled={!votes.length} onClick={() => csv(`communicali-votacao-${poll.slug}.csv`, [['Data', 'Nota', 'Opção', 'Resposta', 'Respondente'], ...votes.map((vote) => [new Date(vote.created_at).toLocaleString('pt-BR'), vote.nota ?? '', vote.opcao || '', vote.texto || '', vote.respondente || ''])])}>Exportar CSV</button>
         </div>
-        <p className="adm-hint">O resultado é a percepção de quem está presente, não uma pesquisa representativa do mercado.</p>
+        <p className="adm-hint">O resultado mostra a percepção de quem está presente na sala.</p>
+        <p className="adm-hint"><button type="button" className="adm-link-botao" onClick={() => void excluir()}>Excluir esta votação</button></p>
       </section>
     </>
+  );
+}
+
+/** Votações de uma edição, dentro da própria página da edição. */
+export function VotacoesDaEdicao({ editionId, editionSlug }: { editionId: string; editionSlug: string }) {
+  const [list, setList] = useState<Poll[]>([]);
+  const [open, setOpen] = useState<Poll | null>(null);
+  const load = () => supabase.from('polls').select('*').eq('edition_id', editionId).order('created_at').then(({ data }) => setList((data || []) as Poll[]));
+  useEffect(() => { void load(); }, [editionId]);
+  async function create() {
+    // A primeira votação usa o mesmo endereço da edição (o QR Code de comuni.calirh.com/votar cai nela).
+    const slug = list.length ? `${editionSlug}-${Date.now().toString(36)}` : editionSlug;
+    const { data } = await supabase.from('polls').insert({ edition_id: editionId, slug, titulo: 'Nova votação', pergunta: 'Escreva a pergunta' }).select('*').single();
+    if (data) { await load(); setOpen(data as Poll); }
+  }
+  if (open) return <section className="v2-forms-card adm-votacao-edicao"><PollEditor key={open.id} poll={open} onBack={() => { setOpen(null); void load(); }} /></section>;
+  return (
+    <section className="v2-forms-card">
+      <header className="adm-envios__topo"><div><small>VOTAÇÃO</small><h2>{list.length ? `${list.length} ${list.length === 1 ? 'votação' : 'votações'} desta edição` : 'Nenhuma votação ainda'}</h2></div>
+        <div className="adm-links"><button type="button" className="wf-secondary" onClick={() => void create()}>Nova votação</button></div></header>
+      <div className="adm-list">{list.map((item) => <button type="button" className="adm-row" key={item.id} onClick={() => setOpen(item)}><strong>{item.titulo}</strong><span>{item.pergunta}</span><em>{{ rascunho: 'Rascunho', ativa: 'Recebendo respostas', encerrada: 'Encerrada' }[item.status]}</em></button>)}</div>
+    </section>
   );
 }
 

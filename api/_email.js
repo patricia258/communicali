@@ -5,7 +5,7 @@ import { createHmac } from 'node:crypto';
 const SITE = 'https://comuni.calirh.com';
 const FROM = 'ComuniCALI <comuni@calirh.com>';
 const REPLY_TO = 'contato@calirh.com';
-export const EDITION_FIELDS = 'id,slug,titulo,data_evento,horario,local,cidade,endereco,capa_url,lembrete_ativo,publica';
+export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,lembrete_ativo,publica';
 
 // Página branca, sem moldura. A cor de cada tipo aparece na etiqueta e no botão; os blocos têm cantos arredondados.
 const COR = { tinta: '#22100F', bordo: '#5A1E2D', vivo: '#7A1F3D', mostarda: '#C9973B', clara: '#DDB160', suave: '#CBB9B1', marfim: '#F7F0EA', rose: '#FBF1EC', oliva: '#5F6238', terra: '#A9502E' };
@@ -17,6 +17,7 @@ const FAIXA = {
   lembrete: { etiqueta: '#A9502E', fundo: VIVAS.terra, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
   convite: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
   agradecimento: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
+  card: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
   boasvindas: { etiqueta: '#B83A62', fundo: VIVAS.rosa, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
 };
 const FONTES = '<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@600;700&family=Inter:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">';
@@ -227,6 +228,9 @@ export function montar(tipo, edition, pessoa) {
     lembrete: { assunto: `É amanhã: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: 'É amanhã!', saudacao, paragrafos: ['Amanhã é dia de ComuniCALI!', '<strong>Na chegada</strong>, a recepção confirma o seu nome<br>e indica a sua mesa.', '<strong>Na mesa</strong>, é só fazer o check-in<br>pelo QR Code.'], botao: agenda, depois: responder, anexo: true },
     boasvindas: { assunto: `Boas-vindas à ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Estamos ansiosos para ver você no nosso encontro!', titulo: 'Uhull! Boas-vindas', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Ficamos <em>muito felizes</em> que você esteja com a gente nessa jornada!', 'A <strong>ComuniCALI</strong> nasceu sem pretensão, era pra ser só "um cafezinho entre colegas de trabalho". Ainda não sabemos onde isso vai chegar, mas temos certeza de que vai trazer <em>grandes contribuições</em> para cada pessoa que faz parte dela.', '<strong><u>Estamos ansiosos para ver você no nosso encontro!</u></strong>', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong>'], botao: { texto: 'Acesse o site', href: SITE }, detalhes: false, anexo: false },
     agradecimento: { assunto: `Obrigado pelo interesse na ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Essa é só a primeira de muitas edições.', titulo: 'Obrigado pelo interesse', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Muito obrigado pelo seu interesse na <strong>ComuniCALI</strong>!', 'As vagas da nossa <em>primeira edição</em> já estão fechadas, e que pena que desta vez você não vai poder estar com a gente.', '<strong><u>Mas essa é só a primeira de muitas!</u></strong> Queremos muito conhecer você nos próximos encontros.', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong> Lá você conhece a comunidade e registra seu interesse para as próximas edições.'], botao: { texto: 'Conheça a ComuniCALI', href: SITE }, detalhes: false, comFoto: false, anexo: false },
+    card: { assunto: `Seu card "Eu vou!" está pronto, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Mostre para todo mundo que você vai estar com a gente.', titulo: 'Eu vou!', saudacao: nome ? `Olá, ${nome}!` : 'Olá!',
+      paragrafos: [`Faltam poucos dias para o nosso <strong>${edition.numero === 1 ? 'primeiro encontro' : 'próximo encontro'}</strong>, e a gente já está na contagem regressiva! 🎉`, 'Preparamos um <strong>card especial</strong> para você mostrar que vai estar com a gente. Ele já sai pronto, com a <em>sua foto</em>, a data e o local.', '<strong><u>Compartilhe nas suas redes e no grupo!</u></strong> Quanto mais gente souber, mais bonita fica essa história. 💛'],
+      botao: { texto: 'Criar meu card', href: `${SITE}/eu-vou?c=${assinatura(pessoa.cardEmail || pessoa.email)}` }, anexo: false },
     convite: { assunto: `Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: 'Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
   }[tipo];
   return { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null };

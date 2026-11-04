@@ -176,7 +176,7 @@ export function ConviteMembro({ nome, codigoAtual, recarregar }: { nome: string;
 }
 
 // Card "Eu vou!" para quem tem inscrição confirmada: foto de passaporte e cartão de embarque, nas cores do site, com respiro.
-export async function gerarCartaoEuVou(nome: string, foto: string | null, encontro: { titulo: string; data: string; local: string }): Promise<Blob> {
+export async function gerarCartaoEuVou(nome: string, foto: string | null, encontro: { titulo: string; data: string; local: string }, frase = 'Vou estar no próximo encontro da ComuniCALI.'): Promise<Blob> {
   await Promise.all([document.fonts.load('700 72px "Funnel Display"'), document.fonts.load('400 36px Inter'), document.fonts.load('600 32px Inter'), document.fonts.load('700 20px Inter')]);
   const [logo, retrato] = await Promise.all([imagem('/brand/communicali-branco.png'), foto ? imagem(foto).catch(() => null) : Promise.resolve(null)]);
   const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1350;
@@ -190,7 +190,7 @@ export async function gerarCartaoEuVou(nome: string, foto: string | null, encont
   const largura = 300; c.drawImage(logo, (1080 - largura) / 2, 70, largura, largura * logo.height / logo.width);
   c.textAlign = 'center';
   c.fillStyle = '#DDB160'; c.font = '700 168px "Funnel Display", sans-serif'; c.fillText('Eu vou!', 540, 330);
-  c.fillStyle = '#E9DDD5'; c.font = '400 34px Inter, sans-serif'; c.fillText('Vou estar no próximo encontro da ComuniCALI.', 540, 392, 900);
+  c.fillStyle = '#E9DDD5'; c.font = '400 34px Inter, sans-serif'; c.fillText(frase, 540, 392, 900);
   // Foto de passaporte no centro.
   c.save(); c.translate(540, 640); c.rotate(-0.035);
   c.shadowColor = 'rgba(0,0,0,.45)'; c.shadowBlur = 30; c.shadowOffsetY = 12;
@@ -209,8 +209,17 @@ export async function gerarCartaoEuVou(nome: string, foto: string | null, encont
   c.fillStyle = '#22100F'; let t = 46; do { c.font = `700 ${t}px "Funnel Display", sans-serif`; t -= 2; } while (c.measureText(encontro.titulo).width > 600 && t > 28); c.fillText(encontro.titulo, 120, y + 118);
   c.fillStyle = '#8A7A72'; c.font = '700 18px Inter, sans-serif'; c.fillText('DATA', 120, y + 172); c.fillText('LOCAL', 120, y + 232);
   c.fillStyle = '#3A2A24'; c.font = '600 26px Inter, sans-serif'; c.fillText(encontro.data, 210, y + 174, 530); c.fillText(encontro.local, 210, y + 234, 530);
-  c.textAlign = 'center'; c.fillStyle = '#7A1F3D'; c.font = '700 22px "Funnel Display", sans-serif'; c.fillText('Café &', 890, y + 120); c.fillText('Pessoas', 890, y + 150);
-  c.strokeStyle = '#7A1F3D'; c.lineWidth = 3; c.strokeRect(830, y + 185, 120, 58); c.font = '700 15px Inter, sans-serif'; c.fillText('EMBARQUE', 890, y + 210); c.fillText('CONFIRMADO', 890, y + 232);
+  // Carimbo redondo "Presença confirmada" no canhoto, levemente torto, como carimbo de verdade.
+  c.save(); c.translate(890, y + h / 2); c.rotate(-0.2); c.globalAlpha = 0.92;
+  c.strokeStyle = '#7A1F3D'; c.fillStyle = '#7A1F3D'; c.textAlign = 'center';
+  c.lineWidth = 5; c.beginPath(); c.arc(0, 0, 96, 0, Math.PI * 2); c.stroke();
+  c.lineWidth = 2; c.beginPath(); c.arc(0, 0, 82, 0, Math.PI * 2); c.stroke();
+  c.font = '700 14px Inter, sans-serif'; c.fillText('★  ★  ★', 0, -44);
+  c.font = '800 24px Inter, sans-serif'; c.fillText('PRESENÇA', 0, -6);
+  c.font = '800 19px Inter, sans-serif'; c.fillText('CONFIRMADA', 0, 22);
+  c.font = 'italic 600 15px Inter, sans-serif'; c.fillText('ComuniCALI', 0, 52);
+  c.restore();
+  c.textAlign = 'center';
   c.fillStyle = '#DDB160'; c.font = 'italic 400 30px Inter, sans-serif'; c.fillText('Falar de pessoas pode mudar o mundo.', 540, 1268);
   c.fillStyle = '#CBB9B1'; c.font = '600 22px Inter, sans-serif'; c.fillText('comuni.calirh.com  ·  Toda honra a Deus!', 540, 1312);
   return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('imagem')), 'image/png'));

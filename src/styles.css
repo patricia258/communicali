@@ -199,3 +199,10 @@ html:has(.legal),body:has(.legal){background:#1F0E14}
 .resultado__painel .resultado__barras{height:clamp(200px,38vh,480px)}
 .resultado__texto h1{font-size:clamp(26px,3vw,56px)}
 .resultado__linha{white-space:nowrap}
+/* Card Eu vou! */
+.euvou h1 em{display:block;font-style:normal;color:#DDB160}
+.euvou__texto{margin:0;color:#CBB9B1;line-height:1.55}
+.euvou__form{display:grid;gap:12px}
+.euvou__card{display:block;width:100%;height:auto;border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.35)}
+.euvou .button--linha{background:transparent;border:1px solid rgba(221,177,96,.6);color:#DDB160}
+.euvou__trocar{justify-self:center;color:#CBB9B1;font:500 13px Inter,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}

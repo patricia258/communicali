@@ -187,3 +187,14 @@
 /* Painel do administrador usa toda a largura da tela (04/11). */
 .adm .ap-content,.adm .ap-content:has(.adm-tabela){max-width:none}
 .adm-link-botao{display:inline-flex;align-items:center;gap:4px;border:0;background:none;padding:0;color:#a9502e;font:inherit;text-decoration:underline;cursor:pointer}
+/* Lista suspensa (e-mails enviados) e botão de ação destrutiva. */
+.adm-suspensa{margin-top:6px;border-top:1px solid #f0e7e0;padding-top:12px}
+.adm-suspensa>summary{cursor:pointer;width:max-content;padding:7px 12px;border:1px solid #eadfd6;border-radius:999px;font:600 13px Inter,sans-serif;color:#5a1e2d;list-style:none}
+.adm-suspensa>summary::-webkit-details-marker{display:none}
+.adm-suspensa>summary::before{content:'▸ ';}
+.adm-suspensa[open]>summary::before{content:'▾ ';}
+.adm-suspensa[open]>summary{margin-bottom:12px}
+.wf-secondary.adm-perigo{color:#a9502e;border-color:#e8c9bb}
+.wf-secondary.adm-perigo:hover{background:#fbede6}
+.adm-card-euvou{align-items:center;padding:12px 14px;border:1px dashed #d8c3a5;border-radius:12px;background:#fdf8f1}
+.adm-card-euvou>span{margin-right:auto;font-size:13px;color:#3e3533}

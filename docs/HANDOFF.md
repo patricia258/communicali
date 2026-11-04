@@ -8,6 +8,13 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 | Tudo da edição dentro da edição, card Eu vou! por e-mail
+- Página da edição (painel): seção VOTAÇÃO (`VotacoesDaEdicao` em AdminPrograma.tsx) com lista, nova votação (a primeira usa o slug da edição) e o editor; aba Votações saiu do menu. Editor sem "Revelar no telão" e sem telão antigo; botões Ativar/Encerrar, "Abrir tela ao vivo", "Excluir esta votação"; mostra médias de opinião e prática.
+- E-mails enviados ficam numa lista suspensa. Botão "Excluir edição" (confirma digitando o nome) chama `communicali_excluir_edicao` (migração `20261105100000_excluir_edicao.sql`), que apaga votações, votos, presenças, milhas da edição, convidados, inscrições e fotos.
+- Card Eu vou!: canhoto agora tem carimbo "PRESENÇA CONFIRMADA" (no lugar de Café & Pessoas / Embarque confirmado); frase "Vou estar no primeiro encontro" quando a edição é a nº 1.
+- `/eu-vou` (`EuVou.tsx`, `api/eu-vou.js`): a pessoa confirmada (inscrita aprovada, convidado confirmado, contatada no formulário da edição ou organização) informa o e-mail, ou chega com `?c=<assinatura>` do e-mail, e o card sai com a foto do formulário (link temporário do bucket cali-forms) ou do passaporte. "Usar outra foto" troca só no aparelho.
+- E-mail "card" (`montar('card')`): botão "Criar meu card" com link pessoal. No painel (E-mails da edição): "Testar card (pclazumi@gmail.com)", "Enviar card para os confirmados (N)" e o link do grupo. Teste enviado em 05/11; lote NÃO enviado (aguarda o ok da Patrícia). A conta de membro da Patrícia é contato@calirh.com.
+
 ### 2026-11-05 | Tela ao vivo com QR Code
 - `/telao/resultado` virou a tela única da dinâmica: "Antes de debater, vamos votar!", QR Code para comuni.calirh.com/votar à esquerda; total, médias "Na opinião" e "Na prática", distância e barras à direita, atualizando a cada 2,5 s. O slide separado do QR pode sair da apresentação; o link "Abrir tela ao vivo" fica no slide do tema central.
 - Ao abrir a tela logada como administradora, a votação em rascunho abre sozinha (o público não consegue). Se não estiver aberta, a tela avisa. `communicali_resultado` devolve `situacao` (migração `20261105090000_resultado_situacao.sql`).
