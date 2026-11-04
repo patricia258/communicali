@@ -16,6 +16,6 @@ export default async function handler(req, res) {
   if (!linhas.length || destino[0].email.endsWith('.test')) return res.status(200).json({ enviado: false });
   const nome = (autor[0].apelido || autor[0].nome).trim().split(/\s+/)[0];
   const quem = (destino[0].apelido || destino[0].nome).trim().split(/\s+/)[0];
-  const result = await enviar(destino[0].email, { assunto: `🤝 ${nome} quer se conectar com você`, html: layoutSimples({ titulo: '🤝 Nova conexão', saudacao: `Oi, ${quem}!`, linhas: [`<strong>${escape(nome)}</strong> quer se conectar com você<br>na ComuniCALI!`, '<strong>Abra seu passaporte</strong> para ver o perfil<br>e se conectar de volta.'], botao: { texto: 'Abrir meu passaporte', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
+  const result = await enviar(destino[0].email, { assunto: `🤝 ${nome} quer se conectar com você`, html: layoutSimples({ titulo: '🤝 Nova conexão', saudacao: `Oi, ${quem}!`, linhas: [`<strong>${escape(nome)}</strong> quer se conectar com você<br>na ComuniCALI!`, '<strong>Abra seu passaporte</strong> para ver o perfil<br>e se conectar de volta.'], botao: { texto: 'Abrir meu passaporte', href: 'https://comuni.calirh.com/meu-passaporte' } }), ics: null });
   res.status(result.erro ? 502 : 200).json({ enviado: !result.erro });
 }

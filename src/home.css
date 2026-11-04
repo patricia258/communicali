@@ -228,9 +228,30 @@
 .ticket p{opacity:.85}
 .ticket__numero{position:absolute!important;right:24px;top:50%;transform:translateY(-50%) rotate(90deg);transform-origin:center;font:700 11px Inter,sans-serif;letter-spacing:.2em;opacity:.7}
 .ticket__estrelas{display:block;margin:6px 0 4px;font-size:12px;letter-spacing:.4em;opacity:.8}
-.passaporte .ticket{padding:28px 56px 26px 34px}
-.passaporte .ticket strong{font:800 26px var(--display);text-transform:uppercase;letter-spacing:.04em}
-.stats .ticket{padding:22px 34px}
+/* Topo: ticket escuro e compacto, só moldura e números em dourado. */
+.stats .ticket{padding:14px 22px!important;background:linear-gradient(160deg,#3A1F28,#2A151C)!important;color:var(--ivory,#F7F0EA)!important;box-shadow:0 10px 28px rgba(0,0,0,.25)}
+.stats .ticket::before{inset:7px 14px;border:1px dashed rgba(221,177,96,.35)}
+.stats .ticket strong{color:#DDB160!important;font-size:clamp(22px,2.4vw,28px)}
+.stats .ticket svg{color:#C9973B!important;margin-bottom:2px}
+.stats .ticket h3{color:#F7F0EA!important;border-top:1px dashed rgba(221,177,96,.25);font-size:13px;padding-top:6px}
+.stats .ticket p{color:var(--soft)!important;font-size:12px}
+@media (max-width:640px){
+  .stats{grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+  .stats .ticket{padding:12px 10px!important;justify-items:center;text-align:center}
+  .stats .ticket::before{inset:5px 9px}
+  .stats .ticket svg,.stats .ticket p{display:none}
+  .stats .ticket strong{font-size:20px}
+  .stats .ticket h3{font-size:11px;padding-top:4px}
+}
+/* Passaporte: ticket vazado com canhoto do ícone à esquerda. */
+.passaporte .ticket{display:grid;grid-template-columns:52px 1fr;column-gap:18px;align-items:center;padding:20px 46px 20px 22px!important;background:rgba(201,151,59,.07)!important;color:#F7F0EA!important}
+.passaporte .ticket::before{inset:6px 12px;border:1px solid rgba(221,177,96,.4)}
+.passaporte .ticket svg{grid-row:1/4;color:#DDB160!important;justify-self:center}
+.passaporte .ticket::after{content:'';display:block;position:absolute;left:74px;top:14px;bottom:14px;border-left:1px dashed rgba(221,177,96,.4);width:0;height:auto;background:none;clip-path:none;border-radius:0}
+.passaporte .ticket .ticket__estrelas{grid-column:2;color:#C9973B!important;font-size:10px;margin:0}
+.passaporte .ticket strong{grid-column:2;margin:2px 0 4px;font:700 18px var(--display);text-transform:uppercase;letter-spacing:.05em;color:#DDB160!important}
+.passaporte .ticket p{grid-column:2;color:var(--soft)!important;font-size:14px;opacity:1}
+.passaporte .ticket .ticket__numero{color:#C9973B!important;right:12px;font-size:10px}
 /* Formatos com capa. */
 .escalas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .escala{overflow:hidden;border:1px solid var(--edge);border-radius:18px;background:var(--panel)}
@@ -271,3 +292,12 @@
 .pill:active{transform:scale(.97)}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){.revelar,.revelar *{opacity:1!important;transform:none!important;transition:none!important}.hero *{animation:none!important}html{scroll-behavior:auto}}
+@media (max-width:420px){
+  .nav__acoes{gap:10px}
+  .nav__acoes .nav__membro{font-size:12px}
+  .nav__acoes .pill{padding:8px 12px;font-size:12px}
+  .nav__row{gap:10px}
+  .nav__logo img{height:24px}
+  .nav__acoes{margin-left:auto}
+  .nav__acoes .pill{min-height:34px;padding:0 12px;white-space:nowrap}
+}

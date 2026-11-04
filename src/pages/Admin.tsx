@@ -117,7 +117,7 @@ function Login() {
             <button type="submit" disabled={busy}>{busy ? 'Enviando...' : 'Receber código de acesso'}</button>
           </form>
         )}
-        <a className="adm-login__voltar" href="/meu-espaco">Sou membro, quero meu passaporte</a>
+        <a className="adm-login__voltar" href="/meu-passaporte">Sou membro, quero meu passaporte</a>
       </section>
     </main>
   );

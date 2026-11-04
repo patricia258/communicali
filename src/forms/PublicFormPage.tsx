@@ -234,10 +234,10 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     <header className="cf-top"><a href="/"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></a>{preview && <span className="cf-preview">Prévia · as respostas não são salvas</span>}</header>
     <main className="cf-stage">
       {phase === 'loading' && <div className="cf-screen cf-center"><span className="cf-spinner" aria-label="Carregando" /></div>}
-      {phase === 'missing' && <div className="cf-screen cf-center cf-enter"><small>COMMUNICALI</small><h1>Formulário não encontrado</h1><p>Confira o link que você recebeu ou fale com a CALI RH.</p></div>}
-      {phase === 'closed' && form && <div className="cf-screen cf-center cf-enter"><small>COMMUNICALI</small><h1>{form.title}</h1><p>Este formulário não está mais recebendo respostas. Obrigada pelo interesse.</p></div>}
+      {phase === 'missing' && <div className="cf-screen cf-center cf-enter"><small>ComuniCALI</small><h1>Formulário não encontrado</h1><p>Confira o link que você recebeu ou fale com a CALI RH.</p></div>}
+      {phase === 'closed' && form && <div className="cf-screen cf-center cf-enter"><small>ComuniCALI</small><h1>{form.title}</h1><p>Este formulário não está mais recebendo respostas. Obrigada pelo interesse.</p></div>}
       {phase === 'welcome' && form && <div className="cf-screen cf-enter">
-        <small>{form.category || 'Formulário'}</small><h1>{form.title}</h1>
+        <h1>{form.title}</h1>
         {form.description && <p className="cf-desc" dangerouslySetInnerHTML={{ __html: richTextHtml(form.description) }} />}
         <div className="cf-actions"><button type="button" className="cf-primary" onClick={() => setPhase('questions')}>Começar <ArrowRight size={18} /></button><span className="cf-enter-hint">ou pressione <b>Enter <CornerDownLeft size={13} /></b></span></div>
         <p className="cf-meta">{answerable.length} {answerable.length === 1 ? 'pergunta' : 'perguntas'} · cerca de {Math.max(1, Math.round(answerable.length * 0.4))} min</p>

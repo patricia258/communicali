@@ -165,7 +165,7 @@ export function Home() {
             <a href="#proximo">Agenda</a>
             <a href="#parceiros">Parceiros</a>
           </div>
-          <div className="nav__acoes"><a className="nav__membro" href="/meu-espaco">Já sou membro</a><a className="pill" href={joinHref}>Registrar interesse</a></div>
+          <div className="nav__acoes"><a className="nav__membro" href="/meu-passaporte">Já sou membro</a><a className="pill" href={joinHref}>Registrar interesse</a></div>
         </div>
       </nav>
 

@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         const nome = (outra.apelido || outra.nome).trim().split(/\s+/)[0];
         await banco('notifications', { method: 'POST', body: JSON.stringify({ member_id: pessoa.id, tipo: 'match', texto: `Temos uma sugestão de conexão: ${nome}.`, de: outra.id }) });
         if (!pessoa.email.endsWith('.test')) {
-          await enviar(pessoa.email, { assunto: `✨ Sugestão de conexão: ${nome}`, html: layoutSimples({ titulo: '✨ Sugestão de conexão', saudacao: `Oi, ${(pessoa.apelido || pessoa.nome).trim().split(/\s+/)[0]}!`, linhas: [`Achamos que vale você conhecer<br><strong>${escape(nome)}</strong>!`, 'O ponto em comum é:', `<strong>${escape(par.motivo)}</strong>`, 'Abra seu passaporte para ver o perfil<br>e trocar figurinhas!'], botao: { texto: 'Ver sugestão', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
+          await enviar(pessoa.email, { assunto: `✨ Sugestão de conexão: ${nome}`, html: layoutSimples({ titulo: '✨ Sugestão de conexão', saudacao: `Oi, ${(pessoa.apelido || pessoa.nome).trim().split(/\s+/)[0]}!`, linhas: [`Achamos que vale você conhecer<br><strong>${escape(nome)}</strong>!`, 'O ponto em comum é:', `<strong>${escape(par.motivo)}</strong>`, 'Abra seu passaporte para ver o perfil<br>e trocar figurinhas!'], botao: { texto: 'Ver sugestão', href: 'https://comuni.calirh.com/meu-passaporte' } }), ics: null });
           await pausa();
         }
       }
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       await pausa();
     }
     // Um exemplo de aviso do espaço do membro, com o link de parar de receber.
-    const exemplo = await enviar(email, { assunto: '[Teste] 🤝 Ana quer se conectar com você', html: layoutSimples({ titulo: '🤝 Nova conexão', saudacao: 'Oi, Patrícia!', linhas: ['<strong>Ana</strong> quer se conectar com você<br>na ComuniCALI!', '<strong>Abra seu passaporte</strong> para ver o perfil<br>e se conectar de volta.'], botao: { texto: 'Abrir meu passaporte', href: 'https://comuni.calirh.com/meu-espaco' } }) });
+    const exemplo = await enviar(email, { assunto: '[Teste] 🤝 Ana quer se conectar com você', html: layoutSimples({ titulo: '🤝 Nova conexão', saudacao: 'Oi, Patrícia!', linhas: ['<strong>Ana</strong> quer se conectar com você<br>na ComuniCALI!', '<strong>Abra seu passaporte</strong> para ver o perfil<br>e se conectar de volta.'], botao: { texto: 'Abrir meu passaporte', href: 'https://comuni.calirh.com/meu-passaporte' } }) });
     if (exemplo.erro) return res.status(502).json({ error: exemplo.erro });
     return res.status(200).json({ para: email, enviados: tipos.length + (exemplo.pulado ? 0 : 1) });
   }
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       const quem = (await (await banco(`members?id=eq.${pessoa.indicado_por}&select=nome,apelido,email`)).json())[0];
       if (quem && !quem.email.endsWith('.test')) {
         const convidada = pessoa.nome.trim().split(/\s+/)[0];
-        await enviar(quem.email, { assunto: `🎉 ${convidada} foi confirmada no encontro`, html: layoutSimples({ titulo: '🎉 Indicação aprovada', saudacao: `Oi, ${(quem.apelido || quem.nome).trim().split(/\s+/)[0]}!`, linhas: [`<strong>${escape(pessoa.nome)}</strong> está confirmada no encontro`, `<strong>${escape(edition.titulo)}</strong>`, 'Como vem pela sua indicação,<br>contamos com você para:'], itens: ['Receber a pessoa na chegada', 'Não deixar a pessoa sozinha', 'Apresentar a comunidade e outras pessoas', 'Mostrar como funciona o check-in'], botao: { texto: 'Ver minhas indicações', href: 'https://comuni.calirh.com/meu-espaco' } }), ics: null });
+        await enviar(quem.email, { assunto: `🎉 ${convidada} foi confirmada no encontro`, html: layoutSimples({ titulo: '🎉 Indicação aprovada', saudacao: `Oi, ${(quem.apelido || quem.nome).trim().split(/\s+/)[0]}!`, linhas: [`<strong>${escape(pessoa.nome)}</strong> está confirmada no encontro`, `<strong>${escape(edition.titulo)}</strong>`, 'Como vem pela sua indicação,<br>contamos com você para:'], itens: ['Receber a pessoa na chegada', 'Não deixar a pessoa sozinha', 'Apresentar a comunidade e outras pessoas', 'Mostrar como funciona o check-in'], botao: { texto: 'Ver minhas indicações', href: 'https://comuni.calirh.com/meu-passaporte' } }), ics: null });
       }
     }
     return res.status(200).json({ email: situacao });

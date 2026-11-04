@@ -38,6 +38,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/checkin" element={<ComEdicao><Page><Checkin /></Page></ComEdicao>} />
       <Route path="/validar/:codigo" element={<Page><Validar /></Page>} />
       <Route path="/cadastro" element={<Navigate to="/#fazer-parte" replace />} />
+      <Route path="/meu-passaporte" element={<MeuEspaco />} />
       <Route path="/meu-espaco" element={<MeuEspaco />} />
       <Route path="/c/:codigo" element={<CodigoConvite />} />
       <Route path="/regras" element={<Page><TextoPagina tipo="regras" /></Page>} />

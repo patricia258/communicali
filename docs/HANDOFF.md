@@ -7,6 +7,14 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 1. Toda mudança precisa de pedido de Patrícia. Faça só o que foi pedido, sem refazer o que já está aprovado.
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
+
+### 2026-11-03 (noite) | Tickets mais sutis, endereço Meu passaporte, ticket serrilhado
+- Tickets do topo (+300, 1ª edição, Brasil): agora escuros, compactos, com moldura tracejada dourada. No celular ficam lado a lado, só número e rótulo.
+- Carimbos, Selos e Milhas: ticket vazado com canhoto do ícone à esquerda, diferente do topo.
+- Novo endereço `/meu-passaporte` (o antigo `/meu-espaco` continua funcionando). Menu, rodapé, login do admin e e-mails de aviso apontam para o novo.
+- Formulários: a etiqueta "ComuniCALI | Café & Pessoas" saiu do topo; o desenho de fundo virou ticket serrilhado (`public/brand/bilhete-communicali.svg`). Grafia corrigida para ComuniCALI nas telas de formulário fechado ou não encontrado.
+- Barra do topo cabe em celular de 375px.
+- Pendente: novo slogan no lugar de "Café & Pessoas" (aguarda a Patrícia).
 4. Não apague nem sobrescreva o trabalho da outra IA. Se o código do pacote estiver mais antigo que este registro, avise Patrícia antes de editar.
 5. Nunca mexa em dados reais em massa. Apagar só registros próprios de teste, filtrando por e-mail ou marca.
 6. Nunca grave chave, senha ou token em arquivo, chat ou commit.

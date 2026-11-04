@@ -184,7 +184,7 @@ function CarimboEdicao({ carimbo, indice }: { carimbo: Carimbo; indice: number }
     <svg className="passe__carimbo" viewBox="0 0 400 400" role="img" aria-label={`Carimbo: ${carimbo.titulo}`} style={{ transform: `rotate(${indice % 2 ? 5 : -6}deg)` }}>
       <rect x="28" y="92" width="344" height="216" fill="none" stroke={cor} strokeWidth="7" />
       <rect x="44" y="108" width="312" height="184" fill="none" stroke={cor} strokeWidth="2.5" />
-      <text x="200" y="164" textAnchor="middle" fontSize="22" letterSpacing="4" fill={cor} fontWeight="700">COMMUNICALI</text>
+      <text x="200" y="164" textAnchor="middle" fontSize="22" letterSpacing="4" fill={cor} fontWeight="700">COMUNICALI</text>
       <text x="200" y="214" textAnchor="middle" fontSize="30" fill={cor} fontWeight="700">{carimbo.titulo.slice(0, 20)}</text>
       <text x="200" y="256" textAnchor="middle" fontSize="23" letterSpacing="2" fill={cor} fontWeight="700">{data}</text>
     </svg>

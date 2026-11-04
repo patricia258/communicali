@@ -2,7 +2,7 @@
 // Pode ser chamado a qualquer momento: cada aviso é marcado antes do envio e vai uma vez só.
 import { banco, enviar, escape, layoutSimples, pausa } from './_email.js';
 
-const MEU = 'https://comuni.calirh.com/meu-espaco';
+const MEU = 'https://comuni.calirh.com/meu-passaporte';
 const PAINEL = 'https://comuni.calirh.com/admin';
 const primeiro = (nome) => String(nome || '').trim().split(/\s+/)[0] || '';
 const desde = () => new Date(Date.now() - 3 * 86400000).toISOString();
