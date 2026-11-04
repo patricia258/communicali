@@ -9,6 +9,8 @@ import { FeedbackPerfil, ParceiroRede, usePerfisParceiros } from './RedeExtras';
 import { CartaoConvite, ConviteMembro, gerarCartaoEuVou } from './ConviteMembro';
 import { ParceirosExemplos } from './ParceirosExemplos';
 import { TrilhaPrograma } from './TrilhaPrograma';
+import { buscar, esquecerTudo, lembrado, preCarregarFotos, useLembrado } from './lembrar';
+import { FONTE_CONVITE } from './ConviteMembro';
 import './membro.css';
 
 type Carimbo = { slug: string; titulo: string; selo: string; data_evento: string; local: string; cidade: string; capa_url: string | null; carimbo_url: string | null; fotos_url: string | null };
@@ -206,9 +208,8 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
   const meta = META[m.categoria];
   const faltam = meta ? Math.max(meta.pontos - espaco.pontos, 0) : 0;
   const preenchidos = meta ? Math.min(espaco.pontos / meta.pontos, 1) * 10 : 10;
-  const [cartao, setCartao] = useState<Cartao | null>(null);
+  const [cartao] = useLembrado<Cartao | null>('cartao', FONTE_CARTAO);
   const [ocultas, setOcultas] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem('passe:sugestoes-ocultas') || '[]'); } catch { return []; } });
-  useEffect(() => { void supabase.rpc('communicali_meu_cartao').then(({ data }) => setCartao(data as Cartao)); }, []);
   const ocultar = (id: string) => { const lista = [...ocultas, id]; setOcultas(lista); try { localStorage.setItem('passe:sugestoes-ocultas', JSON.stringify(lista)); } catch { /* só nesta visita */ } };
   // Uma pessoa aparece uma vez, com todos os pontos em comum juntos.
   const sugestoes = Object.values((extra?.sugestoes || []).reduce<Record<string, { id: string; nome: string; foto_url: string | null; motivos: string[] }>>((acc, item) => {
@@ -357,6 +358,15 @@ function organizarAgenda(espaco: Espaco, publicadas: EncontroAgenda[], hoje: str
   };
 }
 
+type RedeDados = { eu: string; acesso: boolean; total?: number; pessoas: Pessoa[]; parceiros: Parceiro[] };
+const FONTE_CARTAO = () => supabase.rpc('communicali_meu_cartao').then(({ data }) => data as Cartao | null);
+const FONTE_INSCRICOES = () => supabase.rpc('communicali_minhas_inscricoes').then(({ data }) => (data as string[]) || []);
+// Mesmo filtro público do site, sem ampliar acesso a edições privadas.
+const FONTE_AGENDA = () => supabase.from('editions').select(AGENDA_FIELDS).eq('publica', true).order('data_evento', { ascending: false }).then(({ data, error }) => { if (error) throw error; return (data || []) as EncontroAgenda[]; });
+const FONTE_PARCEIROS = () => supabase.from('partners').select('id,nome,logo_url,site_url').eq('ativo', true).order('ordem').then(({ data }) => { const lista = (data || []) as Parceiro[]; preCarregarFotos(lista.map((item) => item.logo_url)); return lista; });
+// A Rede já vem com as fotos baixadas, para não aparecerem uma a uma.
+const FONTE_REDE = () => supabase.rpc('communicali_rede').then(({ data }) => { const rede = data as RedeDados | null; preCarregarFotos([...(rede?.pessoas || []).map((item) => item.foto_url), ...(rede?.parceiros || []).map((item) => item.logo_url)]); return rede; });
+
 const MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
 function EncontroCartao({ edicao, proximo, carregando, erro, estive = false, embarque = false, pessoa }: { edicao: EncontroAgenda; proximo: boolean; carregando: boolean; erro: boolean; estive?: boolean; embarque?: boolean; pessoa?: { nome: string; foto_url: string | null } }) {
   const [euVou, setEuVou] = useState(false);
@@ -393,19 +403,17 @@ function EncontroCartao({ edicao, proximo, carregando, erro, estive = false, emb
 }
 
 function Edicoes({ espaco }: { espaco: Espaco }) {
-  const [publicadas, setPublicadas] = useState<EncontroAgenda[]>([]);
-  const [carregando, setCarregando] = useState(true);
+  const [publicadas, setPublicadas] = useState<EncontroAgenda[]>(() => lembrado<EncontroAgenda[]>('agenda') || []);
+  const [carregando, setCarregando] = useState(() => !lembrado('agenda'));
   const [erro, setErro] = useState(false);
   const [tentativa, setTentativa] = useState(0);
   useEffect(() => {
     let ativa = true;
     async function carregarAgenda() {
-      setCarregando(true); setErro(false);
+      setCarregando(!lembrado('agenda')); setErro(false);
       try {
-        // Mesmo filtro público do site, sem ampliar acesso a edições privadas.
-        const { data, error } = await supabase.from('editions').select(AGENDA_FIELDS).eq('publica', true).order('data_evento', { ascending: false });
-        if (error) throw error;
-        if (ativa) setPublicadas((data || []) as EncontroAgenda[]);
+        const data = await buscar('agenda', FONTE_AGENDA);
+        if (ativa) setPublicadas(data);
       } catch { if (ativa) setErro(true); }
       finally { if (ativa) setCarregando(false); }
     }
@@ -415,8 +423,7 @@ function Edicoes({ espaco }: { espaco: Espaco }) {
   const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
   const { proximos, anteriores } = organizarAgenda(espaco, publicadas, hoje);
   const carimbados = new Set(espaco.carimbos.map((item) => item.slug));
-  const [confirmadas, setConfirmadas] = useState<string[]>([]);
-  useEffect(() => { void supabase.rpc('communicali_minhas_inscricoes').then(({ data }) => setConfirmadas((data as string[]) || [])); }, []);
+  const [confirmadas = []] = useLembrado<string[]>('inscricoes', FONTE_INSCRICOES);
   return (
     <>
       <header className="passe__agenda-titulo"><CalendarDays size={28} aria-hidden="true" /><h1>Edições</h1></header>
@@ -910,9 +917,8 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar, outras = [] }: 
 
 // Empresas parceiras e suas vantagens ficam abertas a todo Membro; a Rede de pessoas segue a partir de Conector.
 function VitrineParceiros() {
-  const [parceiros, setParceiros] = useState<Parceiro[]>([]);
+  const [parceiros = []] = useLembrado<Parceiro[]>('parceiros', FONTE_PARCEIROS);
   const perfis = usePerfisParceiros(true);
-  useEffect(() => { void supabase.from('partners').select('id,nome,logo_url,site_url').eq('ativo', true).order('ordem').then(({ data }) => setParceiros((data || []) as Parceiro[])); }, []);
   if (!parceiros.length) return null;
   return (
     <>
@@ -940,13 +946,12 @@ function RedeBloqueada({ total, abrir }: { total: number; abrir: () => void }) {
 }
 
 function Rede({ comoMembro, abrir, fundadora = false }: { comoMembro: boolean; abrir: (aba: Aba) => void; fundadora?: boolean }) {
-  const [rede, setRede] = useState<{ eu: string; acesso: boolean; total?: number; pessoas: Pessoa[]; parceiros: Parceiro[] } | null>(null);
+  const [rede = null, setRede] = useLembrado<RedeDados | null>('rede', FONTE_REDE);
   const [frente, setFrente] = useState<'pessoas' | 'parceiros'>('pessoas');
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState({ segmento: '', regiao: '', nivel: '', mercado: '', conexao: '' });
   const [abertaId, setAbertaId] = useState('');
-  const carregarRede = () => { supabase.rpc('communicali_rede').then(({ data }) => setRede(data as typeof rede)); };
-  useEffect(carregarRede, []);
+  const carregarRede = () => { void FONTE_REDE().then(setRede); };
   const perfis = usePerfisParceiros(!!rede?.acesso && !comoMembro && frente === 'parceiros');
   if (rede && (!rede.acesso || comoMembro)) return <><RedeBloqueada total={rede.total ?? rede.pessoas.length} abrir={() => abrir('programa')} /><VitrineParceiros /></>;
   const aberta = rede?.pessoas.find((pessoa) => pessoa.id === abertaId);
@@ -1015,7 +1020,8 @@ export function MeuEspaco() {
   }, []);
 
   const carregar = () => {
-    void supabase.rpc('communicali_meu_espaco').then(({ data }) => setEspaco(data as Espaco));
+    void Promise.all([supabase.rpc('communicali_meu_espaco'), buscar('cartao', FONTE_CARTAO).catch(() => null)]).then(([{ data }]) => setEspaco(data as Espaco));
+    for (const [chave, fonte] of [['inscricoes', FONTE_INSCRICOES], ['agenda', FONTE_AGENDA], ['rede', FONTE_REDE], ['parceiros', FONTE_PARCEIROS], ['convite', FONTE_CONVITE]] as const) void buscar(chave, fonte as () => PromiseLike<unknown>).catch(() => null);
     void supabase.rpc('communicali_meu_extra').then(({ data }) => {
       const dados = data as Extra | null;
       setExtra(dados);
@@ -1023,7 +1029,7 @@ export function MeuEspaco() {
     });
   };
   const verPerfil = (id: string) => { void supabase.rpc('communicali_perfil', { p_id: id }).then(({ data }) => { setPerfilAberto(data as Pessoa); window.scrollTo(0, 0); }); };
-  useEffect(() => { if (session) carregar(); else setEspaco(null); }, [session?.user.id]);
+  useEffect(() => { esquecerTudo(); if (session) carregar(); else setEspaco(null); }, [session?.user.id]);
 
   if (session === undefined) return <div className="passe" aria-busy="true" />;
   if (!session) return <Entrar />;

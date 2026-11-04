@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Copy, Globe, Mail } from 'lucide-react';
 import { supabase } from '../lib';
+import { buscar, lembrado, preCarregarFotos } from './lembrar';
 
 export type PerfilParceiro = { partner_id: string; logo_original_url: string | null; descricao: string | null; whatsapp: string | null; email: string | null; instagram: string | null; linkedin: string | null; beneficio?: string | null; desconto?: string | null; beneficio_detalhes?: string | null; cupom?: string | null };
 export const recursoAusente = (erro: { code?: string } | null) => !!erro && ['PGRST202', 'PGRST205', '42883', '42P01'].includes(erro.code || '');
@@ -11,12 +12,19 @@ export function urlWeb(valor?: string | null) {
   try { const url = new URL(/^https?:\/\//i.test(texto) ? texto : `https://${texto}`); return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password ? url.href : ''; } catch { return ''; }
 }
 
+export const FONTE_PERFIS_PARCEIROS = () => supabase.rpc('communicali_rede_perfis').then(({ data, error }) => {
+  if (error) throw error;
+  const lista = (data || []) as PerfilParceiro[];
+  preCarregarFotos(lista.map((item) => (item as { logo_original_url?: string | null }).logo_original_url));
+  return lista;
+});
+
 export function usePerfisParceiros(permitido: boolean) {
-  const [perfis, setPerfis] = useState<PerfilParceiro[]>([]);
+  const [perfis, setPerfis] = useState<PerfilParceiro[]>(() => (permitido && lembrado<PerfilParceiro[]>('perfis-parceiros')) || []);
   useEffect(() => {
     let ativo = true;
-    setPerfis([]);
-    if (permitido) void supabase.rpc('communicali_rede_perfis').then(({ data, error }) => { if (ativo && !error) setPerfis((data || []) as PerfilParceiro[]); });
+    if (!permitido) { setPerfis([]); return; }
+    void buscar('perfis-parceiros', FONTE_PERFIS_PARCEIROS).then((lista) => { if (ativo) setPerfis(lista); }).catch(() => null);
     return () => { ativo = false; };
   }, [permitido]);
   return perfis;

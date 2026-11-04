@@ -3,6 +3,7 @@ import QRCode from 'qrcode';
 import { Share2 } from 'lucide-react';
 import { errorMessage, supabase } from '../lib';
 import { recursoAusente } from './RedeExtras';
+import { buscar, guardar, lembrado } from './lembrar';
 
 export const linkConvite = (codigo: string) => `https://comuni.calirh.com/c/${encodeURIComponent(codigo)}`;
 export const textoConvite = (codigo: string) => `Quero te convidar para fazer parte da nossa comunidade ComuniCALI. Use meu convite ${codigo}: ${linkConvite(codigo)}`;
@@ -119,17 +120,20 @@ export function CartaoConvite({ nome, codigo, fechar, gerar, titulo = 'Convide p
   </div></div>;
 }
 
+const guardado = () => (lembrado<{ data: unknown }>('convite')?.data as Config | null | undefined);
+export const FONTE_CONVITE = () => supabase.rpc('communicali_convite_config').then(({ data, error }) => ({ data, error }));
+
 export function ConviteMembro({ nome, codigoAtual, recarregar }: { nome: string; codigoAtual: string; recarregar: () => void }) {
-  const [config, setConfig] = useState<Config | null>(null);
-  const [codigo, setCodigo] = useState(codigoAtual);
+  const [config, setConfig] = useState<Config | null>(() => guardado() || null);
+  const [codigo, setCodigo] = useState(() => guardado()?.codigo || codigoAtual);
   const [erro, setErro] = useState('');
   const [aviso, setAviso] = useState('');
   const [busy, setBusy] = useState(false);
   const [cartao, setCartao] = useState(false);
-  const [carregando, setCarregando] = useState(true);
+  const [carregando, setCarregando] = useState(() => !lembrado('convite'));
   useEffect(() => {
-    let ativo = true; setCarregando(true); setConfig(null); setCodigo(codigoAtual);
-    void supabase.rpc('communicali_convite_config').then(({ data, error }) => {
+    let ativo = true;
+    void buscar('convite', FONTE_CONVITE).then(({ data, error }) => {
       if (!ativo) return;
       if (!error && data) { const c = data as Config; setConfig(c); setCodigo(c.codigo); }
       else if (error && !recursoAusente(error)) setErro('Não foi possível consultar as alterações disponíveis.');
@@ -145,7 +149,7 @@ export function ConviteMembro({ nome, codigoAtual, recarregar }: { nome: string;
     try {
       const { data, error } = await supabase.rpc('communicali_convite_alterar', { p_codigo: codigo });
       if (error) throw new Error(errorMessage(error));
-      const c = data as Config; setConfig(c); setCodigo(c.codigo); setAviso('Código salvo. Use o novo link e gere novamente seus cartões.'); recarregar();
+      const c = data as Config; guardar('convite', { data: c, error: null }); setConfig(c); setCodigo(c.codigo); setAviso('Código salvo. Use o novo link e gere novamente seus cartões.'); recarregar();
     } catch (error) { setErro(error instanceof Error ? error.message : 'Não foi possível salvar o código. Tente novamente.'); }
     finally { setBusy(false); }
   }

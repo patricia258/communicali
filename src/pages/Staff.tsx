@@ -5,11 +5,15 @@ import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 import { downloadXlsx } from '../forms/formExports';
 
 const ACEITE = 'Autorizo';
+const DE_ACORDO = 'Estou de acordo';
+const OUTRO = 'Outro';
+const FUNCOES = ['Fotografia', 'Vídeo', 'Fotografia e vídeo', 'Recepção', 'Apoio de produção', OUTRO];
+const NOTA = 'Nota fiscal (tenho CNPJ)';
+const RECIBO = 'Recibo (pessoa física)';
 
 const PRESET: FormPreset = {
   title: 'Cadastro de staff',
-  category: 'ComuniCALI | Café & Pessoas',
-  description: 'Para quem vai trabalhar nos encontros, como fotografia, vídeo e apoio. Seus dados ficam restritos à organização.',
+  description: 'Para quem vai trabalhar nos encontros, como fotografia, vídeo, recepção e apoio. Seus dados ficam restritos à organização.',
   submitLabel: 'Enviar cadastro',
   successText: 'Cadastro recebido! A organização vai entrar em contato com os próximos passos.',
   questions: [
@@ -17,20 +21,37 @@ const PRESET: FormPreset = {
     { id: 'cpf', kind: 'short_text', label: 'Qual é o seu CPF?', required: true },
     { id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', required: true },
     { id: 'whatsapp', kind: 'phone', label: 'Qual é o seu WhatsApp com DDD?', required: true },
-    { id: 'funcao', kind: 'short_text', label: 'Qual será a sua função?', help: 'Ex.: fotografia, vídeo, recepção.', required: true },
-    { id: 'empresa', kind: 'short_text', label: 'Empresa, se houver' },
-    { id: 'cnpj', kind: 'short_text', label: 'CNPJ, se houver' },
+    // Quem escolhe uma função da lista pula a pergunta "Outro".
+    { id: 'funcao', kind: 'single_choice', label: 'Qual será a sua função no encontro?', options: FUNCOES, required: true,
+      logic: FUNCOES.filter((item) => item !== OUTRO).map((item) => ({ when: item, goTo: 'assistente' })) },
+    { id: 'funcao_outra', kind: 'short_text', label: 'Conte qual será a sua função', help: 'Ex.: maquiagem, som, decoração.', required: true },
+    { id: 'assistente', kind: 'yes_no', label: 'Você vai levar assistente?', help: 'Por exemplo, um assistente de fotografia.', required: true, logic: [{ when: 'Não', goTo: 'comprovante' }] },
+    { id: 'assistente_nome', kind: 'short_text', label: 'Nome completo do assistente', required: true },
+    { id: 'assistente_cpf', kind: 'short_text', label: 'CPF do assistente', required: true },
+    { id: 'assistente_whatsapp', kind: 'phone', label: 'WhatsApp do assistente com DDD', required: true },
+    { id: 'assistente_funcao', kind: 'long_text', label: 'O que o assistente vai fazer?', help: 'Uma descrição breve.', required: true },
+    { id: 'comprovante', kind: 'single_choice', label: 'Como você vai emitir o comprovante dos pagamentos?', options: [NOTA, RECIBO], required: true, logic: [{ when: RECIBO, goTo: 'cep' }] },
+    { id: 'empresa', kind: 'short_text', label: 'Qual é o nome da sua empresa?', required: true },
+    { id: 'cnpj', kind: 'short_text', label: 'Qual é o CNPJ da empresa?', required: true },
     { id: 'cep', kind: 'short_text', label: 'Qual é o seu CEP?' },
     { id: 'endereco', kind: 'short_text', label: 'Qual é o seu endereço completo?', help: 'Rua, número, complemento e bairro.', required: true },
     { id: 'cidade', kind: 'short_text', label: 'Em qual cidade e estado?', required: true },
-    { id: 'pix', kind: 'short_text', label: 'Qual é a sua chave Pix?', help: 'Só para pagamentos combinados com a organização.' },
+    { id: 'pix', kind: 'short_text', label: 'Qual é a sua chave Pix?', help: 'Para os pagamentos combinados com a organização.', required: true },
+    { id: 'valor', kind: 'short_text', label: 'Qual foi o valor combinado com a organização?', help: 'Ex.: R$ 800,00.', required: true },
+    { id: 'pagamento', kind: 'single_choice', label: 'Condições de pagamento', help: 'O pagamento é feito em duas partes: **50% na entrada** e **50% na entrega do trabalho**. Na fotografia e no vídeo, a segunda parte é paga na entrega das fotos e vídeos. Cada pagamento é feito mediante **nota fiscal** ou, para pessoa física, **recibo**.', options: [DE_ACORDO], required: true },
     { id: 'aceite', kind: 'single_choice', label: 'Uso dos dados', help: 'Autorizo a CALI RH a guardar estes dados para organizar minha participação nos encontros, conforme a [política de privacidade](https://comuni.calirh.com/privacidade).', options: [ACEITE], required: true },
   ],
   submit: async (answers) => {
     const value = (key: string) => String(answers[key] ?? '');
+    const assistente = answers.assistente === 'Sim';
+    const nota = answers.comprovante === NOTA;
     const { error } = await supabase.rpc('communicali_cadastrar_staff', {
-      p_nome: value('nome'), p_cpf: value('cpf'), p_email: value('email'), p_whatsapp: value('whatsapp'), p_funcao: value('funcao'), p_empresa: value('empresa'),
-      p_cnpj: value('cnpj'), p_cep: value('cep'), p_endereco: value('endereco'), p_cidade: value('cidade'), p_pix: value('pix'), p_aceite: answers.aceite === ACEITE,
+      p_nome: value('nome'), p_cpf: value('cpf'), p_email: value('email'), p_whatsapp: value('whatsapp'),
+      p_funcao: answers.funcao === OUTRO ? value('funcao_outra') : value('funcao'),
+      p_empresa: nota ? value('empresa') : '', p_cnpj: nota ? value('cnpj') : '', p_cep: value('cep'), p_endereco: value('endereco'), p_cidade: value('cidade'), p_pix: value('pix'), p_aceite: answers.aceite === ACEITE,
+      p_assistente_nome: assistente ? value('assistente_nome') : null, p_assistente_cpf: assistente ? value('assistente_cpf') : null,
+      p_assistente_whatsapp: assistente ? value('assistente_whatsapp') : null, p_assistente_funcao: assistente ? value('assistente_funcao') : null,
+      p_comprovante: nota ? 'nota' : answers.comprovante === RECIBO ? 'recibo' : '', p_valor: value('valor'), p_aceite_pagamento: answers.pagamento === DE_ACORDO,
     });
     return error ? errorMessage(error) : '';
   },
@@ -40,7 +61,7 @@ export function StaffForm() {
   return <PublicFormPage preset={PRESET} />;
 }
 
-type Staff = { id: string; nome: string; cpf: string; email: string; whatsapp: string; funcao: string; empresa: string | null; cnpj: string | null; cep: string | null; endereco: string; cidade_uf: string; pix: string | null; status: string; created_at: string };
+type Staff = { id: string; nome: string; cpf: string; email: string; whatsapp: string; funcao: string; empresa: string | null; cnpj: string | null; cep: string | null; endereco: string; cidade_uf: string; pix: string | null; status: string; created_at: string; assistente_nome: string | null; assistente_cpf: string | null; assistente_whatsapp: string | null; assistente_funcao: string | null; comprovante: string | null; valor_combinado: string | null; aceite_pagamento_em: string | null };
 
 const maskCpf = (cpf: string) => `***.${cpf.slice(3, 6)}.${cpf.slice(6, 9)}-**`;
 
@@ -66,8 +87,8 @@ export function StaffPanel() {
   }
 
   function exportAll() {
-    downloadXlsx('communicali-staff.xlsx', 'Staff', ['Nome', 'CPF', 'Função', 'E-mail', 'WhatsApp', 'Empresa', 'CNPJ', 'CEP', 'Endereço', 'Cidade/UF', 'Pix', 'Situação'],
-      visible.map((item) => [item.nome, item.cpf, item.funcao, item.email, item.whatsapp, item.empresa || '', item.cnpj || '', item.cep || '', item.endereco, item.cidade_uf, item.pix || '', item.status]));
+    downloadXlsx('communicali-staff.xlsx', 'Staff', ['Nome', 'CPF', 'Função', 'E-mail', 'WhatsApp', 'Empresa', 'CNPJ', 'CEP', 'Endereço', 'Cidade/UF', 'Pix', 'Valor combinado', 'Comprovante', 'Assistente', 'CPF do assistente', 'WhatsApp do assistente', 'O que o assistente faz', 'Situação'],
+      visible.map((item) => [item.nome, item.cpf, item.funcao, item.email, item.whatsapp, item.empresa || '', item.cnpj || '', item.cep || '', item.endereco, item.cidade_uf, item.pix || '', item.valor_combinado || '', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo' : '', item.assistente_nome || '', item.assistente_cpf || '', item.assistente_whatsapp || '', item.assistente_funcao || '', item.status]));
   }
 
   return (
@@ -88,13 +109,15 @@ export function StaffPanel() {
           <div className="adm-row adm-row--static adm-row--stack" key={item.id}>
             <div className="adm-row__line">
               <strong>{item.nome}</strong>
-              <span>{item.funcao} · {item.whatsapp}</span>
+              <span>{item.funcao}{item.assistente_nome ? ' + assistente' : ''} · {item.whatsapp}</span>
               <em>{item.status === 'ativo' ? 'Ativo' : 'Inativo'}</em>
               <button type="button" onClick={() => setOpen(open === item.id ? '' : item.id)}>{open === item.id ? 'Fechar' : 'Ver dados'}</button>
               <button type="button" onClick={() => void toggle(item)}>{item.status === 'ativo' ? 'Inativar' : 'Reativar'}</button>
               <button type="button" className="adm-danger" onClick={() => void remove(item)}>Excluir</button>
             </div>
             {open === item.id && <p className="adm-hint">CPF {item.cpf} · {item.email} · {item.endereco}, {item.cidade_uf}{item.cep ? ` · CEP ${item.cep}` : ''}{item.empresa ? ` · ${item.empresa}` : ''}{item.cnpj ? ` · CNPJ ${item.cnpj}` : ''}{item.pix ? ` · Pix ${item.pix}` : ''}</p>}
+            {open === item.id && <p className="adm-hint">{item.valor_combinado ? `Valor combinado: ${item.valor_combinado}` : 'Valor não informado'} · {item.comprovante === 'nota' ? 'Emite nota fiscal' : item.comprovante === 'recibo' ? 'Emite recibo' : 'Comprovante não informado'}{item.aceite_pagamento_em ? ' · Aceitou as condições de pagamento' : ''}</p>}
+            {open === item.id && item.assistente_nome && <p className="adm-hint">Assistente: {item.assistente_nome} · CPF {item.assistente_cpf} · {item.assistente_whatsapp} · {item.assistente_funcao}</p>}
             {open !== item.id && <p className="adm-hint">CPF {maskCpf(item.cpf)}</p>}
           </div>
         ))}

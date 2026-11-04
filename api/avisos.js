@@ -1,4 +1,4 @@
-// Envia os avisos pendentes: nível, missão e perfil indicado para o membro; formulário preenchido e inscrição em encontro para a organização.
+// Envia os avisos pendentes: nível, missão e perfil indicado para o membro; formulário preenchido, inscrição em encontro e cadastro de staff para a organização.
 // Pode ser chamado a qualquer momento: cada aviso é marcado antes do envio e vai uma vez só.
 import { banco, enviar, escape, layoutSimples, pausa } from './_email.js';
 
@@ -36,7 +36,7 @@ function mensagemMembro(aviso, nome, missoes, edicoes) {
 const valor = (resposta) => (Array.isArray(resposta) ? resposta.join(', ') : resposta && typeof resposta === 'object' ? (resposta.name || resposta.nome || 'arquivo enviado') : String(resposta ?? ''));
 
 export default async function handler(req, res) {
-  const total = { membros: 0, formularios: 0, inscricoes: 0 };
+  const total = { membros: 0, formularios: 0, inscricoes: 0, staff: 0 };
   const admins = ((await (await banco('admins?select=email')).json()) || []).map((item) => item.email);
 
   const avisos = await (await banco(`notifications?email_em=is.null&tipo=in.(nivel,missao,perfil,carimbo)&created_at=gte.${desde()}&select=id,tipo,texto,member:members!member_id(nome,email)&limit=30`)).json();
@@ -71,6 +71,17 @@ export default async function handler(req, res) {
       await pausa();
     }
     total.inscricoes += 1;
+  }
+  // Cadastro de staff: sem CPF nem endereço no e-mail; os dados completos ficam no painel.
+  const staff = await (await banco(`staff?admin_avisado_em=is.null&created_at=gte.${desde()}&select=id,nome,email,whatsapp,funcao,valor_combinado,comprovante,assistente_nome,assistente_funcao&limit=20`)).json();
+  for (const item of Array.isArray(staff) ? staff : []) {
+    if (!(await reservar('staff', item.id, 'admin_avisado_em'))) continue;
+    const itens = [['Função', item.funcao], ['WhatsApp', item.whatsapp], ['E-mail', item.email], ['Valor combinado', item.valor_combinado], ['Comprovante', item.comprovante === 'nota' ? 'Nota fiscal' : item.comprovante === 'recibo' ? 'Recibo (pessoa física)' : ''], ['Assistente', item.assistente_nome ? `${item.assistente_nome}: ${item.assistente_funcao || ''}` : 'Não vai levar']].filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
+    for (const email of admins) {
+      await enviar(email, { assunto: `🧰 Novo cadastro de staff: ${item.nome}`, html: layoutSimples({ titulo: '🧰 Cadastro de staff', saudacao: 'Chegou um cadastro de staff.', linhas: [`<strong>${escape(item.nome)}</strong> preencheu o cadastro.`, ...itens.map((linha) => escape(linha))], botao: { texto: 'Ver no painel', href: `${PAINEL}/staff` } }) });
+      await pausa();
+    }
+    total.staff += 1;
   }
   res.status(200).json(total);
 }

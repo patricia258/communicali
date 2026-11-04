@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (noite) | Staff completo e telas sem piscar
+- Staff (`/staff`, `Staff.tsx`, migração `20261104120000_staff_assistente_pagamento.sql`): função em lista (Fotografia, Vídeo, Fotografia e vídeo, Recepção, Apoio de produção, Outro); "Outro" pede a função por escrito. Pergunta se leva assistente; se sim, nome, CPF, WhatsApp e o que vai fazer. Comprovante: nota fiscal (pede empresa e CNPJ de 14 dígitos) ou recibo de pessoa física. Valor combinado e aceite das condições: 50% na entrada e 50% na entrega do trabalho (fotografia e vídeo: na entrega das fotos e vídeos), mediante nota fiscal ou recibo. Chave Pix agora obrigatória. Servidor valida tudo de novo.
+- Painel Staff mostra e exporta valor, comprovante e dados do assistente. `api/avisos.js` envia e-mail para os admins a cada cadastro de staff (sem CPF nem endereço no e-mail).
+- Telas do passaporte: `src/pages/lembrar.ts` guarda em memória cartão do perfil, inscrições, agenda, Rede, parceiros, perfis de parceiros e configuração do código de convite. Tudo é buscado ao abrir o passaporte (o Início espera o cartão junto, para o cargo não entrar depois); ao trocar de aba a tela aparece pronta e se atualiza por trás. Fotos da Rede e logos são baixados antes. A memória é limpa ao trocar de sessão.
+- O plano gratuito do Supabase não redimensiona imagens (render/image devolve 403); as fotos atuais têm cerca de 34 KB.
+
 ### 2026-11-04 (tarde) | Perfil e modo aplicativo
 - Perfis (o próprio e o da Rede): saiu a etiqueta de categoria (FUNDADORA, CONECTOR...); o selo representa a pessoa e ganhou texto alternativo. Pílulas de temas/segmento numa linha só, embaixo da foto, de ponta a ponta do cartão; até 3, e a que não cabe inteira fica escondida (linha de altura fixa).
 - Telas da área do membro entram com um fade único de 0,22s, sem blocos caindo um a um.
