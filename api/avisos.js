@@ -12,7 +12,7 @@ async function reservar(tabela, id, coluna) {
   return r.ok && (await r.json()).length > 0;
 }
 
-function mensagemMembro(aviso, nome) {
+function mensagemMembro(aviso, nome, missoes, edicoes) {
   const saudacao = `Oi, ${primeiro(nome)}!`;
   if (aviso.tipo === 'nivel') {
     const nivel = (aviso.texto.match(/agora é (.+?)\.?$/) || [])[1] || 'um novo nível';
@@ -21,7 +21,13 @@ function mensagemMembro(aviso, nome) {
   }
   if (aviso.tipo === 'missao') {
     const missao = (aviso.texto.match(/^Missão concluída: (.+?)\. O selo/) || [])[1] || 'uma missão';
-    return { assunto: '🏅 Missão concluída na ComuniCALI', html: layoutSimples({ titulo: '🏅 Missão concluída', saudacao, linhas: ['Você concluiu uma missão!', `<strong>${escape(missao)}</strong>`, 'O selo já está no seu passaporte.'], botao: { texto: 'Ver meus selos', href: MEU } }) };
+    const slug = missoes.find((item) => item.titulo === missao)?.slug;
+    return { assunto: '🏅 Missão concluída! Seu selo novo chegou', html: layoutSimples({ titulo: '🏅 Missão concluída', imagem: slug ? `https://comuni.calirh.com/selos/missao-${slug}.png` : undefined, saudacao: `Parabéns, ${primeiro(nome)}!`, linhas: ['Você concluiu uma missão!', `<strong>${escape(missao)}</strong>`, 'O selo já está no seu passaporte.'], botao: { texto: 'Ver meus selos', href: MEU } }) };
+  }
+  if (aviso.tipo === 'carimbo') {
+    const edicao = (aviso.texto.match(/passaporte: (.+?)\.$/) || [])[1] || 'o encontro';
+    const carimbo = edicoes.find((item) => item.titulo === edicao)?.carimbo_url;
+    return { assunto: '📮 Novo carimbo no seu passaporte ComuniCALI', html: layoutSimples({ titulo: '📮 Novo carimbo', imagem: carimbo ? new URL(carimbo, 'https://comuni.calirh.com').href : undefined, saudacao, linhas: ['Que bom ter você com a gente!', 'Seu passaporte ganhou o carimbo de', `<strong>${escape(edicao)}</strong>`, 'Entre no Meu espaço para ver seus carimbos,<br>pontos e missões.'], botao: { texto: 'Ver meu passaporte', href: MEU } }) };
   }
   const [, quem, perfil, recado] = aviso.texto.match(/^(.+?) indicou o perfil de (.+?) para você\.(?: "(.*)")?$/) || [];
   return { assunto: `👤 ${quem || 'Alguém'} indicou um perfil para você`, html: layoutSimples({ titulo: '👤 Perfil indicado', saudacao, linhas: [`<strong>${escape(quem || 'Alguém da Rede')}</strong> indicou um perfil para você:`, `<strong>${escape(perfil || 'um membro da comunidade')}</strong>`, ...(recado ? [`<em>"${escape(recado)}"</em>`] : []), 'Abra seu passaporte para ver o perfil<br>e se conectar.'], botao: { texto: 'Ver o perfil', href: MEU } }) };
@@ -33,10 +39,12 @@ export default async function handler(req, res) {
   const total = { membros: 0, formularios: 0, inscricoes: 0 };
   const admins = ((await (await banco('admins?select=email')).json()) || []).map((item) => item.email);
 
-  const avisos = await (await banco(`notifications?email_em=is.null&tipo=in.(nivel,missao,perfil)&created_at=gte.${desde()}&select=id,tipo,texto,member:members!member_id(nome,email)&limit=30`)).json();
+  const avisos = await (await banco(`notifications?email_em=is.null&tipo=in.(nivel,missao,perfil,carimbo)&created_at=gte.${desde()}&select=id,tipo,texto,member:members!member_id(nome,email)&limit=30`)).json();
+  const missoes = (await (await banco('missions?select=slug,titulo')).json()) || [];
+  const edicoes = (await (await banco('editions?select=titulo,carimbo_url')).json()) || [];
   for (const aviso of Array.isArray(avisos) ? avisos : []) {
     if (!aviso.member?.email || aviso.member.email.endsWith('.test') || !(await reservar('notifications', aviso.id, 'email_em'))) continue;
-    const r = await enviar(aviso.member.email, mensagemMembro(aviso, aviso.member.nome));
+    const r = await enviar(aviso.member.email, mensagemMembro(aviso, aviso.member.nome, missoes, edicoes));
     if (!r.erro && !r.pulado) total.membros += 1;
     await pausa();
   }
