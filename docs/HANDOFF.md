@@ -129,6 +129,10 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — card "Eu vou!" e cores do site no passaporte
+- Quem tem inscrição aprovada vê "Criar meu card Eu vou!" no próximo encontro (aba Edições). Imagem 1080x1350 nas cores do site: foto de passaporte, "Eu vou!", cartão de embarque com encontro, data e local, frase da comunidade e conceito do v23. Baixar ou compartilhar. `gerarCartaoEuVou` em `ConviteMembro.tsx`; a janela de compartilhar virou genérica (`CartaoConvite` com `gerar`, `titulo`, `texto`, `arquivoNome`). Conferido no celular.
+- Cores do Meu passaporte alinhadas ao site: fundos vinho #361C24 → #1F0E14 com brilho #5A1E2D, mostarda #C9973B nos destaques e botões (antes havia rosa/vinho claro).
+
 ### 03/11/2026, Claude Code — milhas e linguagem de jornada (v22 + complemento v23)
 - Fontes: Documento Mestre v22 "Narrativa Passaporte" no Drive (id 10ifqSQL0N6uBtC2hgJ0O9g7RV8r0fZC3) e o complemento "Universo Narrativo e Visual da Jornada" (v23, Downloads). Patrícia aprovou "aplicar tudo".
 - **Pontos viraram milhas** em todo texto visível (site, Meu passaporte, painel, e-mails, check-in, privacidade e regras; migração `20261103300000`). Nomes técnicos e cálculos não mudaram. Conector 60 milhas, Embaixador 180. Milhas não têm resgate nem valor em dinheiro.
