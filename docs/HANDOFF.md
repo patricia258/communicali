@@ -129,6 +129,13 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — home: tickets, comunidade e formatos de encontro
+- Números do topo (+300, 1ª edição, Brasil) em formato de ticket (recortes laterais e linha picotada). Cartão da fundadora com carimbo "ComuniCALI · Idealizadora" sobre a foto, no lugar das pílulas.
+- "A comunidade": título "Caminhos que se cruzam e seguem juntos." e texto novo na linha do v23 (bagagem, caminhos, escuta), com a fé dita assim: "Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com fé e integridade, e damos toda honra a Deus por cada caminho que se cruza aqui."
+- "Primeira vez?" virou "Comece a sua jornada." Agenda "Sua próxima escala." com quatro formatos: Encontros presenciais, Encontros virtuais, Experiências, Almoços e jantares (formatos da comunidade; nenhum evento novo foi anunciado).
+- Painel: datas com horário passam a aparecer no fuso de São Paulo (`dataBr`); antes o e-mail aberto às 21h aparecia com o dia seguinte.
+- Pendente: fotos do topo (hoje imagens neutras do Unsplash); trocar pelas fotos reais depois do dia 14.
+
 ### 03/11/2026, Claude Code — site na linha do v23, bilhete nos formulários, card Eu vou! refeito
 - Regra de Patrícia sobre texto: a estrutura em linhas curtas vale para e-mail; em telas largas use a lógica do espaço (texto corrido, blocos lado a lado, alinhamento conforme o lugar), sem quebras forçadas.
 - Home: seção do passaporte com o conceito "Cada pessoa, uma jornada. Cada encontro, novos horizontes.", trilha com descrições do v23 ligada por linha pontilhada e três blocos lado a lado (Carimbos, Selos, Milhas). Agenda: "Sua próxima escala."
