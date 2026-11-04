@@ -645,6 +645,7 @@ function Programa({ espaco, extra, compartilhar, comoMembro, setComoMembro, verP
             return <div key={id}><strong>{itens.length}</strong><span>{nome}</span><em>+{itens.reduce((soma, item) => soma + item.pontos, 0)}</em></div>;
           })}
         </div>
+        <p className="passe__validade">As milhas do ciclo valem por 12 meses, contados da data do seu cadastro, e recomeçam no aniversário de adesão. O histórico completo continua guardado. Milhas não têm valor em dinheiro nem resgate.</p>
         <button type="button" className="passe__botao passe__botao--linha" onClick={compartilhar}>Compartilhar meu selo</button>
       </section>
       <details className="passe__cartao passe__suspensa">
