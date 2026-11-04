@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 | Tela ao vivo com QR Code
+- `/telao/resultado` virou a tela única da dinâmica: "Antes de debater, vamos votar!", QR Code para comuni.calirh.com/votar à esquerda; total, médias "Na opinião" e "Na prática", distância e barras à direita, atualizando a cada 2,5 s. O slide separado do QR pode sair da apresentação; o link "Abrir tela ao vivo" fica no slide do tema central.
+- Ao abrir a tela logada como administradora, a votação em rascunho abre sozinha (o público não consegue). Se não estiver aberta, a tela avisa. `communicali_resultado` devolve `situacao` (migração `20261105090000_resultado_situacao.sql`).
+
 ### 2026-11-04 (noite, 11) | Votação uma pergunta por vez e rodapé curto
 - `/votar`: com segunda pergunta, mostra "Pergunta 1 de 2", botão Continuar e só então a segunda ("Pergunta 2 de 2", Enviar, Voltar para a primeira).
 - `/votar` e `/checkin` usam `PageEvento` (main.tsx): rodapé de uma linha só com Regras e Privacidade (abrem em nova aba).

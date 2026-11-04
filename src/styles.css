@@ -182,3 +182,20 @@ html:has(.legal),body:has(.legal){background:#1F0E14}
 .site-footer--mini .site-links{justify-content:center;gap:18px}
 /* Voltar para a primeira pergunta da votação. */
 .link-voltar{justify-self:center;border:0;background:none;padding:4px;color:#CBB9B1;font:500 13px Inter,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* Tela ao vivo (05/11): QR Code à esquerda com o título; números e gráfico à direita, ocupando a tela. */
+.resultado{padding:2.6vw 4.5vw 3vw}
+.resultado__corpo{grid-template-columns:minmax(0,.75fr) minmax(0,1.5fr);gap:4.5vw;align-items:stretch;padding-top:2vw}
+.resultado__texto{display:flex;flex-direction:column;justify-content:center}
+.resultado__texto h1{font-size:clamp(30px,3.6vw,64px)}
+.resultado__qr{display:block;width:min(21vw,36vh);height:auto;padding:clamp(10px,1vw,18px);border-radius:18px;background:#FFFFFF}
+.resultado__url{margin:12px 0 0;font:600 clamp(14px,1.3vw,22px) Inter,sans-serif;color:#DDB160}
+.resultado__aviso{margin:14px 0 0;max-width:28ch;padding:10px 14px;border-radius:10px;background:rgba(169,80,46,.18);border:1px solid rgba(217,103,58,.5);font-size:clamp(12px,1vw,16px);color:#F7F0EA}
+.resultado__painel{display:flex;flex-direction:column;justify-content:center;gap:clamp(14px,1.6vw,26px)}
+.resultado__numeros{display:flex;align-items:stretch;gap:clamp(12px,1.4vw,24px);flex-wrap:wrap}
+.resultado__numeros .resultado__total{display:grid;align-content:center;gap:4px;margin:0;padding-right:clamp(8px,1vw,18px)}
+.resultado__numeros .resultado__total strong{display:block;font:700 clamp(40px,5vw,92px)/1 'Funnel Display',sans-serif;color:#F7F0EA;margin:0}
+.resultado__painel .resultado__distancia{margin:0;max-width:none}
+.resultado__painel .resultado__barras{height:clamp(200px,38vh,480px)}
+.resultado__texto h1{font-size:clamp(26px,3vw,56px)}
+.resultado__linha{white-space:nowrap}
