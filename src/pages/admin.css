@@ -179,3 +179,6 @@
 .adm-login__erro{color:#8A1F1F}
 .adm-login__voltar{align-self:flex-start;color:#7A1F3D;font-size:13px;font-weight:600}
 @media (max-width:860px){.adm-login{grid-template-columns:1fr}.adm-login__marca{padding:32px 24px;gap:24px}.adm-login__selo{width:180px}}
+.adm-login__acesso input[inputmode=numeric]{font:700 26px 'Funnel Display',sans-serif;letter-spacing:.3em;text-align:center}
+.adm-login__acesso .adm-login__outro{min-height:0;padding:6px 0;background:none;color:#7A1F3D;font:600 13px Inter,sans-serif;text-decoration:underline}
+.adm-login__acesso .adm-login__outro:hover{background:none}

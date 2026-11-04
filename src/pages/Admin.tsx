@@ -64,14 +64,24 @@ function Login() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [codigo, setCodigo] = useState('');
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setBusy(true); setError('');
-    const { error: failure } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/admin` } });
+    const { error: failure } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/admin` } });
     setBusy(false);
-    if (failure) setError('Não foi possível enviar o link. Confira o e-mail ou tente de novo em alguns minutos.');
+    if (failure) setError('Não foi possível enviar o código. Confira o e-mail ou tente de novo em alguns minutos.');
     else setSent(true);
+  }
+
+  // O e-mail traz um código de 6 números; o acesso só abre para quem está na lista da organização.
+  async function confirmar(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true); setError('');
+    const { error: failure } = await supabase.auth.verifyOtp({ email: email.trim().toLowerCase(), token: codigo.trim(), type: 'email' });
+    setBusy(false);
+    if (failure) setError('Código inválido ou vencido. Confira o último e-mail ou peça um novo código.');
   }
 
   return (
@@ -91,12 +101,20 @@ function Login() {
       </section>
       <section className="adm-login__acesso">
         <h2>Entrar no painel</h2>
-        {sent ? <p className="adm-login__ok">Enviamos um link de acesso para <strong>{email}</strong>. Abra pelo e-mail neste mesmo navegador.</p> : (
+        {sent ? (
+          <form onSubmit={confirmar}>
+            <p className="adm-login__ok">Enviamos um código de 6 números para <strong>{email}</strong>.</p>
+            <label>Código do e-mail<input inputMode="numeric" autoComplete="one-time-code" required maxLength={6} pattern="[0-9]{6}" placeholder="000000" value={codigo} onChange={(event) => setCodigo(event.target.value.replace(/\D/g, ''))} /></label>
+            {error && <p className="adm-login__erro" role="alert">{error}</p>}
+            <button type="submit" disabled={busy || codigo.length < 6}>{busy ? 'Entrando...' : 'Entrar no painel'}</button>
+            <button type="button" className="adm-login__outro" onClick={() => { setSent(false); setCodigo(''); setError(''); }}>Usar outro e-mail ou pedir novo código</button>
+          </form>
+        ) : (
           <form onSubmit={submit}>
-            <p>Use o e-mail cadastrado na organização. O link chega na hora e vale para este navegador.</p>
+            <p>Use o e-mail cadastrado na organização. Você recebe um código de 6 números para entrar.</p>
             <label>E-mail<input type="email" required autoComplete="email" placeholder="voce@calirh.com" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
             {error && <p className="adm-login__erro" role="alert">{error}</p>}
-            <button type="submit" disabled={busy}>{busy ? 'Enviando...' : 'Receber link de acesso'}</button>
+            <button type="submit" disabled={busy}>{busy ? 'Enviando...' : 'Receber código de acesso'}</button>
           </form>
         )}
         <a className="adm-login__voltar" href="/meu-espaco">Sou membro, quero meu passaporte</a>
