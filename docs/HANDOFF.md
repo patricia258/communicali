@@ -129,6 +129,12 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — site na linha do v23, bilhete nos formulários, card Eu vou! refeito
+- Regra de Patrícia sobre texto: a estrutura em linhas curtas vale para e-mail; em telas largas use a lógica do espaço (texto corrido, blocos lado a lado, alinhamento conforme o lugar), sem quebras forçadas.
+- Home: seção do passaporte com o conceito "Cada pessoa, uma jornada. Cada encontro, novos horizontes.", trilha com descrições do v23 ligada por linha pontilhada e três blocos lado a lado (Carimbos, Selos, Milhas). Agenda: "Sua próxima escala."
+- Formulários da ComuniCALI: a folha decorativa virou um **bilhete** (`public/brand/bilhete-communicali.svg`, usado como máscara em `.cf-leaf`).
+- Card "Eu vou!" refeito com respiro: logo, "Eu vou!", foto de passaporte no centro e cartão de embarque claro com picote (encontro, data, local, "Embarque confirmado"). Conferido no celular.
+
 ### 03/11/2026, Claude Code — card "Eu vou!" e cores do site no passaporte
 - Quem tem inscrição aprovada vê "Criar meu card Eu vou!" no próximo encontro (aba Edições). Imagem 1080x1350 nas cores do site: foto de passaporte, "Eu vou!", cartão de embarque com encontro, data e local, frase da comunidade e conceito do v23. Baixar ou compartilhar. `gerarCartaoEuVou` em `ConviteMembro.tsx`; a janela de compartilhar virou genérica (`CartaoConvite` com `gerar`, `titulo`, `texto`, `arquivoNome`). Conferido no celular.
 - Cores do Meu passaporte alinhadas ao site: fundos vinho #361C24 → #1F0E14 com brilho #5A1E2D, mostarda #C9973B nos destaques e botões (antes havia rosa/vinho claro).
