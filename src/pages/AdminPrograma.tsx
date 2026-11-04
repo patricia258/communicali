@@ -10,7 +10,7 @@ import { Categoria, Email, Rede, Tabela, Telefone, dataBr, type Coluna } from '.
 type Member = { segmento: string | null; regiao: string | null; busca: string[]; aberto_trabalho: boolean; recrutador: boolean; curriculo_path: string | null; na_rede: boolean; presta_servicos: boolean; instagram: string | null; codigo: string | null; temas: string[]; interesse_palestras: boolean; foto_url: string | null; id: string; status: string; nome: string; apelido: string | null; email: string; whatsapp: string | null; cidade_uf: string | null; empresa: string | null; cargo: string | null; linkedin: string | null; interesses: string[]; como_conheceu: string | null; categoria: string; cracha_status: string; autoriza_imagem: boolean; autoriza_comunicacoes: boolean; created_at: string };
 type History = { id: string; checked_in_at: string; codigo: string; editions: { titulo: string } };
 type Point = { id: string; acao: string; pontos: number; created_at: string; motivo: string | null };
-type Poll = { id: string; slug: string; titulo: string; pergunta: string; tipo: 'nota' | 'multipla' | 'aberta'; opcoes: string[]; anonima: boolean; status: 'rascunho' | 'ativa' | 'encerrada'; revelada: boolean; edition_id: string };
+type Poll = { id: string; slug: string; titulo: string; pergunta: string; pergunta_2: string | null; tipo: 'nota' | 'multipla' | 'aberta'; opcoes: string[]; anonima: boolean; status: 'rascunho' | 'ativa' | 'encerrada'; revelada: boolean; edition_id: string };
 type Vote = { nota: number | null; opcao: string | null; texto: string | null; respondente: string | null; created_at: string };
 
 const CRACHA: Record<string, string> = { nao_disponivel: 'Sem presença ainda', disponivel: 'Disponível para retirada', entregue: 'Entregue' };
@@ -178,18 +178,18 @@ export function MembersPanel() {
 }
 
 function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
-  const [draft, setDraft] = useState({ ...poll, opcoesTexto: poll.opcoes.join('\n') });
+  const [draft, setDraft] = useState({ ...poll, pergunta_2: poll.pergunta_2 || '', opcoesTexto: poll.opcoes.join('\n') });
   const [votes, setVotes] = useState<Vote[]>([]);
   const [note, setNote] = useState('');
   const load = () => supabase.from('poll_votes').select('nota,opcao,texto,respondente,created_at').eq('poll_id', poll.id).order('created_at').then(({ data }) => setVotes((data || []) as Vote[]));
   useEffect(() => { void load(); const timer = window.setInterval(load, 4000); return () => window.clearInterval(timer); }, [poll.id]);
 
   async function persist(extra: Partial<Poll> = {}) {
-    const next = { titulo: draft.titulo, pergunta: draft.pergunta, tipo: draft.tipo, anonima: draft.anonima, opcoes: draft.opcoesTexto.split('\n').map((item) => item.trim()).filter(Boolean), status: draft.status, revelada: draft.revelada, ...extra };
+    const next = { titulo: draft.titulo, pergunta: draft.pergunta, pergunta_2: draft.tipo === 'nota' && draft.pergunta_2.trim() ? draft.pergunta_2.trim() : null, tipo: draft.tipo, anonima: draft.anonima, opcoes: draft.opcoesTexto.split('\n').map((item) => item.trim()).filter(Boolean), status: draft.status, revelada: draft.revelada, ...extra };
     if (next.tipo === 'multipla' && next.opcoes.length < 2) { setNote('Cadastre ao menos duas opções.'); return; }
     const { error } = await supabase.from('polls').update(next).eq('id', poll.id);
     if (error) { setNote(`Não foi possível salvar: ${error.message}`); return; }
-    setDraft({ ...draft, ...next }); setNote('Alterações salvas.');
+    setDraft({ ...draft, ...next, pergunta_2: next.pergunta_2 || '' }); setNote('Alterações salvas.');
   }
 
   const notas = votes.filter((vote) => vote.nota !== null).map((vote) => vote.nota as number);
@@ -211,6 +211,7 @@ function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
           <label><span>Título da dinâmica</span><input value={draft.titulo} onChange={(event) => setDraft({ ...draft, titulo: event.target.value })} /></label>
           <label><span>Tipo de resposta</span><select value={draft.tipo} disabled={votes.length > 0} onChange={(event) => setDraft({ ...draft, tipo: event.target.value as Poll['tipo'] })}><option value="nota">Nota de 0 a 10</option><option value="multipla">Múltipla escolha</option><option value="aberta">Resposta aberta</option></select></label>
           <label className="wide"><span>Pergunta</span><textarea rows={2} value={draft.pergunta} onChange={(event) => setDraft({ ...draft, pergunta: event.target.value })} /></label>
+          {draft.tipo === 'nota' && <label className="wide"><span>Segunda pergunta (opcional)</span><textarea rows={2} value={draft.pergunta_2} placeholder="Respondida na mesma tela, também de 0 a 10" onChange={(event) => setDraft({ ...draft, pergunta_2: event.target.value })} /></label>}
           {draft.tipo === 'multipla' && <label className="wide"><span>Opções, uma por linha</span><textarea rows={4} value={draft.opcoesTexto} onChange={(event) => setDraft({ ...draft, opcoesTexto: event.target.value })} /></label>}
           <label className="v2-forms-check"><input type="checkbox" checked={draft.anonima} onChange={(event) => setDraft({ ...draft, anonima: event.target.checked })} /><span><strong>Votação anônima</strong></span></label>
           <div className="adm-submit"><button type="button" className="wf-primary" onClick={() => void persist()}>Salvar alterações</button></div>
@@ -221,6 +222,7 @@ function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
         <div className="adm-links">
           <a className="wf-secondary" href={`${origin}/telao/votacao?edicao=${poll.slug}`} target="_blank" rel="noopener noreferrer">Abrir telão</a>
           <a className="wf-secondary" href={`${origin}/votar?edicao=${poll.slug}`} target="_blank" rel="noopener noreferrer">Abrir tela de resposta</a>
+          {draft.tipo === 'nota' && <a className="wf-primary" href={`${origin}/telao/resultado?edicao=${poll.slug}`} target="_blank" rel="noopener noreferrer">Abrir tela de resultado</a>}
           <button type="button" className="wf-secondary" disabled={!votes.length} onClick={() => csv(`communicali-votacao-${poll.slug}.csv`, [['Data', 'Nota', 'Opção', 'Resposta', 'Respondente'], ...votes.map((vote) => [new Date(vote.created_at).toLocaleString('pt-BR'), vote.nota ?? '', vote.opcao || '', vote.texto || '', vote.respondente || ''])])}>Exportar CSV</button>
         </div>
         <p className="adm-hint">O resultado é a percepção de quem está presente, não uma pesquisa representativa do mercado.</p>

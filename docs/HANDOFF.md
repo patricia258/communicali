@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (noite, 10) | Votação com duas perguntas e tela de resultado; modo apresentação removido
+- Modo apresentação saiu inteiro (a apresentação fica no Canva): páginas, rota, menu, pdfjs-dist, tabela `apresentacoes`, funções `communicali_ao_vivo*` (migração `20261104220000_remove_apresentacoes.sql`) e os 39 slides do bucket.
+- Votação: `polls.pergunta_2` e `poll_votes.nota_2` (migração `20261104230000_votacao_duas_perguntas.sql`). O celular mostra as duas escalas na mesma tela e exige as duas. Editor de Votações ganhou "Segunda pergunta" e o botão "Abrir tela de resultado".
+- `/telao/resultado?edicao=<slug>` (`TelaoResultado` em `Telao.tsx`, função `communicali_resultado`): no tom dos slides, "Vamos ao resultado", total de votos, médias "Na opinião" e "Na prática", a distância entre elas e barras de 0 a 10 nas duas cores; atualiza a cada 3 s. Sem QR Code.
+- Votações antigas apagadas a pedido. Nova votação "Cuidar de pessoas ainda é relevante?" (slug fundadora, em rascunho): opinião e prática, de 0 a 10. Ativar no painel na hora da dinâmica. QR do slide continua comuni.calirh.com/votar.
+
 ### 2026-11-04 (noite, 9) | Modo apresentação com enquete ao vivo
 - Painel, Edições, Apresentação (`AdminApresentacao.tsx`): sobe o PDF do Canva (convertido no navegador em JPEG 1920 px com pdfjs-dist 4.10.38, `intent: 'print'` para não travar em aba oculta) ou as imagens; guarda em `site/apresentacoes/<id>/`. Entre os slides, "Enquete aqui" escolhe uma votação (criadas em Votações). Trocar os slides mantém as enquetes nos mesmos pontos.
 - `/apresentacao?id=` (`Apresentacao.tsx`, só admin): tela cheia (F), avança com passador, setas, espaço ou clique; volta com seta ou clique no canto esquerdo; guarda a posição se recarregar. Ao chegar numa enquete, abre a votação (`polls.status = ativa`, `apresentacoes.poll_atual`) e mostra QR Code e gráfico ao vivo (lê `poll_votes` a cada 2 s, sem esperar revelar); ao seguir, encerra.

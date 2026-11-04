@@ -41,6 +41,8 @@ export type Edition = {
 export type Poll = {
   titulo: string;
   pergunta: string;
+  /** Segunda pergunta de nota, respondida na mesma tela (ex.: "na prática"). */
+  pergunta_2?: string | null;
   tipo: 'nota' | 'multipla' | 'aberta';
   opcoes: string[];
   anonima: boolean;
