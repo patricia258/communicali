@@ -129,6 +129,12 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — home em nova ordem e ticket convencional
+- **Modelo de ticket de Patrícia:** quando ela diz "ticket" é o ingresso convencional, com bordas recortadas em meia-lua, moldura interna, estrelas e numeração lateral, em cor invertida (mostarda com texto vinho). Classe `.ticket` em `src/home.css`. Usado nos números do topo e em Carimbos, Selos e Milhas (com ícones Stamp, Award e Route).
+- Nova ordem da home: Hero → números → A comunidade → Comece a sua jornada → Sua próxima escala (formatos com capa) → Seu passaporte → Agenda "Próximo check-in" → Apoie este encontro → logos de quem apoia → Dúvidas.
+- Texto da comunidade com palavras-chave destacadas em mostarda.
+- Fotos dos formatos e do topo ainda são as neutras; Patrícia vai mandar exemplos (reunião online, presencial, palestra, experiências, almoço e jantar).
+
 ### 03/11/2026, Claude Code — home: tickets, comunidade e formatos de encontro
 - Números do topo (+300, 1ª edição, Brasil) em formato de ticket (recortes laterais e linha picotada). Cartão da fundadora com carimbo "ComuniCALI · Idealizadora" sobre a foto, no lugar das pílulas.
 - "A comunidade": título "Caminhos que se cruzam e seguem juntos." e texto novo na linha do v23 (bagagem, caminhos, escuta), com a fé dita assim: "Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com fé e integridade, e damos toda honra a Deus por cada caminho que se cruza aqui."
