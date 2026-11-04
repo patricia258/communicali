@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-04 (noite, 3) | Staff: Apoio e comprovante por função
+- Funções: Fotografia, Vídeo, Fotografia e vídeo, Apoio (cobre recepção e produção), Outro.
+- Fotografia e vídeo emitem nota fiscal (pedem empresa e CNPJ, Pix no CNPJ). Apoio emite recibo de pessoa física, Pix no próprio CPF, com o aviso "Caso você não saiba como emitir o recibo, não se preocupe: nós ajudamos você", e não é perguntado sobre assistente. Só "Outro" escolhe entre nota e recibo.
+
 ### 2026-11-04 (noite, 2) | Staff: pagamento por função
 - Motor de formulários: `showIf: { id, in }` em `FormQuestion` faz a pergunta aparecer só quando outra resposta bate; `nextQuestionIndex` recebe todas as respostas.
 - Staff: fotografia e vídeo descrevem o que foi combinado (padrão 50% na reserva e 50% após a entrega dos materiais) e aceitam as condições; recepção e apoio aceitam pagamento integral por Pix no primeiro dia útil após o evento; "Outro" descreve o combinado. Pix precisa ser da mesma titularidade (CPF do cadastro ou, com nota fiscal, CNPJ da empresa).

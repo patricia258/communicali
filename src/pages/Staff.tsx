@@ -7,17 +7,21 @@ import { downloadXlsx } from '../forms/formExports';
 const ACEITE = 'Autorizo';
 const DE_ACORDO = 'Estou de acordo';
 const OUTRO = 'Outro';
-const FUNCOES = ['Fotografia', 'Vídeo', 'Fotografia e vídeo', 'Recepção', 'Apoio de produção', OUTRO];
+const FUNCOES = ['Fotografia', 'Vídeo', 'Fotografia e vídeo', 'Apoio', OUTRO];
 const FOTO_VIDEO = ['Fotografia', 'Vídeo', 'Fotografia e vídeo'];
-const APOIO = ['Recepção', 'Apoio de produção'];
+// Apoio cobre recepção, produção e o que mais o encontro pedir no dia.
+const APOIO = ['Apoio'];
 const PAGAMENTO_APOIO = 'Integral por Pix no primeiro dia útil após o evento.';
+// Fotografia e vídeo emitem nota fiscal; apoio emite recibo de pessoa física; "Outro" escolhe.
 const TITULARIDADE = 'em chave da **mesma titularidade** (seu CPF ou, com nota fiscal, o CNPJ da empresa), mediante **nota fiscal** ou, para pessoa física, **recibo**.';
+const TITULARIDADE_FOTO = 'em chave da **mesma titularidade do CNPJ** da empresa, mediante **nota fiscal**.';
+const TITULARIDADE_APOIO = 'em chave **no seu nome** (o mesmo CPF do cadastro), mediante **recibo**. Caso você não saiba como emitir o recibo, não se preocupe: nós ajudamos você.';
 const NOTA = 'Nota fiscal (tenho CNPJ)';
 const RECIBO = 'Recibo (pessoa física)';
 
 export const PRESET_STAFF: FormPreset = {
   title: 'Cadastro de staff',
-  description: 'Para quem vai trabalhar nos encontros, como fotografia, vídeo, recepção e apoio. Seus dados ficam restritos à organização.',
+  description: 'Para quem vai trabalhar nos encontros, como fotografia, vídeo e apoio. Seus dados ficam restritos à organização.',
   submitLabel: 'Enviar cadastro',
   successText: 'Cadastro recebido! A organização vai entrar em contato com os próximos passos.',
   questions: [
@@ -29,14 +33,14 @@ export const PRESET_STAFF: FormPreset = {
     { id: 'funcao', kind: 'single_choice', label: 'Qual será a sua função no encontro?', options: FUNCOES, required: true,
       logic: FUNCOES.filter((item) => item !== OUTRO).map((item) => ({ when: item, goTo: 'assistente' })) },
     { id: 'funcao_outra', kind: 'short_text', label: 'Conte qual será a sua função', help: 'Ex.: maquiagem, som, decoração.', required: true },
-    { id: 'assistente', kind: 'yes_no', label: 'Você vai levar assistente?', help: 'Por exemplo, um assistente de fotografia.', required: true, logic: [{ when: 'Não', goTo: 'comprovante' }] },
-    { id: 'assistente_nome', kind: 'short_text', label: 'Nome completo do assistente', required: true },
-    { id: 'assistente_cpf', kind: 'short_text', label: 'CPF do assistente', required: true },
-    { id: 'assistente_whatsapp', kind: 'phone', label: 'WhatsApp do assistente com DDD', required: true },
-    { id: 'assistente_funcao', kind: 'long_text', label: 'O que o assistente vai fazer?', help: 'Uma descrição breve.', required: true },
-    { id: 'comprovante', kind: 'single_choice', label: 'Como você vai emitir o comprovante dos pagamentos?', options: [NOTA, RECIBO], required: true, logic: [{ when: RECIBO, goTo: 'cep' }] },
-    { id: 'empresa', kind: 'short_text', label: 'Qual é o nome da sua empresa?', required: true },
-    { id: 'cnpj', kind: 'short_text', label: 'Qual é o CNPJ da empresa?', required: true },
+    { id: 'assistente', kind: 'yes_no', label: 'Você vai levar assistente?', help: 'Por exemplo, um assistente de fotografia.', required: true, logic: [{ when: 'Não', goTo: 'comprovante' }], showIf: { id: 'funcao', in: [...FOTO_VIDEO, OUTRO] } },
+    { id: 'assistente_nome', kind: 'short_text', label: 'Nome completo do assistente', required: true, showIf: { id: 'assistente', in: ['Sim'] } },
+    { id: 'assistente_cpf', kind: 'short_text', label: 'CPF do assistente', required: true, showIf: { id: 'assistente', in: ['Sim'] } },
+    { id: 'assistente_whatsapp', kind: 'phone', label: 'WhatsApp do assistente com DDD', required: true, showIf: { id: 'assistente', in: ['Sim'] } },
+    { id: 'assistente_funcao', kind: 'long_text', label: 'O que o assistente vai fazer?', help: 'Uma descrição breve.', required: true, showIf: { id: 'assistente', in: ['Sim'] } },
+    { id: 'comprovante', kind: 'single_choice', label: 'Como você vai emitir o comprovante dos pagamentos?', options: [NOTA, RECIBO], required: true, logic: [{ when: RECIBO, goTo: 'cep' }], showIf: { id: 'funcao', in: [OUTRO] } },
+    { id: 'empresa', kind: 'short_text', label: 'Qual é o nome da sua empresa?', help: 'Fotografia e vídeo são pagos mediante nota fiscal.', required: true, showIf: { id: 'funcao', in: [...FOTO_VIDEO, OUTRO] } },
+    { id: 'cnpj', kind: 'short_text', label: 'Qual é o CNPJ da empresa?', required: true, showIf: { id: 'funcao', in: [...FOTO_VIDEO, OUTRO] } },
     { id: 'cep', kind: 'short_text', label: 'Qual é o seu CEP?' },
     { id: 'endereco', kind: 'short_text', label: 'Qual é o seu endereço completo?', help: 'Rua, número, complemento e bairro.', required: true },
     { id: 'cidade', kind: 'short_text', label: 'Em qual cidade e estado?', required: true },
@@ -44,8 +48,8 @@ export const PRESET_STAFF: FormPreset = {
     { id: 'valor', kind: 'short_text', label: 'Qual foi o valor combinado com a organização?', help: 'Ex.: R$ 800,00.', required: true },
     // Condições de pagamento conforme a função escolhida.
     { id: 'combinado_foto', kind: 'long_text', label: 'O que ficou combinado sobre o pagamento?', help: 'O padrão é 50% na reserva e 50% após a entrega dos materiais. Descreva como ficou no seu caso, com datas se houver.', required: true, showIf: { id: 'funcao', in: FOTO_VIDEO } },
-    { id: 'pagamento_foto', kind: 'single_choice', label: 'Condições de pagamento', help: `Pagamento conforme o combinado com a organização. O padrão é **50% na reserva** e **50% após a entrega dos materiais**, por **Pix** ${TITULARIDADE}`, options: [DE_ACORDO], required: true, showIf: { id: 'funcao', in: FOTO_VIDEO } },
-    { id: 'pagamento_apoio', kind: 'single_choice', label: 'Condições de pagamento', help: `Pagamento **integral** por **Pix** no **primeiro dia útil após o evento**, ${TITULARIDADE}`, options: [DE_ACORDO], required: true, showIf: { id: 'funcao', in: APOIO } },
+    { id: 'pagamento_foto', kind: 'single_choice', label: 'Condições de pagamento', help: `Pagamento conforme o combinado com a organização. O padrão é **50% na reserva** e **50% após a entrega dos materiais**, por **Pix** ${TITULARIDADE_FOTO}`, options: [DE_ACORDO], required: true, showIf: { id: 'funcao', in: FOTO_VIDEO } },
+    { id: 'pagamento_apoio', kind: 'single_choice', label: 'Condições de pagamento', help: `Pagamento **integral** por **Pix** no **primeiro dia útil após o evento**, ${TITULARIDADE_APOIO}`, options: [DE_ACORDO], required: true, showIf: { id: 'funcao', in: APOIO } },
     { id: 'combinado_outro', kind: 'long_text', label: 'O que ficou combinado sobre o pagamento?', help: 'Descreva como e quando será pago, com datas se houver.', required: true, showIf: { id: 'funcao', in: [OUTRO] } },
     { id: 'pagamento_outro', kind: 'single_choice', label: 'Condições de pagamento', help: `Pagamento conforme o combinado com a organização, por **Pix** ${TITULARIDADE}`, options: [DE_ACORDO], required: true, showIf: { id: 'funcao', in: [OUTRO] } },
     { id: 'aceite', kind: 'single_choice', label: 'Uso dos dados', help: 'Autorizo a CALI RH a guardar estes dados para organizar minha participação nos encontros, conforme a [política de privacidade](https://comuni.calirh.com/privacidade).', options: [ACEITE], required: true },
@@ -53,14 +57,15 @@ export const PRESET_STAFF: FormPreset = {
   submit: async (answers) => {
     const value = (key: string) => String(answers[key] ?? '');
     const assistente = answers.assistente === 'Sim';
-    const nota = answers.comprovante === NOTA;
+    const funcao = value('funcao');
+    const nota = FOTO_VIDEO.includes(funcao) || (funcao === OUTRO && answers.comprovante === NOTA);
     const { error } = await supabase.rpc('communicali_cadastrar_staff', {
       p_nome: value('nome'), p_cpf: value('cpf'), p_email: value('email'), p_whatsapp: value('whatsapp'),
       p_funcao: answers.funcao === OUTRO ? value('funcao_outra') : value('funcao'),
       p_empresa: nota ? value('empresa') : '', p_cnpj: nota ? value('cnpj') : '', p_cep: value('cep'), p_endereco: value('endereco'), p_cidade: value('cidade'), p_pix: value('pix'), p_aceite: answers.aceite === ACEITE,
       p_assistente_nome: assistente ? value('assistente_nome') : null, p_assistente_cpf: assistente ? value('assistente_cpf') : null,
       p_assistente_whatsapp: assistente ? value('assistente_whatsapp') : null, p_assistente_funcao: assistente ? value('assistente_funcao') : null,
-      p_comprovante: nota ? 'nota' : answers.comprovante === RECIBO ? 'recibo' : '', p_valor: value('valor'),
+      p_comprovante: nota ? 'nota' : APOIO.includes(funcao) || answers.comprovante === RECIBO ? 'recibo' : '', p_valor: value('valor'),
       p_aceite_pagamento: [answers.pagamento_foto, answers.pagamento_apoio, answers.pagamento_outro].includes(DE_ACORDO),
       p_combinado: APOIO.includes(value('funcao')) ? PAGAMENTO_APOIO : value('combinado_foto') || value('combinado_outro'),
     });
