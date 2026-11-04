@@ -562,3 +562,31 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__convite input,.passe__convite input[readonly],.passe__convite input:not([readonly]){box-sizing:border-box;height:56px;min-height:56px;padding:0 12px;border:1.5px dashed transparent;border-radius:10px}
 .passe__convite input:not([readonly]){border-color:rgba(221,177,96,.8);background:rgba(255,255,255,.06)}
 .passe__convite,.passe__convite *{animation:none!important}
+
+/* Foto de passaporte reta, com carimbo de mercado. Substitui a versão redonda. */
+.passe__foto-selo{position:relative;display:block;flex:none;aspect-ratio:4/5;height:auto!important;padding:5px;border-radius:6px;background:#FFFFFF;box-shadow:0 6px 16px rgba(34,16,15,.18);transform:rotate(-2deg)}
+.passe__foto-selo img,.passe__foto-inicial{display:block;width:100%;height:100%;border-radius:3px;object-fit:cover}
+.passe__foto-selo svg{display:none}
+.passe__carimbo-mercado{position:absolute;right:-12px;bottom:10px;display:grid;justify-items:center;padding:4px 8px;border:2px solid currentColor;border-radius:4px;outline:1px dashed currentColor;outline-offset:-5px;background:rgba(255,253,250,.92);font:800 11px/1.1 'Funnel Display',sans-serif;letter-spacing:.08em;text-transform:uppercase;transform:rotate(-10deg);box-shadow:0 2px 6px rgba(34,16,15,.15)}
+.passe__carimbo-mercado small{font:700 6.5px Inter,sans-serif;letter-spacing:.18em;opacity:.85}
+.passe__carimbo-mercado--aberto{color:#4F5A22}
+.passe__carimbo-mercado--recruta{color:#7A1F3D}
+.passe__pessoa-topo .passe__foto-selo{transform:rotate(-1.5deg)}
+
+/* Cartão do Início e do perfil: sem enfeite solto, selo de nível quadrado, pontos dentro do cartão. */
+.passe__heroi::after{display:none}
+.passe__heroi{border-radius:20px;padding:22px 22px 18px}
+.passe__heroi-nivel{padding:4px 12px}
+.passe__heroi-selo{position:absolute;right:18px;top:60px;width:66px;height:auto;transform:rotate(6deg);filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.passe__heroi-texto{padding-right:72px}
+.passe__heroi-pontos{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:14px;background:rgba(255,253,250,.96);color:#22100F}
+.passe__heroi-pontos .passe__numero{margin:0}
+.passe__heroi-pontos .passe__mrz{margin:2px 0 0;color:#7A6E66}
+.passe__heroi .passe__compartilhar{justify-self:end;min-height:32px;padding:0 14px;font-size:12px;gap:6px}
+.passe__heroi--perfil .passe__heroi-texto p+p{opacity:.75}
+@media (max-width:420px){.passe__heroi{justify-items:stretch;text-align:left}.passe__heroi-foto{justify-self:center}.passe__heroi-texto{padding-right:0;text-align:center}.passe__heroi-selo{top:18px;left:18px;right:auto;width:54px}.passe__heroi .passe__compartilhar{justify-self:center}}
+
+/* Cantos suaves em todos os cartões; carimbos guardados numa página do passaporte. */
+.passe__cartao,.passe__missao,.passe__empresa,.passe__notificacoes,.passe__pessoa{border-radius:16px}
+.passe__pagina{margin:0;padding:18px 0 14px;border:1px solid #E6D8CC;border-radius:16px;background:repeating-linear-gradient(0deg,rgba(201,151,59,.05) 0 1px,transparent 1px 22px),#FFFCF7;box-shadow:inset 0 0 0 6px #FFFCF7,inset 0 0 0 7px #EADCCF}
+.passe__pagina>h2{padding:0 20px}

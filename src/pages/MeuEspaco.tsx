@@ -84,18 +84,13 @@ const ROTULO = (acao: string, titulo: string | null) => {
   return 'Ajuste da organização';
 };
 
-// Foto redonda com selo em arco, como nas redes profissionais: #DISPONÍVEL (aberto ao mercado) ou #RECRUTANDO.
+// Foto de passaporte, reta, com carimbo da comunidade: DISPONÍVEL (aberto ao mercado) ou RECRUTANDO.
 function FotoSelo({ url, nome, aberto, recruta, tamanho = 120 }: { url: string | null; nome: string; aberto?: boolean; recruta?: boolean; tamanho?: number }) {
-  const arco = useId();
-  const selo = recruta ? { texto: '#RECRUTANDO', cor: '#7A1F3D' } : aberto ? { texto: '#DISPONÍVEL', cor: '#5F6238' } : null;
+  const selo = recruta ? { texto: 'Recrutando', tipo: 'recruta' } : aberto ? { texto: 'Disponível', tipo: 'aberto' } : null;
   return (
-    <span className="passe__foto-selo" style={{ width: tamanho, height: tamanho }}>
+    <span className="passe__foto-selo" style={{ width: tamanho }}>
       {url ? <img src={url} alt={`Foto de ${nome}`} /> : <span className="passe__foto-inicial">{nome.charAt(0)}</span>}
-      {selo && <svg viewBox="0 0 100 100" aria-label={selo.texto.replace('#', '')} role="img">
-        <defs><path id={arco} d="M 12 50 A 38 38 0 0 0 88 50" /></defs>
-        <path d="M 4 50 A 46 46 0 0 0 96 50 L 82 50 A 32 32 0 0 1 18 50 Z" fill={selo.cor} />
-        <text fill="#FFFFFF" fontFamily="Inter, sans-serif" fontWeight="700" fontSize="9.5" letterSpacing="1.4"><textPath href={`#${arco}`} startOffset="50%" textAnchor="middle" dominantBaseline="middle">{selo.texto}</textPath></text>
-      </svg>}
+      {selo && <span className={`passe__carimbo-mercado passe__carimbo-mercado--${selo.tipo}`}><small>ComuniCALI</small>{selo.texto}</span>}
     </span>
   );
 }
@@ -273,17 +268,21 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
           {m.foto_url ? <FotoSelo url={m.foto_url} nome={m.nome} aberto={cartao?.aberto_trabalho} recruta={cartao?.recrutador} tamanho={116} /> : <button type="button" className="passe__heroi-sem-foto" onClick={() => abrir('perfil')}>Colocar foto</button>}
         </div>
         <div className="passe__heroi-texto">
-          <span className="passe__heroi-nivel"><img src={`/selos/postal-${m.categoria === 'organizador' ? 'fundadora' : m.categoria}.png`} alt="" onError={(event) => { event.currentTarget.style.display = 'none'; }} />{NIVEIS[m.categoria] || m.categoria}</span>
+          <span className="passe__heroi-nivel">{NIVEIS[m.categoria] || m.categoria}</span>
           <h2>{m.nome}</h2>
           {(cartao?.cargo || cartao?.empresa) && <p>{[cartao.cargo, cartao.empresa].filter(Boolean).join(' · ')}</p>}
           {!!cartao?.temas?.length && <div className="passe__heroi-temas">{cartao.temas.slice(0, 3).map((tema) => <span key={tema}>{tema}</span>)}</div>}
         </div>
-        <div className="passe__heroi-numeros">
-          <div><strong>{espaco.pontos}</strong><span>pontos</span></div>
-          <div><strong>{espaco.carimbos.length}</strong><span>{espaco.carimbos.length === 1 ? 'carimbo' : 'carimbos'}</span></div>
-          <div><strong>{espaco.missoes.filter((item) => item.status === 'concluida').length}</strong><span>selos</span></div>
+        <img className="passe__heroi-selo" src={`/selos/postal-${m.categoria === 'organizador' ? 'fundadora' : m.categoria}.png`} alt={`Selo ${NIVEIS[m.categoria] || m.categoria}`} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+        <div className="passe__heroi-pontos">
+          <p className="passe__numero"><strong>{espaco.pontos}</strong> pontos{meta ? <>, <b>{faltam ? `faltam ${faltam} para ${meta.nome}` : `pontos alcançados para ${meta.nome}`}</b></> : ''}</p>
+          <div className="passe__barra" aria-hidden="true">
+            {Array.from({ length: 10 }, (_, indice) => <span key={indice} className={`c${Math.min(Math.floor(indice / 2), 3)}`} style={{ '--fill': `${Math.max(Math.min(preenchidos - indice, 1), 0) * 100}%` } as React.CSSProperties} />)}
+          </div>
+          {meta && <p className="passe__req">{Math.min(espaco.encontros, meta.encontros)} de {meta.encontros} encontros · {espaco.missoes.filter((item) => item.nivel === meta.nivel && item.status === 'concluida').length} de {espaco.missoes.filter((item) => item.nivel === meta.nivel).length} missões</p>}
+          <p className="passe__mrz">P&lt;COMUNICALI&lt;{m.nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z]+/g, '<').slice(0, 18)}<br />{m.codigo.replace(/-/g, '<').padEnd(10, '<')}{espaco.carimbos[0]?.data_evento.split('-').reverse().join('') || ''}&lt;&lt;&lt;{espaco.pontos}</p>
         </div>
-        <button type="button" className="passe__compartilhar" onClick={compartilhar}><Share2 size={16} aria-hidden="true" />Compartilhar meu selo</button>
+        <button type="button" className="passe__compartilhar" onClick={compartilhar}><Share2 size={14} aria-hidden="true" />Compartilhar</button>
       </section>
       {(avisos.length > 0 || reacoes.length > 0) && (
         <section className="passe__cartao passe__novidades">
@@ -316,20 +315,12 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
           ))}
         </section>
       )}
-      <section className="passe__carimbos">
+      <section className="passe__carimbos passe__pagina">
         <h2>Meus carimbos</h2>
         <div className="passe__rolagem">
           {espaco.carimbos.map((carimbo, indice) => <CarimboEdicao key={carimbo.slug} carimbo={carimbo} indice={indice} />)}
           <div className="passe__vago">próximo<br />encontro</div>
         </div>
-      </section>
-      <section className="passe__pontos">
-        <p className="passe__numero"><strong>{espaco.pontos}</strong> pontos{meta ? <>, <b>{faltam ? `faltam ${faltam} para ${meta.nome}` : `pontos alcançados para ${meta.nome}`}</b></> : ''}</p>
-        <div className="passe__barra" aria-hidden="true">
-          {Array.from({ length: 10 }, (_, indice) => <span key={indice} className={`c${Math.min(Math.floor(indice / 2), 3)}`} style={{ '--fill': `${Math.max(Math.min(preenchidos - indice, 1), 0) * 100}%` } as React.CSSProperties} />)}
-        </div>
-        {meta && <p className="passe__req">{Math.min(espaco.encontros, meta.encontros)} de {meta.encontros} encontros · {espaco.missoes.filter((item) => item.nivel === meta.nivel && item.status === 'concluida').length} de {espaco.missoes.filter((item) => item.nivel === meta.nivel).length} missões</p>}
-        <p className="passe__mrz">P&lt;COMMUNICALI&lt;{m.nome.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z]+/g, '<').slice(0, 18)}<br />{m.codigo.replace(/-/g, '<').padEnd(10, '<')}{espaco.carimbos[0]?.data_evento.split('-').reverse().join('') || ''}&lt;&lt;&lt;{espaco.pontos}</p>
       </section>
     </>
   );
@@ -864,9 +855,16 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar, outras = [] }: 
   return (
     <>
       <button type="button" className="passe__link" onClick={voltar}>Voltar</button>
-      <section className="passe__dados passe__cartao passe__dados--cartao passe__perfil-topo">
-        <FotoSelo url={pessoa.foto_url} nome={pessoa.nome} aberto={pessoa.aberto_trabalho} recruta={pessoa.recrutador} tamanho={132} />
-        <div><h1 className="menor">{pessoa.nome}</h1><p className="passe__data">{NIVEIS[pessoa.categoria] || pessoa.categoria}</p>{pessoa.segmento && <span className="passe__segmento">{pessoa.segmento}</span>}{(pessoa.cidade_uf || pessoa.regiao) && <p>{pessoa.cidade_uf || pessoa.regiao}</p>}{(pessoa.cargo || pessoa.empresa) && <p>{[pessoa.cargo, pessoa.empresa].filter(Boolean).join(', ')}</p>}</div>
+      <section className="passe__heroi passe__heroi--perfil" aria-label={`Perfil de ${pessoa.nome}`}>
+        <div className="passe__heroi-foto"><FotoSelo url={pessoa.foto_url} nome={pessoa.nome} aberto={pessoa.aberto_trabalho} recruta={pessoa.recrutador} tamanho={116} /></div>
+        <div className="passe__heroi-texto">
+          <span className="passe__heroi-nivel">{NIVEIS[pessoa.categoria] || pessoa.categoria}</span>
+          <h2>{pessoa.nome}</h2>
+          {(pessoa.cargo || pessoa.empresa) && <p>{[pessoa.cargo, pessoa.empresa].filter(Boolean).join(' · ')}</p>}
+          {(pessoa.cidade_uf || pessoa.regiao) && <p>{pessoa.cidade_uf || pessoa.regiao}</p>}
+          {pessoa.segmento && <div className="passe__heroi-temas"><span>{pessoa.segmento}</span></div>}
+        </div>
+        <img className="passe__heroi-selo" src={`/selos/postal-${pessoa.categoria === 'organizador' ? 'fundadora' : pessoa.categoria}.png`} alt="" onError={(event) => { event.currentTarget.style.display = 'none'; }} />
       </section>
       {!eu && (conexao
         ? <p className="passe__ok" role="status">{conexao}</p>
