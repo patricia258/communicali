@@ -129,9 +129,13 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 03/11/2026, Claude Code — selos nos e-mails
+- Selos redondos das missões gerados em imagem (`public/selos/missao-<slug>.png`, a partir do mesmo desenho do Meu espaço). E-mail de missão concluída mostra o selo da missão; e-mail de novo nível mostra o selo postal do nível.
+- Novo e-mail "Novo carimbo": gatilho em `checkins` cria alerta `carimbo` (exceto edições teste e demo) e `api/avisos.js` envia com a imagem de `editions.carimbo_url`. Migração `20261103260000`. Publicado `dpl_B2g1ucdpCNCsYgopRYcvy5AtKijg`; tela de acesso do painel conferida; 3 testes enviados a Patrícia.
+
 ### 03/11/2026, Claude Code — acesso do painel e e-mail de nível (parcial, limite de uso)
 - Publicado `dpl_8EYQNCftG6C9hnfu2nZ3riqUyDch`: nova tela de acesso do painel (lado vinho com a marca e cartão claro); e-mail de novo nível com o selo postal do nível (`layoutSimples` aceita `imagem`). Não conferido na tela.
-- **Pendente (pedido de Patrícia):** e-mail de missão concluída com a imagem do selo redondo da missão (gerar PNGs `public/selos/missao-<slug>.png` a partir de `SeloMissao`); e-mail de novo carimbo após o check-in, com a imagem do carimbo da edição; o PPT ela vai ajustar na conversa onde foi criado, com base no Google Doc de falas.
+- Concluído na entrada seguinte. O PPT ela ajusta na conversa onde foi criado, com base no Google Doc de falas.
 
 ### 03/11/2026, Claude Code — avisos por e-mail e roteiro da apresentação
 - `api/avisos.js` (migração `20261103250000`): e-mail ao membro quando muda de nível, conclui missão (novo gatilho em `member_missions` cria alerta `missao`) ou recebe um perfil indicado; e-mail simples aos admins (`public.admins`) a cada formulário preenchido e a cada inscrição em encontro, com as respostas. Cada aviso vai uma vez (`email_em`, `admin_avisado_em`); o que existia antes foi marcado como avisado. Disparado após envio de formulário, após indicar perfil, ao navegar no painel e no cron diário. 5 testes enviados a Patrícia.
