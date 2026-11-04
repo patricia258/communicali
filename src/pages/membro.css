@@ -591,3 +591,31 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__pagina{margin:0;padding:18px 0 14px;border:1px solid #E6D8CC;border-radius:16px;background:repeating-linear-gradient(0deg,rgba(201,151,59,.05) 0 1px,transparent 1px 22px),#FFFCF7;box-shadow:inset 0 0 0 6px #FFFCF7,inset 0 0 0 7px #EADCCF}
 .passe__pagina>h2{padding:0 20px}
 @media (max-width:420px){.passe .passe__tela .passe__heroi h2{text-align:center}}
+
+/* Edições como páginas do passaporte: próximo encontro em destaque, anteriores numa rota. */
+.passe__agenda-intro{margin:-4px 0 4px;font-size:14px;line-height:1.55;color:#5A4740}
+.passe__agenda-cartao{position:relative;overflow:hidden;border:1px solid #EADFD6;border-radius:16px;background:#FFFDFA;box-shadow:0 1px 2px rgba(34,16,15,.04)}
+.passe__agenda-data{position:absolute;top:12px;left:12px;z-index:2;display:grid;justify-items:center;min-width:52px;padding:6px 8px;border-radius:10px;background:#FFFDFA;color:#7A1F3D;box-shadow:0 4px 12px rgba(34,16,15,.18)}
+.passe__agenda-data strong{font:700 24px/1 'Funnel Display',sans-serif}
+.passe__agenda-data span{font:700 10px Inter,sans-serif;letter-spacing:.16em}
+.passe__agenda-cabecalho{position:relative}
+.passe__agenda-capa{display:block;width:100%;height:150px;object-fit:cover}
+.passe__agenda-corpo{display:flex;flex-direction:column;gap:6px;padding:14px 16px 16px}
+.passe .passe__tela .passe__agenda-corpo h3{margin:0;font:700 18px/1.25 'Funnel Display',sans-serif;color:#22100F}
+.passe__agenda-cartao--proximo{border:0;background:linear-gradient(160deg,#7A1F3D,#3E1220);color:#F7F0EA;box-shadow:0 16px 34px rgba(74,20,36,.25)}
+.passe__agenda-cartao--proximo .passe__agenda-corpo{position:relative;padding-top:18px;border-top:2px dashed rgba(247,240,234,.35)}
+.passe__agenda-cartao--proximo .passe__agenda-corpo::before,.passe__agenda-cartao--proximo .passe__agenda-corpo::after{content:'';position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:#F4EEE8}
+.passe__agenda-cartao--proximo .passe__agenda-corpo::before{left:-11px}
+.passe__agenda-cartao--proximo .passe__agenda-corpo::after{right:-11px}
+.passe .passe__tela .passe__agenda-cartao--proximo h3{color:#FFFFFF;font-size:22px}
+.passe__agenda-cartao--proximo .passe__data,.passe__agenda-cartao--proximo .passe__agenda-local{color:rgba(247,240,234,.85)}
+.passe__agenda-cartao--proximo .passe__encontro summary{color:#DDB160}
+.passe__agenda-cartao--proximo .passe__encontro-resumo{color:#F7F0EA}
+.passe__agenda-cartao--proximo .passe__botao{background:#DDB160;color:#22100F;border:0;border-radius:999px}
+.passe__agenda-carimbado{position:absolute;top:118px;right:14px;z-index:2;padding:5px 10px;border:2px solid #A9502E;border-radius:4px;outline:1px dashed #A9502E;outline-offset:-5px;background:rgba(255,253,250,.92);color:#A9502E;font:800 12px 'Funnel Display',sans-serif;letter-spacing:.14em;text-transform:uppercase;transform:rotate(-8deg)}
+.passe__rota--agenda{gap:12px;margin-top:4px}
+.passe__rota--agenda>*::before{top:24px}
+.passe__rota--agenda .passe__agenda-capa{height:110px}
+.passe__rota--agenda .passe__agenda-carimbado{top:78px}
+.passe__rota--agenda .passe__agenda-cartao:not(.is-estive) .passe__agenda-capa{filter:grayscale(.6);opacity:.85}
+.passe__agenda-status{position:absolute;top:12px;right:12px;padding:4px 10px;border-radius:999px;font:600 11px Inter,sans-serif}

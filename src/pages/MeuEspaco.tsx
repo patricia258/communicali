@@ -358,11 +358,15 @@ function organizarAgenda(espaco: Espaco, publicadas: EncontroAgenda[], hoje: str
   };
 }
 
-function EncontroCartao({ edicao, proximo, carregando, erro }: { edicao: EncontroAgenda; proximo: boolean; carregando: boolean; erro: boolean }) {
+const MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+function EncontroCartao({ edicao, proximo, carregando, erro, estive = false }: { edicao: EncontroAgenda; proximo: boolean; carregando: boolean; erro: boolean; estive?: boolean }) {
+  const [, mes, dia] = edicao.data_evento.split('-');
   const fotos = linkEncontro(edicao.fotos_url);
   const inscricao = edicao.inscricoes_abertas ? linkEncontro(edicao.inscricao_url) || `/inscricao/${encodeURIComponent(edicao.slug)}` : '';
   return (
-    <article className="passe__agenda-cartao">
+    <article className={`passe__agenda-cartao${proximo ? ' passe__agenda-cartao--proximo' : ''}${estive ? ' is-estive' : ''}`}>
+      <div className="passe__agenda-data" aria-hidden="true"><strong>{dia}</strong><span>{MESES[Number(mes) - 1]}</span></div>
+      {estive && <span className="passe__agenda-carimbado" aria-label="Você esteve neste encontro">Carimbado</span>}
       <div className="passe__agenda-cabecalho">
         {edicao.capa_url && <img className="passe__agenda-capa" src={edicao.capa_url} alt={`Local: ${edicao.local}`} loading="lazy" />}
         <span className={`passe__agenda-status passe__agenda-status--${!proximo ? 'encerrado' : edicao.inscricoes_abertas ? 'aberto' : 'previsto'}`}>{!proximo ? 'Encerrado' : edicao.inscricoes_abertas ? 'Inscrições abertas' : 'Previsto'}</span>
@@ -407,19 +411,21 @@ function Edicoes({ espaco }: { espaco: Espaco }) {
   }, [tentativa]);
   const hoje = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
   const { proximos, anteriores } = organizarAgenda(espaco, publicadas, hoje);
+  const carimbados = new Set(espaco.carimbos.map((item) => item.slug));
   return (
     <>
       <header className="passe__agenda-titulo"><CalendarDays size={28} aria-hidden="true" /><h1>Edições</h1></header>
+      <p className="passe__agenda-intro">Cada encontro é uma página do seu passaporte.<br /><strong>{carimbados.size} {carimbados.size === 1 ? 'carimbo' : 'carimbos'}</strong> até agora.</p>
       {carregando && <p className="passe__aviso" role="status">Atualizando a agenda…</p>}
       {erro && <div className="passe__agenda-erro" role="alert"><p>Não foi possível atualizar a agenda. Os encontros já carregados continuam disponíveis.</p><button type="button" className="passe__link" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
       <section className="passe__agenda-grupo" aria-labelledby="agenda-proximos">
         <h2 id="agenda-proximos">Próximos encontros</h2>
-        {proximos.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo carregando={carregando} erro={erro} />)}
+        {proximos.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo carregando={carregando} erro={erro} estive={carimbados.has(edicao.slug)} />)}
         {!proximos.length && !carregando && !erro && <p className="passe__aviso">Nenhum próximo encontro anunciado.</p>}
       </section>
       <section className="passe__agenda-grupo" aria-labelledby="agenda-anteriores">
         <h2 id="agenda-anteriores">Encontros anteriores</h2>
-        {anteriores.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo={false} carregando={carregando} erro={erro} />)}
+        <div className="passe__rota passe__rota--agenda">{anteriores.map((edicao) => <EncontroCartao key={edicao.slug} edicao={edicao} proximo={false} carregando={carregando} erro={erro} estive={carimbados.has(edicao.slug)} />)}</div>
         {!anteriores.length && !carregando && !erro && <p className="passe__aviso">Os encontros realizados aparecerão aqui.</p>}
       </section>
     </>
