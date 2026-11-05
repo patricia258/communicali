@@ -3,7 +3,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { AdminFormsPage, FormularioDaEdicao } from '../forms/AdminFormsPage';
+import { AdminFormsPage } from '../forms/AdminFormsPage';
 import { PessoasDaEdicao } from './AdminPessoasEdicao';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
@@ -272,7 +272,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <nav className="adm-indice" aria-label="Seções da edição">
-        {[['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-pessoas', 'Pessoas'], ...(draft.form_inscricao ? [['secao-formulario', 'Respostas']] : []), ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
+        {[['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-pessoas', 'Pessoas'], ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
           <a key={id} href={`#${id}`} onClick={(event) => { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>{nome}</a>
         ))}
       </nav>
@@ -316,7 +316,6 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         </div>
       </section>
       <PessoasDaEdicao edition={draft} />
-      {draft.form_inscricao && <FormularioDaEdicao slug={draft.form_inscricao} />}
       <div id="secao-emails"><EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} /></div>
       <CardEMimos edition={edition} />
       <div id="secao-votacao"><VotacoesDaEdicao editionId={edition.id} editionSlug={edition.slug} /></div>

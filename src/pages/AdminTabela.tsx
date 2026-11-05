@@ -1,7 +1,7 @@
 /* Tabela do painel: ordena pelas colunas, filtra e busca. Contatos viram links com botão de copiar. */
 import { useMemo, useState, type ReactNode } from 'react';
 
-export type Coluna<T> = { id: string; titulo: string; valor: (linha: T) => string | number; render?: (linha: T) => ReactNode; longo?: boolean };
+export type Coluna<T> = { id: string; titulo: string; valor: (linha: T) => string | number; render?: (linha: T) => ReactNode; longo?: boolean; /** Cabeçalho próprio (ex.: caixa de selecionar todos), sem ordenação. */ cabecalho?: ReactNode; estreita?: boolean };
 export type Filtro<T> = { id: string; titulo: string; valor: (linha: T) => string };
 
 /** `acoes` (imprimir, exportar...) ficam na mesma linha da busca e dos filtros, encostadas à direita. */
@@ -40,12 +40,12 @@ export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio
       <div className="adm-tabela">
         <table>
           <thead><tr>{colunas.map((coluna) => (
-            <th key={coluna.id} aria-sort={ordem.id === coluna.id ? (ordem.desc ? 'descending' : 'ascending') : 'none'}>
-              <button type="button" onClick={() => setOrdem({ id: coluna.id, desc: ordem.id === coluna.id ? !ordem.desc : false })}>{coluna.titulo}{ordem.id === coluna.id ? (ordem.desc ? ' ↓' : ' ↑') : ''}</button>
+            <th key={coluna.id} className={coluna.estreita ? 'estreita' : undefined} aria-sort={ordem.id === coluna.id ? (ordem.desc ? 'descending' : 'ascending') : 'none'}>
+              {coluna.cabecalho !== undefined ? coluna.cabecalho : <button type="button" onClick={() => setOrdem({ id: coluna.id, desc: ordem.id === coluna.id ? !ordem.desc : false })}>{coluna.titulo}{ordem.id === coluna.id ? (ordem.desc ? ' ↓' : ' ↑') : ''}</button>}
             </th>
           ))}</tr></thead>
           <tbody>
-            {visiveis.map((linha) => <tr key={chave(linha)}>{colunas.map((coluna) => <td key={coluna.id} className={coluna.longo ? 'longo' : undefined}>{coluna.render ? coluna.render(linha) : coluna.valor(linha)}</td>)}</tr>)}
+            {visiveis.map((linha) => <tr key={chave(linha)}>{colunas.map((coluna) => <td key={coluna.id} className={coluna.longo ? 'longo' : coluna.estreita ? 'estreita' : undefined}>{coluna.render ? coluna.render(linha) : coluna.valor(linha)}</td>)}</tr>)}
             {!visiveis.length && <tr><td colSpan={colunas.length} className="adm-vazio">{vazio}</td></tr>}
           </tbody>
         </table>

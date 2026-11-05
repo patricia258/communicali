@@ -587,13 +587,27 @@ function ViewResponse({ form, row, onClose, onEdit }: { form: FormRecord; row: R
   </div>;
 }
 
-/** Respostas do formulário de inscrição dentro da página da edição. */
-export function FormularioDaEdicao({ slug }: { slug: string }) {
+/** Planilha completa das respostas do formulário da edição (fica recolhida dentro de Pessoas da edição). */
+export function PlanilhaDaEdicao({ slug }: { slug: string }) {
   const [form, setForm] = useState<FormRecord | null | undefined>(undefined);
   useEffect(() => { if (supabase) void supabase.from('forms').select(FORM_FIELDS).eq('slug', slug).maybeSingle().then(({ data }) => setForm((data as FormRecord | null) || null)); }, [slug]);
-  return <section className="v2-forms-card" id="secao-formulario">
-    <header className="adm-secao__topo"><div><small>RESPOSTAS DO FORMULÁRIO</small><h2>{form ? `Tudo o que responderam em ${form.title}` : 'Respostas do formulário'}</h2></div>
-      {form && <div className="adm-links"><a className="wf-secondary" href={`/f/${form.slug}`} target="_blank" rel="noopener noreferrer">Abrir formulário</a><a className="wf-secondary" href={`/admin/formularios?form=${form.id}&aba=questions`}>Editar perguntas</a></div>}</header>
-    {form === undefined ? <div className="data-loading">Carregando respostas…</div> : form ? <ResponsesPanel form={form} /> : <p className="adm-hint">O formulário ligado a esta edição não foi encontrado.</p>}
-  </section>;
+  return form === undefined ? <div className="data-loading">Carregando respostas…</div> : form ? <ResponsesPanel form={form} /> : <p className="adm-hint">O formulário ligado a esta edição não foi encontrado.</p>;
+}
+
+/** Ver ou editar uma resposta a partir de outra tela (Pessoas da edição). */
+export function RespostaGaveta({ slug, id, modo: inicial, fechar, mudou }: { slug: string; id: string; modo: 'ver' | 'editar'; fechar: () => void; mudou: () => void }) {
+  const [form, setForm] = useState<FormRecord | null>(null);
+  const [row, setRow] = useState<ResponseRow | null>(null);
+  const [modo, setModo] = useState(inicial);
+  useEffect(() => {
+    if (!supabase) return;
+    void supabase.from('forms').select(FORM_FIELDS).eq('slug', slug).maybeSingle().then(({ data }) => setForm(data as FormRecord | null));
+    void supabase.from('form_responses').select(RESPONSE_FIELDS).eq('id', id).maybeSingle().then(({ data }) => setRow(data as ResponseRow | null));
+  }, [slug, id]);
+  if (!form || !row) return null;
+  if (modo === 'ver') return <ViewResponse form={form} row={row} onClose={fechar} onEdit={() => setModo('editar')} />;
+  return <EditResponse form={form} row={row} onClose={fechar} onSaved={() => { mudou(); fechar(); }} onDelete={async () => {
+    if (!supabase || !window.confirm(`Excluir a resposta de ${row.respondent_name || 'esta pessoa'}? Ela sai da edição.`)) return;
+    await supabase.from('form_responses').delete().eq('id', row.id); mudou(); fechar();
+  }} />;
 }

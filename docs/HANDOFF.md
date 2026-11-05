@@ -8,6 +8,16 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (10) | Pessoas da edição: categoria, pessoa manual, assistente e respostas juntas
+- Os 24 que estavam "Contatado" (já conferidos antes da mudança) viraram "Confirmado": 25 participantes confirmados.
+- Categoria editável na linha e em lote (`communicali_definir_categoria`; coluna `categoria` em `form_responses`, `registrations`, `guests`).
+- `edition_kids` virou o cadastro manual de qualquer pessoa (categoria, função, idade, responsável, e-mail, WhatsApp); botão "Adicionar pessoa". Manual com e-mail e confirmado entra em `communicali_destinatarios`.
+- O assistente informado no cadastro do staff aparece como Staff (fonte `assistente`).
+- Ações por linha em ícones: olho (respostas do formulário em gaveta, `RespostaGaveta`), lápis (editar), lixeira (tirar da edição). Caixa "selecionar todos" no cabeçalho da tabela (`Coluna.cabecalho`).
+- Barra de lote explica o que faz: "Mudar a situação para" e "Mudar a categoria para", com Aplicar.
+- A seção separada "Respostas" saiu; a planilha completa do formulário fica recolhida no fim de Pessoas (`PlanilhaDaEdicao`).
+- Testado com admin de teste (removido): adicionar, mudar categoria em lote, olho e tirar.
+
 ### 2026-11-05 (9) | Pessoas da edição num lugar só
 - Nova seção "Pessoas da edição" (`src/pages/AdminPessoasEdicao.tsx`, RPC `communicali_pessoas_edicao`): participantes (formulário da edição e página do site), convidados (link de convite, `registrations.indicado_por`, e `guests`), kids (tabela nova `edition_kids`, cadastro manual), staff e fornecedores ligados pelo rótulo do encontro em `eventos`, e organização. Contagem de quem vai estar lá, recorrência pelo histórico de check-ins, seleção em lote, lista impressa da recepção e Excel.
 - Situação única: inscrito, contatado, confirmado, sem_resposta, nao_vai (`communicali_definir_situacao`). No formulário fica em `form_responses.stage` (etapas do formulário); em `registrations` e `guests`, na coluna nova `situacao`. Migração `20261105150000_pessoas_da_edicao.sql`: quem tinha contato virou "Contatado", os outros "Inscrito".

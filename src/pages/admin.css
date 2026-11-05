@@ -237,3 +237,12 @@ html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>header h2{display:block}
 .adm-todos{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap}
 .adm-selbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .adm-selbar>span{font-size:13px;color:var(--muted)}
+.adm-tabela th.estreita,.adm-tabela td.estreita{width:1%;white-space:nowrap;padding-left:10px;padding-right:6px}
+.adm-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.adm-pill--select{border:0;cursor:pointer;padding-right:22px;appearance:auto}
+.adm-lote{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:12px 14px;border:1px solid #ddb160;border-radius:10px;background:#FFF8EA}
+.adm-lote>strong{align-self:center;font-size:14px;color:#5a1e2d}
+.adm-lote label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--muted)}
+.adm-lote select{min-height:36px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font:400 14px Inter,sans-serif}
+.adm-form-pessoa label{display:flex;flex-direction:column;gap:4px}
+.adm-tabela a.v2-forms-edit{text-decoration:none}
