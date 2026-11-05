@@ -11,7 +11,7 @@ import { GuestsPanel } from './Convidados';
 import { HomePanel, ProgramPanel } from './AdminInicio';
 import { StaffPanel } from './Staff';
 import { FornecedorPanel } from './Fornecedor';
-import { EmailsCard, chamar } from './AdminEmails';
+import { CardEMimos, EmailsCard, chamar } from './AdminEmails';
 import { ImpactosPanel, IndicacoesPanel, MatchesPanel, RecommendationsPanel } from './AdminRecomendacoes';
 import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 import { AdminRedeExtras } from './AdminRedeExtras';
@@ -285,10 +285,17 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
   const origin = window.location.origin;
   return (
     <>
+      <div className="adm-edicao">
       <button type="button" className="v2-forms-back" onClick={onBack}>Voltar para edições</button>
       <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
-      <section className="v2-forms-card">
+      <nav className="adm-indice" aria-label="Seções da edição">
+        {[['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-inscricoes', 'Inscrições'], ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
+          <a key={id} href={`#${id}`} onClick={(event) => { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>{nome}</a>
+        ))}
+      </nav>
+      <section className="v2-forms-card" id="secao-dados">
+        <header><small>DADOS DO ENCONTRO</small><h2>Data, local, check-in e o que aparece no site</h2></header>
         <div className="v2-forms-grid">
           {text('titulo', 'Título')}
           {text('selo', 'Selo', 'aparece na tela do check-in')}
@@ -308,7 +315,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           <label className="wide"><span>Resumo do encontro</span><textarea rows={5} value={draft.resumo || ''} onChange={(event) => set({ resumo: event.target.value })} /></label>
         </div>
       </section>
-      <section className="v2-forms-card">
+      <section className="v2-forms-card" id="secao-imagens">
         <header><small>IMAGENS</small><h2>Capa e fotos do carrossel</h2></header>
         <div className="adm-cover">
           {draft.capa_url && <img src={draft.capa_url} alt="Capa da edição" />}
@@ -326,7 +333,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           ))}
         </div>
       </section>
-      <section className="v2-forms-card">
+      <section className="v2-forms-card" id="secao-inscricoes">
         <header><small>INSCRIÇÕES PELO SITE</small><h2>{signups.filter((item) => item.status === 'analise').length} para aprovar, {signups.filter((item) => item.status === 'inscrito').length} {signups.filter((item) => item.status === 'inscrito').length === 1 ? 'aprovado' : 'aprovados'}{signups.some((item) => item.status === 'espera') ? `, ${signups.filter((item) => item.status === 'espera').length} na lista de espera` : ''}</h2></header>
         <div className="adm-links">
           <input readOnly aria-label="Link da página da edição" value={`https://comuni.calirh.com/e/${edition.slug}`} onFocus={(event) => event.target.select()} />
@@ -334,9 +341,10 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         </div>
         <Tabela colunas={colunasInscritos} linhas={signups} chave={(item) => item.id} vazio="Nenhuma inscrição pelo site." filtros={[{ id: 'situacao', titulo: 'Situação', valor: (item) => SITUACAO_INSCRICAO[item.status] || item.status }]} />
       </section>
-      <EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} />
-      <VotacoesDaEdicao editionId={edition.id} editionSlug={edition.slug} />
-      <section className="v2-forms-card">
+      <div id="secao-emails"><EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} /></div>
+      <CardEMimos edition={edition} />
+      <div id="secao-votacao"><VotacoesDaEdicao editionId={edition.id} editionSlug={edition.slug} /></div>
+      <section className="v2-forms-card" id="secao-presencas">
         <header><small>PRESENÇAS</small><h2>{people.length} {people.length === 1 ? 'check-in' : 'check-ins'}</h2></header>
         <div className="adm-links">
           <a className="wf-secondary" href={`${origin}/telao/checkin?edicao=${edition.slug}`} target="_blank" rel="noopener noreferrer">Telão do check-in</a>
@@ -354,6 +362,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           ))}
         </div>
       </section>
+      </div>
     </>
   );
 }

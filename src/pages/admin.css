@@ -200,3 +200,20 @@
 .adm-card-euvou>span{margin-right:auto;font-size:13px;color:#3e3533}
 .adm-mimo{cursor:pointer}
 .adm-mimo input{accent-color:#5a1e2d;width:18px;height:18px}
+/* Página da edição: cada seção com cabeçalho destacado e um índice no topo para pular entre elas. */
+.adm-edicao{display:flex;flex-direction:column;gap:22px}
+.adm-edicao [id^="secao-"]{scroll-margin-top:120px}
+.adm-indice{position:sticky;top:64px;z-index:5;display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;border:1px solid #eadfd6;border-radius:14px;background:rgba(255,253,251,.96);backdrop-filter:blur(6px)}
+.adm-indice a{padding:7px 14px;border-radius:999px;background:#f5ede6;color:#5a1e2d;font:600 13px Inter,sans-serif;text-decoration:none}
+.adm-indice a:hover{background:#5a1e2d;color:#f7f0ea}
+html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card{padding:0 0 20px;overflow:hidden;border-color:#e6d7cc}
+html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>*:not(header):not(.adm-secao__topo):not(.adm-envios__topo){margin-left:22px;margin-right:22px}
+html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>header,html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>.adm-envios__topo,html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>.adm-secao__topo{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:0 0 18px;padding:16px 22px;background:linear-gradient(90deg,#5a1e2d,#7a1f3d);color:#f7f0ea}
+html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>header small,html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>.adm-envios__topo small,html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>.adm-secao__topo small{display:inline-block;padding:3px 10px;border-radius:999px;background:rgba(221,177,96,.22);color:#ddb160;font-size:11px;letter-spacing:.12em}
+html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>header h2,html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>.adm-envios__topo h2,html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>.adm-secao__topo h2{margin:6px 0 0;font-size:20px;color:#fff}
+html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>.adm-envios__topo .wf-secondary,html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>.adm-secao__topo .wf-secondary{background:rgba(255,255,255,.1);border-color:rgba(247,240,234,.35);color:#f7f0ea}
+.adm-secao__topo{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.adm-aprovar{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;color:#5a1e2d}
+.adm-aprovar input{accent-color:#5a1e2d;width:16px;height:16px}
+html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>header{display:block}
+html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>header h2{display:block}

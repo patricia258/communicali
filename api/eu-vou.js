@@ -35,11 +35,21 @@ export default async function handler(req, res) {
   const pessoa = c ? pessoas.find((item) => assinatura(item.email) === String(c)) : pessoas.find((item) => item.email === alvo);
   if (!pessoa) return res.status(200).json({ encontrado: false, motivo: 'nao_confirmado' });
 
-  // Mimo: a pessoa avisa que compartilhou o card marcando a CALI. Uma linha por pessoa e edição.
+  // Registro por pessoa e edição: quando gerou o card, em quais formatos, e quando e onde disse que compartilhou.
+  const registro = async (mudanca) => {
+    const atual = (await (await banco(`compartilhamentos?edition_id=eq.${edition.id}&email=eq.${encodeURIComponent(pessoa.email)}&select=formatos,gerado_em`)).json())[0];
+    const corpo = { edition_id: edition.id, email: pessoa.email, nome: pessoa.nome, ...mudanca(atual) };
+    return banco('compartilhamentos?on_conflict=edition_id,email', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(corpo) });
+  };
+  if (acao === 'gerou') {
+    const formato = req.body?.formato === 'story' ? 'story' : 'feed';
+    await registro((atual) => ({ gerado_em: atual?.gerado_em || new Date().toISOString(), formatos: [...new Set([...(atual?.formatos || []), formato])] }));
+    return res.status(200).json({ ok: true });
+  }
   if (acao === 'compartilhei') {
     const lista = (Array.isArray(redes) ? redes : []).filter((rede) => ['Instagram', 'LinkedIn'].includes(rede));
     if (!lista.length) return res.status(400).json({ error: 'Marque onde você compartilhou.' });
-    const salvo = await banco('compartilhamentos?on_conflict=edition_id,email', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ edition_id: edition.id, email: pessoa.email, nome: pessoa.nome, redes: lista }) });
+    const salvo = await registro(() => ({ redes: lista, compartilhado_em: new Date().toISOString() }));
     return salvo.ok ? res.status(200).json({ ok: true }) : res.status(502).json({ error: 'Não foi possível anotar agora.' });
   }
 

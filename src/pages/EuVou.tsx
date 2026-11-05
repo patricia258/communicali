@@ -1,6 +1,6 @@
 /* Card "Eu vou!" sem entrar no aplicativo: a pessoa confirmada informa o e-mail (ou chega pelo link do e-mail)
    e o card sai pronto, com a foto do formulário de inscrição, a edição, a data e o local. */
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { gerarCartaoEuVou } from './ConviteMembro';
 import { longDate } from './Edicao';
 
@@ -20,6 +20,7 @@ export function EuVou() {
   const [dados, setDados] = useState<Resposta | null>(null);
   const [card, setCard] = useState<{ blob: Blob; url: string } | null>(null);
   const [identidade, setIdentidade] = useState<Record<string, string>>(CODIGO ? { c: CODIGO } : {});
+  const identidadeRef = useRef<Record<string, string>>(CODIGO ? { c: CODIGO } : {});
   const [redes, setRedes] = useState<string[]>([]);
   const [mimo, setMimo] = useState<'' | 'enviando' | 'ok' | 'erro'>('');
   // Feed e LinkedIn em 4:5; story do Instagram em 9:16, com a mesma arte.
@@ -33,6 +34,8 @@ export function EuVou() {
     const frase = edicao.numero === 1 ? 'Vou estar no primeiro encontro da ComuniCALI.' : 'Vou estar no próximo encontro da ComuniCALI.';
     const blob = await gerarCartaoEuVou(resposta.nome || '', foto === undefined ? resposta.foto || null : foto, { titulo: edicao.titulo, data: longDate(edicao.data_evento), local: edicao.local }, frase, qual);
     setCard((anterior) => { if (anterior) URL.revokeObjectURL(anterior.url); return { blob, url: URL.createObjectURL(blob) }; });
+    // Registra que o card foi gerado e em qual formato (para a organização acompanhar).
+    void fetch('/api/eu-vou', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...(CODIGO ? { c: CODIGO } : {}), ...identidadeRef.current, acao: 'gerou', formato: qual }) }).catch(() => null);
     setEstado('pronto');
   }
 
@@ -41,7 +44,7 @@ export function EuVou() {
   async function enviar(event: FormEvent) {
     event.preventDefault();
     setEstado('buscando');
-    setIdentidade({ email });
+    setIdentidade({ email }); identidadeRef.current = { email };
     try { await montar(await buscar({ email })); } catch { setEstado('erro'); }
   }
 

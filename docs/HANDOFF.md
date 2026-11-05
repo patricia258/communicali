@@ -8,6 +8,11 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (7) | Página da edição organizada e Card e mimos
+- Página da edição: índice fixo no topo (Dados, Imagens, Inscrições, E-mails, Card e mimos, Votação, Presenças) e cada seção com cabeçalho vinho destacado (`.adm-edicao` em admin.css). Seção de dados ganhou cabeçalho.
+- Nova seção CARD EU VOU! E MIMOS (`CardEMimos` em AdminEmails.tsx), separada dos e-mails: números (receberam, geraram, postaram, aprovados), tabela com busca e filtros (quem gerou, quando, formatos feed/story, quando postou, onde, aprovação do post), "Imprimir lista da recepção" (só quem postou, com coluna Entregue para marcar no papel), Exportar Excel, copiar link do grupo, teste do e-mail e envio para quem falta.
+- Controle de retirada saiu da tela. `compartilhamentos` ganhou gerado_em, formatos, compartilhado_em, conferido_em (migração `20261105130000_card_participacoes.sql`); `/eu-vou` registra cada geração e formato (acao gerou).
+
 ### 2026-11-05 (6) | Card Eu vou! enviado
 - Primeira tentativa não enviou nada: a regra de `email_log.tipo` não aceitava "card", a reserva falhava e o envio contava como feito. Corrigido (migração `20261105120000_email_log_card.sql`) e o lote agora conta só o que saiu de verdade.
 - Com o ok da Patrícia, o e-mail do card foi enviado aos 25 confirmados da 1ª Edição (25 registros "enviado" com id do Resend, 0 erros). Quem já recebeu não recebe de novo. Acompanhar aberturas, cliques e a lista de Mimos no painel da edição.
