@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Tabela, dataBr } from './AdminTabela';
+import { esc, imprimirFolhas } from './listaImpressa';
 
 type Resumo = { todos: number; acionados: number; confirmacoes: number; lembretes: number; convites: number; cards?: number; agradecimentos: number; erros: number };
 type Linha = { email: string; nome: string; tipo: string; situacao: string; created_at: string; aberto_em: string | null; clicado_em: string | null };
@@ -140,18 +141,16 @@ export function CardEMimos({ edition }: { edition: { id: string; titulo: string;
   }
   // Lista para a recepção: quem postou, em ordem alfabética, com caixa para marcar a entrega no papel.
   function imprimir() {
-    const linhas = [...postaram].sort((a, b) => (a.nome || a.email).localeCompare(b.nome || b.email, 'pt-BR'))
-      .map((item, n) => `<tr><td>${n + 1}</td><td>${(item.nome || item.email).replace(/</g, '&lt;')}</td><td>${item.redes.join(' e ')}</td><td>${item.conferido_em ? 'Aprovado' : ''}</td><td class="caixa"></td></tr>`).join('');
-    const janela = window.open('', '_blank');
-    if (!janela) { setNote('Libere as janelas do navegador para imprimir a lista.'); return; }
-    janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Mimos · ${edition.titulo}</title><style>
-      body{font-family:Inter,Arial,sans-serif;color:#22100F;margin:32px}h1{font-size:22px;margin:0 0 4px}p{margin:0 0 18px;color:#5a4740;font-size:13px}
-      table{width:100%;border-collapse:collapse;font-size:14px}th,td{border:1px solid #cdbcae;padding:9px 10px;text-align:left}th{background:#f3ece6;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
-      td:first-child{width:36px;text-align:center}.caixa{width:90px}@media print{body{margin:12mm}}</style></head><body>
-      <h1>Mimos · ${edition.titulo}</h1><p>${dataBr(edition.data_evento)} · ${postaram.length} ${postaram.length === 1 ? 'pessoa postou' : 'pessoas postaram'} marcando a CALI. Marque a última coluna ao entregar.</p>
-      <table><thead><tr><th>Nº</th><th>Nome</th><th>Onde postou</th><th>Post</th><th>Entregue</th></tr></thead><tbody>${linhas || '<tr><td colspan="5">Ninguém postou ainda.</td></tr>'}</tbody></table>
-      <script>window.onload=()=>window.print()<\/script></body></html>`);
-    janela.document.close();
+    const ordem = (lista: Participacao[]) => [...lista].sort((a, b) => (a.nome || a.email).localeCompare(b.nome || b.email, 'pt-BR'));
+    const linha = (item: Participacao) => [esc(item.nome || item.email), esc(item.redes.join(' e ')), quandoBr(item.compartilhado_em)];
+    const ok = imprimirFolhas(`Mimos · ${edition.titulo}`, [{
+      etiqueta: 'MIMO DO CARD EU VOU!', titulo: 'Lista dos Mimos', meta: `${dataBr(edition.data_evento)} · ${edition.titulo}`,
+      instrucao: 'Marque a caixa ao entregar o mimo.', resumo: `<b>${postaram.length}</b> ${postaram.length === 1 ? 'pessoa postou' : 'pessoas postaram'} marcando a CALI`,
+      colunas: ['Nome', 'Onde postou', 'Postou em'],
+      grupos: [{ nome: 'Post aprovado', linhas: ordem(postaram.filter((item) => item.conferido_em)).map(linha) }, { nome: 'Ainda sem conferir', cor: 'ouro', linhas: ordem(postaram.filter((item) => !item.conferido_em)).map(linha) }],
+      rodape: 'Só quem postou marcando a CALI',
+    }]);
+    if (!ok) setNote('Libere as janelas do navegador para imprimir a lista.');
   }
   function exportar() {
     void import('../forms/formExports').then(({ downloadXlsx }) => downloadXlsx(`communicali-mimos.xlsx`, 'Card e mimos', ['Nome', 'E-mail', 'Gerou o card em', 'Formatos', 'Compartilhou em', 'Onde', 'Post aprovado'],

@@ -8,6 +8,11 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (12) | Listas impressas no modelo de ticket
+- `src/pages/listaImpressa.ts` (`imprimirFolhas`): modelo único para listas impressas, a partir do PDF de referência da Patrícia (logo, ticket com título, instrução de marca-texto, resumo, blocos por categoria com etiqueta e contagem, caixa, número, nome em negrito, rodapé). Usar em toda lista impressa nova.
+- Lista de Recepção: confirmados por categoria (Membros, Participantes, Convidados, Kids, Organização) com Cargo, Empresa (Open to Work vira etiqueta) e E-mail de cadastro; nome completo com o sobrenome do formulário. Staff e fornecedores numa folha à parte.
+- Lista dos Mimos no mesmo modelo, separando post aprovado e ainda sem conferir.
+
 ### 2026-11-05 (11) | Pessoas sem pisca e lista da recepção por categoria
 - Mudar situação ou categoria atualiza a linha na hora e grava em seguida; a tabela não some mais ("Carregando" só na primeira carga). Avisos viram toast.
 - Lista da recepção: só confirmados, um bloco por categoria (Membros separados dos Participantes pelo nível no passaporte, via `nivel` em `communicali_pessoas_edicao`, migração `20261105170000`), ordem alfabética, colunas Nome, Primeira vez?, E-mail (ou função para equipe e kids), WhatsApp e Chegou.

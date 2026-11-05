@@ -8,6 +8,7 @@ import { downloadXlsx } from '../forms/formExports';
 import { PlanilhaDaEdicao, RespostaGaveta } from '../forms/AdminFormsPage';
 import { Email, Tabela, Telefone } from './AdminTabela';
 import { chamar } from './AdminEmails';
+import { esc, imprimirFolhas, type Folha } from './listaImpressa';
 
 type Pessoa = { fonte: string; id: string; categoria: string; nome: string; email: string | null; whatsapp: string | null; situacao: string; detalhe: string | null; vezes: number; criado_em: string; nivel: string | null };
 type Manual = { id: string; categoria: string; nome: string; funcao: string | null; idade: number | null; responsavel: string | null; email: string | null; whatsapp: string | null };
@@ -23,7 +24,7 @@ const recorrencia = (item: Pessoa) => (item.categoria === 'Kids' || !item.email 
 const classeCategoria = (categoria: string) => `adm-cat--${categoria.normalize('NFD').replace(/[^a-zA-Z]/g, '').toLowerCase()}`;
 const ORIGEM_CADASTRO: Record<string, string> = { staff: 'Vem do cadastro de Staff', assistente: 'Assistente de um staff: vem do cadastro de Staff', fornecedor: 'Vem do cadastro de Fornecedores', organizacao: 'Organização: sempre confirmada' };
 
-export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: string; titulo: string; data_evento: string; form_inscricao?: string | null } }) {
+export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: string; titulo: string; data_evento: string; numero: number | null; cidade: string; form_inscricao?: string | null } }) {
   const [lista, setLista] = useState<Pessoa[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [selecao, setSelecao] = useState<Set<string>>(new Set());
@@ -105,35 +106,64 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
 
   // Lista da recepção: só os confirmados, um bloco por categoria (membros separados dos participantes), em ordem alfabética,
   // com o que a recepção usa: nome, primeira vez ou não, e-mail e WhatsApp para achar a pessoa, e a caixa de chegada.
-  function imprimir() {
-    const grupo = (item: Pessoa) => (item.categoria === 'Participante' && item.nivel && item.nivel !== 'visitante' ? 'Membro' : item.categoria);
-    const ORDEM = ['Membro', 'Participante', 'Convidado', 'Kids', 'Staff', 'Fornecedor', 'Organização'];
-    const PLURAL: Record<string, string> = { Membro: 'Membros', Participante: 'Participantes', Convidado: 'Convidados', Kids: 'Kids', Staff: 'Staff', Fornecedor: 'Fornecedores', 'Organização': 'Organização' };
-    const esc = (texto: string | null) => (texto || '').replace(/</g, '&lt;');
-    let n = 0;
-    const blocos = ORDEM.map((nome) => {
-      const gente = vao.filter((item) => grupo(item) === nome).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-      if (!gente.length) return '';
-      const equipe = ['Kids', 'Staff', 'Fornecedor', 'Organização'].includes(nome);
-      const linhas = gente.map((item) => {
-        n += 1;
-        const vez = item.categoria === 'Kids' ? '' : item.vezes ? `Já veio ${item.vezes}x` : '<b>Primeira vez</b>';
-        const extra = equipe ? esc((item.detalhe || '').replace(/^Adicionado à mão · ?/, '')) : esc(item.email);
-        return `<tr><td class="n">${n}</td><td class="nome">${esc(item.nome)}</td><td>${vez}</td><td>${extra}</td><td>${esc(item.whatsapp)}</td><td class="caixa"></td></tr>`;
-      }).join('');
-      return `<h2>${PLURAL[nome]} <span>${gente.length}</span></h2><table><thead><tr><th class="n">Nº</th><th>Nome</th><th>Primeira vez?</th><th>${equipe ? 'Função ou detalhe' : 'E-mail'}</th><th>WhatsApp</th><th>Chegou</th></tr></thead><tbody>${linhas}</tbody></table>`;
-    }).join('');
-    const nova = window.open('', '_blank');
-    if (!nova) { avisar('Libere as janelas do navegador para imprimir a lista.'); return; }
-    nova.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Recepção · ${esc(edition.titulo)}</title><style>
-      body{font-family:Inter,Arial,sans-serif;color:#22100F;margin:28px}h1{font-size:22px;margin:0 0 2px}.sub{margin:0 0 8px;color:#5a4740;font-size:13px}
-      h2{margin:22px 0 8px;padding:6px 12px;border-radius:6px;background:#5a1e2d;color:#fff;font-size:15px;letter-spacing:.04em}h2 span{float:right;font-weight:600;color:#ddb160}
-      table{width:100%;border-collapse:collapse;font-size:13px;page-break-inside:auto}tr{page-break-inside:avoid}th,td{border:1px solid #cdbcae;padding:7px 9px;text-align:left}
-      th{background:#f3ece6;font-size:11px;text-transform:uppercase;letter-spacing:.06em}.n{width:30px;text-align:center}.nome{font-weight:600}.caixa{width:70px}
-      @media print{body{margin:10mm}h2{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
-      <h1>Recepção · ${esc(edition.titulo)}</h1><p class="sub">${vao.length} pessoas confirmadas, separadas por categoria e em ordem alfabética. Marque "Chegou" na entrada.</p>
-      ${blocos}<script>window.onload=()=>window.print()<\/script></body></html>`);
-    nova.document.close();
+  // Modelo de ticket: cargo, empresa e e-mail ajudam a recepção a achar a pessoa. Staff e fornecedores vão numa folha à parte.
+  async function imprimir() {
+    const extras = new Map<string, { cargo: string; empresa: string; sobrenome: string }>();
+    if (edition.form_inscricao) {
+      const { data: form } = await supabase.from('forms').select('id').eq('slug', edition.form_inscricao).maybeSingle();
+      if (form) {
+        const { data } = await supabase.from('form_responses').select('id,answers').eq('form_id', form.id);
+        for (const row of (data || []) as Array<{ id: string; answers: Record<string, unknown> }>) extras.set(row.id, { cargo: String(row.answers.cargo ?? ''), empresa: String(row.answers.empresa ?? ''), sobrenome: String(row.answers.sobrenome ?? '') });
+      }
+    }
+    const regs = vao.filter((item) => item.fonte === 'registro').map((item) => item.id);
+    if (regs.length) {
+      const { data } = await supabase.from('registrations').select('id,empresa,cargo').in('id', regs);
+      for (const row of (data || []) as Array<{ id: string; empresa: string | null; cargo: string | null }>) extras.set(row.id, { cargo: row.cargo || '', empresa: row.empresa || '', sobrenome: '' });
+    }
+    const semManual = (texto: string | null) => (texto || '').replace(/^Adicionado à mão( · )?/, '');
+    const nomeCompleto = (item: Pessoa) => { const sobrenome = extras.get(item.id)?.sobrenome.trim(); return sobrenome && !item.nome.toLowerCase().includes(sobrenome.toLowerCase()) ? `${item.nome} ${sobrenome}` : item.nome; };
+    const empresa = (texto: string) => (/open to work|desempregad|recoloca|em transi[cç][aã]o|buscando/i.test(texto) ? '<span class="pill">Open to Work</span>' : esc(texto));
+    const linha = (item: Pessoa): string[] => {
+      const extra = extras.get(item.id);
+      if (item.categoria === 'Kids') return [esc(item.nome), '—', esc(semManual(item.detalhe)), '—'];
+      if (item.categoria === 'Organização') return [esc(nomeCompleto(item)), esc(item.detalhe), 'CALI RH', esc(item.email)];
+      if (item.categoria === 'Convidado') return [esc(nomeCompleto(item)), esc(extra?.cargo || 'Convidado'), esc(extra?.empresa || semManual(item.detalhe)), esc(item.email)];
+      return [esc(nomeCompleto(item)), esc(extra?.cargo || semManual(item.detalhe)), empresa(extra?.empresa || ''), esc(item.email)];
+    };
+    const ordenar = (gente: Pessoa[]) => [...gente].sort((a, b) => nomeCompleto(a).localeCompare(nomeCompleto(b), 'pt-BR'));
+    const membro = (item: Pessoa) => item.categoria === 'Participante' && Boolean(item.nivel) && item.nivel !== 'visitante';
+    const recepcao = vao.filter((item) => !['Staff', 'Fornecedor'].includes(item.categoria));
+    const equipe = vao.filter((item) => ['Staff', 'Fornecedor'].includes(item.categoria));
+    const kids = recepcao.filter((item) => item.categoria === 'Kids').length;
+    const edicao = edition.numero ? ` · ${edition.numero}ª EDIÇÃO` : '';
+    const meta = [edition.data_evento.split('-').reverse().join('/'), edition.cidade, 'Organização CALI RH'].filter(Boolean).join(' · ');
+    const daEquipe = (item: Pessoa) => [esc(item.nome), esc(semManual(item.detalhe)), esc(item.whatsapp), esc(item.email)];
+    const folhas: Folha[] = [{
+      etiqueta: `TICKET DE ENTRADA${edicao}`, titulo: 'Lista de Recepção', meta,
+      instrucao: 'Passe <mark>marca-texto</mark> no nome de quem já chegou.',
+      resumo: `<b>${recepcao.length}</b> pessoas no local · ${recepcao.length - kids} adultos · ${kids} ${kids === 1 ? 'criança' : 'crianças'}`,
+      colunas: ['Nome', 'Cargo', 'Empresa', 'E-mail de cadastro'],
+      grupos: [
+        { nome: 'Membros', linhas: ordenar(recepcao.filter(membro)).map(linha) },
+        { nome: 'Participantes', linhas: ordenar(recepcao.filter((item) => item.categoria === 'Participante' && !membro(item))).map(linha) },
+        { nome: 'Convidados', linhas: ordenar(recepcao.filter((item) => item.categoria === 'Convidado')).map(linha) },
+        { nome: 'Kids', cor: 'ouro', linhas: ordenar(recepcao.filter((item) => item.categoria === 'Kids')).map(linha) },
+        { nome: 'Organização', linhas: ordenar(recepcao.filter((item) => item.categoria === 'Organização')).map(linha) },
+      ],
+      rodape: equipe.length ? 'Staff e fornecedores: folha seguinte' : '',
+    }];
+    if (equipe.length) folhas.push({
+      etiqueta: `EQUIPE${edicao}`, titulo: 'Staff e Fornecedores', meta,
+      instrucao: 'Marque a chegada de cada pessoa da equipe.', resumo: `<b>${equipe.length}</b> na equipe`,
+      colunas: ['Nome', 'Função', 'WhatsApp', 'E-mail'],
+      grupos: [
+        { nome: 'Staff', linhas: ordenar(equipe.filter((item) => item.categoria === 'Staff')).map(daEquipe) },
+        { nome: 'Fornecedores', cor: 'ouro', linhas: ordenar(equipe.filter((item) => item.categoria === 'Fornecedor')).map(daEquipe) },
+      ],
+      rodape: 'Lista da equipe',
+    });
+    if (!imprimirFolhas(`Recepção · ${edition.titulo}`, folhas)) avisar('Libere as janelas do navegador para imprimir a lista.');
   }
 
   const selecionaveis = lista.filter((item) => MUDA.includes(item.fonte));
@@ -191,7 +221,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
       {carregando ? <div className="data-loading">Carregando pessoas…</div> : <Tabela<Pessoa> colunas={colunas} linhas={lista} chave={chave} inicial={{ id: 'nome' }} vazio="Ninguém nesta edição ainda."
         filtros={[{ id: 'categoria', titulo: 'Categoria', valor: (item) => item.categoria }, { id: 'situacao', titulo: 'Situação', valor: (item) => NOME_SITUACAO[item.situacao] || item.situacao }, { id: 'recorrencia', titulo: 'Recorrência', valor: (item) => (recorrencia(item) === 'Primeira vez' ? 'Primeira vez' : recorrencia(item) === '-' ? '' : 'Já veio') }]}
         acoes={<>
-          <button type="button" className="wf-primary" disabled={!vao.length} onClick={imprimir}>Imprimir lista da recepção</button>
+          <button type="button" className="wf-primary" disabled={!vao.length} onClick={() => void imprimir()}>Imprimir lista da recepção</button>
           <button type="button" className="wf-secondary" disabled={!lista.length} onClick={exportar}>Exportar Excel</button>
         </>} />}
       {edition.form_inscricao && <details className="adm-suspensa">
