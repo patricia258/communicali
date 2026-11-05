@@ -250,3 +250,10 @@ html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>header h2{display:block}
 .adm-nota:focus{border-style:solid;border-color:#c9973b;outline:none;background:#fff}
 .adm-nota--curta{width:150px}
 select.adm-nota{border-style:solid;cursor:pointer}
+/* Votação: blocos do dia e zona de exclusão */
+.adm-linha-acoes{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:4px;margin-bottom:18px}
+.adm-linha-acoes .adm-hint{margin:0}
+.adm-dia{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:20px}
+.adm-dia__item{display:flex;flex-direction:column;justify-content:space-between;gap:14px;padding:16px 18px;border:1px solid #eadfd6;border-radius:12px;background:#fbf7f3}
+.adm-dia__item strong{font-size:15px;color:#5a1e2d}.adm-dia__item p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.5}
+.adm-zona-perigo{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:4px 0 24px;font-size:13px;color:var(--muted)}

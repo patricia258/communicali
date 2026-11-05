@@ -188,6 +188,7 @@ function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
   const [draft, setDraft] = useState({ ...poll, pergunta_2: poll.pergunta_2 || '', opcoesTexto: poll.opcoes.join('\n') });
   const [votes, setVotes] = useState<Vote[]>([]);
   const [note, setNote] = useState('');
+  useEffect(() => { if (!note) return undefined; const timer = window.setTimeout(() => setNote(''), 3500); return () => window.clearTimeout(timer); }, [note]);
   const load = () => supabase.from('poll_votes').select('nota,nota_2,opcao,texto,respondente,created_at').eq('poll_id', poll.id).order('created_at').then(({ data }) => setVotes((data || []) as Vote[]));
   useEffect(() => { void load(); const timer = window.setInterval(load, 4000); return () => window.clearInterval(timer); }, [poll.id]);
 
@@ -204,43 +205,75 @@ function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
   const media2 = notas2.length ? (notas2.reduce((sum, value) => sum + value, 0) / notas2.length).toFixed(1).replace('.', ',') : '-';
   const media = notas.length ? (notas.reduce((sum, value) => sum + value, 0) / notas.length).toFixed(1).replace('.', ',') : '-';
   const origin = window.location.origin;
+  const linkTelao = `${origin}/telao/resultado?edicao=${poll.slug}`;
+  const linkVotar = `${origin}/votar?edicao=${poll.slug}`;
+  const distancia = notas.length && notas2.length ? Math.abs(notas.reduce((a, b) => a + b, 0) / notas.length - notas2.reduce((a, b) => a + b, 0) / notas2.length).toFixed(1).replace('.', ',') : '-';
+  const copiar = (link: string, texto: string) => { void navigator.clipboard.writeText(link); setNote(texto); };
+  // Testes antes do encontro: apaga os votos e mantém as perguntas.
+  async function zerar() {
+    if (!window.confirm(`Apagar as ${votes.length} ${votes.length === 1 ? 'resposta' : 'respostas'} desta votação? As perguntas continuam. Use para limpar os testes antes do encontro.`)) return;
+    const { error } = await supabase.from('poll_votes').delete().eq('poll_id', poll.id);
+    setNote(error ? `Não foi possível apagar: ${error.message}` : 'Respostas apagadas. A votação está zerada.');
+    void load();
+  }
   return (
     <>
-      <button type="button" className="v2-forms-back" onClick={onBack}>Voltar para votações</button>
-      <div className="wf-head"><div><small>VOTAÇÃO · {{ rascunho: 'RASCUNHO', ativa: 'RECEBENDO RESPOSTAS', encerrada: 'ENCERRADA' }[draft.status]}</small><h1>{draft.titulo}</h1><p>{votes.length} {votes.length === 1 ? 'resposta' : 'respostas'}{draft.tipo === 'nota' ? (draft.pergunta_2 ? ` · na opinião ${media} · na prática ${media2}` : ` · média ${media}`) : ''}</p></div>
-        <div className="v2-head-actions">
-          {draft.status !== 'ativa' && <button type="button" className="wf-primary" onClick={() => void persist({ status: 'ativa' })}>Ativar votação</button>}
-          {draft.status === 'ativa' && <button type="button" className="wf-secondary" onClick={() => void persist({ status: 'encerrada' })}>Encerrar votação</button>}
-          {draft.tipo === 'nota' && <a className="wf-primary" href={`${window.location.origin}/telao/resultado?edicao=${poll.slug}`} target="_blank" rel="noopener noreferrer">Abrir tela ao vivo</a>}
-        </div>
-      </div>
-      {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <section className="v2-forms-card">
+        <header className="adm-secao__topo"><div><small>VOTAÇÃO · {{ rascunho: 'RASCUNHO', ativa: 'RECEBENDO RESPOSTAS', encerrada: 'ENCERRADA' }[draft.status]}</small><h2>{draft.titulo}</h2></div>
+          <div className="adm-links">
+            <button type="button" className="wf-secondary" onClick={onBack}>Voltar para votações</button>
+            {draft.status !== 'ativa' && <button type="button" className="wf-secondary" onClick={() => void persist({ status: 'ativa' })}>Ativar votação</button>}
+            {draft.status === 'ativa' && <button type="button" className="wf-secondary" onClick={() => void persist({ status: 'encerrada' })}>Encerrar votação</button>}
+          </div>
+        </header>
+        <div className="adm-cards">
+          <div className="adm-card"><span>Respostas</span><strong>{votes.length}</strong><small>{draft.status === 'ativa' ? 'recebendo agora' : draft.status === 'encerrada' ? 'votação encerrada' : 'ainda em rascunho'}</small></div>
+          {draft.tipo === 'nota' && <div className="adm-card"><span>{draft.pergunta_2 ? 'Na opinião' : 'Média'}</span><strong>{media}</strong><small>primeira pergunta</small></div>}
+          {draft.tipo === 'nota' && draft.pergunta_2 && <div className="adm-card"><span>Na prática</span><strong>{media2}</strong><small>segunda pergunta</small></div>}
+          {draft.tipo === 'nota' && draft.pergunta_2 && <div className="adm-card"><span>Distância</span><strong>{distancia}</strong><small>pontos entre as duas</small></div>}
+        </div>
+        <div className="adm-linha-acoes">
+          <p className="adm-hint">Votou para testar? Zere antes do encontro: as perguntas continuam, só os votos saem.</p>
+          <div className="adm-links">
+            <button type="button" className="wf-secondary" disabled={!votes.length} onClick={() => csv(`communicali-votacao-${poll.slug}.csv`, [['Data', 'Nota', 'Nota 2', 'Opção', 'Resposta', 'Respondente'], ...votes.map((vote) => [new Date(vote.created_at).toLocaleString('pt-BR'), vote.nota ?? '', vote.nota_2 ?? '', vote.opcao || '', vote.texto || '', vote.respondente || ''])])}>Exportar CSV</button>
+            <button type="button" className="wf-secondary adm-perigo" disabled={!votes.length} onClick={() => void zerar()}>Zerar respostas</button>
+          </div>
+        </div>
+      </section>
+      {note && <div className="v2-forms-toast" role="status">{note}</div>}
+
+      <section className="v2-forms-card">
+        <header className="adm-secao__topo"><div><small>NO DIA DO ENCONTRO</small><h2>O que abrir e onde</h2></div></header>
+        <div className="adm-dia">
+          <div className="adm-dia__item">
+            <div><strong>Telão da sala</strong><p>Projete no telão. Mostra o QR Code para votar e o resultado mudando ao vivo. Abrindo por aqui, logada, a votação abre sozinha.</p></div>
+            <div className="adm-links"><a className="wf-primary" href={linkTelao} target="_blank" rel="noopener noreferrer">Abrir telão</a><button type="button" className="wf-secondary" onClick={() => copiar(linkTelao, 'Link do telão copiado.')}>Copiar link</button></div>
+          </div>
+          <div className="adm-dia__item">
+            <div><strong>Página de votar</strong><p>É o que o público vê no celular depois de ler o QR Code. Abra para conferir como fica.</p></div>
+            <div className="adm-links"><a className="wf-secondary" href={linkVotar} target="_blank" rel="noopener noreferrer">Ver como o público vê</a><button type="button" className="wf-secondary" onClick={() => copiar(linkVotar, 'Link de votar copiado.')}>Copiar link</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="v2-forms-card">
+        <header className="adm-secao__topo"><div><small>PERGUNTAS</small><h2>O que a sala vai responder</h2></div>
+          <div className="adm-links"><button type="button" className="wf-secondary" onClick={() => void persist()}>Salvar alterações</button></div></header>
         <div className="v2-forms-grid">
           <label><span>Título da dinâmica</span><input value={draft.titulo} onChange={(event) => setDraft({ ...draft, titulo: event.target.value })} /></label>
-          <label><span>Tipo de resposta</span><select value={draft.tipo} disabled={votes.length > 0} onChange={(event) => setDraft({ ...draft, tipo: event.target.value as Poll['tipo'] })}><option value="nota">Nota de 0 a 10</option><option value="multipla">Múltipla escolha</option><option value="aberta">Resposta aberta</option></select></label>
+          <label><span>Tipo de resposta</span><select value={draft.tipo} disabled={votes.length > 0} title={votes.length ? 'Zere as respostas para trocar o tipo' : undefined} onChange={(event) => setDraft({ ...draft, tipo: event.target.value as Poll['tipo'] })}><option value="nota">Nota de 0 a 10</option><option value="multipla">Múltipla escolha</option><option value="aberta">Resposta aberta</option></select></label>
           <label className="wide"><span>Pergunta</span><textarea rows={2} value={draft.pergunta} onChange={(event) => setDraft({ ...draft, pergunta: event.target.value })} /></label>
-          {draft.tipo === 'nota' && <label className="wide"><span>Segunda pergunta (opcional)</span><textarea rows={2} value={draft.pergunta_2} placeholder="Respondida na mesma tela, também de 0 a 10" onChange={(event) => setDraft({ ...draft, pergunta_2: event.target.value })} /></label>}
+          {draft.tipo === 'nota' && <label className="wide"><span>Segunda pergunta (opcional)</span><textarea rows={2} value={draft.pergunta_2} placeholder="Respondida em seguida, também de 0 a 10" onChange={(event) => setDraft({ ...draft, pergunta_2: event.target.value })} /></label>}
           {draft.tipo === 'multipla' && <label className="wide"><span>Opções, uma por linha</span><textarea rows={4} value={draft.opcoesTexto} onChange={(event) => setDraft({ ...draft, opcoesTexto: event.target.value })} /></label>}
-          <label className="v2-forms-check"><input type="checkbox" checked={draft.anonima} onChange={(event) => setDraft({ ...draft, anonima: event.target.checked })} /><span><strong>Votação anônima</strong></span></label>
-          <div className="adm-submit"><button type="button" className="wf-primary" onClick={() => void persist()}>Salvar alterações</button></div>
+          <label className="v2-forms-check wide"><input type="checkbox" checked={draft.anonima} onChange={(event) => setDraft({ ...draft, anonima: event.target.checked })} /><span><strong>Votação anônima</strong><small>Ninguém vê quem deu qual nota.</small></span></label>
         </div>
       </section>
-      <section className="v2-forms-card">
-        <header><small>LINKS</small><h2>Para usar no dia</h2></header>
-        <p className="adm-hint">A tela ao vivo mostra o QR Code e o resultado mudando enquanto a sala vota. Abrindo por aqui, logada, a votação abre sozinha.</p>
-        <div className="adm-links">
-          <a className="wf-secondary" href={`${origin}/votar?edicao=${poll.slug}`} target="_blank" rel="noopener noreferrer">Abrir tela de resposta</a>
-          <button type="button" className="wf-secondary" disabled={!votes.length} onClick={() => csv(`communicali-votacao-${poll.slug}.csv`, [['Data', 'Nota', 'Opção', 'Resposta', 'Respondente'], ...votes.map((vote) => [new Date(vote.created_at).toLocaleString('pt-BR'), vote.nota ?? '', vote.opcao || '', vote.texto || '', vote.respondente || ''])])}>Exportar CSV</button>
-        </div>
-        <p className="adm-hint">O resultado mostra a percepção de quem está presente na sala.</p>
-        <p className="adm-hint"><button type="button" className="adm-link-botao" onClick={() => void excluir()}>Excluir esta votação</button></p>
-      </section>
+
+      <div className="adm-zona-perigo"><span>Não vai mais usar esta votação?</span><button type="button" className="wf-secondary adm-perigo" onClick={() => void excluir()}>Excluir esta votação</button></div>
     </>
   );
 }
 
-/** Votações de uma edição, dentro da própria página da edição. */
 export function VotacoesDaEdicao({ editionId, editionSlug }: { editionId: string; editionSlug: string }) {
   const [list, setList] = useState<Poll[]>([]);
   const [open, setOpen] = useState<Poll | null>(null);
@@ -252,7 +285,7 @@ export function VotacoesDaEdicao({ editionId, editionSlug }: { editionId: string
     const { data } = await supabase.from('polls').insert({ edition_id: editionId, slug, titulo: 'Nova votação', pergunta: 'Escreva a pergunta' }).select('*').single();
     if (data) { await load(); setOpen(data as Poll); }
   }
-  if (open) return <section className="v2-forms-card adm-votacao-edicao"><PollEditor key={open.id} poll={open} onBack={() => { setOpen(null); void load(); }} /></section>;
+  if (open) return <PollEditor key={open.id} poll={open} onBack={() => { setOpen(null); void load(); }} />;
   return (
     <section className="v2-forms-card">
       <header className="adm-envios__topo"><div><small>VOTAÇÃO</small><h2>{list.length ? `${list.length} ${list.length === 1 ? 'votação' : 'votações'} desta edição` : 'Nenhuma votação ainda'}</h2></div>

@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (16) | Votação organizada e check-in junto confirmado pelo responsável
+- `PollEditor` em seções: cabeçalho com status e ações; números (respostas, médias, distância) com Exportar CSV e **Zerar respostas** (apaga `poll_votes`, mantém as perguntas); "No dia do encontro" explicando Telão da sala e Página de votar, cada um com abrir e copiar link; Perguntas; exclusão no fim. Na edição, a votação não fica mais dentro de outro cartão. Avisos somem sozinhos.
+- Check-in junto: `communicali_registrar_presenca` não marca mais sozinho; devolve `junto` com id, tipo e nome. A tela de sucesso pergunta "Quem está com você agora?" e só marca quem a pessoa escolher (`communicali_confirmar_junto`, pelo código do check-in). Migração `20261105200000_checkin_confirma_junto.sql`; testado numa transação desfeita.
+
 ### 2026-11-05 (15) | Confirmado envia e-mail, convidado de quem, check-in junto e boas-vindas
 - Marcar Confirmado (formulário, convite ou pessoa manual com e-mail) chama `email-admin` `acao: confirmados`: boas-vindas e card Eu vou!, uma vez só (`enviarUmaVez`); o servidor confere que a pessoa está confirmada. Página do site continua com o e-mail de confirmação de antes. Kids não recebem.
 - Colunas "Convidado de" (texto, `communicali_definir_convidado_de`) e "Junto com" (`communicali_definir_junto`: `form_responses.junto_com_email`, `edition_kids.responsavel_email`). Migração `20261105190000_convidado_de_e_checkin_junto.sql`, com os dados pedidos: Cíntia, João Ricardo e Inaiê convidados de Patrícia Lima; Cleia convidada do Marcio, com check-in junto; kids ligados aos responsáveis.
