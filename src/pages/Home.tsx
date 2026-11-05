@@ -288,9 +288,9 @@ export function Home() {
             </div>
           </div>
         )}
-        <div id="edicoes" className="past">
+        {/* Encontros que já aconteceram só aparecem quando existem, com resumo e fotos. */}
+        {past.length > 0 && <div id="edicoes" className="past">
           <h3>Como foram os encontros</h3>
-          {past.length ? (
             <div className="posts">
               {past.map((edition) => (
                 <article className="post" id={edition.slug} key={edition.id}>
@@ -305,8 +305,7 @@ export function Home() {
                 </article>
               ))}
             </div>
-          ) : <p className="muted">O resumo e as fotos de cada edição ficam aqui depois de cada encontro.</p>}
-        </div>
+        </div>}
       </section>
 
 

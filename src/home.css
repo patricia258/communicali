@@ -338,3 +338,11 @@ html{scroll-behavior:smooth}
 .faixa--clara + .sponsors{margin-top:0;border-top:0}
 @media (prefers-reduced-motion:reduce){.revelar .event{transform:none;transition:none;opacity:1}}
 @media (max-width:700px){#programa{padding-bottom:64px}.faixa--clara .event{box-shadow:10px 10px 0 #DDB160,0 20px 40px rgba(90,30,45,.2);margin-right:10px}}
+/* Rodapé (05/11, pedido da Patrícia): bordô com letras claras, texto legal e "Toda honra a Deus!" no centro. */
+.home .site-footer{background:#5A1E2D;color:#F7F0EA}
+.home .site-footer__logo img{content:url(/brand/communicali-branco.png)}
+.home .site-footer a{color:#F7F0EA}
+.home .site-footer a:hover{color:#DDB160}
+.home .site-footer__legal{justify-items:center;text-align:center;border-top-color:rgba(247,240,234,.18);color:#EADDD2;font-size:11px}
+.home .site-footer__legal p{max-width:none}
+.home .site-footer__faith{text-align:center;color:#DDB160;font-size:14px;padding-top:6px}
