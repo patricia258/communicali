@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (18) | Conferência geral de entregas
+- `email-admin` `acao: nao_entregues`: lista os 100 e-mails mais recentes direto na Resend (staff, avisos e edição) e devolve os que não chegaram. Resultado em 05/11: 97 de 100 entregues; problemas só em Lilian (bloqueio na Resend), Cleia (email@email.com) e Paula Gaio (domínio digitado errado, pgrecuroshumanos).
+- Todos os confirmados com endereço válido receberam boas-vindas e card. DNS de calirh.com está na Hostinger (dns-parking.com); DMARC com relatório fica como melhoria opcional.
+
 ### 2026-11-05 (17) | E-mails: spam e entrega
 - Diagnóstico (Lilian Oliveira, Sursuma, disse que não recebeu): boas-vindas (03/11) e card (05/11) aceitos pela Resend. DNS de calirh.com está certo: SPF do send.calirh.com (amazonses), DKIM resend._domainkey, DMARC p=none sem relatório.
 - `api/_email.js`: todo e-mail sai também em texto simples (`textoSimples`, links rastreados voltam ao endereço final). Boas-vindas, card e agradecimento (`lote`) levam List-Unsubscribe (link assinado e mailto) com one-click e respeitam quem pediu para sair.

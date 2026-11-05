@@ -17,6 +17,16 @@ export default async function handler(req, res) {
   if (!email) return res.status(401).json({ error: 'Entre novamente no painel.' });
   const { acao, edicao, publico, tipo, registro, status, match } = req.body || {};
 
+  // Todos os e-mails recentes que não chegaram (staff, avisos, edição): lista da própria Resend.
+  if (acao === 'nao_entregues') {
+    const r = await fetch('https://api.resend.com/emails?limit=100', { headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` } });
+    if (!r.ok) return res.status(502).json({ error: 'Não foi possível ler a Resend agora.' });
+    const lista = (await r.json()).data || [];
+    const ok = ['delivered', 'opened', 'clicked'];
+    return res.status(200).json({ total: lista.length, entregues: lista.filter((item) => ok.includes(item.last_event)).length,
+      problemas: lista.filter((item) => !ok.includes(item.last_event)).map((item) => ({ para: (item.to || []).join(', '), assunto: item.subject, situacao: item.last_event, em: item.created_at })) });
+  }
+
   if (acao === 'match') {
     if (!['liberado', 'recusado'].includes(status)) return res.status(400).json({ error: 'Situação inválida.' });
     const id = String(match).replace(/[^a-f0-9-]/g, '');
