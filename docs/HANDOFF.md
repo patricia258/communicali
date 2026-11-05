@@ -8,6 +8,10 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (13) | Cleia como convidada e kids cadastrados
+- Dados da fundadora (pedido da Patrícia, conforme o PDF dela): Cleia Parcio Gomes passou a Convidado, com a nota "Acompanhante de Marcio J Silva"; Akemi e Ayumi Azumi Lima (responsável Patrícia Lima) e Bernardo (responsável Marcio J Silva) entraram como Kids confirmados.
+- Lista de Recepção: convidado vindo do formulário mostra "Acompanhante de ..." da nota interna no lugar da empresa. Total conferido: 29 pessoas, 26 adultos e 3 crianças.
+
 ### 2026-11-05 (12) | Listas impressas no modelo de ticket
 - `src/pages/listaImpressa.ts` (`imprimirFolhas`): modelo único para listas impressas, a partir do PDF de referência da Patrícia (logo, ticket com título, instrução de marca-texto, resumo, blocos por categoria com etiqueta e contagem, caixa, número, nome em negrito, rodapé). Usar em toda lista impressa nova.
 - Lista de Recepção: confirmados por categoria (Membros, Participantes, Convidados, Kids, Organização) com Cargo, Empresa (Open to Work vira etiqueta) e E-mail de cadastro; nome completo com o sobrenome do formulário. Staff e fornecedores numa folha à parte.

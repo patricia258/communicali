@@ -108,12 +108,12 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   // com o que a recepção usa: nome, primeira vez ou não, e-mail e WhatsApp para achar a pessoa, e a caixa de chegada.
   // Modelo de ticket: cargo, empresa e e-mail ajudam a recepção a achar a pessoa. Staff e fornecedores vão numa folha à parte.
   async function imprimir() {
-    const extras = new Map<string, { cargo: string; empresa: string; sobrenome: string }>();
+    const extras = new Map<string, { cargo: string; empresa: string; sobrenome: string; nota?: string }>();
     if (edition.form_inscricao) {
       const { data: form } = await supabase.from('forms').select('id').eq('slug', edition.form_inscricao).maybeSingle();
       if (form) {
-        const { data } = await supabase.from('form_responses').select('id,answers').eq('form_id', form.id);
-        for (const row of (data || []) as Array<{ id: string; answers: Record<string, unknown> }>) extras.set(row.id, { cargo: String(row.answers.cargo ?? ''), empresa: String(row.answers.empresa ?? ''), sobrenome: String(row.answers.sobrenome ?? '') });
+        const { data } = await supabase.from('form_responses').select('id,answers,admin_note').eq('form_id', form.id);
+        for (const row of (data || []) as Array<{ id: string; answers: Record<string, unknown>; admin_note: string | null }>) extras.set(row.id, { cargo: String(row.answers.cargo ?? ''), empresa: String(row.answers.empresa ?? ''), sobrenome: String(row.answers.sobrenome ?? ''), nota: row.admin_note || '' });
       }
     }
     const regs = vao.filter((item) => item.fonte === 'registro').map((item) => item.id);
@@ -128,7 +128,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
       const extra = extras.get(item.id);
       if (item.categoria === 'Kids') return [esc(item.nome), '—', esc(semManual(item.detalhe)), '—'];
       if (item.categoria === 'Organização') return [esc(nomeCompleto(item)), esc(item.detalhe), 'CALI RH', esc(item.email)];
-      if (item.categoria === 'Convidado') return [esc(nomeCompleto(item)), esc(extra?.cargo || 'Convidado'), esc(extra?.empresa || semManual(item.detalhe)), esc(item.email)];
+      if (item.categoria === 'Convidado') return [esc(nomeCompleto(item)), esc(extra?.cargo || 'Convidado'), esc(extra?.empresa || extra?.nota?.match(/acompanhante de [^·.\n]+/i)?.[0].trim() || (item.fonte === 'form' ? '' : semManual(item.detalhe))), esc(item.email)];
       return [esc(nomeCompleto(item)), esc(extra?.cargo || semManual(item.detalhe)), empresa(extra?.empresa || ''), esc(item.email)];
     };
     const ordenar = (gente: Pessoa[]) => [...gente].sort((a, b) => nomeCompleto(a).localeCompare(nomeCompleto(b), 'pt-BR'));
