@@ -5,12 +5,13 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { supabase } from '../lib';
 import { downloadXlsx } from '../forms/formExports';
-import { PlanilhaDaEdicao, RespostaGaveta } from '../forms/AdminFormsPage';
+import { RespostaGaveta } from '../forms/AdminFormsPage';
+import { type FormQuestion, formatAnswer, isAnswerable, stripRichText } from '../forms/formModel';
 import { Email, Tabela, Telefone } from './AdminTabela';
 import { chamar } from './AdminEmails';
 import { esc, imprimirFolhas, type Folha } from './listaImpressa';
 
-type Pessoa = { fonte: string; id: string; categoria: string; nome: string; email: string | null; whatsapp: string | null; situacao: string; detalhe: string | null; vezes: number; criado_em: string; nivel: string | null };
+type Pessoa = { fonte: string; id: string; categoria: string; nome: string; email: string | null; whatsapp: string | null; situacao: string; detalhe: string | null; vezes: number; criado_em: string; nivel: string | null; nota: string | null; chegou_em: string | null };
 type Manual = { id: string; categoria: string; nome: string; funcao: string | null; idade: number | null; responsavel: string | null; email: string | null; whatsapp: string | null };
 type Cadastro = { id: string; nome: string; detalhe: string };
 
@@ -42,7 +43,14 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   }
   // A mudança aparece na hora; o banco grava em seguida.
   const trocarLocal = (pessoas: Pessoa[], mudanca: Partial<Pessoa>) => { const ids = new Set(pessoas.map(chave)); setLista((atual) => atual.map((item) => (ids.has(chave(item)) ? { ...item, ...mudanca } : item))); };
-  useEffect(() => { void carregar(); }, [edition.id]);
+  // Lista sempre em dia: carrega ao abrir, a cada 30 segundos e quando você volta para a aba.
+  useEffect(() => {
+    void carregar();
+    const relogio = window.setInterval(() => { if (document.visibilityState === 'visible') void carregar(); }, 30000);
+    const voltou = () => { if (document.visibilityState === 'visible') void carregar(); };
+    document.addEventListener('visibilitychange', voltou);
+    return () => { window.clearInterval(relogio); document.removeEventListener('visibilitychange', voltou); };
+  }, [edition.id]);
   const avisar = (texto: string) => { setAviso(texto); window.setTimeout(() => setAviso(''), 4000); };
 
   const vao = lista.filter((item) => item.situacao === 'confirmado');
@@ -99,9 +107,29 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
     if (data) setJanela({ tipo: 'manual', item: data as Manual });
   }
 
-  function exportar() {
-    downloadXlsx(`communicali-${edition.slug}-pessoas.xlsx`, 'Pessoas', ['Nome', 'Categoria', 'Situação', 'E-mail', 'WhatsApp', 'Origem ou função', 'Recorrência'],
-      lista.map((item) => [item.nome, item.categoria, NOME_SITUACAO[item.situacao] || item.situacao, item.email || '', item.whatsapp || '', item.detalhe || '', recorrencia(item)]));
+  async function salvarNota(item: Pessoa, texto: string) {
+    if (texto.trim() === (item.nota || '').trim()) return;
+    trocarLocal([item], { nota: texto.trim() || null });
+    const { error } = await supabase.rpc('communicali_definir_nota', { p_fonte: item.fonte, p_id: item.id, p_nota: texto });
+    avisar(error ? 'Não foi possível salvar a nota.' : `Nota de ${item.nome} salva.`);
+  }
+
+  // Excel com tudo: os dados da lista e, para quem veio pelo formulário, cada resposta numa coluna.
+  async function exportar() {
+    let perguntas: FormQuestion[] = [];
+    const respostas = new Map<string, Record<string, unknown>>();
+    if (edition.form_inscricao) {
+      const { data: form } = await supabase.from('forms').select('id,questions').eq('slug', edition.form_inscricao).maybeSingle();
+      if (form) {
+        perguntas = ((form.questions || []) as FormQuestion[]).filter(isAnswerable);
+        const { data } = await supabase.from('form_responses').select('id,answers').eq('form_id', form.id);
+        for (const row of (data || []) as Array<{ id: string; answers: Record<string, unknown> }>) respostas.set(row.id, row.answers);
+      }
+    }
+    downloadXlsx(`communicali-${edition.slug}-pessoas.xlsx`, 'Pessoas', ['Nome', 'Categoria', 'Situação', 'E-mail', 'WhatsApp', 'Origem ou função', 'Recorrência', 'Nota interna', 'Check-in', ...perguntas.map((pergunta) => stripRichText(pergunta.label))],
+      lista.map((item) => [item.nome, item.categoria, NOME_SITUACAO[item.situacao] || item.situacao, item.email || '', item.whatsapp || '', item.detalhe || '', recorrencia(item), item.nota || '',
+        item.chegou_em ? new Date(item.chegou_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : '',
+        ...perguntas.map((pergunta) => { const resposta = item.fonte === 'form' ? respostas.get(item.id)?.[pergunta.id] : undefined; return resposta === undefined ? '' : formatAnswer(pergunta, resposta); })]));
   }
 
   // Lista da recepção: só os confirmados, um bloco por categoria (membros separados dos participantes), em ordem alfabética,
@@ -192,6 +220,11 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
     { id: 'whatsapp', titulo: 'WhatsApp', valor: (item: Pessoa) => item.whatsapp || '', render: (item: Pessoa) => <Telefone numero={item.whatsapp} /> },
     { id: 'email', titulo: 'E-mail', valor: (item: Pessoa) => item.email || '', render: (item: Pessoa) => <Email email={item.email} /> },
     { id: 'detalhe', titulo: 'Origem ou função', valor: (item: Pessoa) => item.detalhe || '-' },
+    { id: 'nota', titulo: 'Nota interna', valor: (item: Pessoa) => item.nota || '', render: (item: Pessoa) => (MUDA.includes(item.fonte)
+      ? <input key={`${chave(item)}:${item.nota || ''}`} className="adm-nota" defaultValue={item.nota || ''} placeholder="Anotar" maxLength={2000} title={item.nota || 'Só a organização vê'}
+        onKeyDown={(event) => { if (event.key === 'Enter') (event.target as HTMLInputElement).blur(); }} onBlur={(event) => void salvarNota(item, event.target.value)} />
+      : <span className="adm-status">-</span>) },
+    { id: 'chegou', titulo: 'Check-in', valor: (item: Pessoa) => item.chegou_em || '', render: (item: Pessoa) => (item.chegou_em ? <span className="adm-status adm-status--sim">Chegou {new Date(item.chegou_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</span> : <span className="adm-status">Ainda não</span>) },
   ], [selecao, busy, lista, todos]);
 
   return (
@@ -209,7 +242,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
         <div className="adm-card"><span>Falta confirmar</span><strong>{publico.filter((item) => ['inscrito', 'contatado', 'sem_resposta'].includes(item.situacao)).length}</strong><small>{publico.filter((item) => item.situacao === 'inscrito').length} sem contato · {publico.filter((item) => item.situacao === 'contatado').length} contatados · {publico.filter((item) => item.situacao === 'sem_resposta').length} sem resposta</small></div>
         <div className="adm-card"><span>Equipe e kids</span><strong>{conta('Staff') + conta('Fornecedor') + conta('Organização') + conta('Kids')}</strong><small>{conta('Staff')} staff · {conta('Fornecedor')} fornecedores · {conta('Organização')} organização · {conta('Kids')} kids</small></div>
       </div>
-      <p className="adm-hint adm-hint--antes">Troque a <strong>categoria</strong> e a <strong>situação</strong> direto na linha. Só quem está <strong>Confirmado</strong> recebe o lembrete, o card Eu vou! e os e-mails de quem vai. O olho mostra tudo o que a pessoa respondeu no formulário.</p>
+      <p className="adm-hint adm-hint--antes">Troque a <strong>categoria</strong> e a <strong>situação</strong> direto na linha. Só quem está <strong>Confirmado</strong> recebe o lembrete, o card Eu vou! e os e-mails de quem vai. O olho mostra tudo o que a pessoa respondeu no formulário; a <strong>nota interna</strong> só a organização vê. Quem se inscrever aparece aqui sozinho.</p>
       {selecao.size > 0 && <div className="adm-lote" role="region" aria-label="Mudar várias pessoas de uma vez">
         <strong>{selecao.size} {selecao.size === 1 ? 'pessoa marcada' : 'pessoas marcadas'} na caixinha</strong>
         <label>Mudar a situação para<select value={lote.situacao} onChange={(event) => setLote({ ...lote, situacao: event.target.value })}><option value="">Manter como está</option>{SITUACOES.map(([valor, rotulo]) => <option key={valor} value={valor}>{rotulo}</option>)}</select></label>
@@ -221,14 +254,10 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
       {carregando ? <div className="data-loading">Carregando pessoas…</div> : <Tabela<Pessoa> colunas={colunas} linhas={lista} chave={chave} inicial={{ id: 'nome' }} vazio="Ninguém nesta edição ainda."
         filtros={[{ id: 'categoria', titulo: 'Categoria', valor: (item) => item.categoria }, { id: 'situacao', titulo: 'Situação', valor: (item) => NOME_SITUACAO[item.situacao] || item.situacao }, { id: 'recorrencia', titulo: 'Recorrência', valor: (item) => (recorrencia(item) === 'Primeira vez' ? 'Primeira vez' : recorrencia(item) === '-' ? '' : 'Já veio') }]}
         acoes={<>
+          <button type="button" className="wf-secondary" title="A lista também se atualiza sozinha a cada 30 segundos" onClick={() => void carregar().then(() => avisar('Lista atualizada.'))}>Atualizar</button>
           <button type="button" className="wf-primary" disabled={!vao.length} onClick={() => void imprimir()}>Imprimir lista da recepção</button>
           <button type="button" className="wf-secondary" disabled={!lista.length} onClick={exportar}>Exportar Excel</button>
         </>} />}
-      {edition.form_inscricao && <details className="adm-suspensa">
-        <summary>Planilha com todas as respostas do formulário</summary>
-        <p className="adm-hint adm-hint--antes">As mesmas pessoas da tabela acima, com cada pergunta numa coluna. Use para filtrar por resposta ou exportar tudo o que responderam.</p>
-        <PlanilhaDaEdicao slug={edition.form_inscricao} />
-      </details>}
       {janela?.tipo === 'manual' && <PessoaManual edition={edition.id} item={janela.item} responsaveis={lista.filter((item) => item.categoria !== 'Kids').map((item) => item.nome)} fechar={() => setJanela(null)} salvo={() => { setJanela(null); void carregar(); }} />}
       {janela?.tipo === 'equipe' && <NovaEquipe edition={edition.id} fechar={() => setJanela(null)} salvo={() => { setJanela(null); void carregar(); }} />}
       {janela?.tipo === 'resposta' && edition.form_inscricao && <RespostaGaveta slug={edition.form_inscricao} id={janela.id} modo={janela.modo} fechar={() => setJanela(null)} mudou={() => void carregar()} />}

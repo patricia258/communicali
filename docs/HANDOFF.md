@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (14) | Uma lista só em Pessoas da edição
+- A planilha separada de respostas saiu da edição: a tabela de Pessoas é a única lista. Ela recarrega ao abrir, a cada 30 segundos, ao voltar para a aba e no botão Atualizar, então quem se inscreve aparece sozinho.
+- Coluna "Nota interna" editável na linha (`communicali_definir_nota`; `admin_note` no formulário e coluna nova `nota` em `registrations`, `guests`, `edition_kids`) e coluna "Check-in" com a hora de chegada. Migração `20261105180000_pessoas_nota_checkin.sql`.
+- O nome já vem com o sobrenome do formulário. O Excel leva a lista, a nota, o check-in e todas as respostas do formulário (uma pergunta por coluna), sem perder nada.
+- Check-in: `communicali_inscricao` também reconhece quem foi adicionado à mão com e-mail. Quem se inscreveu pelo formulário é achado pelo e-mail em qualquer situação; quem não for encontrado faz o cadastro completo na hora.
+
 ### 2026-11-05 (13) | Cleia como convidada e kids cadastrados
 - Dados da fundadora (pedido da Patrícia, conforme o PDF dela): Cleia Parcio Gomes passou a Convidado, com a nota "Acompanhante de Marcio J Silva"; Akemi e Ayumi Azumi Lima (responsável Patrícia Lima) e Bernardo (responsável Marcio J Silva) entraram como Kids confirmados.
 - Lista de Recepção: convidado vindo do formulário mostra "Acompanhante de ..." da nota interna no lugar da empresa. Total conferido: 29 pessoas, 26 adultos e 3 crianças.
