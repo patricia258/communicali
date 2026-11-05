@@ -6,7 +6,7 @@ import { editionSlug, errorMessage, formatDate, supabase, type Edition } from '.
 import { answerArgs, confirmQuestions, memberQuestions, useSiteTexts } from './MemberFields';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 
-type Done = { nome: string; categoria: string; edicao: string; selo: string; codigo: string; repetido: boolean };
+type Done = { nome: string; categoria: string; edicao: string; selo: string; codigo: string; repetido: boolean; junto?: string[] };
 type Step = 'email' | 'novo' | 'codigo' | 'inscrito';
 
 export const CATEGORIAS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organizador', kids: 'Kids' };
@@ -21,7 +21,8 @@ function Success({ done }: { done: Done }) {
       <section className="pass">
         <img className="pass__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
         <h1>Presença confirmada!</h1>
-        <p className="pass__lead">Parabéns! Você faz parte da ComuniCALI.</p>
+        <p className="pass__lead">Que bom ter você aqui. Você faz parte da ComuniCALI.</p>
+        {!!done.junto?.length && <p className="pass__hint">Registramos também a chegada de <strong>{done.junto.join(', ').replace(/, ([^,]*)$/, ' e $1')}</strong>, que {done.junto.length === 1 ? 'veio' : 'vieram'} com você.</p>}
         {done.repetido ? <p className="pass__hint">Sua presença neste encontro já estava registrada.</p> : <p className="pass__hint">Você conquistou 10 milhas pela participação neste encontro.</p>}
         <dl className="pass__data">
           <div><dt>Nome</dt><dd>{done.nome}</dd></div>
@@ -32,7 +33,7 @@ function Success({ done }: { done: Done }) {
         {qr && <img className="pass__qr" src={qr} alt="QR Code para a organização validar sua presença" />}
         <div className="pass__badge">
           <IdCard size={26} aria-hidden="true" />
-          <p><strong>Obrigada pelas confirmações!</strong> Mostre esta tela na recepção e retire seu crachá de membro.</p>
+          <p><strong>Agora é só levantar a mão.</strong> Você recebe o seu crachá na mesa.</p>
         </div>
       </section>
     </main>
@@ -60,8 +61,8 @@ export function Checkin() {
 
   const preset = useMemo<FormPreset | null>(() => {
     if (step === 'email') return {
-      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Continuar',
-      questions: [{ id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', help: meta, required: true }],
+      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Fazer meu check-in',
+      questions: [{ id: 'email', kind: 'email', label: 'Bem-vindas e bem-vindos! Qual é o seu e-mail?', help: `Sinta-se à vontade e escolha uma mesa. Use o e-mail da sua inscrição. ${meta}`, required: true }],
       submit: async (answers) => {
         const clean = String(answers.email).trim().toLowerCase();
         const { data, error } = await supabase.rpc('communicali_situacao_email', { p_slug: slug, p_email: clean });
@@ -118,12 +119,12 @@ export function Checkin() {
 
   return (
     <main className="event-page">
-      <section className="event-card">
-        <p className="eyebrow">ComuniCALI</p>
-        <h1>Check-in</h1>
+      <section className="event-card event-card--boasvindas">
+        <img className="event-card__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
+        <h1><span className="nowrap">Bem-vindas e</span> <span className="nowrap">bem-vindos!</span></h1>
         {loadError && <p className="notice notice--alert">{loadError}</p>}
         {edition && <p className="event-card__meta">{meta}</p>}
-        {edition?.situacao === 'antes' && <p className="notice">O check-in abre no dia do encontro.</p>}
+        {edition?.situacao === 'antes' && <p className="notice">O check-in abre no dia do encontro. Até lá!</p>}
         {edition?.situacao === 'encerrado' && <p className="notice">O check-in desta edição foi encerrado.</p>}
       </section>
     </main>

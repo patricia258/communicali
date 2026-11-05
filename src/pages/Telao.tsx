@@ -23,7 +23,8 @@ export function TelaoCheckin() {
     <main className="screen">
       <div className="screen__text">
         <img className="screen__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
-        <h1>Faça seu <span className="nowrap">check-in</span></h1>
+        <h1><span className="nowrap">Bem-vindas e</span> <span className="nowrap">bem-vindos!</span></h1>
+        <p className="screen__lead">Sinta-se à vontade, escolha uma mesa e faça seu <span className="nowrap">check-in</span> pelo QR Code.</p>
         <p className="screen__url">{url.replace(/^https?:\/\//, '')}</p>
       </div>
       {qr && <img className="screen__qr" src={qr} alt="QR Code do check-in" />}

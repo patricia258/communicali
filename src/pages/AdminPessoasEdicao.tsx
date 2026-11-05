@@ -11,7 +11,7 @@ import { Email, Tabela, Telefone } from './AdminTabela';
 import { chamar } from './AdminEmails';
 import { esc, imprimirFolhas, type Folha } from './listaImpressa';
 
-type Pessoa = { fonte: string; id: string; categoria: string; nome: string; email: string | null; whatsapp: string | null; situacao: string; detalhe: string | null; vezes: number; criado_em: string; nivel: string | null; nota: string | null; chegou_em: string | null };
+type Pessoa = { fonte: string; id: string; categoria: string; nome: string; email: string | null; whatsapp: string | null; situacao: string; detalhe: string | null; vezes: number; criado_em: string; nivel: string | null; nota: string | null; chegou_em: string | null; convidado_de: string | null; junto_com: string | null };
 type Manual = { id: string; categoria: string; nome: string; funcao: string | null; idade: number | null; responsavel: string | null; email: string | null; whatsapp: string | null };
 type Cadastro = { id: string; nome: string; detalhe: string };
 
@@ -54,6 +54,8 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   const avisar = (texto: string) => { setAviso(texto); window.setTimeout(() => setAviso(''), 4000); };
 
   const vao = lista.filter((item) => item.situacao === 'confirmado');
+  // Quem pode trazer alguém no check-in: adultos com e-mail, que fazem o próprio check-in.
+  const adultos = lista.filter((item) => item.email && item.categoria !== 'Kids' && !item.junto_com).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
   const conta = (categoria: string, base = vao) => base.filter((item) => item.categoria === categoria).length;
   const publico = lista.filter((item) => item.categoria === 'Participante' || item.categoria === 'Convidado');
   const linkInscricao = edition.form_inscricao ? `https://comuni.calirh.com/f/${edition.form_inscricao}` : `https://comuni.calirh.com/e/${edition.slug}`;
@@ -72,7 +74,15 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
         for (const id of ids) await chamar({ acao: 'decidir', edicao: edition.id, registro: id, status: situacao === 'confirmado' ? 'inscrito' : 'cancelado' }).catch(() => null);
       }
     }
-    avisar(validas.length === 1 ? `${validas[0].nome}: ${NOME_SITUACAO[situacao]}.` : `${validas.length} pessoas agora estão como ${NOME_SITUACAO[situacao]}.`);
+    // Confirmado pela primeira vez: a pessoa recebe as boas-vindas e o card Eu vou! (quem já recebeu não recebe de novo).
+    let enviados = 0;
+    const comEmail = validas.filter((item) => item.fonte !== 'registro' && item.categoria !== 'Kids' && item.email);
+    if (situacao === 'confirmado' && comEmail.length) {
+      const resposta = await chamar({ acao: 'confirmados', edicao: edition.id, emails: comEmail.map((item) => item.email).join(',') }).catch(() => null);
+      enviados = Number(resposta?.enviados || 0);
+    }
+    const quem = validas.length === 1 ? `${validas[0].nome}: ${NOME_SITUACAO[situacao]}.` : `${validas.length} pessoas agora estão como ${NOME_SITUACAO[situacao]}.`;
+    avisar(enviados ? `${quem} ${enviados} ${enviados === 1 ? 'e-mail enviado' : 'e-mails enviados'} (boas-vindas e card).` : quem);
     await carregar();
   }
   async function mudarCategoria(pessoas: Pessoa[], categoria: string) {
@@ -105,6 +115,19 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   async function editarManual(item: Pessoa) {
     const { data } = await supabase.from('edition_kids').select('id,categoria,nome,funcao,idade,responsavel,email,whatsapp').eq('id', item.id).single();
     if (data) setJanela({ tipo: 'manual', item: data as Manual });
+  }
+
+  async function salvarConvidadoDe(item: Pessoa, texto: string) {
+    if (texto.trim() === (item.convidado_de || '').trim()) return;
+    trocarLocal([item], { convidado_de: texto.trim() || null });
+    const { error } = await supabase.rpc('communicali_definir_convidado_de', { p_fonte: item.fonte, p_id: item.id, p_nome: texto });
+    avisar(error ? 'Não foi possível salvar.' : texto.trim() ? `${item.nome}: convidado de ${texto.trim()}.` : `${item.nome}: sem anfitrião.`);
+  }
+  async function salvarJunto(item: Pessoa, email: string) {
+    const quem = adultos.find((pessoa) => pessoa.email === email)?.nome || null;
+    trocarLocal([item], { junto_com: quem });
+    const { error } = await supabase.rpc('communicali_definir_junto', { p_fonte: item.fonte, p_id: item.id, p_email: email });
+    avisar(error ? 'Não foi possível salvar.' : quem ? `${item.nome} entra junto com o check-in de ${quem}.` : `${item.nome} faz o próprio check-in.`);
   }
 
   async function salvarNota(item: Pessoa, texto: string) {
@@ -154,10 +177,13 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
     const empresa = (texto: string) => (/open to work|desempregad|recoloca|em transi[cç][aã]o|buscando/i.test(texto) ? '<span class="pill">Open to Work</span>' : esc(texto));
     const linha = (item: Pessoa): string[] => {
       const extra = extras.get(item.id);
-      if (item.categoria === 'Kids') return [esc(item.nome), '—', esc(semManual(item.detalhe)), '—'];
-      if (item.categoria === 'Organização') return [esc(nomeCompleto(item)), esc(item.detalhe), 'CALI RH', esc(item.email)];
-      if (item.categoria === 'Convidado') return [esc(nomeCompleto(item)), esc(extra?.cargo || 'Convidado'), esc(extra?.empresa || extra?.nota?.match(/acompanhante de [^·.\n]+/i)?.[0].trim() || (item.fonte === 'form' ? '' : semManual(item.detalhe))), esc(item.email)];
-      return [esc(nomeCompleto(item)), esc(extra?.cargo || semManual(item.detalhe)), empresa(extra?.empresa || ''), esc(item.email)];
+      // Embaixo do nome: de quem é convidado e com quem faz o check-in, para a equipe de apoio levar o crachá certo.
+      const sub = [item.convidado_de && `Convidado de ${item.convidado_de}`, item.junto_com && `Check-in com ${item.junto_com}`].filter(Boolean).join(' · ');
+      const nome = (texto: string) => `${esc(texto)}${sub ? `<small class="sub">${esc(sub)}</small>` : ''}`;
+      if (item.categoria === 'Kids') return [nome(item.nome), '—', esc(semManual(item.detalhe)), '—'];
+      if (item.categoria === 'Organização') return [nome(nomeCompleto(item)), esc(item.detalhe), 'CALI RH', esc(item.email)];
+      if (item.categoria === 'Convidado') return [nome(nomeCompleto(item)), esc(extra?.cargo || 'Convidado'), empresa(extra?.empresa || ''), esc(item.email)];
+      return [nome(nomeCompleto(item)), esc(extra?.cargo || semManual(item.detalhe)), empresa(extra?.empresa || ''), esc(item.email)];
     };
     const ordenar = (gente: Pessoa[]) => [...gente].sort((a, b) => nomeCompleto(a).localeCompare(nomeCompleto(b), 'pt-BR'));
     const membro = (item: Pessoa) => item.categoria === 'Participante' && Boolean(item.nivel) && item.nivel !== 'visitante';
@@ -220,6 +246,16 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
     { id: 'whatsapp', titulo: 'WhatsApp', valor: (item: Pessoa) => item.whatsapp || '', render: (item: Pessoa) => <Telefone numero={item.whatsapp} /> },
     { id: 'email', titulo: 'E-mail', valor: (item: Pessoa) => item.email || '', render: (item: Pessoa) => <Email email={item.email} /> },
     { id: 'detalhe', titulo: 'Origem ou função', valor: (item: Pessoa) => item.detalhe || '-' },
+    { id: 'convidado_de', titulo: 'Convidado de', valor: (item: Pessoa) => item.convidado_de || '', render: (item: Pessoa) => (MUDA.includes(item.fonte) && item.categoria !== 'Kids'
+      ? <input key={`${chave(item)}:${item.convidado_de || ''}`} className="adm-nota adm-nota--curta" list="pessoas-anfitrioes" defaultValue={item.convidado_de || ''} placeholder={item.categoria === 'Convidado' ? 'De quem?' : '-'} title="Quem convidou esta pessoa"
+        onKeyDown={(event) => { if (event.key === 'Enter') (event.target as HTMLInputElement).blur(); }} onBlur={(event) => void salvarConvidadoDe(item, event.target.value)} />
+      : <span className="adm-status">{item.convidado_de || '-'}</span>) },
+    { id: 'junto', titulo: 'Junto com', valor: (item: Pessoa) => item.junto_com || '', cabecalho: <span title="Kids e acompanhantes entram junto com o check-in de quem os traz">Check-in junto com</span>, render: (item: Pessoa) => (item.fonte === 'form' || item.fonte === 'manual'
+      ? <select className="adm-nota adm-nota--curta" aria-label={`Check-in de ${item.nome}`} value={adultos.find((pessoa) => pessoa.nome === item.junto_com)?.email || ''} onChange={(event) => void salvarJunto(item, event.target.value)}>
+        <option value="">{item.categoria === 'Kids' ? 'Escolha o responsável' : 'Faz o próprio'}</option>
+        {adultos.filter((pessoa) => pessoa.email !== item.email).map((pessoa) => <option key={pessoa.email} value={pessoa.email || ''}>{pessoa.nome}</option>)}
+      </select>
+      : <span className="adm-status">{item.junto_com || 'Faz o próprio'}</span>) },
     { id: 'nota', titulo: 'Nota interna', valor: (item: Pessoa) => item.nota || '', render: (item: Pessoa) => (MUDA.includes(item.fonte)
       ? <input key={`${chave(item)}:${item.nota || ''}`} className="adm-nota" defaultValue={item.nota || ''} placeholder="Anotar" maxLength={2000} title={item.nota || 'Só a organização vê'}
         onKeyDown={(event) => { if (event.key === 'Enter') (event.target as HTMLInputElement).blur(); }} onBlur={(event) => void salvarNota(item, event.target.value)} />
@@ -251,6 +287,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
         <button type="button" className="wf-secondary" onClick={() => setSelecao(new Set())}>Desmarcar</button>
       </div>}
       {aviso && <div className="v2-forms-toast" role="status">{aviso}</div>}
+      <datalist id="pessoas-anfitrioes">{[...new Set(lista.filter((item) => item.categoria !== 'Kids').map((item) => item.nome))].map((nome) => <option key={nome} value={nome} />)}</datalist>
       {carregando ? <div className="data-loading">Carregando pessoas…</div> : <Tabela<Pessoa> colunas={colunas} linhas={lista} chave={chave} inicial={{ id: 'nome' }} vazio="Ninguém nesta edição ainda."
         filtros={[{ id: 'categoria', titulo: 'Categoria', valor: (item) => item.categoria }, { id: 'situacao', titulo: 'Situação', valor: (item) => NOME_SITUACAO[item.situacao] || item.situacao }, { id: 'recorrencia', titulo: 'Recorrência', valor: (item) => (recorrencia(item) === 'Primeira vez' ? 'Primeira vez' : recorrencia(item) === '-' ? '' : 'Já veio') }]}
         acoes={<>
@@ -258,7 +295,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
           <button type="button" className="wf-primary" disabled={!vao.length} onClick={() => void imprimir()}>Imprimir lista da recepção</button>
           <button type="button" className="wf-secondary" disabled={!lista.length} onClick={exportar}>Exportar Excel</button>
         </>} />}
-      {janela?.tipo === 'manual' && <PessoaManual edition={edition.id} item={janela.item} responsaveis={lista.filter((item) => item.categoria !== 'Kids').map((item) => item.nome)} fechar={() => setJanela(null)} salvo={() => { setJanela(null); void carregar(); }} />}
+      {janela?.tipo === 'manual' && <PessoaManual edition={edition.id} item={janela.item} responsaveis={adultos.map((item) => ({ nome: item.nome, email: item.email || '' }))} fechar={() => setJanela(null)} salvo={() => { setJanela(null); void carregar(); }} />}
       {janela?.tipo === 'equipe' && <NovaEquipe edition={edition.id} fechar={() => setJanela(null)} salvo={() => { setJanela(null); void carregar(); }} />}
       {janela?.tipo === 'resposta' && edition.form_inscricao && <RespostaGaveta slug={edition.form_inscricao} id={janela.id} modo={janela.modo} fechar={() => setJanela(null)} mudou={() => void carregar()} />}
     </section>
@@ -266,7 +303,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
 }
 
 /** Adicionar ou editar alguém à mão: kids, assistente, convidado de última hora... Entra como confirmado. */
-function PessoaManual({ edition, item, responsaveis, fechar, salvo }: { edition: string; item?: Manual; responsaveis: string[]; fechar: () => void; salvo: () => void }) {
+function PessoaManual({ edition, item, responsaveis, fechar, salvo }: { edition: string; item?: Manual; responsaveis: Array<{ nome: string; email: string }>; fechar: () => void; salvo: () => void }) {
   const [dados, setDados] = useState({ categoria: item?.categoria || 'Kids', nome: item?.nome || '', funcao: item?.funcao || '', idade: item?.idade != null ? String(item.idade) : '', responsavel: item?.responsavel || '', email: item?.email || '', whatsapp: item?.whatsapp || '' });
   const [erro, setErro] = useState('');
   const set = (campo: keyof typeof dados, valor: string) => setDados({ ...dados, [campo]: valor });
@@ -274,7 +311,9 @@ function PessoaManual({ edition, item, responsaveis, fechar, salvo }: { edition:
   const equipe = ['Staff', 'Fornecedor', 'Organização'].includes(dados.categoria);
   async function salvar(event: FormEvent) {
     event.preventDefault(); setErro('');
-    const linha = { categoria: dados.categoria, nome: dados.nome.trim(), funcao: !kids ? dados.funcao.trim() || null : null, idade: kids && dados.idade ? Number(dados.idade) : null, responsavel: kids ? dados.responsavel.trim() || null : null, email: !kids ? dados.email.trim().toLowerCase() || null : null, whatsapp: !kids ? dados.whatsapp.trim() || null : null };
+    const linha = { categoria: dados.categoria, nome: dados.nome.trim(), funcao: !kids ? dados.funcao.trim() || null : null, idade: kids && dados.idade ? Number(dados.idade) : null, responsavel: kids ? dados.responsavel.trim() || null : null,
+      // O responsável escolhido da lista faz o check-in da criança junto com o dele.
+      ...(kids ? { responsavel_email: responsaveis.find((pessoa) => pessoa.nome === dados.responsavel.trim())?.email || null } : {}), email: !kids ? dados.email.trim().toLowerCase() || null : null, whatsapp: !kids ? dados.whatsapp.trim() || null : null };
     const { error } = item ? await supabase.from('edition_kids').update(linha).eq('id', item.id) : await supabase.from('edition_kids').insert({ ...linha, edition_id: edition });
     if (error) setErro('Confira o nome' + (kids ? ' e a idade (até 17 anos).' : '.')); else salvo();
   }
@@ -285,7 +324,7 @@ function PessoaManual({ edition, item, responsaveis, fechar, salvo }: { edition:
       <label>Nome<input required minLength={2} value={dados.nome} onChange={(event) => set('nome', event.target.value)} /></label>
       {!kids && <label>{equipe ? 'Função no encontro' : 'Observação'}<input value={dados.funcao} placeholder={equipe ? 'Ex.: assistente de fotografia, recepção' : 'Opcional'} onChange={(event) => set('funcao', event.target.value)} /></label>}
       {kids && <label>Idade<input inputMode="numeric" value={dados.idade} onChange={(event) => set('idade', event.target.value.replace(/\D/g, '').slice(0, 2))} /></label>}
-      {kids && <label>Responsável<input list="pessoas-responsaveis" value={dados.responsavel} placeholder="Comece a digitar o nome" onChange={(event) => set('responsavel', event.target.value)} /><datalist id="pessoas-responsaveis">{[...new Set(responsaveis)].map((nome) => <option key={nome} value={nome} />)}</datalist></label>}
+      {kids && <label>Responsável<input list="pessoas-responsaveis" value={dados.responsavel} placeholder="Comece a digitar o nome" onChange={(event) => set('responsavel', event.target.value)} /><datalist id="pessoas-responsaveis">{responsaveis.map((pessoa) => <option key={pessoa.email} value={pessoa.nome} />)}</datalist><small className="adm-hint">Escolha da lista: o check-in da criança entra junto com o do responsável.</small></label>}
       {!kids && <label>E-mail<input type="email" value={dados.email} placeholder="Opcional. Com e-mail, recebe os avisos do encontro" onChange={(event) => set('email', event.target.value.replace(/\s/g, ''))} /></label>}
       {!kids && <label>WhatsApp<input value={dados.whatsapp} placeholder="Opcional" onChange={(event) => set('whatsapp', event.target.value)} /></label>}
       {erro && <p className="v2-forms-error" role="alert">{erro}</p>}

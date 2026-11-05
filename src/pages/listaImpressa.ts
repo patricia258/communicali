@@ -47,6 +47,7 @@ export function imprimirFolhas(titulo: string, folhas: Folha[]) {
     td.caixa{width:22px}td.caixa span{display:block;width:13px;height:13px;border:1.3px solid #b39b8a;border-radius:3px}
     td.n{width:26px;font-weight:600;color:#c9973b}
     td.nome{font-weight:700;font-size:12.5px}
+    td.nome small.sub{display:block;margin-top:1px;font-weight:500;font-size:9.5px;color:#7a1f3d}
     tr.grupo td{padding:12px 0 6px;border:0;background:none!important}
     .tag{position:relative;display:inline-flex;align-items:center;gap:8px;padding:4px 18px 4px 10px;color:#fff;font-weight:700;font-size:11.5px;clip-path:polygon(0 0,100% 0,calc(100% - 9px) 50%,100% 100%,0 100%)}
     .tag i{font-style:normal;font-weight:600;font-size:9.5px;color:#ddb160;padding-left:8px;border-left:1px solid rgba(255,255,255,.35)}

@@ -98,6 +98,21 @@ export default async function handler(req, res) {
     return res.status(200).json({ linhas: log.filter((row) => row.situacao !== 'reservado').map((row) => ({ ...row, nome: nomes.get(row.email) || '' })) });
   }
 
+  // Quem acabou de ser marcado Confirmado no painel: boas-vindas e card Eu vou!, uma vez só por pessoa.
+  // O servidor confere na lista que a pessoa está mesmo confirmada.
+  if (acao === 'confirmados') {
+    const pedidos = new Set(String(req.body?.emails || '').toLowerCase().split(',').map((item) => item.trim()).filter(Boolean));
+    const fila = pessoas.filter((item) => item.acionado && pedidos.has(item.email)).slice(0, LOTE);
+    let enviadosAgora = 0; let erros = 0;
+    for (const pessoa of fila) {
+      for (const modelo of ['boasvindas', 'card']) {
+        const situacao = await enviarUmaVez(modelo, edition, pessoa);
+        if (situacao === 'erro') erros += 1; else if (situacao === 'enviado') { enviadosAgora += 1; await pausa(); }
+      }
+    }
+    return res.status(200).json({ pessoas: fila.length, enviados: enviadosAgora, erros });
+  }
+
   if (acao === 'convite') {
     const modelo = tipo === 'agradecimento' || tipo === 'card' ? tipo : 'boasvindas';
     const ja = enviados(modelo);

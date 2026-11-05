@@ -8,6 +8,14 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (15) | Confirmado envia e-mail, convidado de quem, check-in junto e boas-vindas
+- Marcar Confirmado (formulário, convite ou pessoa manual com e-mail) chama `email-admin` `acao: confirmados`: boas-vindas e card Eu vou!, uma vez só (`enviarUmaVez`); o servidor confere que a pessoa está confirmada. Página do site continua com o e-mail de confirmação de antes. Kids não recebem.
+- Colunas "Convidado de" (texto, `communicali_definir_convidado_de`) e "Junto com" (`communicali_definir_junto`: `form_responses.junto_com_email`, `edition_kids.responsavel_email`). Migração `20261105190000_convidado_de_e_checkin_junto.sql`, com os dados pedidos: Cíntia, João Ricardo e Inaiê convidados de Patrícia Lima; Cleia convidada do Marcio, com check-in junto; kids ligados aos responsáveis.
+- `communicali_registrar_presenca`: ao fazer check-in, marca `chegou_em` de quem chega junto e devolve `junto` (nomes) para a tela de sucesso. Testado numa transação desfeita: o check-in da Patrícia registrou Akemi e Ayumi.
+- Lista impressa: embaixo do nome, "Convidado de ..." e "Check-in com ...".
+- Check-in: telão e celular com "Bem-vindas e bem-vindos!", "Sinta-se à vontade, escolha uma mesa e faça seu check-in"; logo na tela fechada; sucesso diz "Agora é só levantar a mão. Você recebe o seu crachá na mesa." e quem entrou junto.
+- Pendente: as boas-vindas da Cíntia não saíram (o envio direto foi bloqueado aqui); ela recebe pelo botão "Enviar boas-vindas" em E-mails.
+
 ### 2026-11-05 (14) | Uma lista só em Pessoas da edição
 - A planilha separada de respostas saiu da edição: a tabela de Pessoas é a única lista. Ela recarrega ao abrir, a cada 30 segundos, ao voltar para a aba e no botão Atualizar, então quem se inscreve aparece sozinho.
 - Coluna "Nota interna" editável na linha (`communicali_definir_nota`; `admin_note` no formulário e coluna nova `nota` em `registrations`, `guests`, `edition_kids`) e coluna "Check-in" com a hora de chegada. Migração `20261105180000_pessoas_nota_checkin.sql`.
