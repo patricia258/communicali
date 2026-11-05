@@ -303,3 +303,28 @@ html{scroll-behavior:smooth}
 
 /* No celular o topo mostra só "Já sou membro"; o Registrar interesse já aparece no hero. */
 @media (max-width:640px){.nav__acoes .pill{display:none}.nav__acoes .nav__membro{font-size:13px}}
+
+/* Prévia da logo nova: topo claro com a logo bordô e faixas alternando cores, para a página não ficar toda bordô. */
+.nav{background:rgba(247,240,234,.94);border-bottom:1px solid rgba(34,16,15,.1)}
+.nav__links a{color:#5A4740}
+.nav__links a:hover{color:#22100F}
+.home .nav__membro{color:#7A1F3D}
+/* Faixa de fundo em toda a largura, atrás do conteúdo da seção. */
+.faixa{position:relative;isolation:isolate}
+.faixa::before{content:'';position:absolute;inset:0 calc(50% - 50vw);z-index:-1}
+.faixa--clara{--bg:#F7F0EA;--panel:#FFFFFF;--panel-2:#F1E7DF;--edge:rgba(34,16,15,.12);--text:#22100F;--soft:#5A4740;--gold-2:#7A1F3D;color:var(--text)}
+.faixa--clara::before{background:linear-gradient(180deg,#FBF7F3,#F3EAE2)}
+.faixa--mostarda{--panel:rgba(255,253,248,.62);--panel-2:rgba(255,253,248,.8);--edge:rgba(34,16,15,.14);--text:#22100F;--soft:#4A3832;--gold:#5A1E2D;--gold-2:#5A1E2D;color:var(--text)}
+.faixa--mostarda::before{background:linear-gradient(135deg,#F2D58E 0%,#DDB160 55%,#C9973B 100%)}
+.faixa--mostarda .pill{color:#F7F0EA}
+.faixa--mostarda .pill:hover{background:#7A1F3D}
+.faixa--emenda{margin-top:0}
+/* Rodapé mostarda com a logo bordô e o texto legal menor. */
+.home .site-footer{background:linear-gradient(135deg,#DDB160,#C9973B);border-top:0;color:#3A2420}
+.home .site-footer__logo img{content:url(/brand/comunicali-bordo-horizontal.png)}
+.home .site-footer a{color:#22100F}
+.home .site-footer__legal{border-top-color:rgba(34,16,15,.15);color:#4A3832;font-size:10px;line-height:1.5}
+.home .site-footer__faith{color:#5A1E2D}
+.faixa{padding-top:64px;padding-bottom:64px}
+.faixa--emenda{padding-bottom:72px}
+.home .site-footer{margin-top:0}

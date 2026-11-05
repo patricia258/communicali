@@ -30,8 +30,7 @@ export function SiteFooter() {
       </div>
       <div className="site-footer__legal">
         <p>© {new Date().getFullYear()} ComuniCALI, uma iniciativa da CALI RH. Todos os direitos reservados.</p>
-        <p>Marca, logotipo, selos, carimbos, textos e materiais deste site pertencem à CALI RH e são protegidos pela Lei de Direitos Autorais (Lei nº 9.610/1998). A reprodução, total ou parcial, depende de autorização prévia e por escrito.</p>
-        <p>Conteúdo, design e desenvolvimento: CALI RH.</p>
+        <p>Marca, selos e conteúdo protegidos pela Lei 9.610/1998. Reprodução só com autorização por escrito.</p>
       </div>
       <p className="site-footer__faith">Toda honra a Deus!</p>
     </footer>

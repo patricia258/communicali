@@ -158,7 +158,7 @@ export function Home() {
     <div className="home">
       <nav className="nav">
         <div className="wrap nav__row">
-          <a href="/" className="nav__logo"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></a>
+          <a href="/" className="nav__logo"><img src="/brand/comunicali-bordo-horizontal.png" alt="ComuniCALI" /></a>
           <div className="nav__links">
             <a href="#comunidade">Comunidade</a>
             <a href="#fazer-parte">Como entrar</a>
@@ -200,7 +200,7 @@ export function Home() {
         <People joinHref={joinHref} />
       </section>
 
-      <section className="wrap block" id="fazer-parte">
+      <section className="wrap block faixa faixa--mostarda" id="fazer-parte">
         <div className="block__head">
           <div>
             <p className="eyebrow">Primeira vez?</p>
@@ -262,7 +262,7 @@ export function Home() {
         </div>
       </section>
 
-      <section className="wrap block" id="proximo">
+      <section className="wrap block faixa faixa--clara" id="proximo">
         <div className="block__head">
           <div>
             <p className="eyebrow">Agenda</p>
@@ -334,7 +334,7 @@ export function Home() {
         </div>
       </section>
 
-      <section className="wrap block">
+      <section className="wrap block faixa faixa--clara faixa--emenda">
         <div className="block__head"><div><p className="eyebrow">Dúvidas</p><h2>Perguntas <em>frequentes.</em></h2></div></div>
         <div className="faq">
           {FAQ.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}
