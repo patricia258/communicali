@@ -4,7 +4,8 @@ import { useMemo, useState, type ReactNode } from 'react';
 export type Coluna<T> = { id: string; titulo: string; valor: (linha: T) => string | number; render?: (linha: T) => ReactNode; longo?: boolean };
 export type Filtro<T> = { id: string; titulo: string; valor: (linha: T) => string };
 
-export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio }: { colunas: Array<Coluna<T>>; linhas: T[]; chave: (linha: T) => string; filtros?: Array<Filtro<T>>; inicial?: { id: string; desc?: boolean }; vazio: string }) {
+/** `acoes` (imprimir, exportar...) ficam na mesma linha da busca e dos filtros, encostadas à direita. */
+export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio, acoes }: { colunas: Array<Coluna<T>>; linhas: T[]; chave: (linha: T) => string; filtros?: Array<Filtro<T>>; inicial?: { id: string; desc?: boolean }; vazio: string; acoes?: ReactNode }) {
   const [busca, setBusca] = useState('');
   const [ordem, setOrdem] = useState(inicial || { id: colunas[0].id, desc: false });
   const [escolha, setEscolha] = useState<Record<string, string>>({});
@@ -34,7 +35,7 @@ export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio
             </select>
           </label>
         ))}
-        <p className="adm-contagem">{visiveis.length} de {linhas.length}</p>
+        <div className="adm-filtros__fim"><p className="adm-contagem">{visiveis.length} de {linhas.length}</p>{acoes}</div>
       </div>
       <div className="adm-tabela">
         <table>

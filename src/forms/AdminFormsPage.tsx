@@ -3,7 +3,7 @@
    Nada aqui aparece para o cliente: a rota e o menu são só da administradora. */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ArrowDown, ArrowLeft, ArrowUp, Bold, Check, Copy, Italic, Paperclip, Pencil, Smile, Underline, X, Download, ExternalLink, FileSpreadsheet, ListChecks, Plus, QrCode, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowUp, Bold, Check, Copy, Italic, Paperclip, Pencil, Smile, Underline, X, Download, ExternalLink, FileSpreadsheet, ListChecks, Plus, QrCode, RefreshCw, Search, Trash2, Eye } from 'lucide-react';
 import { Shell } from '../components/WorkspaceShell';
 import { supabase } from '../lib/supabase';
 import { downloadQrPng, downloadShareCard, downloadXlsx, qrDataUrl } from './formExports';
@@ -309,7 +309,7 @@ function SharePanel({ form, url, onOpen }: { form: FormRecord; url: string; onOp
   </div>;
 }
 
-function ResponsesPanel({ form }: { form: FormRecord }) {
+export function ResponsesPanel({ form }: { form: FormRecord }) {
   const [rows, setRows] = useState<ResponseRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -325,6 +325,7 @@ function ResponsesPanel({ form }: { form: FormRecord }) {
   const [noteFor, setNoteFor] = useState<{ row: ResponseRow; text: string; busy: boolean } | null>(null);
   const [toast, setToast] = useState('');
   const [editing, setEditing] = useState<ResponseRow | null>(null);
+  const [viewing, setViewing] = useState<ResponseRow | null>(null);
   const columns = useMemo(() => form.questions.filter(isAnswerable), [form.questions]);
   const choiceColumns = useMemo(() => columns.filter((question) => ['single_choice', 'multi_choice', 'yes_no', 'scale'].includes(question.kind)), [columns]);
 
@@ -424,7 +425,7 @@ function ResponsesPanel({ form }: { form: FormRecord }) {
       : <div className="v2-forms-table-wrap"><table className="v2-forms-table">
         <thead><tr>
           <th className="v2-forms-check-col"><input type="checkbox" aria-label="Selecionar todas" checked={allChecked} onChange={() => setSelected(allChecked ? new Set() : new Set(filtered.map((row) => row.id)))} /></th>
-          <th className="v2-forms-edit-col" aria-label="Editar ou excluir" />
+          <th className="v2-forms-edit-col" aria-label="Ver, editar ou excluir" />
           <th className="v2-forms-date-col"><button type="button" onClick={() => sortBy('date')}>Data{sortMark('date')}</button></th>
           {stages.length > 0 && <th><button type="button" onClick={() => sortBy('stage')}>Situação{sortMark('stage')}</button></th>}
           {stages.length > 0 && <th><button type="button" onClick={() => sortBy('owner')}>Responsável{sortMark('owner')}</button></th>}
@@ -434,7 +435,7 @@ function ResponsesPanel({ form }: { form: FormRecord }) {
         </tr></thead>
         <tbody>{filtered.map((row) => <tr key={row.id} className={selected.has(row.id) ? 'is-selected' : ''}>
           <td className="v2-forms-check-col"><input type="checkbox" aria-label="Selecionar resposta" checked={selected.has(row.id)} onChange={() => toggle(row.id)} /></td>
-          <td className="v2-forms-edit-col"><span className="v2-forms-row-actions"><button type="button" className="v2-forms-edit" title="Editar resposta" aria-label="Editar resposta" onClick={() => setEditing(row)}><Pencil size={13} /></button><button type="button" className="v2-forms-edit v2-forms-edit--excluir" title="Excluir resposta" aria-label="Excluir resposta" onClick={() => excluirUma(row)}><Trash2 size={13} /></button></span></td>
+          <td className="v2-forms-edit-col"><span className="v2-forms-row-actions"><button type="button" className="v2-forms-edit" title="Ver resposta completa" aria-label="Ver resposta completa" onClick={() => setViewing(row)}><Eye size={14} /></button><button type="button" className="v2-forms-edit" title="Editar resposta" aria-label="Editar resposta" onClick={() => setEditing(row)}><Pencil size={13} /></button><button type="button" className="v2-forms-edit v2-forms-edit--excluir" title="Excluir resposta" aria-label="Excluir resposta" onClick={() => excluirUma(row)}><Trash2 size={13} /></button></span></td>
           <td className="v2-forms-date v2-forms-date-col">{dateTime(row.submitted_at)}</td>
           {stages.length > 0 && <td><select className={`v2-forms-stage s${Math.max(0, stages.indexOf(row.stage || stages[0]))}`} aria-label="Situação" value={row.stage || stages[0]} onChange={(event) => void updateRow(row, { stage: event.target.value })}>{stages.map((item) => <option key={item}>{item}</option>)}</select></td>}
           {stages.length > 0 && <td><input className="v2-forms-owner" defaultValue={row.owner || ''} placeholder="Definir" maxLength={120} onBlur={(event) => { const owner = event.target.value.trim() || null; if (owner !== (row.owner || null)) void updateRow(row, { owner }); }} onKeyDown={(event) => { if (event.key === 'Enter') (event.target as HTMLInputElement).blur(); }} /></td>}
@@ -443,6 +444,7 @@ function ResponsesPanel({ form }: { form: FormRecord }) {
           {columns.map((question) => { const raw = row.answers[question.id]; const text = textOf(question, row); if (question.kind === 'file' && raw) return <td key={question.id}><FileLink value={String(raw)} /></td>; return <td key={question.id} className={text ? 'v2-forms-copy' : ''} title={text ? `${text}\n\nClique para copiar` : undefined} onClick={() => copy(text)}>{text || <span className="v2-forms-empty">—</span>}{text && <Copy size={12} className="v2-forms-copy-ico" aria-hidden="true" />}</td>; })}
         </tr>)}</tbody>
       </table></div>}
+    {viewing && <ViewResponse form={form} row={viewing} onClose={() => setViewing(null)} onEdit={() => { setEditing(viewing); setViewing(null); }} />}
     {editing && <EditResponse form={form} row={editing} onDelete={() => excluirUma(editing)} onClose={() => setEditing(null)} onSaved={(saved) => { setRows((current) => current.map((item) => item.id === saved.id ? saved : item)); setEditing(null); flash('Resposta atualizada'); }} />}
     {toast && <div className="v2-forms-toast" role="status"><Check size={14} /> {toast}</div>}
     {noteFor && <div className="ap-pd-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !noteFor.busy) setNoteFor(null); }}><section className="ap-status-confirm" role="dialog" aria-modal="true" aria-label="Nota interna">
@@ -564,4 +566,30 @@ function EditResponse({ form, row, onClose, onSaved, onDelete }: { form: FormRec
       <footer><button type="button" className="v2-forms-delete v2-forms-drawer-excluir" disabled={busy} onClick={onDelete}><Trash2 size={14} /> Excluir resposta</button><button type="button" className="wf-secondary" disabled={busy} onClick={onClose}>Cancelar</button><button type="button" className="wf-primary" disabled={busy || Boolean(uploading)} onClick={() => void save()}>{busy ? 'Salvando…' : 'Salvar resposta'}</button></footer>
     </aside>
   </div>;
+}
+
+/** Leitura da resposta completa, pergunta por pergunta, sem risco de alterar nada. */
+function ViewResponse({ form, row, onClose, onEdit }: { form: FormRecord; row: ResponseRow; onClose: () => void; onEdit: () => void }) {
+  const questions = form.questions.filter(isAnswerable);
+  return <div className="ap-pd-overlay v2-forms-drawer-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <aside className="v2-forms-drawer" role="dialog" aria-modal="true" aria-label="Resposta completa">
+      <header><div><small>RESPOSTA · {dateTime(row.submitted_at)}</small><h2>{row.respondent_name || 'Resposta'}</h2><p>{[row.respondent_email, row.stage, row.contacted_at ? `Contatado em ${dateTime(row.contacted_at)}` : 'Ainda sem contato'].filter(Boolean).join(' · ')}</p></div><button type="button" aria-label="Fechar" onClick={onClose}><X size={18} /></button></header>
+      <div className="v2-forms-drawer-body">
+        {row.admin_note && <div className="v2-forms-edit-field is-largo"><span>Nota interna</span><p className="v2-forms-leitura">{row.admin_note}</p></div>}
+        {questions.map((question) => { const raw = row.answers[question.id]; const text = formatAnswer(question, raw); return <div className={`v2-forms-edit-field${['long_text', 'multi_choice', 'file'].includes(question.kind) || text.length > 60 ? ' is-largo' : ''}`} key={question.id}><span>{stripRichText(question.label)}</span>{question.kind === 'file' && raw ? <FileLink value={String(raw)} /> : <p className="v2-forms-leitura">{text || '—'}</p>}</div>; })}
+      </div>
+      <footer><button type="button" className="wf-secondary" onClick={onClose}>Fechar</button><button type="button" className="wf-primary" onClick={onEdit}><Pencil size={14} /> Editar</button></footer>
+    </aside>
+  </div>;
+}
+
+/** Respostas do formulário de inscrição dentro da página da edição. */
+export function FormularioDaEdicao({ slug }: { slug: string }) {
+  const [form, setForm] = useState<FormRecord | null | undefined>(undefined);
+  useEffect(() => { if (supabase) void supabase.from('forms').select(FORM_FIELDS).eq('slug', slug).maybeSingle().then(({ data }) => setForm((data as FormRecord | null) || null)); }, [slug]);
+  return <section className="v2-forms-card" id="secao-formulario">
+    <header className="adm-secao__topo"><div><small>FORMULÁRIO DE INSCRIÇÃO</small><h2>{form ? form.title : 'Respostas do formulário'}</h2></div>
+      {form && <div className="adm-links"><a className="wf-secondary" href={`/f/${form.slug}`} target="_blank" rel="noopener noreferrer">Abrir formulário</a><a className="wf-secondary" href={`/admin/formularios?form=${form.id}&aba=questions`}>Editar perguntas</a></div>}</header>
+    {form === undefined ? <div className="data-loading">Carregando respostas…</div> : form ? <ResponsesPanel form={form} /> : <p className="adm-hint">O formulário ligado a esta edição não foi encontrado.</p>}
+  </section>;
 }

@@ -164,6 +164,7 @@ export function CardEMimos({ edition }: { edition: { id: string; titulo: string;
         <div className="adm-links">
           <button type="button" className="wf-secondary" onClick={() => { void navigator.clipboard.writeText(link); setNote('Link do grupo copiado.'); }}>Copiar link do grupo</button>
           <button type="button" className="wf-secondary" disabled={busy} onClick={() => void teste()}>Enviar teste do e-mail para mim</button>
+          {faltam > 0 && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void enviarFaltam()}>{`Enviar convite para quem falta (${faltam})`}</button>}
         </div>
       </header>
       <div className="adm-cards">
@@ -171,11 +172,6 @@ export function CardEMimos({ edition }: { edition: { id: string; titulo: string;
         <div className="adm-card"><span>Geraram o card</span><strong>{geraram}</strong><small>{lista.filter((item) => item.formatos.includes('story')).length} no formato story</small></div>
         <div className="adm-card"><span>Postaram</span><strong>{postaram.length}</strong><small>{postaram.filter((item) => item.redes.includes('Instagram')).length} Instagram · {postaram.filter((item) => item.redes.includes('LinkedIn')).length} LinkedIn</small></div>
         <div className="adm-card"><span>Posts aprovados</span><strong>{aprovados}</strong><small>{postaram.length - aprovados} para conferir</small></div>
-      </div>
-      <div className="adm-links">
-        <button type="button" className="wf-primary" disabled={!postaram.length} onClick={imprimir}>Imprimir lista da recepção</button>
-        <button type="button" className="wf-secondary" disabled={!lista.length} onClick={exportar}>Exportar Excel</button>
-        {faltam > 0 && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void enviarFaltam()}>{`Enviar convite para quem falta (${faltam})`}</button>}
       </div>
       {note && <p className="adm-hint" role="status">{note}</p>}
       <Tabela<Participacao> colunas={[
@@ -187,7 +183,11 @@ export function CardEMimos({ edition }: { edition: { id: string; titulo: string;
         { id: 'aprovado', titulo: 'Post aprovado', valor: (item) => (item.conferido_em ? 'Sim' : 'Não'), render: (item) => (item.compartilhado_em
           ? <label className="adm-aprovar"><input type="checkbox" checked={Boolean(item.conferido_em)} onChange={() => void aprovar(item)} /> {item.conferido_em ? 'Aprovado' : 'Conferir'}</label> : '-') },
       ]} filtros={[{ id: 'onde', titulo: 'Onde postou', valor: (item) => item.redes.join(' e ') }, { id: 'aprovado', titulo: 'Post aprovado', valor: (item) => (item.compartilhado_em ? (item.conferido_em ? 'Aprovado' : 'Para conferir') : 'Não postou') }]}
-        linhas={lista} chave={(item) => item.id} inicial={{ id: 'nome' }} vazio="Quando alguém gerar o card, aparece aqui." />
+        linhas={lista} chave={(item) => item.id} inicial={{ id: 'nome' }} vazio="Quando alguém gerar o card, aparece aqui."
+        acoes={<>
+          <button type="button" className="wf-primary" disabled={!postaram.length} onClick={imprimir}>Imprimir lista da recepção</button>
+          <button type="button" className="wf-secondary" disabled={!lista.length} onClick={exportar}>Exportar Excel</button>
+        </>} />
       <p className="adm-hint">Aprove depois de ver o post marcando a CALI. A lista impressa leva só quem postou, para a recepção entregar o mimo pelo nome.</p>
     </section>
   );

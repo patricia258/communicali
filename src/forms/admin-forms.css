@@ -221,7 +221,7 @@ html[data-workspace-ui='v2'] .v2-forms-trash .wf-record-row:not(.header):hover{b
 
 /* Painel em largura total (04/11): tabela usa a tela inteira, gaveta mais larga com campos em duas colunas. */
 html[data-workspace-ui='v2'] .v2-forms-table td{max-width:360px}
-html[data-workspace-ui='v2'] .v2-forms-table .v2-forms-edit-col{width:66px;min-width:66px;max-width:66px}
+html[data-workspace-ui='v2'] .v2-forms-table .v2-forms-edit-col{width:98px;min-width:98px;max-width:98px}
 html[data-workspace-ui='v2'] .v2-forms-table .v2-forms-date-col{left:102px!important}
 html[data-workspace-ui='v2'] .v2-forms-row-actions{display:inline-flex;gap:4px}
 html[data-workspace-ui='v2'] .v2-forms-edit--excluir{color:#a9502e}

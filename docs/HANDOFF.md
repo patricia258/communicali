@@ -8,6 +8,14 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (8) | Ver respostas sem editar e barras de ferramentas numa linha só
+- Respostas de formulário, Staff e Fornecedores: botão de olho em cada linha abre a resposta completa só para leitura (`ViewResponse` em AdminFormsPage, `VerRegistro` em RegistrosPainel), com "Editar" no rodapé.
+- Página da edição ganhou a seção "Formulário de inscrição" (`FormularioDaEdicao`, pelo `editions.form_inscricao`) com a mesma tabela de respostas; item "Formulário" no índice.
+- `Tabela` (AdminTabela) aceita `acoes`: imprimir e exportar ficam na mesma linha da busca e dos filtros, à direita. Regra para toda tabela nova.
+- Inscrições: o campo solto com o link virou "Copiar link para divulgar" e "Ver a página" no cabeçalho, com uma frase explicando a seção. Presenças virou tabela com filtro de uso de imagem.
+- "Ver os e-mails enviados" é uma faixa vinho com "Clique para abrir".
+- Testado em produção com admin de teste (removido): mesma linha nas quatro tabelas, leitura sem campos editáveis.
+
 ### 2026-11-05 (7) | Página da edição organizada e Card e mimos
 - Página da edição: índice fixo no topo (Dados, Imagens, Inscrições, E-mails, Card e mimos, Votação, Presenças) e cada seção com cabeçalho vinho destacado (`.adm-edicao` em admin.css). Seção de dados ganhou cabeçalho.
 - Nova seção CARD EU VOU! E MIMOS (`CardEMimos` em AdminEmails.tsx), separada dos e-mails: números (receberam, geraram, postaram, aprovados), tabela com busca e filtros (quem gerou, quando, formatos feed/story, quando postou, onde, aprovação do post), "Imprimir lista da recepção" (só quem postou, com coluna Entregue para marcar no papel), Exportar Excel, copiar link do grupo, teste do e-mail e envio para quem falta.

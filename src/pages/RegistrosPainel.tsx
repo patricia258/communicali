@@ -1,7 +1,7 @@
 /* Tabela de cadastros (STAFF, fornecedores) no mesmo modelo das respostas de formulário:
    busca, filtro, exportar, editar na gaveta lateral, excluir uma ou várias. */
 import { useEffect, useMemo, useState } from 'react';
-import { Check, FileSpreadsheet, Pencil, RefreshCw, Search, Trash2, X } from 'lucide-react';
+import { Check, Eye, FileSpreadsheet, Pencil, RefreshCw, Search, Trash2, X } from 'lucide-react';
 import { supabase } from '../lib';
 import { downloadXlsx } from '../forms/formExports';
 import '../forms/admin-forms.css';
@@ -39,6 +39,7 @@ export function RegistrosPainel<T extends Linha>({ tabela, campos, nome, alerta,
   const [confirmar, setConfirmar] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
   const [editando, setEditando] = useState<T | null>(null);
+  const [vendo, setVendo] = useState<T | null>(null);
   const [aviso, setAviso] = useState('');
 
   async function carregar() {
@@ -89,17 +90,18 @@ export function RegistrosPainel<T extends Linha>({ tabela, campos, nome, alerta,
       : <div className="v2-forms-table-wrap"><table className="v2-forms-table">
         <thead><tr>
           <th className="v2-forms-check-col"><input type="checkbox" aria-label="Selecionar todos" checked={todos} onChange={() => setSelecao(todos ? new Set() : new Set(visiveis.map((linha) => linha.id)))} /></th>
-          <th className="v2-forms-edit-col" aria-label="Editar ou excluir" />
+          <th className="v2-forms-edit-col" aria-label="Ver, editar ou excluir" />
           <th className="v2-forms-date-col">Data</th>
           {colunas.map((campo) => <th key={campo.id} title={campo.titulo}>{campo.titulo}</th>)}
         </tr></thead>
         <tbody>{visiveis.map((linha) => <tr key={linha.id} className={selecao.has(linha.id) ? 'is-selected' : ''}>
           <td className="v2-forms-check-col"><input type="checkbox" aria-label="Selecionar cadastro" checked={selecao.has(linha.id)} onChange={() => alternar(linha.id)} /></td>
-          <td className="v2-forms-edit-col"><span className="v2-forms-row-actions"><button type="button" className="v2-forms-edit" title="Ver e editar" aria-label="Ver e editar" onClick={() => setEditando(linha)}><Pencil size={13} /></button><button type="button" className="v2-forms-edit v2-forms-edit--excluir" title="Excluir cadastro" aria-label="Excluir cadastro" onClick={() => excluirUm(linha)}><Trash2 size={13} /></button></span></td>
+          <td className="v2-forms-edit-col"><span className="v2-forms-row-actions"><button type="button" className="v2-forms-edit" title="Ver cadastro completo" aria-label="Ver cadastro completo" onClick={() => setVendo(linha)}><Eye size={14} /></button><button type="button" className="v2-forms-edit" title="Editar cadastro" aria-label="Editar cadastro" onClick={() => setEditando(linha)}><Pencil size={13} /></button><button type="button" className="v2-forms-edit v2-forms-edit--excluir" title="Excluir cadastro" aria-label="Excluir cadastro" onClick={() => excluirUm(linha)}><Trash2 size={13} /></button></span></td>
           <td className="v2-forms-date v2-forms-date-col">{dataHora(linha.created_at)}{alerta?.(linha) && <span className="v2-forms-alerta" title={alerta(linha) || ''}> · Conferir</span>}</td>
           {colunas.map((campo) => { const texto = campo.valor(linha); return <td key={campo.id} title={texto}>{texto || '—'}</td>; })}
         </tr>)}</tbody>
       </table></div>}
+    {vendo && <VerRegistro linha={vendo} campos={campos} nome={nome(vendo)} alerta={alerta?.(vendo) || ''} onClose={() => setVendo(null)} onEdit={() => { setEditando(vendo); setVendo(null); }} />}
     {editando && <EditarRegistro tabela={tabela} linha={editando} campos={campos} nome={nome(editando)} alerta={alerta?.(editando) || ''} onClose={() => setEditando(null)} onDelete={() => excluirUm(editando)}
       onSaved={(salvo) => { setLinhas((atual) => atual.map((item) => (item.id === salvo.id ? salvo : item))); setEditando(null); flash('Cadastro atualizado'); }} />}
     {confirmar && <div className="ap-pd-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget && !excluindo) setConfirmar(false); }}><section className="ap-status-confirm" role="dialog" aria-modal="true" aria-label="Excluir cadastros">
@@ -139,6 +141,20 @@ function EditarRegistro<T extends Linha>({ tabela, linha, campos, nome, alerta, 
       </div>
       {erro && <p className="v2-forms-error" role="alert">{erro}</p>}
       <footer><button type="button" className="v2-forms-delete v2-forms-drawer-excluir" disabled={salvando} onClick={onDelete}><Trash2 size={14} /> Excluir cadastro</button><button type="button" className="wf-secondary" disabled={salvando} onClick={onClose}>Cancelar</button><button type="button" className="wf-primary" disabled={salvando} onClick={() => void salvar()}>{salvando ? 'Salvando…' : 'Salvar'}</button></footer>
+    </aside>
+  </div>;
+}
+
+/** Leitura do cadastro completo, sem caixas de edição. */
+function VerRegistro<T extends Linha>({ linha, campos, nome, alerta, onClose, onEdit }: { linha: T; campos: Array<Campo<T>>; nome: string; alerta: string; onClose: () => void; onEdit: () => void }) {
+  return <div className="ap-pd-overlay v2-forms-drawer-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <aside className="v2-forms-drawer" role="dialog" aria-modal="true" aria-label="Cadastro completo">
+      <header><div><small>CADASTRO · {dataHora(linha.created_at)}</small><h2>{nome}</h2></div><button type="button" aria-label="Fechar" onClick={onClose}><X size={18} /></button></header>
+      <div className="v2-forms-drawer-body">
+        {alerta && <p className="v2-forms-error is-largo" role="note">Conferir: {alerta}</p>}
+        {campos.map((campo) => { const texto = campo.valor(linha); return <div className={`v2-forms-edit-field${campo.longo || texto.length > 60 ? ' is-largo' : ''}`} key={campo.id}><span>{campo.titulo}</span><p className="v2-forms-leitura">{texto || '—'}</p></div>; })}
+      </div>
+      <footer><button type="button" className="wf-secondary" onClick={onClose}>Fechar</button><button type="button" className="wf-primary" onClick={onEdit}><Pencil size={14} /> Editar</button></footer>
     </aside>
   </div>;
 }

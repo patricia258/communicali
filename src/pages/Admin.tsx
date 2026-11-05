@@ -3,7 +3,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { AdminFormsPage } from '../forms/AdminFormsPage';
+import { AdminFormsPage, FormularioDaEdicao } from '../forms/AdminFormsPage';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
 import { MembersPanel, PollsPanel, TextsPanel, VotacoesDaEdicao, exportPresencasCsv } from './AdminPrograma';
@@ -17,7 +17,7 @@ import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 import { AdminRedeExtras } from './AdminRedeExtras';
 import './admin.css';
 
-type Edition = { limite_convidados?: number; inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean };
+type Edition = { limite_convidados?: number; inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean; form_inscricao?: string | null };
 type Photo = { id: string; url: string; legenda: string | null; no_carrossel: boolean };
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null; ativo: boolean; ordem: number };
 type Attendee = { id: string; checked_in_at: string; codigo: string; origem: string; members: { nome: string; email: string; whatsapp: string | null; empresa: string | null; cargo: string | null; categoria: string; autoriza_imagem: boolean } };
@@ -179,6 +179,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
   const [people, setPeople] = useState<Attendee[]>([]);
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
+  const [copiado, setCopiado] = useState(false);
   const set = (next: Partial<Edition>) => { setDraft({ ...draft, ...next }); setNote(''); };
   const text = (key: keyof Edition, label: string, hint?: string) => (
     <label><span>{label}{hint && <em> {hint}</em>}</span><input value={String(draft[key] ?? '')} onChange={(event) => set({ [key]: event.target.value } as Partial<Edition>)} /></label>
@@ -290,7 +291,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <nav className="adm-indice" aria-label="Seções da edição">
-        {[['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-inscricoes', 'Inscrições'], ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
+        {[['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-inscricoes', 'Inscrições'], ...(draft.form_inscricao ? [['secao-formulario', 'Formulário']] : []), ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
           <a key={id} href={`#${id}`} onClick={(event) => { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>{nome}</a>
         ))}
       </nav>
@@ -334,33 +335,36 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         </div>
       </section>
       <section className="v2-forms-card" id="secao-inscricoes">
-        <header><small>INSCRIÇÕES PELO SITE</small><h2>{signups.filter((item) => item.status === 'analise').length} para aprovar, {signups.filter((item) => item.status === 'inscrito').length} {signups.filter((item) => item.status === 'inscrito').length === 1 ? 'aprovado' : 'aprovados'}{signups.some((item) => item.status === 'espera') ? `, ${signups.filter((item) => item.status === 'espera').length} na lista de espera` : ''}</h2></header>
-        <div className="adm-links">
-          <input readOnly aria-label="Link da página da edição" value={`https://comuni.calirh.com/e/${edition.slug}`} onFocus={(event) => event.target.select()} />
-          <button type="button" className="wf-secondary" disabled={!signups.length} onClick={() => downloadXlsx(`communicali-${edition.slug}-inscritos.xlsx`, 'Inscritos', ['Nome', 'E-mail', 'WhatsApp', 'Situação'], signups.map((item) => [item.nome, item.email, item.whatsapp, item.status]))}>Exportar Excel</button>
-        </div>
-        <Tabela colunas={colunasInscritos} linhas={signups} chave={(item) => item.id} vazio="Nenhuma inscrição pelo site." filtros={[{ id: 'situacao', titulo: 'Situação', valor: (item) => SITUACAO_INSCRICAO[item.status] || item.status }]} />
+        <header className="adm-secao__topo"><div><small>INSCRIÇÕES PELO SITE</small><h2>{signups.filter((item) => item.status === 'analise').length} para aprovar, {signups.filter((item) => item.status === 'inscrito').length} {signups.filter((item) => item.status === 'inscrito').length === 1 ? 'aprovado' : 'aprovados'}{signups.some((item) => item.status === 'espera') ? `, ${signups.filter((item) => item.status === 'espera').length} na lista de espera` : ''}</h2></div>
+          <div className="adm-links">
+            <button type="button" className="wf-secondary" title={`${origin}/e/${edition.slug}`} onClick={() => { void navigator.clipboard.writeText(`https://comuni.calirh.com/e/${edition.slug}`); setCopiado(true); window.setTimeout(() => setCopiado(false), 2000); }}>{copiado ? 'Link copiado' : 'Copiar link para divulgar'}</button>
+            <a className="wf-secondary" href={`${origin}/e/${edition.slug}`} target="_blank" rel="noopener noreferrer">Ver a página</a>
+          </div></header>
+        <p className="adm-hint adm-hint--antes">Quem se inscreve pela página da edição aparece aqui para você aprovar, colocar na lista de espera ou recusar. A pessoa recebe o e-mail da decisão.</p>
+        <Tabela colunas={colunasInscritos} linhas={signups} chave={(item) => item.id} vazio="Nenhuma inscrição pelo site." filtros={[{ id: 'situacao', titulo: 'Situação', valor: (item) => SITUACAO_INSCRICAO[item.status] || item.status }]}
+          acoes={<button type="button" className="wf-secondary" disabled={!signups.length} onClick={() => downloadXlsx(`communicali-${edition.slug}-inscritos.xlsx`, 'Inscritos', ['Nome', 'E-mail', 'WhatsApp', 'Situação'], signups.map((item) => [item.nome, item.email, item.whatsapp, SITUACAO_INSCRICAO[item.status] || item.status]))}>Exportar Excel</button>} />
       </section>
+      {draft.form_inscricao && <FormularioDaEdicao slug={draft.form_inscricao} />}
       <div id="secao-emails"><EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} /></div>
       <CardEMimos edition={edition} />
       <div id="secao-votacao"><VotacoesDaEdicao editionId={edition.id} editionSlug={edition.slug} /></div>
       <section className="v2-forms-card" id="secao-presencas">
-        <header><small>PRESENÇAS</small><h2>{people.length} {people.length === 1 ? 'check-in' : 'check-ins'}</h2></header>
-        <div className="adm-links">
-          <a className="wf-secondary" href={`${origin}/telao/checkin?edicao=${edition.slug}`} target="_blank" rel="noopener noreferrer">Telão do check-in</a>
-          <button type="button" className="wf-secondary" title="Para quem não conseguiu fazer o check-in pelo celular" onClick={() => void manualCheckin()}>Registrar presença manualmente</button>
-          <button type="button" className="wf-secondary" disabled={!people.length} onClick={exportCsv}>Exportar CSV</button>
-          <button type="button" className="wf-secondary" disabled={!people.length} onClick={exportPeople}>Exportar Excel</button>
-        </div>
-        <div className="adm-list">
-          {people.map((person) => (
-            <div className="adm-row adm-row--static" key={person.id}>
-              <strong>{person.members.nome}</strong>
-              <span>{person.members.email} · {person.codigo}{person.members.autoriza_imagem ? ' · autoriza imagem' : ' · sem autorização de imagem'}</span>
-              <button type="button" onClick={() => void removeCheckin(person)}>Tirar presença</button>
-            </div>
-          ))}
-        </div>
+        <header className="adm-secao__topo"><div><small>PRESENÇAS</small><h2>{people.length} {people.length === 1 ? 'check-in' : 'check-ins'}</h2></div>
+          <div className="adm-links">
+            <a className="wf-secondary" href={`${origin}/telao/checkin?edicao=${edition.slug}`} target="_blank" rel="noopener noreferrer">Telão do check-in</a>
+            <button type="button" className="wf-secondary" title="Para quem não conseguiu fazer o check-in pelo celular" onClick={() => void manualCheckin()}>Registrar presença manualmente</button>
+          </div></header>
+        <Tabela<Attendee> colunas={[
+          { id: 'hora', titulo: 'Horário', valor: (item) => item.checked_in_at, render: (item) => new Date(item.checked_in_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }) },
+          { id: 'nome', titulo: 'Nome', valor: (item) => item.members.nome },
+          { id: 'email', titulo: 'E-mail', valor: (item) => item.members.email, render: (item) => <Email email={item.members.email} /> },
+          { id: 'empresa', titulo: 'Empresa', valor: (item) => item.members.empresa || '-' },
+          { id: 'codigo', titulo: 'Código', valor: (item) => item.codigo },
+          { id: 'imagem', titulo: 'Uso de imagem', valor: (item) => (item.members.autoriza_imagem ? 'Autoriza' : 'Não autoriza') },
+          { id: 'tirar', titulo: '', valor: () => '', render: (item) => <span className="adm-acoes"><button type="button" onClick={() => void removeCheckin(item)}>Tirar presença</button></span> },
+        ]} filtros={[{ id: 'imagem', titulo: 'Uso de imagem', valor: (item) => (item.members.autoriza_imagem ? 'Autoriza' : 'Não autoriza') }]}
+          linhas={people} chave={(item) => item.id} inicial={{ id: 'hora' }} vazio="Nenhum check-in ainda."
+          acoes={<><button type="button" className="wf-secondary" disabled={!people.length} onClick={exportCsv}>Exportar CSV</button><button type="button" className="wf-secondary" disabled={!people.length} onClick={exportPeople}>Exportar Excel</button></>} />
       </section>
       </div>
     </>
