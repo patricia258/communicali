@@ -8,6 +8,11 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (19) | Passaporte da organização e prévia da logo nova
+- `communicali_meu_espaco`: fundadora e organizadores veem o passaporte mesmo sem check-in (migração `20261105220000_passaporte_organizacao.sql`). O check-in de teste da Patrícia saiu quando a edição de teste foi excluída.
+- Prévia da logo nova no branch `logo-nova` (worktree `~/CALI/communicali-logo-nova`, commit separado, não publicado em produção): `public/brand/communicali-branco.png` (fundo escuro), `communicali-horizontal.png` (fundo claro) e `communicali-bordo.png` (empilhado) trocados pelas artes de `~/CALI/ComuniCALI-Logo`; títulos h1 a h3 em Inter 700 para não competir com a logo (Funnel Display fica na logo, números e carimbos). Prévia protegida: https://communicali-1mbwsv3vs-cali11.vercel.app
+- Plano: subir no domingo 15/11, depois do encontro. Falta ainda: topo dos e-mails (`public/email/topo.png`), ícones do app (`public/app/icone-*`), favicon e cards gerados no canvas.
+
 ### 2026-11-05 (18) | Conferência geral de entregas
 - `email-admin` `acao: nao_entregues`: lista os 100 e-mails mais recentes direto na Resend (staff, avisos e edição) e devolve os que não chegaram. Resultado em 05/11: 97 de 100 entregues; problemas só em Lilian (bloqueio na Resend), Cleia (email@email.com) e Paula Gaio (domínio digitado errado, pgrecuroshumanos).
 - Todos os confirmados com endereço válido receberam boas-vindas e card. DNS de calirh.com está na Hostinger (dns-parking.com); DMARC com relatório fica como melhoria opcional.
