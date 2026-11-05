@@ -237,7 +237,8 @@ export function montar(tipo, edition, pessoa) {
       botao: { texto: 'Criar meu card', href: `${SITE}/eu-vou?c=${assinatura(pessoa.cardEmail || pessoa.email)}` }, detalhes: false, comFoto: false, anexo: false },
     convite: { assunto: `Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: 'Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
   }[tipo];
-  return { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null };
+  // Boas-vindas, card e agradecimento são envios em lote: levam o descadastro no cabeçalho e respeitam quem saiu.
+  return { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null, lote: ['boasvindas', 'card', 'agradecimento'].includes(tipo) };
 }
 
 export const banco = (path, options = {}) => fetch(`${SUPABASE}/rest/v1/${path}`, { ...options, headers: { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json', ...options.headers } });
@@ -246,17 +247,29 @@ const DESCADASTRO = '{{DESCADASTRO}}';
 export const assinatura = (email) => createHmac('sha256', process.env.CRON_SECRET || '').update(String(email).toLowerCase()).digest('hex').slice(0, 32);
 const linkDescadastro = (email) => `${SITE}/api/descadastro?e=${encodeURIComponent(email.toLowerCase())}&t=${assinatura(email)}`;
 
+// Link rastreado vira o endereço final na versão em texto.
+const destino = (url) => { try { const u = new URL(url); return u.pathname === '/api/r' && u.searchParams.get('u') ? u.searchParams.get('u') : url; } catch { return url; } };
+
+// Versão em texto simples do e-mail: provedores desconfiam de mensagem só em HTML.
+export function textoSimples(html) {
+  return html.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<head[\s\S]*?<\/head>/gi, '')
+    .replace(/<a [^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, (_, url, texto) => `${texto.replace(/<[^>]+>/g, '').trim()} (${destino(url.replace(/&amp;/g, '&'))})`)
+    .replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|tr|h[1-6]|li)>/gi, '\n').replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .split('\n').map((linha) => linha.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n\n').trim();
+}
+
 export async function enviar(para, mensagem) {
   // E-mails do espaço do membro levam o link de parar de receber e respeitam quem já saiu.
   const membro = mensagem.html.includes(DESCADASTRO);
-  if (membro) {
+  if (membro || mensagem.lote) {
     const saiu = await banco(`email_descadastro?email=eq.${encodeURIComponent(para.toLowerCase())}&select=email`);
     if (saiu.ok && (await saiu.json()).length) return { pulado: true };
   }
   const html = membro ? mensagem.html.replaceAll(DESCADASTRO, linkDescadastro(para)) : mensagem.html;
-  const headers = membro ? { 'List-Unsubscribe': `<${linkDescadastro(para)}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' } : undefined;
+  const headers = membro || mensagem.lote ? { 'List-Unsubscribe': `<${linkDescadastro(para)}>, <mailto:${REPLY_TO.match(/[^<\s]+@[^>\s]+/)?.[0] || 'contato@calirh.com'}?subject=Parar%20de%20receber>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' } : undefined;
   const attachments = mensagem.ics ? [{ filename: 'convite-communicali.ics', content: Buffer.from(mensagem.ics).toString('base64'), content_type: 'text/calendar; method=REQUEST; charset=UTF-8' }] : undefined;
-  const sent = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: FROM, to: [para], reply_to: REPLY_TO, subject: mensagem.assunto, html, attachments, headers }) });
+  const sent = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: FROM, to: [para], reply_to: REPLY_TO, subject: mensagem.assunto, html, text: textoSimples(html), attachments, headers }) });
   const body = await sent.json().catch(() => ({}));
   return sent.ok ? { id: body.id } : { erro: `${sent.status} ${body.message || ''}`.trim() };
 }

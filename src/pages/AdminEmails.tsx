@@ -5,7 +5,8 @@ import { Tabela, dataBr } from './AdminTabela';
 import { esc, imprimirFolhas } from './listaImpressa';
 
 type Resumo = { todos: number; acionados: number; confirmacoes: number; lembretes: number; convites: number; cards?: number; agradecimentos: number; erros: number };
-type Linha = { email: string; nome: string; tipo: string; situacao: string; created_at: string; aberto_em: string | null; clicado_em: string | null };
+type Linha = { email: string; nome: string; tipo: string; situacao: string; created_at: string; aberto_em: string | null; clicado_em: string | null; entrega?: string | null };
+const ENTREGA: Record<string, string> = { delivered: 'Entregue', bounced: 'Voltou', failed: 'Falhou', suppressed: 'Bloqueado', complained: 'Marcou como spam', delivery_delayed: 'Atrasado', sent: 'Saiu, sem retorno', opened: 'Entregue', clicked: 'Entregue' };
 const NOMES: Record<string, string> = { recebido: 'Inscrição recebida', confirmacao: 'Reserva confirmada', espera: 'Lista de espera', lembrete: 'Lembrete', convite: 'Convite de agenda', boasvindas: 'Boas-vindas', agradecimento: 'Agradecimento', card: 'Card Eu vou' };
 
 export async function chamar(body: Record<string, string>) {
@@ -54,7 +55,24 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
     setBusy(false);
   }
 
+  // Lê na Resend se cada e-mail foi entregue ou voltou. Repete em blocos de 15 até acabar.
+  async function conferirEntregas() {
+    setBusy(true); setNote('Conferindo entregas...');
+    try {
+      for (let rodada = 0; rodada < 20; rodada += 1) {
+        const result = await chamar({ acao: 'entregas', edicao: edition.id });
+        if (result.lidos < 15) break;
+      }
+      await carregar();
+      setNote('Entregas conferidas.');
+    } catch (error) { setNote((error as Error).message); }
+    setBusy(false);
+  }
+
   const enviadas = linhas.filter((item) => item.situacao === 'enviado');
+  const entregues = enviadas.filter((item) => ['delivered', 'opened', 'clicked'].includes(item.entrega || '')).length;
+  const voltaram = enviadas.filter((item) => ['bounced', 'failed', 'suppressed'].includes(item.entrega || '')).length;
+  const spam = enviadas.filter((item) => item.entrega === 'complained').length;
   const abriram = enviadas.filter((item) => item.aberto_em).length;
   const clicaram = enviadas.filter((item) => item.clicado_em).length;
   const pct = (valor: number) => (enviadas.length ? ` · ${Math.round((valor / enviadas.length) * 100)}%` : '');
@@ -66,6 +84,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
         <div><small>E-MAILS</small><h2>Envios desta edição</h2></div>
         <div className="adm-links">
           <button type="button" className="wf-secondary" disabled={busy} onClick={() => void teste()}>Enviar teste para mim</button>
+          <button type="button" className="wf-secondary" disabled={busy} onClick={() => void conferirEntregas()}>Conferir entregas</button>
           <button type="button" className="wf-secondary" disabled={busy} onClick={() => void carregar()}>Atualizar</button>
         </div>
       </header>
@@ -74,7 +93,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
         <div className="adm-card"><span>Enviados</span><strong>{enviadas.length}</strong><small>{resumo ? `${resumo.convites} boas-vindas · ${resumo.agradecimentos} agradecimentos` : ''}</small></div>
         <div className="adm-card"><span>Abriram</span><strong>{abriram}</strong><small>{pct(abriram).replace(' · ', '') || '-'} dos enviados (aproximado)</small></div>
         <div className="adm-card"><span>Clicaram</span><strong>{clicaram}</strong><small>{pct(clicaram).replace(' · ', '') || '-'} dos enviados</small></div>
-        <div className="adm-card"><span>Com erro</span><strong>{resumo?.erros ?? 0}</strong><small>{resumo ? `${resumo.todos} inscritos · ${resumo.acionados} contatados` : ''}</small></div>
+        <div className="adm-card"><span>Entregues</span><strong>{entregues}</strong><small>{voltaram} voltaram · {spam} marcados como spam · {resumo?.erros ?? 0} com erro</small></div>
       </div>
 
       <label className="v2-forms-check"><input type="checkbox" checked={lembrete} onChange={(event) => onLembrete(event.target.checked)} /><span><strong>Lembrete automático em {diaLembrete}</strong><small>Vai na véspera, pela manhã, com local e agenda, para quem foi aprovado e para os contatados.</small></span></label>
@@ -93,10 +112,11 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
           { id: 'email', titulo: 'E-mail', valor: (item: Linha) => item.email },
           { id: 'tipo', titulo: 'Qual e-mail', valor: (item: Linha) => NOMES[item.tipo] || item.tipo, render: (item: Linha) => <span className={`adm-pill adm-tipo--${item.tipo}`}>{NOMES[item.tipo] || item.tipo}</span> },
           { id: 'enviado', titulo: 'Enviado em', valor: (item: Linha) => item.created_at, render: (item: Linha) => (item.situacao === 'erro' ? <span className="adm-status adm-status--erro">Erro</span> : quando(item.created_at)) },
+          { id: 'entrega', titulo: 'Entrega', valor: (item: Linha) => ENTREGA[item.entrega || ''] || 'Não conferido', render: (item: Linha) => { const nome = ENTREGA[item.entrega || ''] || 'Não conferido'; return <span className={`adm-status${['delivered', 'opened', 'clicked'].includes(item.entrega || '') ? ' adm-status--sim' : ['bounced', 'failed', 'suppressed', 'complained'].includes(item.entrega || '') ? ' adm-status--erro' : ''}`}>{nome}</span>; } },
           { id: 'aberto', titulo: 'Abriu', valor: (item: Linha) => item.aberto_em || '', render: (item: Linha) => marca(item.aberto_em) },
           { id: 'clicado', titulo: 'Clicou', valor: (item: Linha) => item.clicado_em || '', render: (item: Linha) => marca(item.clicado_em) },
-        ]} filtros={[{ id: 'tipo', titulo: 'Qual e-mail', valor: (item: Linha) => NOMES[item.tipo] || item.tipo }]} linhas={linhas} chave={(item) => `${item.email}-${item.tipo}`} inicial={{ id: 'enviado', desc: true }} vazio="Nenhum e-mail enviado." />
-        <p className="adm-hint">A abertura é aproximada: o Apple Mail marca sozinho e alguns programas bloqueiam a contagem. O clique é o sinal seguro.</p>
+        ]} filtros={[{ id: 'tipo', titulo: 'Qual e-mail', valor: (item: Linha) => NOMES[item.tipo] || item.tipo }, { id: 'entrega', titulo: 'Entrega', valor: (item: Linha) => ENTREGA[item.entrega || ''] || 'Não conferido' }]} linhas={linhas} chave={(item) => `${item.email}-${item.tipo}`} inicial={{ id: 'enviado', desc: true }} vazio="Nenhum e-mail enviado." />
+        <p className="adm-hint">"Entregue" quer dizer que o servidor da pessoa aceitou o e-mail; se ele foi para a caixa de entrada ou para o spam, só a pessoa vê. A abertura é aproximada: o Apple Mail marca sozinho e alguns programas bloqueiam a contagem. O clique é o sinal seguro.</p>
       </details>}
     </section>
   );

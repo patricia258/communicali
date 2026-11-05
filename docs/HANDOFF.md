@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (17) | E-mails: spam e entrega
+- Diagnóstico (Lilian Oliveira, Sursuma, disse que não recebeu): boas-vindas (03/11) e card (05/11) aceitos pela Resend. DNS de calirh.com está certo: SPF do send.calirh.com (amazonses), DKIM resend._domainkey, DMARC p=none sem relatório.
+- `api/_email.js`: todo e-mail sai também em texto simples (`textoSimples`, links rastreados voltam ao endereço final). Boas-vindas, card e agradecimento (`lote`) levam List-Unsubscribe (link assinado e mailto) com one-click e respeitam quem pediu para sair.
+- `email-admin` `acao: entregas`: lê na Resend o `last_event` de cada envio e grava em `email_log.entrega` (migração `20261105210000_email_entrega.sql`). Painel: botão "Conferir entregas", cartão Entregues (voltaram, spam, erro), coluna e filtro Entrega.
+- Pendente com a Patrícia: DMARC com endereço de relatório (rua) no DNS; pedir aos inscritos que marquem "não é spam" e salvem comuni@calirh.com nos contatos.
+
 ### 2026-11-05 (16) | Votação organizada e check-in junto confirmado pelo responsável
 - `PollEditor` em seções: cabeçalho com status e ações; números (respostas, médias, distância) com Exportar CSV e **Zerar respostas** (apaga `poll_votes`, mantém as perguntas); "No dia do encontro" explicando Telão da sala e Página de votar, cada um com abrir e copiar link; Perguntas; exclusão no fim. Na edição, a votação não fica mais dentro de outro cartão. Avisos somem sozinhos.
 - Check-in junto: `communicali_registrar_presenca` não marca mais sozinho; devolve `junto` com id, tipo e nome. A tela de sucesso pergunta "Quem está com você agora?" e só marca quem a pessoa escolher (`communicali_confirmar_junto`, pelo código do check-in). Migração `20261105200000_checkin_confirma_junto.sql`; testado numa transação desfeita.

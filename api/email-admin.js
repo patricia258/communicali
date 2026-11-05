@@ -86,7 +86,7 @@ export default async function handler(req, res) {
   }
 
   const pessoas = await destinatarios(edition.id);
-  const log = await (await banco(`email_log?edition_id=eq.${edition.id}&select=email,tipo,situacao,created_at,aberto_em,clicado_em`)).json();
+  const log = await (await banco(`email_log?edition_id=eq.${edition.id}&select=email,tipo,situacao,created_at,aberto_em,clicado_em,entrega`)).json();
   const enviados = (item) => new Set(log.filter((row) => row.tipo === item && row.situacao === 'enviado').map((row) => row.email));
 
   if (acao === 'resumo') {
@@ -96,6 +96,23 @@ export default async function handler(req, res) {
   if (acao === 'acompanhar') {
     const nomes = new Map(pessoas.map((item) => [item.email, item.nome]));
     return res.status(200).json({ linhas: log.filter((row) => row.situacao !== 'reservado').map((row) => ({ ...row, nome: nomes.get(row.email) || '' })) });
+  }
+
+  // Situação de entrega na Resend (entregue, devolvido, marcado como spam...). Lê 15 por vez; o painel repete até acabar.
+  if (acao === 'entregas') {
+    const FINAIS = ['delivered', 'opened', 'clicked', 'bounced', 'complained', 'failed', 'suppressed'];
+    const linhas = await (await banco(`email_log?edition_id=eq.${edition.id}&resend_id=not.is.null&or=(entrega.is.null,entrega.not.in.(${FINAIS.join(',')}))&select=id,resend_id&order=created_at&limit=15`)).json();
+    let lidos = 0;
+    for (const linha of Array.isArray(linhas) ? linhas : []) {
+      const r = await fetch(`https://api.resend.com/emails/${linha.resend_id}`, { headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` } });
+      if (!r.ok) break;
+      const dados = await r.json();
+      await banco(`email_log?id=eq.${linha.id}`, { method: 'PATCH', body: JSON.stringify({ entrega: dados.last_event || 'sent', entrega_em: new Date().toISOString() }) });
+      lidos += 1;
+      await new Promise((resolve) => setTimeout(resolve, 550));
+    }
+    const resto = await (await banco(`email_log?edition_id=eq.${edition.id}&resend_id=not.is.null&or=(entrega.is.null,entrega.not.in.(${FINAIS.join(',')}))&select=id`)).json();
+    return res.status(200).json({ lidos, faltam: Array.isArray(resto) ? resto.length : 0 });
   }
 
   // Quem acabou de ser marcado Confirmado no painel: boas-vindas e card Eu vou!, uma vez só por pessoa.
