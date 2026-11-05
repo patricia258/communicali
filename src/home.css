@@ -328,3 +328,13 @@ html{scroll-behavior:smooth}
 .faixa{padding-top:64px;padding-bottom:64px}
 .faixa--emenda{padding-bottom:72px}
 .home .site-footer{margin-top:0}
+/* Ajustes da prévia (05/11): respiro embaixo dos tickets, card do próximo encontro com fundo e entrada pela direita,
+   e sem a faixa vazia entre a agenda e os parceiros. */
+#programa{padding-bottom:96px}
+.faixa--clara .event{box-shadow:18px 18px 0 #DDB160,0 30px 60px rgba(90,30,45,.22)}
+.faixa--clara .event{margin-right:18px}
+.revelar .event{opacity:0;transform:translateX(120px);transition:opacity .9s cubic-bezier(.2,.7,.2,1) .15s,transform .9s cubic-bezier(.2,.7,.2,1) .15s}
+.revelar.visivel .event{opacity:1;transform:none}
+.faixa--clara + .sponsors{margin-top:0;border-top:0}
+@media (prefers-reduced-motion:reduce){.revelar .event{transform:none;transition:none;opacity:1}}
+@media (max-width:700px){#programa{padding-bottom:64px}.faixa--clara .event{box-shadow:10px 10px 0 #DDB160,0 20px 40px rgba(90,30,45,.2);margin-right:10px}}
