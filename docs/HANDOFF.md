@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (21) | E-mail que voltou: aviso e reenvio
+- Pessoas da edição: ao abrir, lê na Resend os envios sem retorno (`entregas`) e marca "Voltou" no e-mail de quem teve envio devolvido ou bloqueado, com um aviso acima da tabela listando os nomes.
+- Corrigir o e-mail pelo lápis (formulário ou pessoa manual) de alguém Confirmado chama `email-admin` `limpar_falhas` (apaga do registro os envios que voltaram no endereço antigo) e `confirmados` (boas-vindas e card ao endereço novo). Botão de envelope em cada linha confirmada reenvia só o que ainda não chegou. `RespostaGaveta.mudou` agora recebe a resposta salva.
+- Voltar uma pessoa para Confirmado (por exemplo, de "Não vai") já dispara boas-vindas e card se ela ainda não recebeu.
+- Feito: Paula Gaio corrigida para contato@pgrecursoshumanos.com.br, reenviado e entregue; registros antigos da Lilian e da Paula limpos. Só a Cleia (email@email.com) segue marcada.
+
 ### 2026-11-05 (20) | Prévia: página inicial com faixas de cor
 - Branch `logo-nova` (não publicado): topo em marfim com a logo bordô (`public/brand/comunicali-bordo-horizontal.png`); "Primeira vez?" em degradê mostarda; Formatos continua bordô; Próximo encontro e Perguntas frequentes em fundo claro; rodapé mostarda com logo bordô. Faixas por `.faixa--mostarda` e `.faixa--clara` (variáveis de cor locais, fundo em toda a largura). Texto legal do rodapé encurtado para duas linhas. Ajustes seguintes: respiro embaixo dos tickets (#programa), card do próximo encontro com fundo mostarda deslocado e entrada da direita para a esquerda, sem a faixa vazia antes dos parceiros. "Como foram os encontros" só aparece quando já houve encontro; rodapé da página inicial bordô com legal e "Toda honra a Deus!" centralizados em marfim e mostarda. Prévia atual: https://communicali-14c0gg1r1-cali11.vercel.app
 - Post e story do primeiro encontro (logo antiga, fachada) em `~/CALI/communicali-materiais/primeiro-encontro-post-story/`.

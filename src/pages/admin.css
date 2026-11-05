@@ -257,3 +257,4 @@ select.adm-nota{border-style:solid;cursor:pointer}
 .adm-dia__item{display:flex;flex-direction:column;justify-content:space-between;gap:14px;padding:16px 18px;border:1px solid #eadfd6;border-radius:12px;background:#fbf7f3}
 .adm-dia__item strong{font-size:15px;color:#5a1e2d}.adm-dia__item p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.5}
 .adm-zona-perigo{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:4px 0 24px;font-size:13px;color:var(--muted)}
+.adm-email-situacao{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}

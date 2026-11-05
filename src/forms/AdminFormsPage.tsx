@@ -595,7 +595,7 @@ export function PlanilhaDaEdicao({ slug }: { slug: string }) {
 }
 
 /** Ver ou editar uma resposta a partir de outra tela (Pessoas da edição). */
-export function RespostaGaveta({ slug, id, modo: inicial, fechar, mudou }: { slug: string; id: string; modo: 'ver' | 'editar'; fechar: () => void; mudou: () => void }) {
+export function RespostaGaveta({ slug, id, modo: inicial, fechar, mudou }: { slug: string; id: string; modo: 'ver' | 'editar'; fechar: () => void; mudou: (salvo?: { respondent_email: string | null }) => void }) {
   const [form, setForm] = useState<FormRecord | null>(null);
   const [row, setRow] = useState<ResponseRow | null>(null);
   const [modo, setModo] = useState(inicial);
@@ -606,7 +606,7 @@ export function RespostaGaveta({ slug, id, modo: inicial, fechar, mudou }: { slu
   }, [slug, id]);
   if (!form || !row) return null;
   if (modo === 'ver') return <ViewResponse form={form} row={row} onClose={fechar} onEdit={() => setModo('editar')} />;
-  return <EditResponse form={form} row={row} onClose={fechar} onSaved={() => { mudou(); fechar(); }} onDelete={async () => {
+  return <EditResponse form={form} row={row} onClose={fechar} onSaved={(salvo) => { mudou(salvo); fechar(); }} onDelete={async () => {
     if (!supabase || !window.confirm(`Excluir a resposta de ${row.respondent_name || 'esta pessoa'}? Ela sai da edição.`)) return;
     await supabase.from('form_responses').delete().eq('id', row.id); mudou(); fechar();
   }} />;

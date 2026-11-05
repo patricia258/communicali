@@ -2,7 +2,7 @@
    Participantes (formulário ou site), convidados (link de convite), pessoas adicionadas à mão (kids, assistente...),
    staff (com o assistente), fornecedores e organização. A situação decide quem recebe os e-mails de quem vai: só "Confirmado". */
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Mail, Pencil, Trash2 } from 'lucide-react';
 import { supabase } from '../lib';
 import { downloadXlsx } from '../forms/formExports';
 import { RespostaGaveta } from '../forms/AdminFormsPage';
@@ -32,7 +32,9 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   const [lote, setLote] = useState({ situacao: '', categoria: '' });
   const [aviso, setAviso] = useState('');
   const [busy, setBusy] = useState(false);
-  const [janela, setJanela] = useState<null | { tipo: 'manual'; item?: Manual } | { tipo: 'equipe' } | { tipo: 'resposta'; id: string; modo: 'ver' | 'editar' }>(null);
+  const [janela, setJanela] = useState<null | { tipo: 'manual'; item?: Manual } | { tipo: 'equipe' } | { tipo: 'resposta'; id: string; modo: 'ver' | 'editar'; pessoa: Pessoa }>(null);
+  // E-mails que voltaram (endereço errado ou bloqueado) nesta edição.
+  const [voltaram, setVoltaram] = useState<Set<string>>(new Set());
   const [copiado, setCopiado] = useState(false);
 
   // Recarrega sem tirar a tabela da tela: só a primeira carga mostra "Carregando".
@@ -43,6 +45,23 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   }
   // A mudança aparece na hora; o banco grava em seguida.
   const trocarLocal = (pessoas: Pessoa[], mudanca: Partial<Pessoa>) => { const ids = new Set(pessoas.map(chave)); setLista((atual) => atual.map((item) => (ids.has(chave(item)) ? { ...item, ...mudanca } : item))); };
+  async function carregarVoltaram() {
+    const { data } = await supabase.from('email_log').select('email').eq('edition_id', edition.id).in('entrega', ['bounced', 'suppressed', 'failed']);
+    setVoltaram(new Set(((data || []) as Array<{ email: string }>).map((row) => row.email.toLowerCase())));
+  }
+  // Ao abrir, confere na Resend os envios ainda sem retorno e marca quem teve e-mail devolvido.
+  useEffect(() => { void carregarVoltaram(); void chamar({ acao: 'entregas', edicao: edition.id }).then(carregarVoltaram).catch(() => null); }, [edition.id]);
+
+  // E-mail corrigido ou pedido de reenvio: apaga o que voltou no endereço antigo e manda boas-vindas e card ao endereço atual.
+  async function reenviar(item: Pessoa, novo: string | null, antigo?: string | null) {
+    if (!novo || item.situacao !== 'confirmado' || item.categoria === 'Kids') return;
+    if (antigo && antigo !== novo) await chamar({ acao: 'limpar_falhas', edicao: edition.id, email: antigo }).catch(() => null);
+    const resposta = await chamar({ acao: 'confirmados', edicao: edition.id, emails: novo }).catch(() => null);
+    const enviados = Number(resposta?.enviados || 0);
+    avisar(enviados ? `${item.nome}: ${enviados} ${enviados === 1 ? 'e-mail reenviado' : 'e-mails reenviados'} para ${novo}.` : `${item.nome} já tinha recebido tudo em ${novo}.`);
+    void carregarVoltaram();
+  }
+
   // Lista sempre em dia: carrega ao abrir, a cada 30 segundos e quando você volta para a aba.
   useEffect(() => {
     void carregar();
@@ -228,8 +247,9 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
     { id: 'sel', titulo: '', estreita: true, valor: () => '', cabecalho: <input type="checkbox" aria-label="Selecionar todos" title="Selecionar todos" checked={todos} onChange={() => setSelecao(todos ? new Set() : new Set(selecionaveis.map(chave)))} />,
       render: (item: Pessoa) => (MUDA.includes(item.fonte) ? <input type="checkbox" aria-label={`Selecionar ${item.nome}`} checked={selecao.has(chave(item))} onChange={() => alternar(item)} /> : null) },
     { id: 'acoes', titulo: '', estreita: true, valor: () => '', cabecalho: <span className="adm-sr">Ações</span>, render: (item: Pessoa) => <span className="v2-forms-row-actions">
-      {item.fonte === 'form' && edition.form_inscricao && <button type="button" className="v2-forms-edit" title="Ver as respostas" aria-label={`Ver as respostas de ${item.nome}`} onClick={() => setJanela({ tipo: 'resposta', id: item.id, modo: 'ver' })}><Eye size={14} /></button>}
-      {item.fonte === 'form' && edition.form_inscricao && <button type="button" className="v2-forms-edit" title="Editar as respostas" aria-label={`Editar ${item.nome}`} onClick={() => setJanela({ tipo: 'resposta', id: item.id, modo: 'editar' })}><Pencil size={13} /></button>}
+      {item.fonte === 'form' && edition.form_inscricao && <button type="button" className="v2-forms-edit" title="Ver as respostas" aria-label={`Ver as respostas de ${item.nome}`} onClick={() => setJanela({ tipo: 'resposta', id: item.id, modo: 'ver', pessoa: item })}><Eye size={14} /></button>}
+      {item.fonte === 'form' && edition.form_inscricao && <button type="button" className="v2-forms-edit" title="Editar as respostas" aria-label={`Editar ${item.nome}`} onClick={() => setJanela({ tipo: 'resposta', id: item.id, modo: 'editar', pessoa: item })}><Pencil size={13} /></button>}
+      {item.email && item.situacao === 'confirmado' && MUDA.includes(item.fonte) && item.categoria !== 'Kids' && <button type="button" className="v2-forms-edit" title="Reenviar boas-vindas e card (só o que ainda não chegou)" aria-label={`Reenviar e-mails para ${item.nome}`} onClick={() => void reenviar(item, item.email)}><Mail size={13} /></button>}
       {item.fonte === 'manual' && <button type="button" className="v2-forms-edit" title="Editar" aria-label={`Editar ${item.nome}`} onClick={() => void editarManual(item)}><Pencil size={13} /></button>}
       {['staff', 'assistente'].includes(item.fonte) && <a className="v2-forms-edit" title="Ver no cadastro de Staff" aria-label={`Ver ${item.nome} no cadastro de Staff`} href="/admin/staff"><Eye size={14} /></a>}
       {item.fonte === 'fornecedor' && <a className="v2-forms-edit" title="Ver no cadastro de Fornecedores" aria-label={`Ver ${item.nome} no cadastro de Fornecedores`} href="/admin/fornecedores"><Eye size={14} /></a>}
@@ -244,7 +264,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
       : <span className="adm-situacao adm-situacao--confirmado adm-situacao--fixa" title={ORIGEM_CADASTRO[item.fonte]}>Confirmado</span>) },
     { id: 'recorrencia', titulo: 'Recorrência', valor: recorrencia },
     { id: 'whatsapp', titulo: 'WhatsApp', valor: (item: Pessoa) => item.whatsapp || '', render: (item: Pessoa) => <Telefone numero={item.whatsapp} /> },
-    { id: 'email', titulo: 'E-mail', valor: (item: Pessoa) => item.email || '', render: (item: Pessoa) => <Email email={item.email} /> },
+    { id: 'email', titulo: 'E-mail', valor: (item: Pessoa) => item.email || '', render: (item: Pessoa) => <span className="adm-email-situacao"><Email email={item.email} />{item.email && voltaram.has(item.email) && <span className="adm-status adm-status--erro" title="Os e-mails para este endereço voltaram. Corrija pelo lápis: ao salvar, reenviamos.">Voltou</span>}</span> },
     { id: 'detalhe', titulo: 'Origem ou função', valor: (item: Pessoa) => item.detalhe || '-' },
     { id: 'convidado_de', titulo: 'Convidado de', valor: (item: Pessoa) => item.convidado_de || '', render: (item: Pessoa) => (MUDA.includes(item.fonte) && item.categoria !== 'Kids'
       ? <input key={`${chave(item)}:${item.convidado_de || ''}`} className="adm-nota adm-nota--curta" list="pessoas-anfitrioes" defaultValue={item.convidado_de || ''} placeholder={item.categoria === 'Convidado' ? 'De quem?' : '-'} title="Quem convidou esta pessoa"
@@ -261,7 +281,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
         onKeyDown={(event) => { if (event.key === 'Enter') (event.target as HTMLInputElement).blur(); }} onBlur={(event) => void salvarNota(item, event.target.value)} />
       : <span className="adm-status">-</span>) },
     { id: 'chegou', titulo: 'Check-in', valor: (item: Pessoa) => item.chegou_em || '', render: (item: Pessoa) => (item.chegou_em ? <span className="adm-status adm-status--sim">Chegou {new Date(item.chegou_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })}</span> : <span className="adm-status">Ainda não</span>) },
-  ], [selecao, busy, lista, todos]);
+  ], [selecao, busy, lista, todos, voltaram]);
 
   return (
     <section className="v2-forms-card" id="secao-pessoas">
@@ -279,6 +299,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
         <div className="adm-card"><span>Equipe e kids</span><strong>{conta('Staff') + conta('Fornecedor') + conta('Organização') + conta('Kids')}</strong><small>{conta('Staff')} staff · {conta('Fornecedor')} fornecedores · {conta('Organização')} organização · {conta('Kids')} kids</small></div>
       </div>
       <p className="adm-hint adm-hint--antes">Troque a <strong>categoria</strong> e a <strong>situação</strong> direto na linha. Só quem está <strong>Confirmado</strong> recebe o lembrete, o card Eu vou! e os e-mails de quem vai. O olho mostra tudo o que a pessoa respondeu no formulário; a <strong>nota interna</strong> só a organização vê. Quem se inscrever aparece aqui sozinho.</p>
+      {(() => { const problemas = lista.filter((item) => item.email && voltaram.has(item.email)); return problemas.length > 0 && <p className="adm-hint adm-alerta adm-hint--antes" role="alert">{problemas.length === 1 ? 'Um e-mail voltou' : `${problemas.length} e-mails voltaram`}: {problemas.map((item) => item.nome).join(', ')}. Corrija o e-mail pelo lápis; ao salvar, as boas-vindas e o card são reenviados.</p>; })()}
       {selecao.size > 0 && <div className="adm-lote" role="region" aria-label="Mudar várias pessoas de uma vez">
         <strong>{selecao.size} {selecao.size === 1 ? 'pessoa marcada' : 'pessoas marcadas'} na caixinha</strong>
         <label>Mudar a situação para<select value={lote.situacao} onChange={(event) => setLote({ ...lote, situacao: event.target.value })}><option value="">Manter como está</option>{SITUACOES.map(([valor, rotulo]) => <option key={valor} value={valor}>{rotulo}</option>)}</select></label>
@@ -295,15 +316,15 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
           <button type="button" className="wf-primary" disabled={!vao.length} onClick={() => void imprimir()}>Imprimir lista da recepção</button>
           <button type="button" className="wf-secondary" disabled={!lista.length} onClick={exportar}>Exportar Excel</button>
         </>} />}
-      {janela?.tipo === 'manual' && <PessoaManual edition={edition.id} item={janela.item} responsaveis={adultos.map((item) => ({ nome: item.nome, email: item.email || '' }))} fechar={() => setJanela(null)} salvo={() => { setJanela(null); void carregar(); }} />}
+      {janela?.tipo === 'manual' && <PessoaManual edition={edition.id} item={janela.item} responsaveis={adultos.map((item) => ({ nome: item.nome, email: item.email || '' }))} fechar={() => setJanela(null)} salvo={(novo) => { const antes = janela.item; setJanela(null); void carregar(); const pessoa = antes && lista.find((item) => item.fonte === 'manual' && item.id === antes.id); if (pessoa && novo && novo !== pessoa.email) void reenviar(pessoa, novo, pessoa.email); }} />}
       {janela?.tipo === 'equipe' && <NovaEquipe edition={edition.id} fechar={() => setJanela(null)} salvo={() => { setJanela(null); void carregar(); }} />}
-      {janela?.tipo === 'resposta' && edition.form_inscricao && <RespostaGaveta slug={edition.form_inscricao} id={janela.id} modo={janela.modo} fechar={() => setJanela(null)} mudou={() => void carregar()} />}
+      {janela?.tipo === 'resposta' && edition.form_inscricao && <RespostaGaveta slug={edition.form_inscricao} id={janela.id} modo={janela.modo} fechar={() => setJanela(null)} mudou={(salvo) => { void carregar(); const novo = salvo?.respondent_email?.trim().toLowerCase() || null; if (novo && novo !== janela.pessoa.email) void reenviar(janela.pessoa, novo, janela.pessoa.email); }} />}
     </section>
   );
 }
 
 /** Adicionar ou editar alguém à mão: kids, assistente, convidado de última hora... Entra como confirmado. */
-function PessoaManual({ edition, item, responsaveis, fechar, salvo }: { edition: string; item?: Manual; responsaveis: Array<{ nome: string; email: string }>; fechar: () => void; salvo: () => void }) {
+function PessoaManual({ edition, item, responsaveis, fechar, salvo }: { edition: string; item?: Manual; responsaveis: Array<{ nome: string; email: string }>; fechar: () => void; salvo: (email: string | null) => void }) {
   const [dados, setDados] = useState({ categoria: item?.categoria || 'Kids', nome: item?.nome || '', funcao: item?.funcao || '', idade: item?.idade != null ? String(item.idade) : '', responsavel: item?.responsavel || '', email: item?.email || '', whatsapp: item?.whatsapp || '' });
   const [erro, setErro] = useState('');
   const set = (campo: keyof typeof dados, valor: string) => setDados({ ...dados, [campo]: valor });
@@ -315,7 +336,7 @@ function PessoaManual({ edition, item, responsaveis, fechar, salvo }: { edition:
       // O responsável escolhido da lista faz o check-in da criança junto com o dele.
       ...(kids ? { responsavel_email: responsaveis.find((pessoa) => pessoa.nome === dados.responsavel.trim())?.email || null } : {}), email: !kids ? dados.email.trim().toLowerCase() || null : null, whatsapp: !kids ? dados.whatsapp.trim() || null : null };
     const { error } = item ? await supabase.from('edition_kids').update(linha).eq('id', item.id) : await supabase.from('edition_kids').insert({ ...linha, edition_id: edition });
-    if (error) setErro('Confira o nome' + (kids ? ' e a idade (até 17 anos).' : '.')); else salvo();
+    if (error) setErro('Confira o nome' + (kids ? ' e a idade (até 17 anos).' : '.')); else salvo(linha.email);
   }
   return <div className="ap-pd-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) fechar(); }}>
     <form className="ap-status-confirm adm-form-pessoa" role="dialog" aria-modal="true" aria-label={item ? 'Editar pessoa' : 'Adicionar pessoa'} onSubmit={(event) => void salvar(event)}>

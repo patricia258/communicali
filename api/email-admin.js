@@ -95,6 +95,14 @@ export default async function handler(req, res) {
     return res.status(200).json({ email: situacao });
   }
 
+  // E-mail corrigido: apaga do registro os envios que voltaram para o endereço antigo (o novo recebe de novo pelo 'confirmados').
+  if (acao === 'limpar_falhas') {
+    const antigo = String(req.body?.email || '').trim().toLowerCase();
+    if (!antigo.includes('@')) return res.status(400).json({ error: 'Informe o e-mail.' });
+    await banco(`email_log?edition_id=eq.${edition.id}&email=eq.${encodeURIComponent(antigo)}&entrega=in.(bounced,suppressed,failed)`, { method: 'DELETE' });
+    return res.status(200).json({ ok: true });
+  }
+
   const pessoas = await destinatarios(edition.id);
   const log = await (await banco(`email_log?edition_id=eq.${edition.id}&select=email,tipo,situacao,created_at,aberto_em,clicado_em,entrega`)).json();
   const enviados = (item) => new Set(log.filter((row) => row.tipo === item && row.situacao === 'enviado').map((row) => row.email));
