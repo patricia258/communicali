@@ -9,7 +9,7 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
 ### 2026-11-05 (20) | Prévia: página inicial com faixas de cor
-- Branch `logo-nova` (não publicado): topo em marfim com a logo bordô (`public/brand/comunicali-bordo-horizontal.png`); "Primeira vez?" em degradê mostarda; Formatos continua bordô; Próximo encontro e Perguntas frequentes em fundo claro; rodapé mostarda com logo bordô. Faixas por `.faixa--mostarda` e `.faixa--clara` (variáveis de cor locais, fundo em toda a largura). Texto legal do rodapé encurtado para duas linhas. Prévia: https://communicali-kmqebh2ns-cali11.vercel.app
+- Branch `logo-nova` (não publicado): topo em marfim com a logo bordô (`public/brand/comunicali-bordo-horizontal.png`); "Primeira vez?" em degradê mostarda; Formatos continua bordô; Próximo encontro e Perguntas frequentes em fundo claro; rodapé mostarda com logo bordô. Faixas por `.faixa--mostarda` e `.faixa--clara` (variáveis de cor locais, fundo em toda a largura). Texto legal do rodapé encurtado para duas linhas. Ajustes seguintes: respiro embaixo dos tickets (#programa), card do próximo encontro com fundo mostarda deslocado e entrada da direita para a esquerda, sem a faixa vazia antes dos parceiros. Prévia atual: https://communicali-lw3g0h3de-cali11.vercel.app
 - Post e story do primeiro encontro (logo antiga, fachada) em `~/CALI/communicali-materiais/primeiro-encontro-post-story/`.
 
 ### 2026-11-05 (19) | Passaporte da organização e prévia da logo nova
