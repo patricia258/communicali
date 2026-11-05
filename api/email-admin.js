@@ -102,12 +102,14 @@ export default async function handler(req, res) {
     const modelo = tipo === 'agradecimento' || tipo === 'card' ? tipo : 'boasvindas';
     const ja = enviados(modelo);
     const fila = pessoas.filter((item) => (publico === 'todos' || (publico === 'sem_contato' ? !item.acionado : item.acionado)) && !ja.has(item.email));
-    let erros = 0;
+    // Conta só o que saiu de verdade (antes, uma falha ao registrar aparecia como enviado).
+    let erros = 0; let enviadosAgora = 0;
     for (const pessoa of fila.slice(0, LOTE)) {
-      if ((await enviarUmaVez(modelo, edition, pessoa)) === 'erro') erros += 1;
+      const situacao = await enviarUmaVez(modelo, edition, pessoa);
+      if (situacao === 'erro') erros += 1; else if (situacao === 'enviado') enviadosAgora += 1;
       await pausa();
     }
-    return res.status(200).json({ enviados: Math.min(fila.length, LOTE) - erros, restantes: Math.max(fila.length - LOTE, 0), erros });
+    return res.status(200).json({ enviados: enviadosAgora, restantes: Math.max(fila.length - LOTE, 0), erros });
   }
 
   res.status(400).json({ error: 'Ação desconhecida.' });

@@ -9,7 +9,9 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
 ### 2026-11-05 (6) | Card Eu vou! enviado
-- Com o ok da Patrícia, o e-mail do card foi enviado aos 25 confirmados da 1ª Edição (tipo `card` no email_log, 0 erros). Quem já recebeu não recebe de novo. Acompanhar aberturas, cliques e a lista de Mimos no painel da edição.
+- Primeira tentativa não enviou nada: a regra de `email_log.tipo` não aceitava "card", a reserva falhava e o envio contava como feito. Corrigido (migração `20261105120000_email_log_card.sql`) e o lote agora conta só o que saiu de verdade.
+- Com o ok da Patrícia, o e-mail do card foi enviado aos 25 confirmados da 1ª Edição (25 registros "enviado" com id do Resend, 0 erros). Quem já recebeu não recebe de novo. Acompanhar aberturas, cliques e a lista de Mimos no painel da edição.
+- Ao criar um tipo de e-mail novo, incluir o tipo na regra de `email_log`.
 
 ### 2026-11-05 (5) | Card também em story
 - `/eu-vou`: escolha "Feed e LinkedIn" (1080x1350) ou "Story do Instagram" (1080x1920). O story usa a mesma arte, centralizada, deixando livres o topo e a base que o Instagram cobre. A foto escolhida no aparelho vale para os dois formatos.
