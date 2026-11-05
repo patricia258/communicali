@@ -8,6 +8,11 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (11) | Pessoas sem pisca e lista da recepção por categoria
+- Mudar situação ou categoria atualiza a linha na hora e grava em seguida; a tabela não some mais ("Carregando" só na primeira carga). Avisos viram toast.
+- Lista da recepção: só confirmados, um bloco por categoria (Membros separados dos Participantes pelo nível no passaporte, via `nivel` em `communicali_pessoas_edicao`, migração `20261105170000`), ordem alfabética, colunas Nome, Primeira vez?, E-mail (ou função para equipe e kids), WhatsApp e Chegou.
+- Card e mimos: botão renomeado para "Imprimir lista dos mimos".
+
 ### 2026-11-05 (10) | Pessoas da edição: categoria, pessoa manual, assistente e respostas juntas
 - Os 24 que estavam "Contatado" (já conferidos antes da mudança) viraram "Confirmado": 25 participantes confirmados.
 - Categoria editável na linha e em lote (`communicali_definir_categoria`; coluna `categoria` em `form_responses`, `registrations`, `guests`).

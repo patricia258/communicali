@@ -9,7 +9,7 @@ import { PlanilhaDaEdicao, RespostaGaveta } from '../forms/AdminFormsPage';
 import { Email, Tabela, Telefone } from './AdminTabela';
 import { chamar } from './AdminEmails';
 
-type Pessoa = { fonte: string; id: string; categoria: string; nome: string; email: string | null; whatsapp: string | null; situacao: string; detalhe: string | null; vezes: number; criado_em: string };
+type Pessoa = { fonte: string; id: string; categoria: string; nome: string; email: string | null; whatsapp: string | null; situacao: string; detalhe: string | null; vezes: number; criado_em: string; nivel: string | null };
 type Manual = { id: string; categoria: string; nome: string; funcao: string | null; idade: number | null; responsavel: string | null; email: string | null; whatsapp: string | null };
 type Cadastro = { id: string; nome: string; detalhe: string };
 
@@ -33,12 +33,14 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   const [janela, setJanela] = useState<null | { tipo: 'manual'; item?: Manual } | { tipo: 'equipe' } | { tipo: 'resposta'; id: string; modo: 'ver' | 'editar' }>(null);
   const [copiado, setCopiado] = useState(false);
 
+  // Recarrega sem tirar a tabela da tela: só a primeira carga mostra "Carregando".
   async function carregar() {
-    setCarregando(true);
     const { data, error } = await supabase.rpc('communicali_pessoas_edicao', { p_edition: edition.id });
     if (error) setAviso('Não foi possível carregar as pessoas.'); else setLista((data || []) as Pessoa[]);
-    setCarregando(false); setSelecao(new Set());
+    setCarregando(false);
   }
+  // A mudança aparece na hora; o banco grava em seguida.
+  const trocarLocal = (pessoas: Pessoa[], mudanca: Partial<Pessoa>) => { const ids = new Set(pessoas.map(chave)); setLista((atual) => atual.map((item) => (ids.has(chave(item)) ? { ...item, ...mudanca } : item))); };
   useEffect(() => { void carregar(); }, [edition.id]);
   const avisar = (texto: string) => { setAviso(texto); window.setTimeout(() => setAviso(''), 4000); };
 
@@ -51,35 +53,37 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   async function mudarSituacao(pessoas: Pessoa[], situacao: string) {
     const validas = pessoas.filter((item) => MUDA.includes(item.fonte));
     if (!validas.length) return;
-    setBusy(true);
+    trocarLocal(validas, { situacao });
     for (const fonte of MUDA) {
       const ids = validas.filter((item) => item.fonte === fonte).map((item) => item.id);
       if (!ids.length) continue;
       const { error } = await supabase.rpc('communicali_definir_situacao', { p_fonte: fonte, p_ids: ids, p_situacao: situacao });
-      if (error) { avisar('Não foi possível salvar a situação.'); setBusy(false); return; }
+      if (error) { avisar('Não foi possível salvar a situação.'); await carregar(); return; }
       if (fonte === 'registro' && (situacao === 'confirmado' || situacao === 'nao_vai')) {
         for (const id of ids) await chamar({ acao: 'decidir', edicao: edition.id, registro: id, status: situacao === 'confirmado' ? 'inscrito' : 'cancelado' }).catch(() => null);
       }
     }
     avisar(validas.length === 1 ? `${validas[0].nome}: ${NOME_SITUACAO[situacao]}.` : `${validas.length} pessoas agora estão como ${NOME_SITUACAO[situacao]}.`);
-    setBusy(false); await carregar();
+    await carregar();
   }
   async function mudarCategoria(pessoas: Pessoa[], categoria: string) {
     const validas = pessoas.filter((item) => MUDA.includes(item.fonte));
     if (!validas.length) return;
-    setBusy(true);
+    trocarLocal(validas, { categoria });
     for (const fonte of MUDA) {
       const ids = validas.filter((item) => item.fonte === fonte).map((item) => item.id);
       if (ids.length) await supabase.rpc('communicali_definir_categoria', { p_fonte: fonte, p_ids: ids, p_categoria: categoria });
     }
     avisar(validas.length === 1 ? `${validas[0].nome}: ${categoria}.` : `${validas.length} pessoas agora estão como ${categoria}.`);
-    setBusy(false); await carregar();
+    await carregar();
   }
   async function aplicarLote() {
     const pessoas = lista.filter((item) => selecao.has(chave(item)));
+    setBusy(true);
     if (lote.situacao) await mudarSituacao(pessoas, lote.situacao);
     if (lote.categoria) await mudarCategoria(pessoas, lote.categoria);
-    setLote({ situacao: '', categoria: '' });
+    setBusy(false);
+    setLote({ situacao: '', categoria: '' }); setSelecao(new Set());
   }
 
   async function tirar(item: Pessoa) {
@@ -99,19 +103,36 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
       lista.map((item) => [item.nome, item.categoria, NOME_SITUACAO[item.situacao] || item.situacao, item.email || '', item.whatsapp || '', item.detalhe || '', recorrencia(item)]));
   }
 
-  // Lista da recepção: todos os confirmados, por categoria e nome, com caixa para marcar a chegada no papel.
+  // Lista da recepção: só os confirmados, um bloco por categoria (membros separados dos participantes), em ordem alfabética,
+  // com o que a recepção usa: nome, primeira vez ou não, e-mail e WhatsApp para achar a pessoa, e a caixa de chegada.
   function imprimir() {
-    const linhas = [...vao].sort((a, b) => CATEGORIAS.indexOf(a.categoria) - CATEGORIAS.indexOf(b.categoria) || a.nome.localeCompare(b.nome, 'pt-BR'))
-      .map((item, n) => `<tr><td>${n + 1}</td><td>${item.nome.replace(/</g, '&lt;')}</td><td>${item.categoria}</td><td>${(item.detalhe || '').replace(/</g, '&lt;')}</td><td class="caixa"></td></tr>`).join('');
+    const grupo = (item: Pessoa) => (item.categoria === 'Participante' && item.nivel && item.nivel !== 'visitante' ? 'Membro' : item.categoria);
+    const ORDEM = ['Membro', 'Participante', 'Convidado', 'Kids', 'Staff', 'Fornecedor', 'Organização'];
+    const PLURAL: Record<string, string> = { Membro: 'Membros', Participante: 'Participantes', Convidado: 'Convidados', Kids: 'Kids', Staff: 'Staff', Fornecedor: 'Fornecedores', 'Organização': 'Organização' };
+    const esc = (texto: string | null) => (texto || '').replace(/</g, '&lt;');
+    let n = 0;
+    const blocos = ORDEM.map((nome) => {
+      const gente = vao.filter((item) => grupo(item) === nome).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+      if (!gente.length) return '';
+      const equipe = ['Kids', 'Staff', 'Fornecedor', 'Organização'].includes(nome);
+      const linhas = gente.map((item) => {
+        n += 1;
+        const vez = item.categoria === 'Kids' ? '' : item.vezes ? `Já veio ${item.vezes}x` : '<b>Primeira vez</b>';
+        const extra = equipe ? esc((item.detalhe || '').replace(/^Adicionado à mão · ?/, '')) : esc(item.email);
+        return `<tr><td class="n">${n}</td><td class="nome">${esc(item.nome)}</td><td>${vez}</td><td>${extra}</td><td>${esc(item.whatsapp)}</td><td class="caixa"></td></tr>`;
+      }).join('');
+      return `<h2>${PLURAL[nome]} <span>${gente.length}</span></h2><table><thead><tr><th class="n">Nº</th><th>Nome</th><th>Primeira vez?</th><th>${equipe ? 'Função ou detalhe' : 'E-mail'}</th><th>WhatsApp</th><th>Chegou</th></tr></thead><tbody>${linhas}</tbody></table>`;
+    }).join('');
     const nova = window.open('', '_blank');
     if (!nova) { avisar('Libere as janelas do navegador para imprimir a lista.'); return; }
-    nova.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Lista · ${edition.titulo}</title><style>
-      body{font-family:Inter,Arial,sans-serif;color:#22100F;margin:32px}h1{font-size:22px;margin:0 0 4px}p{margin:0 0 18px;color:#5a4740;font-size:13px}
-      table{width:100%;border-collapse:collapse;font-size:14px}th,td{border:1px solid #cdbcae;padding:8px 10px;text-align:left}th{background:#f3ece6;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
-      td:first-child{width:36px;text-align:center}.caixa{width:90px}@media print{body{margin:12mm}}</style></head><body>
-      <h1>${edition.titulo}</h1><p>${vao.length} pessoas confirmadas. Marque a última coluna na chegada.</p>
-      <table><thead><tr><th>Nº</th><th>Nome</th><th>Categoria</th><th>Detalhe</th><th>Chegou</th></tr></thead><tbody>${linhas}</tbody></table>
-      <script>window.onload=()=>window.print()<\/script></body></html>`);
+    nova.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Recepção · ${esc(edition.titulo)}</title><style>
+      body{font-family:Inter,Arial,sans-serif;color:#22100F;margin:28px}h1{font-size:22px;margin:0 0 2px}.sub{margin:0 0 8px;color:#5a4740;font-size:13px}
+      h2{margin:22px 0 8px;padding:6px 12px;border-radius:6px;background:#5a1e2d;color:#fff;font-size:15px;letter-spacing:.04em}h2 span{float:right;font-weight:600;color:#ddb160}
+      table{width:100%;border-collapse:collapse;font-size:13px;page-break-inside:auto}tr{page-break-inside:avoid}th,td{border:1px solid #cdbcae;padding:7px 9px;text-align:left}
+      th{background:#f3ece6;font-size:11px;text-transform:uppercase;letter-spacing:.06em}.n{width:30px;text-align:center}.nome{font-weight:600}.caixa{width:70px}
+      @media print{body{margin:10mm}h2{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
+      <h1>Recepção · ${esc(edition.titulo)}</h1><p class="sub">${vao.length} pessoas confirmadas, separadas por categoria e em ordem alfabética. Marque "Chegou" na entrada.</p>
+      ${blocos}<script>window.onload=()=>window.print()<\/script></body></html>`);
     nova.document.close();
   }
 
@@ -132,10 +153,10 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
     </span> },
     { id: 'nome', titulo: 'Nome', valor: (item: Pessoa) => item.nome },
     { id: 'categoria', titulo: 'Categoria', valor: (item: Pessoa) => item.categoria, render: (item: Pessoa) => (MUDA.includes(item.fonte)
-      ? <select className={`adm-pill adm-pill--select ${classeCategoria(item.categoria)}`} aria-label={`Categoria de ${item.nome}`} value={item.categoria} disabled={busy} onChange={(event) => void mudarCategoria([item], event.target.value)}>{CATEGORIAS.map((categoria) => <option key={categoria}>{categoria}</option>)}</select>
+      ? <select className={`adm-pill adm-pill--select ${classeCategoria(item.categoria)}`} aria-label={`Categoria de ${item.nome}`} value={item.categoria} onChange={(event) => void mudarCategoria([item], event.target.value)}>{CATEGORIAS.map((categoria) => <option key={categoria}>{categoria}</option>)}</select>
       : <span className={`adm-pill ${classeCategoria(item.categoria)}`} title={ORIGEM_CADASTRO[item.fonte]}>{item.categoria}</span>) },
     { id: 'situacao', titulo: 'Situação', valor: (item: Pessoa) => NOME_SITUACAO[item.situacao] || item.situacao, render: (item: Pessoa) => (MUDA.includes(item.fonte)
-      ? <select className={`adm-situacao adm-situacao--${item.situacao}`} aria-label={`Situação de ${item.nome}`} value={item.situacao} disabled={busy} onChange={(event) => void mudarSituacao([item], event.target.value)}>{SITUACOES.map(([valor, rotulo]) => <option key={valor} value={valor}>{rotulo}</option>)}</select>
+      ? <select className={`adm-situacao adm-situacao--${item.situacao}`} aria-label={`Situação de ${item.nome}`} value={item.situacao} onChange={(event) => void mudarSituacao([item], event.target.value)}>{SITUACOES.map(([valor, rotulo]) => <option key={valor} value={valor}>{rotulo}</option>)}</select>
       : <span className="adm-situacao adm-situacao--confirmado adm-situacao--fixa" title={ORIGEM_CADASTRO[item.fonte]}>Confirmado</span>) },
     { id: 'recorrencia', titulo: 'Recorrência', valor: recorrencia },
     { id: 'whatsapp', titulo: 'WhatsApp', valor: (item: Pessoa) => item.whatsapp || '', render: (item: Pessoa) => <Telefone numero={item.whatsapp} /> },
@@ -166,7 +187,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
         <button type="button" className="wf-primary" disabled={busy || (!lote.situacao && !lote.categoria)} onClick={() => void aplicarLote()}>Aplicar</button>
         <button type="button" className="wf-secondary" onClick={() => setSelecao(new Set())}>Desmarcar</button>
       </div>}
-      {aviso && <p className="v2-forms-ok" role="status">{aviso}</p>}
+      {aviso && <div className="v2-forms-toast" role="status">{aviso}</div>}
       {carregando ? <div className="data-loading">Carregando pessoas…</div> : <Tabela<Pessoa> colunas={colunas} linhas={lista} chave={chave} inicial={{ id: 'nome' }} vazio="Ninguém nesta edição ainda."
         filtros={[{ id: 'categoria', titulo: 'Categoria', valor: (item) => item.categoria }, { id: 'situacao', titulo: 'Situação', valor: (item) => NOME_SITUACAO[item.situacao] || item.situacao }, { id: 'recorrencia', titulo: 'Recorrência', valor: (item) => (recorrencia(item) === 'Primeira vez' ? 'Primeira vez' : recorrencia(item) === '-' ? '' : 'Já veio') }]}
         acoes={<>

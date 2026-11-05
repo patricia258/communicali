@@ -185,7 +185,7 @@ export function CardEMimos({ edition }: { edition: { id: string; titulo: string;
       ]} filtros={[{ id: 'onde', titulo: 'Onde postou', valor: (item) => item.redes.join(' e ') }, { id: 'aprovado', titulo: 'Post aprovado', valor: (item) => (item.compartilhado_em ? (item.conferido_em ? 'Aprovado' : 'Para conferir') : 'Não postou') }]}
         linhas={lista} chave={(item) => item.id} inicial={{ id: 'nome' }} vazio="Quando alguém gerar o card, aparece aqui."
         acoes={<>
-          <button type="button" className="wf-primary" disabled={!postaram.length} onClick={imprimir}>Imprimir lista da recepção</button>
+          <button type="button" className="wf-primary" disabled={!postaram.length} onClick={imprimir}>Imprimir lista dos mimos</button>
           <button type="button" className="wf-secondary" disabled={!lista.length} onClick={exportar}>Exportar Excel</button>
         </>} />
       <p className="adm-hint">Aprove depois de ver o post marcando a CALI. A lista impressa leva só quem postou, para a recepção entregar o mimo pelo nome.</p>
