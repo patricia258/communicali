@@ -8,6 +8,14 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-05 (9) | Pessoas da edição num lugar só
+- Nova seção "Pessoas da edição" (`src/pages/AdminPessoasEdicao.tsx`, RPC `communicali_pessoas_edicao`): participantes (formulário da edição e página do site), convidados (link de convite, `registrations.indicado_por`, e `guests`), kids (tabela nova `edition_kids`, cadastro manual), staff e fornecedores ligados pelo rótulo do encontro em `eventos`, e organização. Contagem de quem vai estar lá, recorrência pelo histórico de check-ins, seleção em lote, lista impressa da recepção e Excel.
+- Situação única: inscrito, contatado, confirmado, sem_resposta, nao_vai (`communicali_definir_situacao`). No formulário fica em `form_responses.stage` (etapas do formulário); em `registrations` e `guests`, na coluna nova `situacao`. Migração `20261105150000_pessoas_da_edicao.sql`: quem tinha contato virou "Contatado", os outros "Inscrito".
+- `communicali_destinatarios`: `acionado` agora significa Confirmado; "Não vai" sai. Lembrete (`api/email-lembretes.js`) só vai para confirmados. Card Eu vou! também só para confirmados.
+- Um link por edição: o botão do site leva ao formulário da edição (`signupHref`). O menu Formulários não lista mais formulários de edição. A seção "Inscrições pelo site" saiu; as respostas completas continuam em "Respostas".
+- Fornecedores ganharam `eventos`; o staff e o fornecedor são ligados à edição pelo botão "Adicionar staff ou fornecedor".
+- Pendente: ninguém está Confirmado ainda; os 25 contatados precisam ser marcados para receber lembrete e card.
+
 ### 2026-11-05 (8) | Ver respostas sem editar e barras de ferramentas numa linha só
 - Respostas de formulário, Staff e Fornecedores: botão de olho em cada linha abre a resposta completa só para leitura (`ViewResponse` em AdminFormsPage, `VerRegistro` em RegistrosPainel), com "Editar" no rodapé.
 - Página da edição ganhou a seção "Formulário de inscrição" (`FormularioDaEdicao`, pelo `editions.form_inscricao`) com a mesma tabela de respostas; item "Formulário" no índice.

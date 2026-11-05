@@ -67,7 +67,7 @@ export function FornecedorForm() {
 }
 export const PRESET_FORNECEDOR = PRESET;
 
-type Fornecedor = { id: string; tipo: string; documento: string; nome: string; contato_nome: string | null; email: string; whatsapp: string; categoria: string; fornece: string; primeira_vez: boolean; atualizou_dados: boolean; anterior_id: string | null; cep: string | null; endereco: string | null; cidade_uf: string | null; pix_tipo: string | null; pix: string | null; banco: string | null; quer_ser_acionado: boolean | null; observacoes: string | null; status: string; created_at: string };
+type Fornecedor = { id: string; tipo: string; documento: string; nome: string; contato_nome: string | null; email: string; whatsapp: string; categoria: string; fornece: string; primeira_vez: boolean; atualizou_dados: boolean; anterior_id: string | null; cep: string | null; endereco: string | null; cidade_uf: string | null; pix_tipo: string | null; pix: string | null; banco: string | null; quer_ser_acionado: boolean | null; observacoes: string | null; status: string; created_at: string; eventos: string[] | null };
 
 const formatarDoc = (item: Fornecedor) => item.tipo === 'empresa'
   ? item.documento.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
@@ -76,6 +76,7 @@ const formatarDoc = (item: Fornecedor) => item.tipo === 'empresa'
 const CAMPOS_FORNECEDOR: Array<Campo<Fornecedor>> = [
   { id: 'nome', titulo: 'Nome', valor: (item) => item.nome, coluna: 'nome' },
   { id: 'categoria', titulo: 'Categoria', valor: (item) => item.categoria, coluna: 'categoria' },
+  { id: 'eventos', titulo: 'Encontros', valor: (item) => (item.eventos || []).join(', ') },
   { id: 'fornece', titulo: 'O que fornece', valor: (item) => item.fornece, coluna: 'fornece', longo: true },
   { id: 'contato', titulo: 'Contato', valor: (item) => item.contato_nome || '', coluna: 'contato_nome' },
   { id: 'whatsapp', titulo: 'WhatsApp', valor: (item) => item.whatsapp, coluna: 'whatsapp' },

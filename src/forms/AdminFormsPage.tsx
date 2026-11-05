@@ -62,9 +62,13 @@ export function AdminFormsPage() {
     finally { setLoading(false); }
   }
   useEffect(() => { void load(); }, []);
+  // Formulário de inscrição de uma edição mora dentro da edição; aqui ficam só os gerais.
+  const [daEdicao, setDaEdicao] = useState<Set<string>>(new Set());
+  useEffect(() => { if (supabase) void supabase.from('editions').select('form_inscricao').not('form_inscricao', 'is', null).then(({ data }) => setDaEdicao(new Set((data || []).map((row: { form_inscricao: string }) => row.form_inscricao)))); }, []);
 
   const open = forms.find((form) => form.id === openId) || null;
-  const visible = audienceFilter === 'all' ? forms : forms.filter((form) => form.audience === audienceFilter);
+  const gerais = forms.filter((form) => !daEdicao.has(form.slug));
+  const visible = audienceFilter === 'all' ? gerais : gerais.filter((form) => form.audience === audienceFilter);
 
   // Lixeira: formulário ou respostas excluídos ficam 30 dias e voltam com os mesmos dados (cali_forms_trash_restore).
   async function restore(item: TrashRow) {
@@ -110,9 +114,9 @@ export function AdminFormsPage() {
       <div className="wf-head"><div><small>ÁREA ADMINISTRATIVA</small><h1>Formulários</h1><p>Inscrições, parceiros e pesquisas da comunidade: crie o formulário, envie por link ou QR Code e veja as respostas reunidas aqui.</p></div>
         <div className="v2-head-actions"><button className="wf-secondary" type="button" onClick={() => void load()} disabled={loading}><RefreshCw size={15} /> {loading ? 'Atualizando…' : 'Atualizar'}</button><button className="wf-primary" type="button" onClick={() => setCreating({ title: '', category: '', audience: 'cali', busy: false, error: '' })}><Plus size={15} /> Novo formulário</button></div></div>
       {error && <div className="inline-notice" role="alert">{error}</div>}
-      <div className="wf-controls v2-forms-filter"><div className="wf-segments">{([['all', 'Todos'], ['trash', 'Lixeira']] as Array<['all' | FormAudience | 'trash', string]>).map(([key, label]) => <button type="button" key={key} className={audienceFilter === key ? 'on' : ''} onClick={() => setAudienceFilter(key)}>{label} <b>{key === 'all' ? forms.length : key === 'trash' ? trash.length : forms.filter((form) => form.audience === key).length}</b></button>)}</div></div>
+      <div className="wf-controls v2-forms-filter"><div className="wf-segments">{([['all', 'Todos'], ['trash', 'Lixeira']] as Array<['all' | FormAudience | 'trash', string]>).map(([key, label]) => <button type="button" key={key} className={audienceFilter === key ? 'on' : ''} onClick={() => setAudienceFilter(key)}>{label} <b>{key === 'all' ? gerais.length : key === 'trash' ? trash.length : gerais.filter((form) => form.audience === key).length}</b></button>)}</div></div>
       {audienceFilter !== 'trash' && <div className="adm-categorias">
-        <a className="adm-categoria" href="#externos"><small>EXTERNOS</small><strong>{forms.length} formulários</strong><span>O público preenche: inscrições, parceiros, interesse em participar.</span></a>
+        <a className="adm-categoria" href="#externos"><small>EXTERNOS</small><strong>{gerais.length} formulários</strong><span>O público preenche: parceiros, interesse em participar. A inscrição de cada encontro fica dentro da edição.</span></a>
         <a className="adm-categoria" href="/admin/staff"><small>INTERNO</small><strong>Staff dos encontros</strong><span>Fotógrafos, recepção e prestadores. CPF e endereço só a organização vê.</span></a>
       </div>}
       <span id="externos" />
@@ -588,7 +592,7 @@ export function FormularioDaEdicao({ slug }: { slug: string }) {
   const [form, setForm] = useState<FormRecord | null | undefined>(undefined);
   useEffect(() => { if (supabase) void supabase.from('forms').select(FORM_FIELDS).eq('slug', slug).maybeSingle().then(({ data }) => setForm((data as FormRecord | null) || null)); }, [slug]);
   return <section className="v2-forms-card" id="secao-formulario">
-    <header className="adm-secao__topo"><div><small>FORMULÁRIO DE INSCRIÇÃO</small><h2>{form ? form.title : 'Respostas do formulário'}</h2></div>
+    <header className="adm-secao__topo"><div><small>RESPOSTAS DO FORMULÁRIO</small><h2>{form ? `Tudo o que responderam em ${form.title}` : 'Respostas do formulário'}</h2></div>
       {form && <div className="adm-links"><a className="wf-secondary" href={`/f/${form.slug}`} target="_blank" rel="noopener noreferrer">Abrir formulário</a><a className="wf-secondary" href={`/admin/formularios?form=${form.id}&aba=questions`}>Editar perguntas</a></div>}</header>
     {form === undefined ? <div className="data-loading">Carregando respostas…</div> : form ? <ResponsesPanel form={form} /> : <p className="adm-hint">O formulário ligado a esta edição não foi encontrado.</p>}
   </section>;

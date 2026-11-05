@@ -6,11 +6,12 @@ import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 import { SiteFooter, Instagram } from '../components/SiteFooter';
 import { useSiteTexts } from './MemberFields';
 
-export type EditionRow = { id: string; slug: string; numero: number | null; titulo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; inscricoes_abertas: boolean };
-export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,resumo,fotos_url,inscricao_url,inscricoes_abertas';
+export type EditionRow = { id: string; slug: string; numero: number | null; titulo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; inscricoes_abertas: boolean; form_inscricao?: string | null };
+export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,resumo,fotos_url,inscricao_url,inscricoes_abertas,form_inscricao';
 
 export const longDate = (iso: string) => new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`));
-export const signupHref = (edition: EditionRow) => edition.inscricao_url || (edition.inscricoes_abertas ? `/inscricao/${edition.slug}` : '');
+// Um link só por edição: o formulário de inscrição dela. A página /inscricao fica para quem chega pelo convite de um membro.
+export const signupHref = (edition: EditionRow) => edition.inscricao_url || (edition.inscricoes_abertas ? (edition.form_inscricao ? `/f/${edition.form_inscricao}` : `/inscricao/${edition.slug}`) : '');
 
 const Linkedin = ({ size }: { size: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.5 8.5H3V21h3.5V8.5ZM4.75 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM21 13.6c0-3.3-1.8-5.4-4.6-5.4-1.5 0-2.7.7-3.4 1.8V8.5H9.7V21h3.5v-6.6c0-1.9.9-3 2.4-3 1.4 0 2 .9 2 2.8V21H21v-7.4Z" /></svg>

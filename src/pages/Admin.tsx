@@ -4,6 +4,7 @@ import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { AdminFormsPage, FormularioDaEdicao } from '../forms/AdminFormsPage';
+import { PessoasDaEdicao } from './AdminPessoasEdicao';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
 import { MembersPanel, PollsPanel, TextsPanel, VotacoesDaEdicao, exportPresencasCsv } from './AdminPrograma';
@@ -171,7 +172,6 @@ function EditionsPanel() {
   );
 }
 
-const SITUACAO_INSCRICAO: Record<string, string> = { analise: 'Para aprovar', inscrito: 'Aprovado', espera: 'Lista de espera', cancelado: 'Recusado' };
 
 function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => void }) {
   const [draft, setDraft] = useState(edition);
@@ -179,21 +179,11 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
   const [people, setPeople] = useState<Attendee[]>([]);
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
-  const [copiado, setCopiado] = useState(false);
   const set = (next: Partial<Edition>) => { setDraft({ ...draft, ...next }); setNote(''); };
   const text = (key: keyof Edition, label: string, hint?: string) => (
     <label><span>{label}{hint && <em> {hint}</em>}</span><input value={String(draft[key] ?? '')} onChange={(event) => set({ [key]: event.target.value } as Partial<Edition>)} /></label>
   );
 
-  const [signups, setSignups] = useState<Array<{ id: string; nome: string; email: string; whatsapp: string; status: string }>>([]);
-  const loadSignups = () => supabase.from('registrations').select('id,nome,email,whatsapp,status').eq('edition_id', edition.id).order('created_at').then(({ data }) => setSignups(data || []));
-  useEffect(() => { void loadSignups(); }, [edition.id]);
-  async function decidir(item: { id: string; nome: string }, status: 'inscrito' | 'espera' | 'cancelado') {
-    const pergunta = { inscrito: `Aprovar ${item.nome}? A pessoa recebe a confirmação por e-mail.`, espera: `Colocar ${item.nome} na lista de espera? A pessoa recebe um aviso por e-mail.`, cancelado: `Recusar a inscrição de ${item.nome}? Nenhum e-mail é enviado.` }[status];
-    if (!window.confirm(pergunta)) return;
-    try { await chamar({ acao: 'decidir', edicao: edition.id, registro: item.id, status }); setNote('Inscrição atualizada.'); } catch (error) { setNote((error as Error).message); }
-    await loadSignups();
-  }
   const loadPhotos = () => supabase.from('edition_photos').select('id,url,legenda,no_carrossel').eq('edition_id', edition.id).order('ordem').then(({ data }) => setPhotos((data || []) as Photo[]));
   const loadPeople = () => supabase.from('checkins').select('id,checked_in_at,codigo,origem,members(nome,email,whatsapp,empresa,cargo,categoria,autoriza_imagem)').eq('edition_id', edition.id).order('checked_in_at').then(({ data }) => setPeople((data || []) as unknown as Attendee[]));
   useEffect(() => { void loadPhotos(); void loadPeople(); }, []);
@@ -274,15 +264,6 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       people.map((person) => [new Date(person.checked_in_at).toLocaleString('pt-BR'), person.members.nome, person.members.email, person.members.whatsapp || '', person.members.empresa || '', person.members.cargo || '', person.members.categoria, person.members.autoriza_imagem ? 'Sim' : 'Não']));
   }
 
-  type Inscricao = (typeof signups)[number];
-  const colunasInscritos: Array<Coluna<Inscricao>> = [
-    { id: 'nome', titulo: 'Nome', valor: (item) => item.nome },
-    { id: 'whatsapp', titulo: 'WhatsApp', valor: (item) => item.whatsapp, render: (item) => <Telefone numero={item.whatsapp} /> },
-    { id: 'email', titulo: 'E-mail', valor: (item) => item.email, render: (item) => <Email email={item.email} /> },
-    { id: 'situacao', titulo: 'Situação', valor: (item) => SITUACAO_INSCRICAO[item.status] || item.status },
-    { id: 'acoes', titulo: 'Decisão', valor: (item) => item.status, render: (item) => (item.status === 'analise' || item.status === 'espera'
-      ? <span className="adm-acoes"><button type="button" onClick={() => void decidir(item, 'inscrito')}>Aprovar</button>{item.status === 'analise' && <button type="button" onClick={() => void decidir(item, 'espera')}>Espera</button>}<button type="button" onClick={() => void decidir(item, 'cancelado')}>Recusar</button></span> : '-') },
-  ];
   const origin = window.location.origin;
   return (
     <>
@@ -291,7 +272,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <nav className="adm-indice" aria-label="Seções da edição">
-        {[['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-inscricoes', 'Inscrições'], ...(draft.form_inscricao ? [['secao-formulario', 'Formulário']] : []), ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
+        {[['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-pessoas', 'Pessoas'], ...(draft.form_inscricao ? [['secao-formulario', 'Respostas']] : []), ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
           <a key={id} href={`#${id}`} onClick={(event) => { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>{nome}</a>
         ))}
       </nav>
@@ -334,16 +315,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           ))}
         </div>
       </section>
-      <section className="v2-forms-card" id="secao-inscricoes">
-        <header className="adm-secao__topo"><div><small>INSCRIÇÕES PELO SITE</small><h2>{signups.filter((item) => item.status === 'analise').length} para aprovar, {signups.filter((item) => item.status === 'inscrito').length} {signups.filter((item) => item.status === 'inscrito').length === 1 ? 'aprovado' : 'aprovados'}{signups.some((item) => item.status === 'espera') ? `, ${signups.filter((item) => item.status === 'espera').length} na lista de espera` : ''}</h2></div>
-          <div className="adm-links">
-            <button type="button" className="wf-secondary" title={`${origin}/e/${edition.slug}`} onClick={() => { void navigator.clipboard.writeText(`https://comuni.calirh.com/e/${edition.slug}`); setCopiado(true); window.setTimeout(() => setCopiado(false), 2000); }}>{copiado ? 'Link copiado' : 'Copiar link para divulgar'}</button>
-            <a className="wf-secondary" href={`${origin}/e/${edition.slug}`} target="_blank" rel="noopener noreferrer">Ver a página</a>
-          </div></header>
-        <p className="adm-hint adm-hint--antes">Quem se inscreve pela página da edição aparece aqui para você aprovar, colocar na lista de espera ou recusar. A pessoa recebe o e-mail da decisão.</p>
-        <Tabela colunas={colunasInscritos} linhas={signups} chave={(item) => item.id} vazio="Nenhuma inscrição pelo site." filtros={[{ id: 'situacao', titulo: 'Situação', valor: (item) => SITUACAO_INSCRICAO[item.status] || item.status }]}
-          acoes={<button type="button" className="wf-secondary" disabled={!signups.length} onClick={() => downloadXlsx(`communicali-${edition.slug}-inscritos.xlsx`, 'Inscritos', ['Nome', 'E-mail', 'WhatsApp', 'Situação'], signups.map((item) => [item.nome, item.email, item.whatsapp, SITUACAO_INSCRICAO[item.status] || item.status]))}>Exportar Excel</button>} />
-      </section>
+      <PessoasDaEdicao edition={draft} />
       {draft.form_inscricao && <FormularioDaEdicao slug={draft.form_inscricao} />}
       <div id="secao-emails"><EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} /></div>
       <CardEMimos edition={edition} />

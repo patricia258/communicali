@@ -224,3 +224,16 @@ html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>.adm-envios__topo .wf-se
 html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>header{display:block}
 html[data-workspace-ui='v2'] .adm-edicao .v2-forms-card>header h2{display:block}
 .adm-hint--antes{margin:0 0 14px}
+/* Pessoas da edição: situação colorida, categorias e seleção em lote */
+.adm-situacao{min-height:30px;padding:0 8px;border:1px solid transparent;border-radius:999px;font:600 12.5px Inter,sans-serif;cursor:pointer}
+.adm-situacao--inscrito{background:#EFE7DF;color:#5A4740}
+.adm-situacao--contatado{background:#FBEFD7;color:#8A5A12}
+.adm-situacao--confirmado{background:#E3EEDC;color:#3D5A2A}
+.adm-situacao--sem_resposta{background:#F3E3DA;color:#A9502E}
+.adm-situacao--nao_vai{background:#F6DADA;color:#8A1F1F}
+.adm-situacao--fixa{display:inline-flex;align-items:center;padding:0 12px;cursor:default}
+.adm-cat--participante{background:#F3ECE6;color:#5a1e2d}.adm-cat--convidado{background:#FBEFD7;color:#8A5A12}.adm-cat--kids{background:#E6EEF6;color:#2C4E6E}
+.adm-cat--staff,.adm-cat--fornecedor{background:#ECEDE3;color:#5F6238}.adm-cat--organizacao{background:#5a1e2d;color:#F7F0EA}
+.adm-todos{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap}
+.adm-selbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.adm-selbar>span{font-size:13px;color:var(--muted)}

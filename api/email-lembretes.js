@@ -9,7 +9,8 @@ export default async function handler(req, res) {
   const editions = found.ok ? await found.json() : [];
   const total = { enviado: 0, ja_enviado: 0, erro: 0 };
   for (const edition of editions) {
-    for (const pessoa of await destinatarios(edition.id)) {
+    // Lembrete só para quem está confirmado.
+    for (const pessoa of (await destinatarios(edition.id)).filter((item) => item.acionado)) {
       const situacao = await enviarUmaVez('lembrete', edition, pessoa);
       total[situacao] += 1;
       if (situacao !== 'ja_enviado') await pausa();
