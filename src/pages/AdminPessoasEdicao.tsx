@@ -15,7 +15,7 @@ type Pessoa = { fonte: string; id: string; categoria: string; nome: string; emai
 type Manual = { id: string; categoria: string; nome: string; funcao: string | null; idade: number | null; responsavel: string | null; email: string | null; whatsapp: string | null };
 type Cadastro = { id: string; nome: string; detalhe: string };
 
-export const SITUACOES: Array<[string, string]> = [['inscrito', 'Inscrito'], ['contatado', 'Contatado'], ['confirmado', 'Confirmado'], ['sem_resposta', 'Sem resposta'], ['nao_vai', 'Não vai']];
+export const SITUACOES: Array<[string, string]> = [['espera', 'Lista de espera'], ['inscrito', 'Inscrito'], ['contatado', 'Contatado'], ['confirmado', 'Confirmado'], ['sem_resposta', 'Sem resposta'], ['nao_vai', 'Não vai']];
 const CATEGORIAS = ['Participante', 'Convidado', 'Kids', 'Staff', 'Fornecedor', 'Organização'];
 const NOME_SITUACAO = Object.fromEntries(SITUACOES);
 // De onde vem cada pessoa decide o que dá para mudar aqui. Staff, fornecedor e organização vêm do cadastro deles.
@@ -25,7 +25,8 @@ const recorrencia = (item: Pessoa) => (item.categoria === 'Kids' || !item.email 
 const classeCategoria = (categoria: string) => `adm-cat--${categoria.normalize('NFD').replace(/[^a-zA-Z]/g, '').toLowerCase()}`;
 const ORIGEM_CADASTRO: Record<string, string> = { staff: 'Vem do cadastro de Staff', assistente: 'Assistente de um staff: vem do cadastro de Staff', fornecedor: 'Vem do cadastro de Fornecedores', organizacao: 'Organização: sempre confirmada' };
 
-export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: string; titulo: string; data_evento: string; numero: number | null; cidade: string; form_inscricao?: string | null } }) {
+export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: string; titulo: string; data_evento: string; numero: number | null; cidade: string; form_inscricao?: string | null; inscricao_modo?: 'aberta' | 'espera' | 'fechada' } }) {
+  const [modo, setModo] = useState(edition.inscricao_modo || 'aberta');
   const [lista, setLista] = useState<Pessoa[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [selecao, setSelecao] = useState<Set<string>>(new Set());
@@ -134,6 +135,14 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   async function editarManual(item: Pessoa) {
     const { data } = await supabase.from('edition_kids').select('id,categoria,nome,funcao,idade,responsavel,email,whatsapp').eq('id', item.id).single();
     if (data) setJanela({ tipo: 'manual', item: data as Manual });
+  }
+
+  // Inscrição pelo mesmo link: aberta, lista de espera ou fechada.
+  async function mudarModo(novo: 'aberta' | 'espera' | 'fechada') {
+    const anterior = modo; setModo(novo);
+    const { error } = await supabase.rpc('communicali_modo_inscricao', { p_edition: edition.id, p_modo: novo });
+    if (error) { setModo(anterior); avisar('Não foi possível mudar a inscrição.'); return; }
+    avisar({ aberta: 'Inscrições abertas: quem se inscrever entra como Inscrito.', espera: 'Lista de espera ligada: quem se inscrever entra como Lista de espera.', fechada: 'Inscrições fechadas: o link mostra que não está recebendo respostas.' }[novo]);
   }
 
   async function salvarConvidadoDe(item: Pessoa, texto: string) {
@@ -292,10 +301,14 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
           <button type="button" className="wf-secondary" onClick={() => setJanela({ tipo: 'equipe' })}>Trazer do cadastro de Staff ou Fornecedor</button>
         </div>
       </header>
+      {edition.form_inscricao && <div className="adm-modo" role="group" aria-label="Inscrição pelo link">
+        <span><strong>Inscrição pelo link</strong><small>{{ aberta: 'Quem se inscreve entra como Inscrito.', espera: 'Aviso de lista de espera no formulário; quem se inscreve entra como Lista de espera.', fechada: 'O link mostra que as inscrições estão encerradas.' }[modo]}</small></span>
+        {([['aberta', 'Aberta'], ['espera', 'Lista de espera'], ['fechada', 'Fechada']] as const).map(([valor, rotulo]) => <button key={valor} type="button" className={modo === valor ? 'is-on' : ''} aria-pressed={modo === valor} onClick={() => void mudarModo(valor)}>{rotulo}</button>)}
+      </div>}
       <div className="adm-cards">
         <div className="adm-card"><span>Vão estar lá</span><strong>{vao.length}</strong><small>confirmados, contando todas as categorias</small></div>
         <div className="adm-card"><span>Participantes e convidados</span><strong>{conta('Participante') + conta('Convidado')}</strong><small>confirmados de {publico.length} inscritos · {conta('Convidado')} convidados</small></div>
-        <div className="adm-card"><span>Falta confirmar</span><strong>{publico.filter((item) => ['inscrito', 'contatado', 'sem_resposta'].includes(item.situacao)).length}</strong><small>{publico.filter((item) => item.situacao === 'inscrito').length} sem contato · {publico.filter((item) => item.situacao === 'contatado').length} contatados · {publico.filter((item) => item.situacao === 'sem_resposta').length} sem resposta</small></div>
+        <div className="adm-card"><span>Falta confirmar</span><strong>{publico.filter((item) => ['inscrito', 'contatado', 'sem_resposta'].includes(item.situacao)).length}</strong><small>{publico.filter((item) => item.situacao === 'inscrito').length} sem contato · {publico.filter((item) => item.situacao === 'contatado').length} contatados · {publico.filter((item) => item.situacao === 'sem_resposta').length} sem resposta · {publico.filter((item) => item.situacao === 'espera').length} na lista de espera</small></div>
         <div className="adm-card"><span>Equipe e kids</span><strong>{conta('Staff') + conta('Fornecedor') + conta('Organização') + conta('Kids')}</strong><small>{conta('Staff')} staff · {conta('Fornecedor')} fornecedores · {conta('Organização')} organização · {conta('Kids')} kids</small></div>
       </div>
       <p className="adm-hint adm-hint--antes">Troque a <strong>categoria</strong> e a <strong>situação</strong> direto na linha. Só quem está <strong>Confirmado</strong> recebe o lembrete, o card Eu vou! e os e-mails de quem vai. O olho mostra tudo o que a pessoa respondeu no formulário; a <strong>nota interna</strong> só a organização vê. Quem se inscrever aparece aqui sozinho.</p>

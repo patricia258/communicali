@@ -8,7 +8,7 @@ import { type FormAnswer, type FormQuestion, applyMask, FILE_ACCEPT, FILE_HINT, 
 import { FooterLinks } from '../components/SiteFooter';
 import './public-form.css';
 
-type PublicForm = { id: string; submit_label?: string | null; success_text?: string | null; slug: string; title: string; category?: string; description: string; thank_you: string; status: 'open' | 'closed'; confirm_email: boolean; questions: FormQuestion[] };
+type PublicForm = { id: string; aviso?: string | null; submit_label?: string | null; success_text?: string | null; slug: string; title: string; category?: string; description: string; thank_you: string; status: 'open' | 'closed'; confirm_email: boolean; questions: FormQuestion[] };
 type Phase = 'loading' | 'missing' | 'closed' | 'welcome' | 'questions' | 'sending' | 'done';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -56,7 +56,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
       let data = published;
       // Prévia da administradora: lê também rascunho e encerrado (só funciona com a sessão dela; RLS barra os demais).
       if (preview && supabase) {
-        const own = await supabase.from('forms').select('id,slug,title,description,thank_you,status,confirm_email,category,submit_label,success_text,questions').eq('slug', slug.toLowerCase()).maybeSingle();
+        const own = await supabase.from('forms').select('id,slug,title,description,thank_you,status,confirm_email,category,submit_label,success_text,questions,aviso').eq('slug', slug.toLowerCase()).maybeSingle();
         if (own.data) data = { ...(own.data as PublicForm), status: 'open' };
       }
       if (!alive) return;
@@ -295,6 +295,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
       {phase === 'closed' && form && <div className="cf-screen cf-center cf-enter"><small>ComuniCALI</small><h1>{form.title}</h1><p>Este formulário não está mais recebendo respostas. Obrigada pelo interesse.</p></div>}
       {phase === 'welcome' && form && <div className="cf-screen cf-enter">
         <h1>{form.title}</h1>
+        {form.aviso && <p className="cf-aviso" role="note" dangerouslySetInnerHTML={{ __html: richTextHtml(form.aviso) }} />}
         {form.description && <p className="cf-desc" dangerouslySetInnerHTML={{ __html: richTextHtml(form.description) }} />}
         <div className="cf-actions"><button type="button" className="cf-primary" onClick={() => setPhase('questions')}>Começar <ArrowRight size={18} /></button><span className="cf-enter-hint">ou pressione <b>Enter <CornerDownLeft size={13} /></b></span></div>
         <p className="cf-meta">{basicas} {basicas === 1 ? 'pergunta' : 'perguntas'} · cerca de {Math.max(1, Math.round(basicas * 0.4))} min</p>

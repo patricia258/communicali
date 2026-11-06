@@ -18,7 +18,7 @@ import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 import { AdminRedeExtras } from './AdminRedeExtras';
 import './admin.css';
 
-type Edition = { limite_convidados?: number; inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean; form_inscricao?: string | null };
+type Edition = { limite_convidados?: number; inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean; form_inscricao?: string | null; inscricao_modo?: 'aberta' | 'espera' | 'fechada' };
 type Photo = { id: string; url: string; legenda: string | null; no_carrossel: boolean };
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null; ativo: boolean; ordem: number };
 type Attendee = { id: string; checked_in_at: string; codigo: string; origem: string; members: { nome: string; email: string; whatsapp: string | null; empresa: string | null; cargo: string | null; categoria: string; autoriza_imagem: boolean } };

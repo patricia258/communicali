@@ -207,3 +207,5 @@
 /* Texto digitado legível no fundo escuro (a regra clara antiga fixava o preenchimento em bordô). */
 .cali-form-page.cali-form-page.cali-form-page .cf-text{color:#F7F0EA!important;-webkit-text-fill-color:#F7F0EA!important}
 .cali-form-page.cali-form-page.cali-form-page .cf-phone small{color:#CBB9B1}
+/* Aviso do formulário (ex.: lista de espera), antes da descrição. */
+.cali-form-page .cf-aviso{margin:0 0 18px;padding:14px 16px;border-left:4px solid #C9973B;border-radius:10px;background:rgba(201,151,59,.14);font-size:16px;line-height:1.5}

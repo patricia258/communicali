@@ -8,6 +8,11 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-06 | Lista de espera no mesmo link
+- Edição ganhou `inscricao_modo` (aberta, espera, fechada) e a chave "Inscrição pelo link" no topo de Pessoas (`communicali_modo_inscricao`). Espera: o formulário continua aberto, mostra `forms.aviso` antes da descrição (lido por `cali_form_public`) e a mensagem final de lista de espera; fechada: `forms.status = closed`.
+- Situação nova "Lista de espera" (`espera`) em formulário, site, convites e manual. Gatilho `form_responses_etapa_inscricao`: resposta nova entra como Lista de espera no modo espera, ou Inscrito. Mudar para Confirmado dispara boas-vindas e card como antes. Migrações `20261106090000_lista_de_espera.sql` e `20261106091000_form_publico_aviso.sql`.
+- Testado em transações desfeitas: gatilho, as três posições da chave e o formulário público. O formulário real ficou em "Aberta"; a Patrícia liga a lista de espera quando for mandar o link.
+
 ### 2026-11-05 (21) | E-mail que voltou: aviso e reenvio
 - Pessoas da edição: ao abrir, lê na Resend os envios sem retorno (`entregas`) e marca "Voltou" no e-mail de quem teve envio devolvido ou bloqueado, com um aviso acima da tabela listando os nomes.
 - Corrigir o e-mail pelo lápis (formulário ou pessoa manual) de alguém Confirmado chama `email-admin` `limpar_falhas` (apaga do registro os envios que voltaram no endereço antigo) e `confirmados` (boas-vindas e card ao endereço novo). Botão de envelope em cada linha confirmada reenvia só o que ainda não chegou. `RespostaGaveta.mudou` agora recebe a resposta salva.

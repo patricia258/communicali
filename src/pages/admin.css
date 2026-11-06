@@ -258,3 +258,9 @@ select.adm-nota{border-style:solid;cursor:pointer}
 .adm-dia__item strong{font-size:15px;color:#5a1e2d}.adm-dia__item p{margin:4px 0 0;font-size:13px;color:var(--muted);line-height:1.5}
 .adm-zona-perigo{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:4px 0 24px;font-size:13px;color:var(--muted)}
 .adm-email-situacao{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.adm-situacao--espera{background:#E6EEF6;color:#2C4E6E}
+/* Chave da inscrição pelo link: aberta, lista de espera ou fechada. */
+.adm-modo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:12px 14px;border:1px solid #eadfd6;border-radius:12px;background:#fbf7f3}
+.adm-modo>span{display:grid;gap:2px;margin-right:auto;font-size:14px;color:#5a1e2d}.adm-modo>span small{font-size:12.5px;color:var(--muted)}
+.adm-modo button{min-height:36px;padding:0 14px;border:1px solid #eadfd6;border-radius:999px;background:#fff;color:#5a1e2d;font:600 13px Inter,sans-serif;cursor:pointer}
+.adm-modo button.is-on{background:#5a1e2d;border-color:#5a1e2d;color:#F7F0EA}
