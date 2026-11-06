@@ -11,7 +11,7 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 ### 2026-11-06 | Lista de espera no mesmo link
 - Edição ganhou `inscricao_modo` (aberta, espera, fechada) e a chave "Inscrição pelo link" no topo de Pessoas (`communicali_modo_inscricao`). Espera: o formulário continua aberto, mostra `forms.aviso` antes da descrição (lido por `cali_form_public`) e a mensagem final de lista de espera; fechada: `forms.status = closed`.
 - Situação nova "Lista de espera" (`espera`) em formulário, site, convites e manual. Gatilho `form_responses_etapa_inscricao`: resposta nova entra como Lista de espera no modo espera, ou Inscrito. Mudar para Confirmado dispara boas-vindas e card como antes. Migrações `20261106090000_lista_de_espera.sql` e `20261106091000_form_publico_aviso.sql`.
-- Testado em transações desfeitas: gatilho, as três posições da chave e o formulário público. O formulário real ficou em "Aberta"; a Patrícia liga a lista de espera quando for mandar o link.
+- Testado em transações desfeitas: gatilho, as três posições da chave e o formulário público. Lista de espera ligada em 06/11 a pedido da Patrícia: o link /f/coffee-rh-cwb mostra o aviso e as novas inscrições entram como Lista de espera.
 
 ### 2026-11-05 (21) | E-mail que voltou: aviso e reenvio
 - Pessoas da edição: ao abrir, lê na Resend os envios sem retorno (`entregas`) e marca "Voltou" no e-mail de quem teve envio devolvido ou bloqueado, com um aviso acima da tabela listando os nomes.
