@@ -346,3 +346,44 @@ html{scroll-behavior:smooth}
 .home .site-footer__legal{justify-items:center;text-align:center;border-top-color:rgba(247,240,234,.18);color:#EADDD2;font-size:11px}
 .home .site-footer__legal p{max-width:none}
 .home .site-footer__faith{text-align:center;color:#DDB160;font-size:14px;padding-top:6px}
+
+/* Topo: logo da CALI RH, barra e a comunicali, como marca-mãe e extensão. */
+.nav__marca{display:flex;align-items:center;gap:14px}
+.nav__cali img{display:block;height:34px;width:auto}
+.nav__barra{width:1px;height:30px;background:rgba(90,30,45,.35)}
+.nav__marca .nav__logo img{height:26px}
+@media (max-width:700px){.nav__cali img{height:26px}.nav__barra{height:22px}.nav__marca{gap:10px}.nav__marca .nav__logo img{height:20px}}
+
+/* Primeira vez: caminho em três passos, cartões da mesma altura e ações alinhadas embaixo. */
+.caminho{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.caminho::before{content:'';position:absolute;top:44px;left:8%;right:8%;border-top:2px dashed rgba(90,30,45,.25);z-index:0}
+.caminho article{position:relative;z-index:1;display:flex;flex-direction:column;gap:12px;padding:26px 24px 24px;border:1px solid rgba(90,30,45,.12);border-radius:18px;background:rgba(255,253,248,.82);box-shadow:0 14px 34px rgba(90,30,45,.12)}
+.caminho header{display:flex;align-items:center;justify-content:space-between}
+.caminho__n{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#5A1E2D;color:#F7F0EA;font:700 15px var(--display)}
+.caminho__icone{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:rgba(201,151,59,.2);color:#5A1E2D}
+.caminho h3{font-size:20px;color:#22100F}
+.caminho p{margin:0;color:#4A3832;font-size:15px;line-height:1.6}
+.caminho__acao{margin-top:auto;align-self:flex-start}
+.caminho__grupo{display:flex;align-items:center;gap:14px}
+.caminho__grupo img{width:84px;height:84px;border-radius:10px;background:#fff;padding:4px}
+.faixa--mostarda .link{color:#5A1E2D}
+.revelar.visivel .caminho article:nth-child(2){transition-delay:.12s}.revelar.visivel .caminho article:nth-child(3){transition-delay:.24s}
+.revelar .caminho article{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
+.revelar.visivel .caminho article{opacity:1;transform:none}
+@media (max-width:860px){.caminho{grid-template-columns:1fr}.caminho::before{top:8%;bottom:8%;left:43px;right:auto;border-top:0;border-left:2px dashed rgba(90,30,45,.25)}}
+
+/* Sua próxima escala: foto fixa que troca enquanto a lista de formatos passa ao lado. */
+.escalas2{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:56px;align-items:start}
+.escalas2__foto{position:sticky;top:110px;aspect-ratio:4/5;border-radius:22px;overflow:hidden;background:var(--panel);box-shadow:0 30px 60px rgba(0,0,0,.35)}
+.escalas2__foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.06);transition:opacity .7s ease,transform 1.2s ease}
+.escalas2__foto img.is-on{opacity:1;transform:none}
+.escalas2__tag{position:absolute;left:18px;bottom:18px;padding:6px 14px;border-radius:999px;background:rgba(31,14,20,.78);color:#F7F0EA;font:600 12px Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.escalas2__lista{display:grid}
+.escalas2__lista article{display:grid;gap:8px;min-height:46vh;align-content:center;padding:28px 0;border-top:1px solid var(--edge);opacity:.38;transition:opacity .5s ease}
+.escalas2__lista article:first-child{border-top:0}
+.escalas2__lista article.is-on{opacity:1}
+.escalas2__olho{margin:0;color:var(--gold-2);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.escalas2__lista h3{font-size:clamp(24px,2.6vw,32px)}
+.escalas2__lista p:not(.escalas2__olho){margin:0;max-width:440px;color:var(--soft);font-size:16px;line-height:1.6}
+.escalas2__mini{display:none}
+@media (max-width:860px){.escalas2{grid-template-columns:1fr;gap:0}.escalas2__foto{display:none}.escalas2__lista article{min-height:0;opacity:1;padding:22px 0}.escalas2__mini{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:16px;margin-bottom:6px}}

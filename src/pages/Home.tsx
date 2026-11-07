@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import QRCode from 'qrcode';
 import { ArrowRight, Award, CalendarDays, Route, Stamp, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
@@ -78,11 +78,41 @@ const TRILHA = [
   ['embaixador', 'Embaixador', 'Leva a comunidade a novos horizontes.'],
 ];
 const FORMATOS = [
-  ['Encontros presenciais', 'Em Curitiba e região, com café, conversa e troca de experiências.', '/fotos/home/presencial.jpg'],
+  ['Encontros presenciais', 'Em Curitiba e região, com conversa e troca de experiências entre quem vive gestão de pessoas no dia a dia.', '/fotos/home/presencial.jpg'],
   ['Encontros virtuais', 'Online, para quem está em qualquer lugar do Brasil.', '/fotos/home/virtual.jpg'],
   ['Experiências', 'Vivências, visitas e palestras que ampliam o olhar.', '/fotos/home/experiencia.jpg'],
   ['Almoços e jantares', 'Conversas à mesa, em grupos menores.', '/fotos/home/jantar.jpg'],
 ];
+/** Formatos no modelo de lista com imagem fixa: a foto ao lado troca conforme a pessoa rola pelos formatos. */
+function Escalas() {
+  const [ativo, setAtivo] = useState(0);
+  const itens = useRef<Array<HTMLElement | null>>([]);
+  useEffect(() => {
+    if (!('IntersectionObserver' in window)) return undefined;
+    const observador = new IntersectionObserver((entradas) => entradas.forEach((entrada) => { if (entrada.isIntersecting) setAtivo(Number((entrada.target as HTMLElement).dataset.i)); }), { rootMargin: '-45% 0px -45% 0px' });
+    itens.current.forEach((item) => item && observador.observe(item));
+    return () => observador.disconnect();
+  }, []);
+  return (
+    <div className="escalas2">
+      <div className="escalas2__foto" aria-hidden="true">
+        {FORMATOS.map(([titulo, , foto], i) => <img key={titulo} src={foto} alt="" className={i === ativo ? 'is-on' : ''} />)}
+        <span className="escalas2__tag">{FORMATOS[ativo][0]}</span>
+      </div>
+      <div className="escalas2__lista">
+        {FORMATOS.map(([titulo, texto, foto], i) => (
+          <article key={titulo} data-i={i} ref={(el) => { itens.current[i] = el; }} className={i === ativo ? 'is-on' : ''}>
+            <img className="escalas2__mini" src={foto} alt="" />
+            <p className="escalas2__olho">✦ Formato {String(i + 1).padStart(2, '0')}</p>
+            <h3>{titulo}</h3>
+            <p>{texto}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const PASSAPORTE = [
   ['Carimbos', 'Cada encontro vivido deixa um carimbo no seu passaporte.'],
   ['Selos', 'Cada contribuição reconhecida, como trazer alguém ou fazer uma conexão dar certo, vira um selo.'],
@@ -158,7 +188,7 @@ export function Home() {
     <div className="home">
       <nav className="nav">
         <div className="wrap nav__row">
-          <a href="/" className="nav__logo"><img src="/brand/comunicali-bordo-horizontal.png" alt="ComuniCALI" /></a>
+          <div className="nav__marca"><a href="https://calirh.com" target="_blank" rel="noopener noreferrer" className="nav__cali" aria-label="CALI RH"><img src="/brand/cali-rh-bordo.png" alt="CALI RH" /></a><span className="nav__barra" aria-hidden="true" /><a href="/" className="nav__logo"><img src="/brand/comunicali-bordo-horizontal.png" alt="ComuniCALI" /></a></div>
           <div className="nav__links">
             <a href="#comunidade">Comunidade</a>
             <a href="#fazer-parte">Como entrar</a>
@@ -207,21 +237,24 @@ export function Home() {
             <h2>Comece a sua <em>jornada.</em></h2>
           </div>
         </div>
-        <div className="entrada">
-          <article className="entrada__visita">
-            <span className="entrada__icone"><UserPlus size={22} aria-hidden="true" /></span>
-            <h3>Visite a comunidade</h3>
-            <p>Toda jornada começa com uma primeira visita. Na primeira vez, você participa como visitante. Cadastre seu interesse e avisamos sobre os próximos encontros, online ou presenciais em Curitiba e região.</p>
-            <a className="pill" href="/f/quero-ser-membro">Cadastrar meu interesse</a>
+        <div className="caminho">
+          <article>
+            <header><span className="caminho__n">01</span><span className="caminho__icone"><UserPlus size={20} aria-hidden="true" /></span></header>
+            <h3>Cadastre seu interesse</h3>
+            <p>Na primeira vez, você participa como visitante. Deixe seu contato e avisamos sobre os próximos encontros, online ou presenciais em Curitiba e região.</p>
+            <a className="pill caminho__acao" href="/f/quero-ser-membro">Cadastrar meu interesse</a>
           </article>
-          <article className="entrada__grupo">
-            <div>
-              <span className="entrada__icone"><MessageCircle size={22} aria-hidden="true" /></span>
-              <h3>Grupo no WhatsApp</h3>
-              <p>É onde a conversa continua entre um encontro e outro: vagas, contatos, dúvidas e experiências de pessoas do Brasil inteiro.</p>
-              <a className="link" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>
-            </div>
-            {qr && <img className="entrada__qr" src={qr} alt="QR Code do grupo da comunidade" />}
+          <article>
+            <header><span className="caminho__n">02</span><span className="caminho__icone"><MessageCircle size={20} aria-hidden="true" /></span></header>
+            <h3>Entre no grupo</h3>
+            <p>A conversa continua entre um encontro e outro: vagas, contatos, dúvidas e experiências de pessoas do Brasil inteiro.</p>
+            <div className="caminho__acao caminho__grupo">{qr && <img src={qr} alt="QR Code do grupo da comunidade" />}<a className="link" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a></div>
+          </article>
+          <article>
+            <header><span className="caminho__n">03</span><span className="caminho__icone"><Stamp size={20} aria-hidden="true" /></span></header>
+            <h3>Faça o check-in no encontro</h3>
+            <p>No dia, o check-in pelo QR Code abre o seu passaporte, com o primeiro carimbo e as primeiras milhas. A partir daí, você é membro.</p>
+            <a className="link caminho__acao" href="#proximo">Ver o próximo encontro</a>
           </article>
         </div>
       </section>
@@ -233,14 +266,7 @@ export function Home() {
             <h2>Sua próxima <em>escala.</em></h2>
           </div>
         </div>
-        <div className="escalas">
-          {FORMATOS.map(([titulo, texto, foto]) => (
-            <article className="escala" key={titulo}>
-              <div className="escala__capa" style={{ backgroundImage: `url(${foto})` }} />
-              <div className="escala__corpo"><h3>{titulo}</h3><p>{texto}</p></div>
-            </article>
-          ))}
-        </div>
+        <Escalas />
       </section>
 
       <section className="wrap block" id="programa">
