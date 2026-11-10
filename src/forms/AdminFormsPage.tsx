@@ -64,7 +64,7 @@ export function AdminFormsPage() {
   useEffect(() => { void load(); }, []);
   // Formulário de inscrição de uma edição mora dentro da edição; aqui ficam só os gerais.
   const [daEdicao, setDaEdicao] = useState<Set<string>>(new Set());
-  useEffect(() => { if (supabase) void supabase.from('editions').select('form_inscricao').not('form_inscricao', 'is', null).then(({ data }) => setDaEdicao(new Set((data || []).map((row: { form_inscricao: string }) => row.form_inscricao)))); }, []);
+  useEffect(() => { if (supabase) void supabase.from('editions').select('form_inscricao,form_pesquisa').then(({ data }) => setDaEdicao(new Set((data || []).flatMap((row: { form_inscricao: string | null; form_pesquisa: string | null }) => [row.form_inscricao, row.form_pesquisa]).filter(Boolean) as string[]))); }, []);
 
   const open = forms.find((form) => form.id === openId) || null;
   const gerais = forms.filter((form) => !daEdicao.has(form.slug));
