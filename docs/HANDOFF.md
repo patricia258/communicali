@@ -8,6 +8,15 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-10 | Prévia da dinâmica ao vivo (branch `dinamica`, não publicado)
+- Pedido da Patrícia: dinâmica "Cuidar de pessoas ainda é relevante?" para o encontro de 14/11, com dois murais em tempo real (Barreiras em bordô, Caminhos em marfim), QR no canto do telão, celular sem login e painel da apresentadora. Antes de implementar, ela pediu uma demonstração funcional.
+- Demonstração em `public/previa-dinamica/index.html` (HTML único, estado no navegador via localStorage; sincroniza entre janelas). Quatro vistas pelo hash: `#tudo`, `#participante`, `#telao`, `#painel`. Telão em unidades `cqw` (escala igual de prévia a tela cheia), palavras que entram uma por uma (aparecem grandes no centro, grudam no lugar, FLIP nas demais), tamanho proporcional à frequência, ajuste automático para caber, modo rápido quando chegam muitas de uma vez.
+- Regra de agrupamento: só respostas iguais após tirar maiúsculas, acentos, pontuação e espaços repetidos. Sem agrupamento por sentido.
+- Painel: abrir/encerrar cada etapa (abrir uma fecha a outra), mostrar os dois murais ou um só, QR visível/oculto, congelar para o debate (novas respostas esperam), tela cheia, janela própria, moderação com restaurar, exportar CSV e PNG 1920x1080 desenhado em canvas. Caixa "Só nesta demonstração" simula respostas; no evento os murais começam vazios.
+- Participante: 30 caracteres, 3 respostas por etapa, intervalo de 3 s, bloqueio de links e contatos, campo escondido contra robô, sem pedir nome.
+- Prévia protegida: https://communicali-5e6194ecv-cali11.vercel.app/previa-dinamica/ (QR de exemplo aponta para comuni.calirh.com/dinamica, rota que ainda não existe).
+- Para implementar de verdade: tabelas de etapas e respostas no Supabase, inserção pública só pela função com limite por aparelho, leitura do telão por consulta a cada 2 s (como o telão da votação), painel dentro do admin existente.
+
 ### 2026-11-07 | Prévia: topo com a CALI RH, Primeira vez e formatos (branch logo-nova)
 - Topo: logo da CALI RH (cali-rh-bordo.png, link para calirh.com), barra fina e a comunicali, como a marca-mãe e a extensão (referência: walljobs.ai/wally).
 - "Primeira vez?" refeita em três passos numerados (cadastre seu interesse, entre no grupo com QR, faça o check-in), cartões da mesma altura e ações alinhadas embaixo; no celular, um embaixo do outro.
