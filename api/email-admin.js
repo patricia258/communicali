@@ -1,5 +1,5 @@
 // Ações do painel: resumo dos envios, boas-vindas em lotes e teste para quem está logado. Exige sessão de administrador.
-import { EDITION_FIELDS, PUBLIC_KEY, SUPABASE, banco, destinatarios, enviar, enviarUmaVez, layoutSimples, montar, pausa, escape } from './_email.js';
+import { EDITION_FIELDS, PUBLIC_KEY, SUPABASE, banco, destinatarios, enviar, presentes, enviarUmaVez, layoutSimples, montar, pausa, escape } from './_email.js';
 
 const LOTE = 25;
 
@@ -131,6 +131,24 @@ export default async function handler(req, res) {
     }
     const resto = await (await banco(`email_log?edition_id=eq.${edition.id}&resend_id=not.is.null&or=(entrega.is.null,entrega.not.in.(${FINAIS.join(',')}))&select=id`)).json();
     return res.status(200).json({ lidos, faltam: Array.isArray(resto) ? resto.length : 0 });
+  }
+
+  // Pesquisa de satisfação: teste para quem está logada ou envio para todas as pessoas que fizeram check-in (uma vez só por pessoa).
+  if (acao === 'pesquisa') {
+    if (!edition.form_pesquisa) return res.status(400).json({ error: 'Esta edição ainda não tem pesquisa.' });
+    if (req.body?.modo === 'teste') {
+      const result = await enviar(email, montar('pesquisa', edition, { nome: 'Patrícia', email }));
+      if (result.erro) return res.status(502).json({ error: result.erro });
+      return res.status(200).json({ para: email });
+    }
+    const fila = (await presentes(edition.id)).filter((item) => !enviados('pesquisa').has(item.email));
+    let enviadosAgora = 0; let erros = 0;
+    for (const pessoa of fila.slice(0, LOTE)) {
+      const situacao = await enviarUmaVez('pesquisa', edition, pessoa);
+      if (situacao === 'erro') erros += 1; else if (situacao === 'enviado') enviadosAgora += 1;
+      await pausa();
+    }
+    return res.status(200).json({ enviados: enviadosAgora, restantes: Math.max(fila.length - LOTE, 0), erros });
   }
 
   // Quem acabou de ser marcado Confirmado no painel: boas-vindas e card Eu vou!, uma vez só por pessoa.

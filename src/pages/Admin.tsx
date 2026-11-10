@@ -5,6 +5,7 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
 import { PessoasDaEdicao } from './AdminPessoasEdicao';
+import { DiaDoEncontro } from './DiaDoEncontro';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
 import { MembersPanel, PollsPanel, TextsPanel, VotacoesDaEdicao, exportPresencasCsv } from './AdminPrograma';
@@ -18,7 +19,7 @@ import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 import { AdminRedeExtras } from './AdminRedeExtras';
 import './admin.css';
 
-type Edition = { limite_convidados?: number; inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean; form_inscricao?: string | null; inscricao_modo?: 'aberta' | 'espera' | 'fechada' };
+type Edition = { limite_convidados?: number; inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean; form_inscricao?: string | null; inscricao_modo?: 'aberta' | 'espera' | 'fechada'; form_pesquisa?: string | null; pesquisa_auto?: boolean };
 type Photo = { id: string; url: string; legenda: string | null; no_carrossel: boolean };
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null; ativo: boolean; ordem: number };
 type Attendee = { id: string; checked_in_at: string; codigo: string; origem: string; members: { nome: string; email: string; whatsapp: string | null; empresa: string | null; cargo: string | null; categoria: string; autoriza_imagem: boolean } };
@@ -272,10 +273,11 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <nav className="adm-indice" aria-label="Seções da edição">
-        {[['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-pessoas', 'Pessoas'], ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
+        {[['secao-dia', 'Dia do encontro'], ['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-pessoas', 'Pessoas'], ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
           <a key={id} href={`#${id}`} onClick={(event) => { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>{nome}</a>
         ))}
       </nav>
+      <DiaDoEncontro edition={draft} />
       <section className="v2-forms-card" id="secao-dados">
         <header><small>DADOS DO ENCONTRO</small><h2>Data, local, check-in e o que aparece no site</h2></header>
         <div className="v2-forms-grid">

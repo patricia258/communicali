@@ -5,7 +5,7 @@ import { createHmac } from 'node:crypto';
 const SITE = 'https://comuni.calirh.com';
 const FROM = 'ComuniCALI <comuni@calirh.com>';
 const REPLY_TO = 'contato@calirh.com';
-export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,lembrete_ativo,publica';
+export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,lembrete_ativo,publica,form_pesquisa,pesquisa_auto';
 
 // Topo em imagem (fundo vinho, logo branco, faixa de cores): nenhum aplicativo inverte imagem, então a marca
 // aparece igual no modo claro e no escuro. Página branca, sem moldura. A cor de cada tipo aparece na etiqueta e no botão; os blocos têm cantos arredondados.
@@ -19,6 +19,7 @@ const FAIXA = {
   convite: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
   agradecimento: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
   card: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
+  pesquisa: { etiqueta: '#5F6238', fundo: VIVAS.oliva, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
   boasvindas: { etiqueta: '#B83A62', fundo: VIVAS.rosa, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
 };
 const FONTES = '<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@600;700&family=Inter:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">';
@@ -230,6 +231,7 @@ export function montar(tipo, edition, pessoa) {
     lembrete: { assunto: `É amanhã: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: 'É amanhã!', saudacao, paragrafos: ['Amanhã é dia de ComuniCALI!', '<strong>Na chegada</strong>, a recepção confirma o seu nome<br>e indica a sua mesa.', '<strong>Na mesa</strong>, é só fazer o check-in<br>pelo QR Code.'], botao: agenda, depois: responder, anexo: true },
     boasvindas: { assunto: `Boas-vindas à ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Estamos ansiosos para ver você no nosso encontro!', titulo: 'Uhull! Boas-vindas', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Ficamos <em>muito felizes</em> que você esteja com a gente nessa jornada!', 'A <strong>ComuniCALI</strong> nasceu sem pretensão, era pra ser só "um cafezinho entre colegas de trabalho". Ainda não sabemos onde isso vai chegar, mas temos certeza de que vai trazer <em>grandes contribuições</em> para cada pessoa que faz parte dela.', '<strong><u>Estamos ansiosos para ver você no nosso encontro!</u></strong>', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong>'], botao: { texto: 'Acesse o site', href: SITE }, detalhes: false, anexo: false },
     agradecimento: { assunto: `Obrigado pelo interesse na ComuniCALI, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Essa é só a primeira de muitas edições.', titulo: 'Obrigado pelo interesse', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Muito obrigado pelo seu interesse na <strong>ComuniCALI</strong>!', 'As vagas da nossa <em>primeira edição</em> já estão fechadas, e que pena que desta vez você não vai poder estar com a gente.', '<strong><u>Mas essa é só a primeira de muitas!</u></strong> Queremos muito conhecer você nos próximos encontros.', 'Ah, e uma novidade: <strong>nosso site está no ar!</strong> Lá você conhece a comunidade e registra seu interesse para as próximas edições.'], botao: { texto: 'Conheça a ComuniCALI', href: SITE }, detalhes: false, comFoto: false, anexo: false },
+    pesquisa: { assunto: `Como foi o encontro, ${primeiroNome(pessoa.nome) || 'pessoa querida'}?`, previa: 'Três minutos para contar como foi. Sua opinião desenha o próximo encontro.', titulo: 'Conte como foi', saudacao: nome ? `Olá, ${nome}!` : 'Olá!', paragrafos: ['Que alegria ter você no <strong>primeiro encontro da ComuniCALI</strong>! 💛', 'A sua opinião decide o que a gente <em>mantém</em>, o que <em>muda</em> e o que <em>cria</em> para a próxima edição.', '<strong><u>São só 3 minutos</u></strong>, e você não precisa dizer seu nome. Conte o que funcionou e o que podia ser melhor.'], botao: { texto: 'Responder a pesquisa', href: `${SITE}/f/${edition.form_pesquisa || 'pesquisa-1a-edicao'}` }, detalhes: false, comFoto: false, anexo: false },
     card: { assunto: `Seu card "Eu vou!" está pronto, ${primeiroNome(pessoa.nome) || 'pessoa querida'}!`, previa: 'Crie o seu card, poste marcando a CALI e ganhe um mimo no encontro.', titulo: 'Eu vou!', saudacao: nome ? `Olá, ${nome}!` : 'Olá!',
       paragrafos: [`Faltam poucos dias para o nosso <strong>${edition.numero === 1 ? 'primeiro encontro' : 'próximo encontro'}</strong>, e a gente já está na contagem regressiva! 🎉`, 'Preparamos um <strong>card especial</strong> para você mostrar que vai estar com a gente. Ele já sai pronto, com a <em>sua foto</em>.'],
       // Mimo em destaque: quem posta e toca em "Já compartilhei" na página do card entra na lista de retirada.
@@ -291,6 +293,14 @@ export async function enviarUmaVez(tipo, edition, pessoa) {
   const result = await enviar(email, { ...mensagem, html: rastrear(mensagem.html, rows[0].id) });
   await banco(`email_log?id=eq.${rows[0].id}`, { method: 'PATCH', body: JSON.stringify(result.erro ? { situacao: 'erro', erro: result.erro.slice(0, 300) } : { situacao: 'enviado', resend_id: result.id }) });
   return result.erro ? 'erro' : 'enviado';
+}
+
+/** Quem fez check-in na edição (um e-mail por pessoa; ignora endereços de teste). */
+export async function presentes(editionId) {
+  const found = await banco(`checkins?edition_id=eq.${editionId}&select=members(email,nome,apelido)`);
+  const lista = found.ok ? await found.json() : [];
+  const vistos = new Set();
+  return lista.map((item) => item.members).filter((m) => m?.email && !m.email.endsWith('.test')).map((m) => ({ email: m.email.toLowerCase(), nome: m.apelido || m.nome })).filter((m) => (vistos.has(m.email) ? false : vistos.add(m.email)));
 }
 
 export async function destinatarios(editionId) {

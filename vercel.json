@@ -3,6 +3,10 @@
     {
       "path": "/api/email-lembretes",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/email-pesquisa",
+      "schedule": "0 17 * * *"
     }
   ],
   "functions": {
@@ -13,6 +17,9 @@
       "maxDuration": 60
     },
     "api/avisos.js": {
+      "maxDuration": 60
+    },
+    "api/email-pesquisa.js": {
       "maxDuration": 60
     }
   },

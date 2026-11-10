@@ -209,3 +209,29 @@
 .cali-form-page.cali-form-page.cali-form-page .cf-phone small{color:#CBB9B1}
 /* Aviso do formulário (ex.: lista de espera), antes da descrição. */
 .cali-form-page .cf-aviso{margin:0 0 18px;padding:14px 16px;border-left:4px solid #C9973B;border-radius:10px;background:rgba(201,151,59,.14);font-size:16px;line-height:1.5}
+
+/* Tema claro (check-in e pesquisa de satisfação): marfim, bordô e a faixa de cores, no visual das telas do encontro. */
+.cali-form-page.cali-form-page.cali-form-page.cf-claro{--cf-paper:#F7F0EA;--cf-ink:#22100F;--cf-muted:#5A4740;--cf-line:#E6D8CC;color-scheme:light;background:#F7F0EA;color:#22100F}
+.cf-claro.cf-claro.cf-claro.cf-claro::after{content:"";position:absolute;top:0;left:0;right:0;height:5px;z-index:4;background:linear-gradient(90deg,#7A1F3D 0 25%,#A9502E 25% 50%,#C9973B 50% 75%,#5F6238 75%)}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-leaf{background:linear-gradient(200deg,rgba(201,151,59,.22) 0%,rgba(90,30,45,.10) 55%,rgba(201,151,59,.06) 100%)}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-top img{height:44px}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro h1{color:#5A1E2D!important}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro h2{color:#22100F!important}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-text{color:#22100F!important;-webkit-text-fill-color:#22100F!important;border-bottom-color:rgba(90,30,45,.3);background:transparent}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-text::placeholder{color:rgba(90,30,45,.4)!important}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro :is(.cf-options button,.cf-scale button,.cf-file-drop,.cf-file-chosen){background:#fff;border-color:#E6D8CC;color:#5A1E2D}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-options kbd{background:#F3ECE6;border-color:#E6D8CC;color:#5A1E2D}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro :is(.cf-help,.cf-desc,.cf-meta,.cf-hint,.cf-enter-hint,.cf-foot,.cf-foot a,.cf-nav span,.cf-center p){color:#5A4740}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro :is(.cf-help a,.cf-desc a){color:#7A1F3D}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro :is(b,.cf-desc strong){color:#22100F}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-optional{background:#EFE6DF;color:#5A4740}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-progress{background:rgba(90,30,45,.1)}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-progress i{background:#5A1E2D}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro :is(.cf-num,.cf-req){color:#7A1F3D!important}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-num svg{color:#7A1F3D}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro small{color:#7A1F3D}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-phone small{color:#7A1F3D}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro :is(.cf-primary,.cf-nav button,.cf-done-mark,.cf-options button.on,.cf-scale button.on){--cf-wine:#5A1E2D;--cf-wine-2:#7A1F3D;background:#5A1E2D!important;background-color:#5A1E2D!important;border-color:#5A1E2D!important;color:#F7F0EA!important}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-primary:hover{background:#7A1F3D!important}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-text:focus,.cali-form-page.cali-form-page.cali-form-page.cf-claro :is(.cf-options button,.cf-scale button):hover{border-color:#5A1E2D}
+.cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-aviso{background:rgba(201,151,59,.16)}
