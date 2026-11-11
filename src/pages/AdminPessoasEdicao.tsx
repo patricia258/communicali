@@ -36,6 +36,16 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
   const [janela, setJanela] = useState<null | { tipo: 'manual'; item?: Manual } | { tipo: 'equipe' } | { tipo: 'resposta'; id: string; modo: 'ver' | 'editar'; pessoa: Pessoa }>(null);
   // E-mails que voltaram (endereço errado ou bloqueado) nesta edição.
   const [voltaram, setVoltaram] = useState<Set<string>>(new Set());
+  const [envio, setEnvio] = useState<Pessoa | null>(null);
+  const [envioAviso, setEnvioAviso] = useState('');
+  async function reenviarUm(modelo: 'boasvindas' | 'card', nomeModelo: string) {
+    if (!envio?.email) return;
+    setEnvioAviso('Enviando…');
+    try {
+      const r = await chamar({ acao: 'reenviar_um', edicao: edition.id, email: envio.email, modelo });
+      setEnvioAviso(r.enviado ? `${nomeModelo} reenviado para ${envio.email}.` : `Não foi possível enviar: ${r.erro || 'tente de novo'}.`);
+    } catch (erro) { setEnvioAviso((erro as Error).message); }
+  }
   const [copiado, setCopiado] = useState(false);
 
   // Recarrega sem tirar a tabela da tela: só a primeira carga mostra "Carregando".
@@ -258,7 +268,7 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
     { id: 'acoes', titulo: '', estreita: true, valor: () => '', cabecalho: <span className="adm-sr">Ações</span>, render: (item: Pessoa) => <span className="v2-forms-row-actions">
       {item.fonte === 'form' && edition.form_inscricao && <button type="button" className="v2-forms-edit" title="Ver as respostas" aria-label={`Ver as respostas de ${item.nome}`} onClick={() => setJanela({ tipo: 'resposta', id: item.id, modo: 'ver', pessoa: item })}><Eye size={14} /></button>}
       {item.fonte === 'form' && edition.form_inscricao && <button type="button" className="v2-forms-edit" title="Editar as respostas" aria-label={`Editar ${item.nome}`} onClick={() => setJanela({ tipo: 'resposta', id: item.id, modo: 'editar', pessoa: item })}><Pencil size={13} /></button>}
-      {item.email && item.situacao === 'confirmado' && MUDA.includes(item.fonte) && item.categoria !== 'Kids' && <button type="button" className="v2-forms-edit" title="Reenviar boas-vindas e card (só o que ainda não chegou)" aria-label={`Reenviar e-mails para ${item.nome}`} onClick={() => void reenviar(item, item.email)}><Mail size={13} /></button>}
+      {item.email && item.situacao === 'confirmado' && MUDA.includes(item.fonte) && item.categoria !== 'Kids' && <button type="button" className="v2-forms-edit" title="Reenviar um e-mail para esta pessoa" aria-label={`Reenviar e-mail para ${item.nome}`} onClick={() => setEnvio(envio?.id === item.id ? null : item)}><Mail size={13} /></button>}
       {item.fonte === 'manual' && <button type="button" className="v2-forms-edit" title="Editar" aria-label={`Editar ${item.nome}`} onClick={() => void editarManual(item)}><Pencil size={13} /></button>}
       {['staff', 'assistente'].includes(item.fonte) && <a className="v2-forms-edit" title="Ver no cadastro de Staff" aria-label={`Ver ${item.nome} no cadastro de Staff`} href="/admin/staff"><Eye size={14} /></a>}
       {item.fonte === 'fornecedor' && <a className="v2-forms-edit" title="Ver no cadastro de Fornecedores" aria-label={`Ver ${item.nome} no cadastro de Fornecedores`} href="/admin/fornecedores"><Eye size={14} /></a>}
@@ -329,6 +339,18 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
           <button type="button" className="wf-primary" disabled={!vao.length} onClick={() => void imprimir()}>Imprimir lista da recepção</button>
           <button type="button" className="wf-secondary" disabled={!lista.length} onClick={exportar}>Exportar Excel</button>
         </>} />}
+      {envio && (
+        <div className="v2-forms-toast" role="dialog" aria-label="Reenviar e-mail" style={{ display: 'grid', gap: 10, minWidth: 320 }}>
+          <strong>Reenviar para {envio.nome}</strong>
+          <span>{envio.email}</span>
+          <div className="adm-links">
+            <button type="button" className="wf-secondary" onClick={() => void reenviarUm('boasvindas', 'Boas-vindas')}>Boas-vindas</button>
+            <button type="button" className="wf-secondary" onClick={() => void reenviarUm('card', 'Card Eu vou!')}>Card Eu vou!</button>
+            <button type="button" className="wf-secondary" onClick={() => { setEnvio(null); setEnvioAviso(''); }}>Fechar</button>
+          </div>
+          {envioAviso && <span>{envioAviso}</span>}
+        </div>
+      )}
       {janela?.tipo === 'manual' && <PessoaManual edition={edition.id} item={janela.item} responsaveis={adultos.map((item) => ({ nome: item.nome, email: item.email || '' }))} fechar={() => setJanela(null)} salvo={(novo) => { const antes = janela.item; setJanela(null); void carregar(); const pessoa = antes && lista.find((item) => item.fonte === 'manual' && item.id === antes.id); if (pessoa && novo && novo !== pessoa.email) void reenviar(pessoa, novo, pessoa.email); }} />}
       {janela?.tipo === 'equipe' && <NovaEquipe edition={edition.id} fechar={() => setJanela(null)} salvo={() => { setJanela(null); void carregar(); }} />}
       {janela?.tipo === 'resposta' && edition.form_inscricao && <RespostaGaveta slug={edition.form_inscricao} id={janela.id} modo={janela.modo} fechar={() => setJanela(null)} mudou={(salvo) => { void carregar(); const novo = salvo?.respondent_email?.trim().toLowerCase() || null; if (novo && novo !== janela.pessoa.email) void reenviar(janela.pessoa, novo, janela.pessoa.email); }} />}
