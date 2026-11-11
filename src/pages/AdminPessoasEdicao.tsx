@@ -340,15 +340,17 @@ export function PessoasDaEdicao({ edition }: { edition: { id: string; slug: stri
           <button type="button" className="wf-secondary" disabled={!lista.length} onClick={exportar}>Exportar Excel</button>
         </>} />}
       {envio && (
-        <div className="v2-forms-toast" role="dialog" aria-label="Reenviar e-mail" style={{ display: 'grid', gap: 10, minWidth: 320 }}>
-          <strong>Reenviar para {envio.nome}</strong>
-          <span>{envio.email}</span>
-          <div className="adm-links">
-            <button type="button" className="wf-secondary" onClick={() => void reenviarUm('boasvindas', 'Boas-vindas')}>Boas-vindas</button>
-            <button type="button" className="wf-secondary" onClick={() => void reenviarUm('card', 'Card Eu vou!')}>Card Eu vou!</button>
-            <button type="button" className="wf-secondary" onClick={() => { setEnvio(null); setEnvioAviso(''); }}>Fechar</button>
+        <div role="dialog" aria-label="Reenviar e-mail" style={{ position: 'fixed', inset: 0, background: 'rgba(31,14,20,.35)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 16 }} onClick={() => { setEnvio(null); setEnvioAviso(''); }}>
+          <div style={{ background: '#FFFFFF', color: '#22100F', borderRadius: 14, padding: 22, width: 'min(420px, 100%)', boxShadow: '0 12px 40px rgba(0,0,0,.25)', display: 'grid', gap: 12 }} onClick={(event) => event.stopPropagation()}>
+            <strong style={{ fontSize: 17 }}>Reenviar e-mail</strong>
+            <span style={{ color: '#5A4740', fontSize: 14 }}>{envio.nome}<br />{envio.email}</span>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button type="button" className="wf-secondary" onClick={() => void reenviarUm('boasvindas', 'Boas-vindas')}>Boas-vindas</button>
+              <button type="button" className="wf-secondary" onClick={() => void reenviarUm('card', 'Card Eu vou!')}>Card Eu vou!</button>
+            </div>
+            {envioAviso && <span style={{ fontSize: 14 }}>{envioAviso}</span>}
+            <button type="button" className="wf-secondary" style={{ justifySelf: 'end' }} onClick={() => { setEnvio(null); setEnvioAviso(''); }}>Fechar</button>
           </div>
-          {envioAviso && <span>{envioAviso}</span>}
         </div>
       )}
       {janela?.tipo === 'manual' && <PessoaManual edition={edition.id} item={janela.item} responsaveis={adultos.map((item) => ({ nome: item.nome, email: item.email || '' }))} fechar={() => setJanela(null)} salvo={(novo) => { const antes = janela.item; setJanela(null); void carregar(); const pessoa = antes && lista.find((item) => item.fonte === 'manual' && item.id === antes.id); if (pessoa && novo && novo !== pessoa.email) void reenviar(pessoa, novo, pessoa.email); }} />}
