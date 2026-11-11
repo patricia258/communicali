@@ -160,3 +160,11 @@ a.dn-btn{display:flex;align-items:center;justify-content:center;text-decoration:
 .dn-liberada{text-align:center}
 .dn-apoio-qr{margin-top:14px;text-align:center}
 .dn-apoio-qr img{width:200px;height:200px}
+
+.dn-cron{display:grid!important;grid-template-columns:1fr auto;gap:8px 14px;background:#FBF1EC!important;border:2px dashed #C9973B;color:#5A1E2D}
+.dn-cron__tempo{font:800 40px 'Funnel Display',Inter,sans-serif;font-variant-numeric:tabular-nums;color:#5A1E2D;text-align:right}
+.dn-cron__acoes{grid-column:1/-1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.dn-cron__acoes .dn-btn{width:auto;padding:12px 22px}
+.dn-cron.rodando{background:#EAD9B8!important;border-style:solid}
+.dn-cron.tocando{background:#C9973B!important;animation:dn-pisca .5s steps(2) infinite}
+@keyframes dn-pisca{50%{background:#7A1F3D!important;color:#fff}}
