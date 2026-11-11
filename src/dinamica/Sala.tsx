@@ -1,6 +1,6 @@
 /* Sala do convidado: depois do check-in a pessoa fica nesta janela e cada etapa aparece quando o apoio libera. */
 import { useEffect, useState } from 'react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { Lock, LockOpen } from 'lucide-react';
 import { editionSlug, supabase } from '../lib';
 import { Votar } from '../pages/Votar';
@@ -40,7 +40,7 @@ export function Sala() {
   if (!estado) return <main className="dn-pg" aria-busy="true" />;
   if (estado.etapa === 'votacao') return <Votar />;
   if (estado.etapa === 'palavras') return <Participante />;
-  if (estado.etapa === 'pesquisa' && estado.form_pesquisa) return <MemoryRouter initialEntries={[`/f/${estado.form_pesquisa}`]}><Routes><Route path="/f/:slug" element={<PublicFormPage />} /></Routes></MemoryRouter>;
+  if (estado.etapa === 'pesquisa' && estado.form_pesquisa) return <Routes location={`/f/${estado.form_pesquisa}`}><Route path="/f/:slug" element={<PublicFormPage />} /></Routes>;
   const nome = presenca.nome.split(' ')[0];
   return molde(
     <div className="dn-cartao">
