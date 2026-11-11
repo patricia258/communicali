@@ -19,6 +19,8 @@ import { EuVou } from './pages/EuVou';
 import { Convidar, Convite } from './pages/Convidados';
 import { TelaoCheckin, TelaoResultado, TelaoVotacao } from './pages/Telao';
 import { Participante } from './dinamica/Participante';
+import { Sala } from './dinamica/Sala';
+import { Apoio } from './dinamica/Apoio';
 import { TelaoDinamica } from './dinamica/TelaoDinamica';
 import { Admin } from './pages/Admin';
 import { StaffForm } from './pages/Staff';
@@ -60,6 +62,8 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/telao/checkin" element={<ComEdicao><TelaoCheckin /></ComEdicao>} />
       <Route path="/telao/votacao" element={<ComEdicao><TelaoVotacao /></ComEdicao>} />
       <Route path="/telao/resultado" element={<ComEdicao><TelaoResultado /></ComEdicao>} />
+      <Route path="/sala" element={<ComEdicao><Sala /></ComEdicao>} />
+      <Route path="/apoio/:token" element={<Apoio />} />
       <Route path="/dinamica" element={<ComEdicao><Participante /></ComEdicao>} />
       <Route path="/telao/dinamica" element={<ComEdicao><TelaoDinamica /></ComEdicao>} />
       <Route path="/f/:slug" element={<PublicFormPage />} />

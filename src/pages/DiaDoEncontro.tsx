@@ -27,6 +27,12 @@ function DiaDoEncontroInterno({ edition }: { edition: Edicao }) {
   const [numeros, setNumeros] = useState({ checkins: 0, enviados: 0, respostas: 0 });
   const [aviso, setAviso] = useState('');
   const [busy, setBusy] = useState(false);
+  const [token, setToken] = useState('');
+  const [etapa, setEtapa] = useState('');
+  useEffect(() => {
+    const ler = () => supabase.from('dinamicas').select('token_apoio,etapa_sala').eq('edition_id', edition.id).maybeSingle().then(({ data }) => { if (data) { setToken(data.token_apoio); setEtapa(data.etapa_sala); } });
+    void ler(); const t = window.setInterval(ler, 5000); return () => window.clearInterval(t);
+  }, [edition.id]);
   const avisar = (texto: string) => { setAviso(texto); window.setTimeout(() => setAviso(''), 5000); };
   const copiar = (rotulo: string, link: string) => { void navigator.clipboard.writeText(link); setCopiado(rotulo); window.setTimeout(() => setCopiado(''), 2000); };
 
@@ -64,6 +70,16 @@ function DiaDoEncontroInterno({ edition }: { edition: Edicao }) {
     <section className="v2-forms-card" id="secao-dia">
       <header className="adm-secao__topo"><div><small>DIA DO ENCONTRO</small><h2>Telas e controles ao vivo</h2></div></header>
       <p className="adm-hint adm-hint--antes">Tudo o que roda durante o encontro fica aqui, no mesmo visual. Abra cada telão numa janela e arraste para o projetor; no telão, a tecla F abre a tela cheia.</p>
+      <article className="dia-bloco dia-bloco--largo">
+        <h3>Sala do convidado e equipe de apoio</h3>
+        <p>Depois do check-in, cada convidada fica na sala (<b>/sala</b>) com as etapas trancadas. A pessoa do apoio abre o link abaixo no celular e libera uma etapa por vez: votação, dinâmica de palavras e pesquisa. Etapa liberada agora: <b>{({ boasvindas: 'Boas-vindas', votacao: 'Votação', palavras: 'Dinâmica de palavras', pesquisa: 'Pesquisa' } as Record<string, string>)[etapa] || '...'}</b>.</p>
+        <div className="adm-links">
+          <button type="button" className="wf-primary" disabled={!token} onClick={() => copiar('apoio', `${window.location.origin}/apoio/${token}`)}>{copiado === 'apoio' ? 'Link copiado' : 'Copiar link da equipe de apoio'}</button>
+          <a className="wf-secondary" href={`/apoio/${token}`} target="_blank" rel="noopener noreferrer">Ver o controle do apoio</a>
+          <a className="wf-secondary" href={ev('/sala')} target="_blank" rel="noopener noreferrer">Ver a sala do convidado</a>
+        </div>
+        <p className="adm-hint">Mande o link só para quem vai liberar as etapas: quem tem o link controla o que todo mundo vê.</p>
+      </article>
       <div className="dia-grid">
         <article className="dia-bloco">
           <h3>Boas-vindas e check-in</h3>

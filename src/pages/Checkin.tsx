@@ -5,6 +5,7 @@ import { IdCard } from 'lucide-react';
 import { editionSlug, errorMessage, formatDate, supabase, type Edition } from '../lib';
 import { answerArgs, confirmQuestions, memberQuestions, useSiteTexts } from './MemberFields';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
+import { guardarPresenca, lerPresenca } from '../dinamica/Sala';
 import '../dinamica/dinamica.css';
 
 type Junto = { id: string; tipo: string; nome: string; chegou: boolean };
@@ -42,6 +43,7 @@ export const CATEGORIAS: Record<string, string> = { fundadora: 'Fundadora', memb
 
 function Success({ done }: { done: Done }) {
   const [qr, setQr] = useState('');
+  useEffect(() => { guardarPresenca(done.nome, done.codigo); }, [done.nome, done.codigo]);
   useEffect(() => {
     QRCode.toDataURL(`${window.location.origin}/validar/${done.codigo}`, { width: 320, margin: 1, color: { dark: '#5A1E2D', light: '#FFFFFF' } }).then(setQr);
   }, [done.codigo]);
@@ -64,6 +66,8 @@ function Success({ done }: { done: Done }) {
           </dl>
           {qr && <img className="dn-bilhete__qr" src={qr} alt="QR Code para a organização validar sua presença" />}
           <div className="dn-bilhete__aviso"><IdCard size={26} aria-hidden="true" /><p><strong>Agora é só levantar a mão.</strong> Você recebe o seu crachá na mesa.</p></div>
+          <a className="dn-btn" href="/sala" style={{ textAlign: 'center', textDecoration: 'none' }}>Entrar na sala do encontro</a>
+          <p className="dn-bilhete__texto">Deixe esta janela aberta: a votação e as dinâmicas aparecem lá, quando a equipe liberar.</p>
         </section>
       </div>
     </main>
@@ -72,6 +76,8 @@ function Success({ done }: { done: Done }) {
 
 export function Checkin() {
   const slug = editionSlug();
+  // Aparelho que já fez check-in volta direto para a sala (use ?novo=1 para registrar outra pessoa).
+  if (!new URLSearchParams(window.location.search).has('novo') && lerPresenca()) { window.location.replace(`/sala${window.location.search}`); }
   const texts = useSiteTexts();
   const [edition, setEdition] = useState<Edition | null>(null);
   const [loadError, setLoadError] = useState('');
