@@ -22,14 +22,16 @@ export function lerPresenca(): { nome: string; codigo: string } | null {
 
 export function Sala() {
   const slug = editionSlug();
-  const presenca = lerPresenca();
+  const previa = new URLSearchParams(window.location.search).get('previa');
+  const presenca = previa ? { nome: 'Maria Silva', codigo: 'PREVIA' } : lerPresenca();
   const [estado, setEstado] = useState<{ etapa: Etapa; form_pesquisa: string | null } | null>(null);
   useEffect(() => {
     let vivo = true;
     const buscar = () => { supabase.rpc('communicali_sala_estado', { p_slug: slug }).then(({ data }) => { if (vivo && data) setEstado(data as typeof estado); }); };
+    if (previa) { setEstado({ etapa: previa as Etapa, form_pesquisa: 'pesquisa-1a-edicao' }); return; }
     buscar(); const timer = window.setInterval(buscar, 3000);
     return () => { vivo = false; window.clearInterval(timer); };
-  }, [slug]);
+  }, [slug, previa]);
 
   const molde = (corpo: React.ReactNode) => (
     <main className="dn-pg"><div className="dn-pg-faixa" /><img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" /><div className="dn-pg-corpo">{corpo}</div></main>

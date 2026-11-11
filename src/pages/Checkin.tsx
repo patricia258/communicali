@@ -41,11 +41,11 @@ type Step = 'email' | 'novo' | 'codigo' | 'inscrito';
 
 export const CATEGORIAS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organizador', kids: 'Kids' };
 
-function Success({ done }: { done: Done }) {
+function Success({ done, previa }: { done: Done; previa?: boolean }) {
   const [qr, setQr] = useState('');
-  useEffect(() => { guardarPresenca(done.nome, done.codigo); }, [done.nome, done.codigo]);
+  useEffect(() => { if (!previa) guardarPresenca(done.nome, done.codigo); }, [done.nome, done.codigo, previa]);
   // Sem kids ou acompanhantes para confirmar, a pessoa segue sozinha para a sala.
-  useEffect(() => { if (done.junto?.length) return; const t = window.setTimeout(() => window.location.replace('/sala' + window.location.search.replace(/[?&]novo=1/, '')), 4500); return () => window.clearTimeout(t); }, [done.junto]);
+  useEffect(() => { if (previa || done.junto?.length) return; const t = window.setTimeout(() => window.location.replace('/sala' + window.location.search.replace(/[?&]novo=1/, '')), 4500); return () => window.clearTimeout(t); }, [done.junto, previa]);
   useEffect(() => {
     QRCode.toDataURL(`${window.location.origin}/validar/${done.codigo}`, { width: 320, margin: 1, color: { dark: '#5A1E2D', light: '#FFFFFF' } }).then(setQr);
   }, [done.codigo]);
@@ -79,7 +79,8 @@ function Success({ done }: { done: Done }) {
 export function Checkin() {
   const slug = editionSlug();
   // Aparelho que já fez check-in volta direto para a sala (use ?novo=1 para registrar outra pessoa).
-  if (!new URLSearchParams(window.location.search).has('novo') && lerPresenca()) { window.location.replace(`/sala${window.location.search}`); }
+  const previaCartao = new URLSearchParams(window.location.search).get('previa') === 'sucesso';
+  if (!previaCartao && !new URLSearchParams(window.location.search).has('novo') && lerPresenca()) { window.location.replace(`/sala${window.location.search}`); }
   const texts = useSiteTexts();
   const [edition, setEdition] = useState<Edition | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -151,6 +152,7 @@ export function Checkin() {
     };
   }, [step, email, slug, meta, texts, inscritoNome]);
 
+  if (previaCartao) return <Success previa done={{ nome: 'Maria Silva', categoria: 'membro', edicao: 'Primeiro encontro', selo: '', codigo: 'EXEMPLO', repetido: false }} />;
   if (done) return <Success done={done} />;
   if (edition?.situacao === 'aberto' && preset) return <PublicFormPage key={step} preset={preset} />;
   if (!edition && !loadError) return <main className="dn-pg" aria-busy="true" />;

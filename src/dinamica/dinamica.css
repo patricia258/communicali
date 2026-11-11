@@ -146,3 +146,6 @@
 .dn-apoio li.agora small{color:#E8C9A0}
 .dn-apoio li.feita{opacity:.65}
 .dn-apoio .dn-btn{width:auto;padding:10px 18px}
+
+a.dn-btn{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.dia-bloco .adm-links a{display:inline-flex;align-items:center;text-decoration:none}

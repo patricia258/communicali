@@ -4,6 +4,7 @@ import '../dinamica/dinamica.css';
 
 export function Votar() {
   const slug = editionSlug();
+  const previa = new URLSearchParams(window.location.search).has('previa');
   const [poll, setPoll] = useState<Poll | null>(null);
   const [loadError, setLoadError] = useState('');
   const [nota, setNota] = useState<number | null>(null);
@@ -20,14 +21,15 @@ export function Votar() {
   useEffect(() => {
     supabase.rpc('communicali_votacao', { p_slug: slug }).then(({ data, error: failure }) => {
       if (failure || !data) setLoadError('Não foi possível abrir a votação. Recarregue a página.');
-      else setPoll(data as Poll);
+      else setPoll(previa ? { ...(data as Poll), situacao: 'ativa' } : (data as Poll));
     });
-  }, [slug]);
+  }, [slug, previa]);
 
   const ready = poll && (poll.tipo === 'nota' ? nota !== null && (!poll.pergunta_2 || nota2 !== null) : poll.tipo === 'multipla' ? Boolean(opcao) : Boolean(texto.trim())) && (poll.anonima || nome.trim().length > 1);
 
   async function submit() {
     if (!ready || sending) return;
+    if (previa) { setSent('novo'); return; }
     setSending(true); setError('');
     const { data, error: failure } = await supabase.rpc('communicali_votar', { p_slug: slug, p_aparelho: deviceCode(), p_nota: nota, p_opcao: opcao, p_texto: texto, p_respondente: nome, p_nota_2: poll?.pergunta_2 ? nota2 : null });
     setSending(false);

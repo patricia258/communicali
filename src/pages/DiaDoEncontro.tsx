@@ -71,16 +71,12 @@ function DiaDoEncontroInterno({ edition }: { edition: Edicao }) {
       <header className="adm-secao__topo"><div><small>DIA DO ENCONTRO</small><h2>Telas e controles ao vivo</h2></div></header>
       <p className="adm-hint adm-hint--antes">Tudo o que roda durante o encontro fica aqui, no mesmo visual. Abra cada telão numa janela e arraste para o projetor; no telão, a tecla F abre a tela cheia.</p>
       <article className="dia-bloco dia-bloco--largo">
-        <h3>Sala do convidado e equipe de apoio</h3>
-        <p>Depois do check-in, cada convidada fica na sala (<b>/sala</b>) com as etapas trancadas. A pessoa do apoio abre o link abaixo no celular e libera uma etapa por vez: votação, dinâmica de palavras e pesquisa. O telão único (<b>/telao</b>) acompanha sozinho a etapa liberada: é o único que você precisa deixar aberto no projetor. Etapa liberada agora: <b>{({ boasvindas: 'Boas-vindas', votacao: 'Votação', palavras: 'Dinâmica de palavras', pesquisa: 'Pesquisa' } as Record<string, string>)[etapa] || '...'}</b>.</p>
+        <h3>Caminho do convidado e equipe de apoio</h3>
+        <p>Depois do check-in, cada convidada entra na sala do encontro no celular, com as etapas trancadas. A pessoa do apoio libera uma por vez. Etapa liberada agora: <b>{({ boasvindas: 'Boas-vindas', votacao: 'Votação', palavras: 'Dinâmica de palavras', pesquisa: 'Pesquisa' } as Record<string, string>)[etapa] || '...'}</b>.</p>
         <div className="adm-links">
-          <button type="button" className="wf-primary" disabled={!token} onClick={() => copiar('apoio', `${window.location.origin}/apoio/${token}`)}>{copiado === 'apoio' ? 'Link copiado' : 'Copiar link da equipe de apoio'}</button>
-          <a className="wf-secondary" href={`/apoio/${token}`} target="_blank" rel="noopener noreferrer">Ver o controle do apoio</a>
-          <a className="wf-primary" href={ev('/telao')} target="_blank" rel="noopener noreferrer">Abrir o telão único</a>
-          <button type="button" className="wf-secondary" onClick={() => copiar('sala', ev('/sala'))}>{copiado === 'sala' ? 'Link copiado' : 'Copiar link da sala'}</button>
-          <a className="wf-secondary" href={ev('/sala')} target="_blank" rel="noopener noreferrer">Ver a sala do convidado</a>
+          <a className="wf-primary" href="/previa-convidado" target="_blank" rel="noopener noreferrer">Ver o caminho do convidado, passo a passo</a>
+          <button type="button" className="wf-secondary" disabled={!token} onClick={() => copiar('apoio', `${window.location.origin}/apoio/${token}`)}>{copiado === 'apoio' ? 'Link copiado' : 'Copiar link da equipe de apoio'}</button>
         </div>
-        <p className="adm-hint">Mande o link só para quem vai liberar as etapas: quem tem o link controla o que todo mundo vê.</p>
       </article>
       <div className="dia-grid">
         <article className="dia-bloco">
