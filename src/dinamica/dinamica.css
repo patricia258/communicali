@@ -149,3 +149,14 @@
 
 a.dn-btn{display:flex;align-items:center;justify-content:center;text-decoration:none}
 .dia-bloco .adm-links a{display:inline-flex;align-items:center;text-decoration:none}
+
+.dn-oi{margin:8px 0 0;font-size:clamp(34px,10vw,46px);color:#5A1E2D;text-align:center}
+.dn-oi-sub{margin:0 0 10px;text-align:center;color:#5A4740;font-size:18px}
+.dn-atencao{background:#FBF1EC;border:1px solid #E8C9A0}
+.dn-atencao h2{margin:0;color:#5A1E2D;font-size:20px}
+.dn-atencao p{margin:0}
+.dn-trava li{background:#5A1E2D;color:#F7F0EA;justify-content:center;padding:18px 14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.dn-trava li span{margin:0;font-size:14px;color:#F7F0EA}
+.dn-liberada{text-align:center}
+.dn-apoio-qr{margin-top:14px;text-align:center}
+.dn-apoio-qr img{width:200px;height:200px}

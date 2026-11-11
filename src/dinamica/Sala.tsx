@@ -1,14 +1,13 @@
 /* Sala do convidado: depois do check-in a pessoa fica nesta janela e cada etapa aparece quando o apoio libera. */
 import { useEffect, useState } from 'react';
-import { Lock, LockOpen } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { editionSlug, supabase } from '../lib';
 import { Votar } from '../pages/Votar';
 import { Participante } from './Participante';
-import { PublicFormPage } from '../forms/PublicFormPage';
 import './dinamica.css';
 
-export const ETAPAS = [['boasvindas', 'Boas-vindas'], ['votacao', 'Votação'], ['palavras', 'Dinâmica de palavras'], ['pesquisa', 'Pesquisa de satisfação']] as const;
-type Etapa = (typeof ETAPAS)[number][0];
+export const ETAPAS = [['boasvindas', 'Boas-vindas'], ['votacao', 'Votação'], ['palavras', 'Dinâmica de palavras']] as const;
+type Etapa = (typeof ETAPAS)[number][0] | 'pesquisa';
 const CHAVE = 'communicali_presenca';
 
 /** Guarda neste aparelho quem fez check-in, para não pedir tudo de novo. */
@@ -23,6 +22,7 @@ export function Sala() {
   const slug = editionSlug();
   const previa = new URLSearchParams(window.location.search).get('previa');
   const presenca = previa ? { nome: 'Maria Silva', codigo: 'PREVIA' } : lerPresenca();
+  const [entrou, setEntrou] = useState('');
   const [estado, setEstado] = useState<{ etapa: Etapa; form_pesquisa: string | null } | null>(null);
   useEffect(() => {
     let vivo = true;
@@ -37,20 +37,21 @@ export function Sala() {
   );
   if (!presenca) return molde(<div className="dn-cartao"><h1>Faça seu check-in para entrar</h1><p className="dn-pg-inst">Assim a gente sabe que você está aqui e libera as interações no seu celular.</p><a className="dn-btn" href="/checkin?novo=1" style={{ textAlign: 'center', textDecoration: 'none' }}>Fazer check-in</a></div>);
   if (!estado) return <main className="dn-pg" aria-busy="true" />;
-  if (estado.etapa === 'votacao') return <Votar />;
-  if (estado.etapa === 'palavras') return <Participante />;
-  if (estado.etapa === 'pesquisa' && estado.form_pesquisa) return <PublicFormPage slugFixo={estado.form_pesquisa} />;
+  if (estado.etapa === 'votacao' || estado.etapa === 'palavras') {
+    const rotulo = estado.etapa === 'votacao' ? 'Votação' : 'Dinâmica de palavras';
+    if (entrou === estado.etapa || new URLSearchParams(window.location.search).has('entrou')) return estado.etapa === 'votacao' ? <Votar /> : <Participante />;
+    return molde(<div className="dn-cartao dn-liberada"><p className="dn-pg-etapa">Liberada agora</p><h1>{rotulo}</h1><button type="button" className="dn-btn" onClick={() => setEntrou(estado.etapa)}>Clique aqui</button></div>);
+  }
   const nome = presenca.nome.split(' ')[0];
   return molde(
-    <div className="dn-cartao">
-      <p className="dn-pg-etapa">Check-in feito</p>
-      <h1>Oi, {nome}! Fique por aqui.</h1>
-      <p className="dn-pg-inst">Não feche esta janela. A apresentação e as interações do encontro acontecem aqui: cada etapa aparece sozinha quando a equipe liberar.</p>
+    <>
+      <h1 className="dn-oi">Oi, {nome}!</h1>
+      <p className="dn-oi-sub">Fique por aqui.</p>
+      <div className="dn-cartao dn-atencao"><p className="dn-pg-etapa">Atenção</p><h2>Não feche esta janela.</h2><p>A apresentação e as interações do encontro acontecem por aqui.</p></div>
       <ul className="dn-trava">
-        {ETAPAS.slice(1).map(([id, rotulo]) => <li key={id}><Lock size={16} aria-hidden="true" /> {rotulo}<span>Aguardando liberação</span></li>)}
+        {[0, 1].map((i) => <li key={i}><Lock size={22} aria-hidden="true" /><span>Trancado</span></li>)}
       </ul>
-      <p className="dn-restam">Fechou sem querer? Escaneie o QR Code do telão de novo e você volta direto para cá.</p>
-      <span hidden><LockOpen /></span>
-    </div>,
+      <p className="dn-restam">Fechou sem querer? Escaneie o QR Code do telão de novo ou chame alguém do staff.</p>
+    </>,
   );
 }

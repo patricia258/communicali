@@ -4,11 +4,11 @@ import './dinamica.css';
 
 const PASSOS: [string, string, string][] = [
   ['1. Check-in', 'A pessoa escaneia o QR Code do telão e informa o e-mail.', '/checkin?novo=1&previa=email'],
-  ['2. Presença confirmada', 'Depois dos aceites, aparece o cartão de embarque e ela segue sozinha para a sala.', '/checkin?previa=sucesso'],
-  ['3. Sala, etapas trancadas', 'Ela fica aqui até a equipe de apoio liberar a próxima etapa.', '/sala?previa=boasvindas'],
-  ['4. Votação liberada', 'O apoio libera e a votação aparece no celular, sozinha.', '/sala?previa=votacao'],
-  ['5. Dinâmica de palavras', 'Depois, as duas perguntas das palavras (aqui ainda fechadas, abrem na hora).', '/sala?previa=palavras'],
-  ['6. Pesquisa de satisfação', 'Por fim, a pesquisa aparece na mesma janela.', '/sala?previa=pesquisa'],
+  ['2. Presença confirmada', 'Convidados veem o lembrete do crachá; membros, não. Segue sozinha para a sala.', '/checkin?previa=sucesso'],
+  ['3. Sala, etapas trancadas', 'Ela fica aqui até a equipe de apoio liberar.', '/sala?previa=boasvindas'],
+  ['4. Votação liberada', 'O apoio libera e aparece o botão "Clique aqui".', '/sala?previa=votacao'],
+  ['5. Votação', 'Depois do clique, a votação.', '/sala?previa=votacao&entrou=1'],
+  ['6. Dinâmica liberada', 'Depois, a dinâmica de palavras.', '/sala?previa=palavras'],
 ];
 
 export function PreviaConvidado() {

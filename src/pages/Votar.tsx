@@ -45,7 +45,7 @@ export function Votar() {
         <div className="dn-cartao">
           <p className="dn-pg-etapa">{poll?.pergunta_2 && !sent && poll.situacao === 'ativa' ? `Pergunta ${etapa} de 2` : 'Votação ao vivo'}</p>
           {loadError && <p className="dn-aviso alerta">{loadError}</p>}
-          {sent === 'novo' && <h1>Sua resposta foi registrada. Obrigada por contribuir com essa conversa!</h1>}
+          {sent === 'novo' && <><h1>Obrigada pela sua participação!</h1><p className="dn-pg-inst">A próxima etapa começa em instantes.</p></>}
           {sent === 'repetido' && <h1>Este aparelho já respondeu a esta pergunta.</h1>}
           {!sent && poll && <h1>{etapa === 2 && poll.pergunta_2 ? poll.pergunta_2 : poll.pergunta}</h1>}
           {!sent && poll?.situacao === 'rascunho' && <p className="dn-aviso">A votação ainda não abriu.</p>}

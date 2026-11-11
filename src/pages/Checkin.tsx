@@ -57,19 +57,14 @@ function Success({ done, previa }: { done: Done; previa?: boolean }) {
         <section className="dn-bilhete">
           <p className="dn-bilhete__etapa">Check-in feito</p>
           <h1>Presença confirmada!</h1>
-          <p className="dn-bilhete__texto">Que bom ter você aqui. Você faz parte da ComuniCALI.</p>
+          <p className="dn-bilhete__texto">Que bom ter você aqui.</p>
           {!!done.junto?.length && <QuemVeio codigo={done.codigo} junto={done.junto} />}
-          <p className="dn-bilhete__texto">{done.repetido ? 'Sua presença neste encontro já estava registrada.' : 'Você conquistou 10 milhas pela participação neste encontro.'}</p>
           <dl className="dn-dados">
             <div><dt>Nome</dt><dd>{done.nome}</dd></div>
             <div><dt>Categoria</dt><dd>{CATEGORIAS[done.categoria] || done.categoria}</dd></div>
-            <div><dt>Edição</dt><dd>{done.edicao}</dd></div>
-            <div><dt>Código</dt><dd>{done.codigo}</dd></div>
           </dl>
-          {qr && <img className="dn-bilhete__qr" src={qr} alt="QR Code para a organização validar sua presença" />}
-          <div className="dn-bilhete__aviso"><IdCard size={26} aria-hidden="true" /><p><strong>Agora é só levantar a mão.</strong> Você recebe o seu crachá na mesa.</p></div>
-          <a className="dn-btn" href="/sala" style={{ textAlign: 'center', textDecoration: 'none' }}>Entrar na sala do encontro</a>
-          <p className="dn-bilhete__texto">Deixe esta janela aberta: a votação e as dinâmicas aparecem lá, quando a equipe liberar.</p>
+          {done.categoria === 'convidado' && <p className="dn-bilhete__texto"><strong>Lembrete:</strong> devolva o crachá ao final do encontro.</p>}
+          <p className="dn-bilhete__texto">Aproveite o encontro. Qualquer dúvida, chame alguém do staff.</p>
         </section>
       </div>
     </main>
@@ -152,7 +147,7 @@ export function Checkin() {
     };
   }, [step, email, slug, meta, texts, inscritoNome]);
 
-  if (previaCartao) return <Success previa done={{ nome: 'Maria Silva', categoria: 'membro', edicao: 'Primeiro encontro', selo: '', codigo: 'EXEMPLO', repetido: false }} />;
+  if (previaCartao) return <Success previa done={{ nome: 'Maria Silva', categoria: 'convidado', edicao: 'Primeiro encontro', selo: '', codigo: 'EXEMPLO', repetido: false }} />;
   if (done) return <Success done={done} />;
   if (edition?.situacao === 'aberto' && preset) return <PublicFormPage key={step} preset={preset} />;
   if (!edition && !loadError) return <main className="dn-pg" aria-busy="true" />;
