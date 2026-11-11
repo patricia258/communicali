@@ -22,21 +22,26 @@ function Cronometro({ segundos, titulo, contar }: { segundos: number; titulo: st
   const guardar = (n: number) => { setVezes(n); try { localStorage.setItem('communicali_apresentacoes', String(n)); } catch { /* sem armazenamento */ } };
 
   function silenciar() {
-    if (sirene.current) { window.clearInterval(sirene.current); sirene.current = null; }
+    if (sirene.current) { window.clearTimeout(sirene.current); sirene.current = null; }
     setTocando(false);
   }
   function alarme() {
     const ctx = audio.current; if (!ctx) return;
     setTocando(true);
-    let n = 0;
-    const bip = () => {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'square'; o.frequency.value = n % 2 ? 1320 : 880; g.gain.value = 1;
-      o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.22);
-      try { navigator.vibrate?.(200); } catch { /* sem vibração */ }
-      n += 1; if (n >= 24) silenciar();
+    // Sino de "acabou o tempo": três toques claros, repetidos duas vezes, com som de sino que vai sumindo.
+    const comp = ctx.createDynamicsCompressor(); comp.connect(ctx.destination);
+    const sino = (freq: number, quando: number) => {
+      [[1, 1], [2.76, 0.35], [5.4, 0.15]].forEach(([mult, vol]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = freq * mult;
+        g.gain.setValueAtTime(0.0001, quando); g.gain.exponentialRampToValueAtTime(vol, quando + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, quando + 1.6);
+        o.connect(g); g.connect(comp); o.start(quando); o.stop(quando + 1.7);
+      });
     };
-    bip(); sirene.current = window.setInterval(bip, 320);
+    const t0 = ctx.currentTime + 0.05;
+    [0, 0.7, 1.4, 3.2, 3.9, 4.6].forEach((dt, i) => sino(i % 3 === 2 ? 1318.5 : 1046.5, t0 + dt));
+    try { navigator.vibrate?.([300, 150, 300, 150, 300]); } catch { /* sem vibração */ }
+    sirene.current = window.setTimeout(() => silenciar(), 6500);
   }
   function iniciar() {
     // O toque no botão libera o som no celular.
@@ -57,7 +62,7 @@ function Cronometro({ segundos, titulo, contar }: { segundos: number; titulo: st
     }, 200);
     return () => window.clearInterval(t);
   }, [fim]);
-  useEffect(() => () => { if (sirene.current) window.clearInterval(sirene.current); }, []);
+  useEffect(() => () => { if (sirene.current) window.clearTimeout(sirene.current); }, []);
 
   const mm = String(Math.floor(resta / 60)).padStart(2, '0'), ss = String(resta % 60).padStart(2, '0');
   return (
