@@ -42,7 +42,7 @@ export function memberQuestions(texts: SiteTexts, options: { email?: boolean; im
 /** Quem já se inscreveu na edição só confirma os aceites: o resto vem da inscrição. */
 export function confirmQuestions(texts: SiteTexts, nome: string): FormQuestion[] {
   const list: FormQuestion[] = [
-    { id: 'boasvindas', kind: 'statement', label: `Que bom te ver${nome ? `, ${nome}` : ''}!`, help: 'Encontramos sua inscrição. Faltam só alguns aceites para confirmar sua presença e seu cadastro de membro.' },
+    { id: 'boasvindas', kind: 'statement', label: `Que bom te ver${nome ? `, ${nome}` : ''}!`, help: 'Encontramos sua inscrição. Faltam só alguns aceites para confirmar sua presença.' },
     { id: 'privacidade', kind: 'single_choice', label: 'Política de privacidade', help: `Leia a [política de privacidade](${SITE}/privacidade).`, options: [ACEITE], required: true },
   ];
   if (texts.regras_texto) list.push({ id: 'regras', kind: 'single_choice', label: 'Regras de participação da comunidade', help: `Leia as [regras de participação](${SITE}/regras).`, options: [ACEITE], required: true });

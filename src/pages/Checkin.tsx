@@ -44,6 +44,8 @@ export const CATEGORIAS: Record<string, string> = { fundadora: 'Fundadora', memb
 function Success({ done }: { done: Done }) {
   const [qr, setQr] = useState('');
   useEffect(() => { guardarPresenca(done.nome, done.codigo); }, [done.nome, done.codigo]);
+  // Sem kids ou acompanhantes para confirmar, a pessoa segue sozinha para a sala.
+  useEffect(() => { if (done.junto?.length) return; const t = window.setTimeout(() => window.location.replace('/sala' + window.location.search.replace(/[?&]novo=1/, '')), 4500); return () => window.clearTimeout(t); }, [done.junto]);
   useEffect(() => {
     QRCode.toDataURL(`${window.location.origin}/validar/${done.codigo}`, { width: 320, margin: 1, color: { dark: '#5A1E2D', light: '#FFFFFF' } }).then(setQr);
   }, [done.codigo]);

@@ -8,6 +8,12 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-10 | Sala do convidado, equipe de apoio e telão único (publicado)
+- Pedido da Patrícia: check-in cai direto na sala (`/sala`), com votação, palavras e pesquisa trancadas; a pessoa do apoio libera uma etapa por vez em `/apoio/:token` (link no painel, bloco "Sala do convidado e equipe de apoio"); o telão `/telao` acompanha sozinho a etapa liberada. Escolha de ser membro fora do check-in (fica para e-mail pós-evento).
+- Migração `20261110110000_sala_apoio` (`dinamicas.etapa_sala`, `token_apoio`, RPCs `communicali_sala_estado`, `_apoio_estado`, `_apoio_definir`). Liberar votação abre a poll; palavras abre as duas perguntas e fecha a poll; pesquisa encerra as palavras. A poll `fundadora` ficou em rascunho até o apoio liberar.
+- Check-in guarda a presença no aparelho e, sem kids/acompanhantes a confirmar, segue sozinho para a sala em 4,5 s; `/checkin` redireciona quem já fez (`?novo=1` registra outra pessoa).
+- Testado: tsc e build. NÃO testado no navegador: fluxo da sala, do apoio e do telão único. Pendente: o fluxo de membro existente ainda pede código por e-mail no check-in (`communicali_situacao_email`); decidir se sai.
+
 ### 2026-11-10 | Dia do encontro: dinâmica ao vivo, telas no novo visual e pesquisa automática (publicado)
 - Pedido da Patrícia: as duas perguntas abertas ao mesmo tempo, até 4 palavras por pessoa em cada uma, telas de votação, boas-vindas e check-in no mesmo visual, tudo fácil no painel da edição e pesquisa de satisfação enviada sozinha às 14h aos que fizeram check-in.
 - Banco (migrações `20261110090000_dinamica_ao_vivo` e `20261110100000_pesquisa_satisfacao`, já aplicadas): tabelas `dinamicas` e `dinamica_respostas` (RLS só admin), RPCs públicas `communicali_dinamica_telao`, `_estado`, `_enviar` (limite de 4, agrupa por `communicali_dinamica_chave`), `email_log.tipo` aceita 'pesquisa', `editions.form_pesquisa` e `pesquisa_auto`, formulário `pesquisa-1a-edicao` (11 perguntas, tema claro) ligado à edição fundadora.
