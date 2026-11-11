@@ -1,5 +1,5 @@
 /* Controle da equipe de apoio, no celular: libera uma etapa de cada vez para todo mundo. Link próprio, sem login. */
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import QRCode from 'qrcode';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib';
@@ -8,6 +8,71 @@ import { ETAPAS } from './Sala';
 import './dinamica.css';
 
 type Estado = { titulo: string; etapa: (typeof ETAPAS)[number][0]; checkins: number };
+
+
+/** Cronômetro do apoio: marca pelo relógio (não para com a tela apagada) e toca um alarme alto ao zerar. */
+function Cronometro({ segundos, titulo, contar }: { segundos: number; titulo: string; contar?: boolean }) {
+  const [fim, setFim] = useState<number | null>(null);
+  const [resta, setResta] = useState(segundos);
+  const [tocando, setTocando] = useState(false);
+  const [vezes, setVezes] = useState(() => { try { return Number(localStorage.getItem('communicali_apresentacoes') || 0); } catch { return 0; } });
+  const audio = useRef<AudioContext | null>(null);
+  const sirene = useRef<number | null>(null);
+  const trava = useRef<{ release: () => Promise<void> } | null>(null);
+  const guardar = (n: number) => { setVezes(n); try { localStorage.setItem('communicali_apresentacoes', String(n)); } catch { /* sem armazenamento */ } };
+
+  function silenciar() {
+    if (sirene.current) { window.clearInterval(sirene.current); sirene.current = null; }
+    setTocando(false);
+  }
+  function alarme() {
+    const ctx = audio.current; if (!ctx) return;
+    setTocando(true);
+    let n = 0;
+    const bip = () => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'square'; o.frequency.value = n % 2 ? 1320 : 880; g.gain.value = 1;
+      o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.22);
+      try { navigator.vibrate?.(200); } catch { /* sem vibração */ }
+      n += 1; if (n >= 24) silenciar();
+    };
+    bip(); sirene.current = window.setInterval(bip, 320);
+  }
+  function iniciar() {
+    // O toque no botão libera o som no celular.
+    if (!audio.current) audio.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    void audio.current.resume();
+    silenciar();
+    setFim(Date.now() + segundos * 1000); setResta(segundos);
+    if (contar) guardar(vezes + 1);
+    (navigator as unknown as { wakeLock?: { request: (t: string) => Promise<{ release: () => Promise<void> }> } }).wakeLock?.request('screen').then((w) => { trava.current = w; }).catch(() => undefined);
+  }
+  function parar() { setFim(null); setResta(segundos); silenciar(); void trava.current?.release(); }
+  useEffect(() => {
+    if (fim === null) return;
+    const t = window.setInterval(() => {
+      const r = Math.max(0, Math.ceil((fim - Date.now()) / 1000));
+      setResta(r);
+      if (r === 0) { window.clearInterval(t); setFim(null); alarme(); void trava.current?.release(); }
+    }, 200);
+    return () => window.clearInterval(t);
+  }, [fim]);
+  useEffect(() => () => { if (sirene.current) window.clearInterval(sirene.current); }, []);
+
+  const mm = String(Math.floor(resta / 60)).padStart(2, '0'), ss = String(resta % 60).padStart(2, '0');
+  return (
+    <li className={`dn-cron${fim !== null ? ' rodando' : ''}${tocando ? ' tocando' : ''}`}>
+      <span><b>{titulo}</b><small>{contar ? `Apresentações até agora: ${vezes}` : 'Cronômetro do debate'}</small></span>
+      <strong className="dn-cron__tempo">{mm}:{ss}</strong>
+      <span className="dn-cron__acoes">
+        {tocando ? <button type="button" className="dn-btn" onClick={silenciar}>Silenciar</button>
+          : <button type="button" className="dn-btn" onClick={iniciar}>{fim !== null ? 'Reiniciar' : contar && vezes ? 'Próxima pessoa' : 'Iniciar'}</button>}
+        {fim !== null && <button type="button" className="dn-link" onClick={parar}>Parar</button>}
+        {contar && vezes > 0 && fim === null && <button type="button" className="dn-link" onClick={() => guardar(0)}>Zerar contagem</button>}
+      </span>
+    </li>
+  );
+}
 
 export function Apoio() {
   const { token = '' } = useParams();
@@ -39,10 +104,14 @@ export function Apoio() {
           <p className="dn-pg-inst"><b>{estado.checkins}</b> {estado.checkins === 1 ? 'pessoa fez' : 'pessoas fizeram'} check-in. Libere uma etapa por vez, quando a apresentação chegar nela.</p>
           <ul className="dn-apoio">
             {ETAPAS.map(([id, rotulo], i) => (
-              <li key={id} className={i === atual ? 'agora' : i < atual ? 'feita' : ''}>
+              <Fragment key={id}>
+              <li className={i === atual ? 'agora' : i < atual ? 'feita' : ''}>
                 <span><b>{i + 1}. {rotulo}</b><small>{i === atual ? 'Liberada agora' : i < atual ? 'Já passou' : 'Trancada'}</small></span>
                 {i !== atual && <button type="button" className={i > atual ? 'dn-btn' : 'dn-link'} disabled={Boolean(busy)} onClick={() => void liberar(id, rotulo, i < atual)}>{busy === id ? '…' : i > atual ? 'Liberar' : 'Voltar'}</button>}
               </li>
+              {i === 0 && <Cronometro segundos={60} titulo="Cronômetro de 1 minuto" contar />}
+              {i === 1 && <Cronometro segundos={600} titulo="Cronômetro de 10 minutos" />}
+              </Fragment>
             ))}
           </ul>
           {erro && <p className="dn-aviso alerta">{erro}</p>}
