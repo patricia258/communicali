@@ -30,8 +30,9 @@ export type FormPreset = {
   onAdvance?: (questionId: string, answers: Record<string, FormAnswer>) => Promise<Record<string, FormAnswer> | null>;
 };
 
-export function PublicFormPage({ preset }: { preset?: FormPreset }) {
-  const { slug = '' } = useParams();
+export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slugFixo?: string }) {
+  const { slug: slugRota = '' } = useParams();
+  const slug = slugFixo ?? slugRota;
   const preview = useSearchParams()[0].get('previa') === '1';
   const [form, setForm] = useState<PublicForm | null>(null);
   const [phase, setPhase] = useState<Phase>('loading');
