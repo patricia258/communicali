@@ -16,6 +16,17 @@ export default async function handler(req, res) {
       if (situacao !== 'ja_enviado') await pausa();
     }
   }
+  // Lembrete de consumação mínima: uma vez, no dia 12/11 (9h de Brasília), só para quem está confirmado na 1ª edição.
+  let consumo = null;
+  if (hoje === '2026-11-12') {
+    const [fundadora] = await (await banco(`editions?slug=eq.fundadora&select=${EDITION_FIELDS}`)).json();
+    consumo = { enviado: 0, ja_enviado: 0, erro: 0 };
+    for (const pessoa of (await destinatarios(fundadora.id)).filter((item) => item.acionado && item.email && !item.email.endsWith('.test'))) {
+      const situacao = await enviarUmaVez('consumo', fundadora, pessoa);
+      consumo[situacao] = (consumo[situacao] || 0) + 1;
+      if (situacao !== 'ja_enviado') await pausa();
+    }
+  }
   const avisos = await fetch('https://comuni.calirh.com/api/avisos', { method: 'POST' }).then((r) => r.json()).catch(() => null);
-  res.status(200).json({ alvo, edicoes: editions.length, ...total, avisos });
+  res.status(200).json({ alvo, edicoes: editions.length, ...total, consumo, avisos });
 }
