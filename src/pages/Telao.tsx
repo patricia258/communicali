@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { editionSlug, supabase, type Poll } from '../lib';
+import '../dinamica/dinamica.css';
 
 function useQr(url: string) {
   const [src, setSrc] = useState('');
@@ -20,14 +21,23 @@ export function TelaoCheckin() {
   const url = shortUrl('/checkin');
   const qr = useQr(url);
   return (
-    <main className="screen">
-      <div className="screen__text">
-        <img className="screen__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
-        <h1><span className="nowrap">Bem-vindas e</span> <span className="nowrap">bem-vindos!</span></h1>
-        <p className="screen__lead">Sinta-se à vontade, escolha uma mesa e faça seu <span className="nowrap">check-in</span> pelo QR Code.</p>
-        <p className="screen__url">{url.replace(/^https?:\/\//, '')}</p>
+    <main className="dn-tela">
+      <div className="dn-stage">
+        <div className="dn-faixa" />
+        <div className="dn-boasvindas">
+          <section className="dn-bv-texto">
+            <img src="/brand/communicali-branco.png" alt="ComuniCALI" />
+            <h1>Bem-vindas <em>e bem-vindos!</em></h1>
+            <p>Sinta-se à vontade e escolha uma mesa. Faça o seu check-in pelo QR Code e levante a mão: o seu crachá chega à mesa.</p>
+          </section>
+          <section className="dn-bv-qr">
+            <small>Check-in</small>
+            <h2>Aponte a câmera</h2>
+            {qr && <img src={qr} alt="QR Code do check-in" />}
+            <span>{url.replace(/^https?:\/\//, '')}</span>
+          </section>
+        </div>
       </div>
-      {qr && <img className="screen__qr" src={qr} alt="QR Code do check-in" />}
     </main>
   );
 }
@@ -125,42 +135,39 @@ export function TelaoResultado() {
   const contagem = (dist: Record<string, number> | undefined, nota: number) => Number(dist?.[nota] || 0);
   const topo = Math.max(1, ...Array.from({ length: 11 }, (_, nota) => Math.max(contagem(dados?.dist, nota), duas ? contagem(dados?.dist_2, nota) : 0)));
   const distancia = dados && duas && dados.media !== null && dados.media_2 !== null ? Math.abs(Number(dados.media) - Number(dados.media_2)) : null;
+  const votos = dados?.votos ?? 0;
+  const situacao = dados?.situacao === 'ativa' ? ['aberta', 'Recebendo votos'] : dados?.situacao === 'encerrada' ? ['encerrada', 'Votação encerrada'] : ['aguardando', 'Aguardando abertura'];
+  const quadro = (classe: string, rotulo: string, pergunta: string | null | undefined, media: number | null | undefined, dist: Record<string, number> | undefined) => (
+    <section className={`dn-board ${classe} dn-res-quadro`}>
+      <header><div><small>{rotulo}</small><h3>{virgula(media ?? null)} <span style={{ fontSize: '.5em', fontWeight: 600, opacity: .75 }}>de média</span></h3></div><span className={`dn-chip ${situacao[0]}`}><i /><b>{situacao[1]}</b></span></header>
+      <p className="dn-res-pergunta">{pergunta}</p>
+      <div className="dn-barras" role="img" aria-label={`Distribuição das notas de 0 a 10: ${rotulo}`}>
+        {Array.from({ length: 11 }, (_, nota) => (
+          <div className="dn-col" key={nota}>
+            <i style={{ ['--r' as string]: contagem(dist, nota) / topo }}>{contagem(dist, nota) > 0 && <b>{contagem(dist, nota)}</b>}</i>
+            <span>{nota}</span>
+          </div>
+        ))}
+      </div>
+      {!votos && <div className="dn-vazio">Leia o QR Code e vote.<br />O gráfico se monta aqui, ao vivo.</div>}
+    </section>
+  );
 
   return (
-    <main className="resultado">
-      <header className="resultado__topo"><img src="/brand/communicali-branco.png" alt="ComuniCALI" />{edicao && <span>{edicao}ª Edição</span>}</header>
-      <section className="resultado__corpo">
-        <div className="resultado__texto">
-          <h1><span className="resultado__linha">Antes de debater,</span> <em>vamos votar!</em></h1>
-          <i className="resultado__traco" aria-hidden="true" />
-          {qr && <img className="resultado__qr" src={qr} alt="QR Code para votar" />}
-          <p className="resultado__url">{url.replace(/^https?:\/\//, '')}</p>
-          {dados && dados.situacao !== 'ativa' && <p className="resultado__aviso">{dados.situacao === 'encerrada' ? 'Votação encerrada.' : 'A votação ainda não foi aberta. Ative em Votações, no painel.'}</p>}
+    <main className="dn-tela">
+      <div className="dn-stage">
+        <div className="dn-faixa" />
+        <header className="dn-head">
+          <img className="dn-logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
+          <div className="dn-tema"><small>Votação ao vivo{edicao ? ` · ${edicao}ª Edição` : ''} · {votos} {votos === 1 ? 'pessoa votou' : 'pessoas votaram'}</small><h2>Antes de debater, vamos votar!</h2></div>
+          <div className="dn-qr"><span>Aponte a câmera<br />e vote</span>{qr && <img src={qr} alt="QR Code para votar" />}</div>
+        </header>
+        <div className={`dn-boards${duas ? '' : ' dn-m1'}`}>
+          {quadro('dn-b1', duas ? 'Na opinião' : 'Resultado', dados?.pergunta, dados?.media, dados?.dist)}
+          {duas && quadro('dn-b2', 'Na prática', dados?.pergunta_2, dados?.media_2, dados?.dist_2)}
+          {distancia !== null && <span className="dn-dist"><b>{virgula(distancia)}</b><small>{distancia === 1 ? 'ponto' : 'pontos'} de distância</small></span>}
         </div>
-        <div className="resultado__painel">
-          <div className="resultado__numeros">
-            <p className="resultado__total"><strong>{dados?.votos ?? 0}</strong>{dados?.votos === 1 ? 'pessoa votou' : 'pessoas votaram'}</p>
-            <div className="resultado__media resultado__media--opiniao"><small>{duas ? 'Na opinião' : 'Média'}</small><strong>{virgula(dados?.media ?? null)}</strong></div>
-            {duas && <div className="resultado__media resultado__media--pratica"><small>Na prática</small><strong>{virgula(dados?.media_2 ?? null)}</strong></div>}
-          </div>
-          {distancia !== null && <p className="resultado__distancia">Uma distância de <strong>{virgula(distancia)} {distancia === 1 ? 'ponto' : 'pontos'}</strong> entre o que acreditamos e o que vemos acontecer.</p>}
-          <div className="resultado__grafico" role="img" aria-label="Distribuição das notas de 0 a 10">
-            <div className="resultado__barras">
-              {Array.from({ length: 11 }, (_, nota) => (
-                <div className="resultado__coluna" key={nota}>
-                  <div className="resultado__par">
-                    <i className="resultado__barra resultado__barra--opiniao" style={{ height: `${(contagem(dados?.dist, nota) / topo) * 100}%` }}>{contagem(dados?.dist, nota) > 0 && <b>{contagem(dados?.dist, nota)}</b>}</i>
-                    {duas && <i className="resultado__barra resultado__barra--pratica" style={{ height: `${(contagem(dados?.dist_2, nota) / topo) * 100}%` }}>{contagem(dados?.dist_2, nota) > 0 && <b>{contagem(dados?.dist_2, nota)}</b>}</i>}
-                  </div>
-                  <span>{nota}</span>
-                </div>
-              ))}
-            </div>
-            {duas && <p className="resultado__legenda"><span className="resultado__ponto resultado__ponto--opiniao" />Na opinião<span className="resultado__ponto resultado__ponto--pratica" />Na prática</p>}
-            {!dados?.votos && <p className="resultado__vazio">Leia o QR Code e vote. O gráfico se monta aqui, ao vivo.</p>}
-          </div>
-        </div>
-      </section>
+      </div>
     </main>
   );
 }

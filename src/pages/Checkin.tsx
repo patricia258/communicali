@@ -5,6 +5,8 @@ import { IdCard } from 'lucide-react';
 import { editionSlug, errorMessage, formatDate, supabase, type Edition } from '../lib';
 import { answerArgs, confirmQuestions, memberQuestions, useSiteTexts } from './MemberFields';
 import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
+import { guardarPresenca, lerPresenca } from '../dinamica/Sala';
+import '../dinamica/dinamica.css';
 
 type Junto = { id: string; tipo: string; nome: string; chegou: boolean };
 type Done = { nome: string; categoria: string; edicao: string; selo: string; codigo: string; repetido: boolean; junto?: Junto[] };
@@ -39,37 +41,41 @@ type Step = 'email' | 'novo' | 'codigo' | 'inscrito';
 
 export const CATEGORIAS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organizador', kids: 'Kids' };
 
-function Success({ done }: { done: Done }) {
+function Success({ done, previa }: { done: Done; previa?: boolean }) {
   const [qr, setQr] = useState('');
+  useEffect(() => { if (!previa) guardarPresenca(done.nome, done.codigo); }, [done.nome, done.codigo, previa]);
+  // Sem kids ou acompanhantes para confirmar, a pessoa segue sozinha para a sala.
+  useEffect(() => { if (previa || done.junto?.length) return; const t = window.setTimeout(() => window.location.replace('/sala' + window.location.search.replace(/[?&]novo=1/, '')), 4500); return () => window.clearTimeout(t); }, [done.junto, previa]);
   useEffect(() => {
     QRCode.toDataURL(`${window.location.origin}/validar/${done.codigo}`, { width: 320, margin: 1, color: { dark: '#5A1E2D', light: '#FFFFFF' } }).then(setQr);
   }, [done.codigo]);
   return (
-    <main className="event-page event-page--wine">
-      <section className="pass">
-        <img className="pass__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
-        <h1>Presença confirmada!</h1>
-        <p className="pass__lead">Que bom ter você aqui. Você faz parte da ComuniCALI.</p>
-        {!!done.junto?.length && <QuemVeio codigo={done.codigo} junto={done.junto} />}
-        {done.repetido ? <p className="pass__hint">Sua presença neste encontro já estava registrada.</p> : <p className="pass__hint">Você conquistou 10 milhas pela participação neste encontro.</p>}
-        <dl className="pass__data">
-          <div><dt>Nome</dt><dd>{done.nome}</dd></div>
-          <div><dt>Categoria</dt><dd>{CATEGORIAS[done.categoria] || done.categoria}</dd></div>
-          <div><dt>Edição</dt><dd>{done.edicao}</dd></div>
-          <div><dt>Código</dt><dd>{done.codigo}</dd></div>
-        </dl>
-        {qr && <img className="pass__qr" src={qr} alt="QR Code para a organização validar sua presença" />}
-        <div className="pass__badge">
-          <IdCard size={26} aria-hidden="true" />
-          <p><strong>Agora é só levantar a mão.</strong> Você recebe o seu crachá na mesa.</p>
-        </div>
-      </section>
+    <main className="dn-pg">
+      <div className="dn-pg-faixa" />
+      <img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <div className="dn-pg-corpo">
+        <section className="dn-bilhete">
+          <p className="dn-bilhete__etapa">Check-in feito</p>
+          <h1>Presença confirmada!</h1>
+          <p className="dn-bilhete__texto">Que bom ter você aqui.</p>
+          {!!done.junto?.length && <QuemVeio codigo={done.codigo} junto={done.junto} />}
+          <dl className="dn-dados">
+            <div><dt>Nome</dt><dd>{done.nome}</dd></div>
+            <div><dt>Categoria</dt><dd>{CATEGORIAS[done.categoria] || done.categoria}</dd></div>
+          </dl>
+          {done.categoria === 'convidado' && <p className="dn-bilhete__texto"><strong>Lembrete:</strong> devolva o crachá ao final do encontro.</p>}
+          <p className="dn-bilhete__texto">Aproveite o encontro. Qualquer dúvida, chame alguém do staff.</p>
+        </section>
+      </div>
     </main>
   );
 }
 
 export function Checkin() {
   const slug = editionSlug();
+  // Aparelho que já fez check-in volta direto para a sala (use ?novo=1 para registrar outra pessoa).
+  const previaCartao = new URLSearchParams(window.location.search).get('previa') === 'sucesso';
+  if (!previaCartao && !new URLSearchParams(window.location.search).has('novo') && lerPresenca()) { window.location.replace(`/sala${window.location.search}`); }
   const texts = useSiteTexts();
   const [edition, setEdition] = useState<Edition | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -81,7 +87,7 @@ export function Checkin() {
   useEffect(() => {
     supabase.rpc('communicali_edicao', { p_slug: slug }).then(({ data, error: failure }) => {
       if (failure || !data) setLoadError('Não foi possível abrir o check-in. Recarregue a página.');
-      else setEdition(data as Edition);
+      else setEdition(new URLSearchParams(window.location.search).get('previa') === 'email' ? { ...(data as Edition), situacao: 'aberto' } : (data as Edition));
     });
   }, [slug]);
 
@@ -89,7 +95,7 @@ export function Checkin() {
 
   const preset = useMemo<FormPreset | null>(() => {
     if (step === 'email') return {
-      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Fazer meu check-in',
+      title: 'Check-in', category: 'ComuniCALI', tema: 'claro', skipWelcome: true, submitLabel: 'Fazer meu check-in',
       questions: [{ id: 'email', kind: 'email', label: 'Bem-vindas e bem-vindos! Qual é o seu e-mail?', help: `Sinta-se à vontade e escolha uma mesa. Use o e-mail da sua inscrição. ${meta}`, required: true }],
       submit: async (answers) => {
         const clean = String(answers.email).trim().toLowerCase();
@@ -106,7 +112,7 @@ export function Checkin() {
       },
     };
     if (step === 'codigo') return {
-      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
+      title: 'Check-in', category: 'ComuniCALI', tema: 'claro', skipWelcome: true, submitLabel: 'Confirmar presença',
       questions: [{ id: 'codigo', kind: 'short_text', label: 'Digite o código que enviamos', help: `Confira o e-mail ${email}.`, required: true }],
       submit: async (answers) => {
         const { error } = await supabase.auth.verifyOtp({ email, token: String(answers.codigo).trim(), type: 'email' });
@@ -120,7 +126,7 @@ export function Checkin() {
     };
     if (!texts) return null;
     if (step === 'inscrito') return {
-      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
+      title: 'Check-in', category: 'ComuniCALI', tema: 'claro', skipWelcome: true, submitLabel: 'Confirmar presença',
       questions: confirmQuestions(texts, inscritoNome),
       submit: async (answers) => {
         const { data, error } = await supabase.rpc('communicali_checkin_inscrito', { p_slug: slug, p_email: email, p_privacidade: answers.privacidade === 'Li e aceito', p_regras: answers.regras === 'Li e aceito', p_comunicacoes: answers.comunicacoes === 'Sim', p_imagem: answers.imagem === 'Sim' });
@@ -130,7 +136,7 @@ export function Checkin() {
       },
     };
     return {
-      title: 'Check-in', category: 'ComuniCALI', skipWelcome: true, submitLabel: 'Confirmar presença',
+      title: 'Check-in', category: 'ComuniCALI', tema: 'claro', skipWelcome: true, submitLabel: 'Confirmar presença',
       questions: memberQuestions(texts, { imagem: true }),
       submit: async (answers) => {
         const { data, error } = await supabase.rpc('communicali_checkin_novo', { p_slug: slug, ...answerArgs(answers, email), p_imagem: answers.imagem === 'Sim' });
@@ -141,20 +147,22 @@ export function Checkin() {
     };
   }, [step, email, slug, meta, texts, inscritoNome]);
 
+  if (previaCartao) return <Success previa done={{ nome: 'Maria Silva', categoria: 'convidado', edicao: 'Primeiro encontro', selo: '', codigo: 'EXEMPLO', repetido: false }} />;
   if (done) return <Success done={done} />;
   if (edition?.situacao === 'aberto' && preset) return <PublicFormPage key={step} preset={preset} />;
-  if (!edition && !loadError) return <main className="event-page" aria-busy="true" />;
+  if (!edition && !loadError) return <main className="dn-pg" aria-busy="true" />;
 
   return (
-    <main className="event-page">
-      <section className="event-card event-card--boasvindas">
-        <img className="event-card__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
-        <h1><span className="nowrap">Bem-vindas e</span> <span className="nowrap">bem-vindos!</span></h1>
-        {loadError && <p className="notice notice--alert">{loadError}</p>}
-        {edition && <p className="event-card__meta">{meta}</p>}
-        {edition?.situacao === 'antes' && <p className="notice">O check-in abre no dia do encontro. Até lá!</p>}
-        {edition?.situacao === 'encerrado' && <p className="notice">O check-in desta edição foi encerrado.</p>}
-      </section>
+    <main className="dn-pg">
+      <div className="dn-pg-faixa" />
+      <img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <div className="dn-centro">
+        <h1>Bem-vindas e bem-vindos!</h1>
+        {loadError && <p className="dn-aviso alerta">{loadError}</p>}
+        {edition && <p>{meta}</p>}
+        {edition?.situacao === 'antes' && <p className="dn-aviso">O check-in abre no dia do encontro. Até lá!</p>}
+        {edition?.situacao === 'encerrado' && <p className="dn-aviso">O check-in desta edição foi encerrado.</p>}
+      </div>
     </main>
   );
 }

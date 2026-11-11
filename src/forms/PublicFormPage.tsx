@@ -8,7 +8,7 @@ import { type FormAnswer, type FormQuestion, applyMask, FILE_ACCEPT, FILE_HINT, 
 import { FooterLinks } from '../components/SiteFooter';
 import './public-form.css';
 
-type PublicForm = { id: string; submit_label?: string | null; success_text?: string | null; slug: string; title: string; category?: string; description: string; thank_you: string; status: 'open' | 'closed'; confirm_email: boolean; questions: FormQuestion[] };
+type PublicForm = { id: string; aviso?: string | null; submit_label?: string | null; success_text?: string | null; slug: string; title: string; category?: string; description: string; thank_you: string; status: 'open' | 'closed'; confirm_email: boolean; questions: FormQuestion[] };
 type Phase = 'loading' | 'missing' | 'closed' | 'welcome' | 'questions' | 'sending' | 'done';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -17,6 +17,8 @@ const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 export type FormPreset = {
   title: string;
   category?: string;
+  /** 'claro': marfim com bordô, no visual das telas do encontro. */
+  tema?: 'claro';
   description?: string;
   questions: FormQuestion[];
   submitLabel?: string;
@@ -28,8 +30,9 @@ export type FormPreset = {
   onAdvance?: (questionId: string, answers: Record<string, FormAnswer>) => Promise<Record<string, FormAnswer> | null>;
 };
 
-export function PublicFormPage({ preset }: { preset?: FormPreset }) {
-  const { slug = '' } = useParams();
+export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slugFixo?: string }) {
+  const { slug: slugRota = '' } = useParams();
+  const slug = slugFixo ?? slugRota;
   const preview = useSearchParams()[0].get('previa') === '1';
   const [form, setForm] = useState<PublicForm | null>(null);
   const [phase, setPhase] = useState<Phase>('loading');
@@ -56,7 +59,7 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
       let data = published;
       // Prévia da administradora: lê também rascunho e encerrado (só funciona com a sessão dela; RLS barra os demais).
       if (preview && supabase) {
-        const own = await supabase.from('forms').select('id,slug,title,description,thank_you,status,confirm_email,category,submit_label,success_text,questions').eq('slug', slug.toLowerCase()).maybeSingle();
+        const own = await supabase.from('forms').select('id,slug,title,description,thank_you,status,confirm_email,category,submit_label,success_text,questions,aviso').eq('slug', slug.toLowerCase()).maybeSingle();
         if (own.data) data = { ...(own.data as PublicForm), status: 'open' };
       }
       if (!alive) return;
@@ -285,16 +288,18 @@ export function PublicFormPage({ preset }: { preset?: FormPreset }) {
     }
   }
 
-  return <div className="cali-form-page">
+  const claro = preset?.tema === 'claro' || form?.category === 'Pesquisa';
+  return <div className={`cali-form-page${claro ? ' cf-claro' : ''}`}>
     <div className={`cf-leaf cf-leaf-${phase === 'welcome' || phase === 'loading' || phase === 'missing' || phase === 'closed' ? 'intro' : phase === 'done' ? 'done' : 'questions'}`} key={phase === 'sending' ? 'questions' : phase} aria-hidden="true" />
     <div className="cf-progress" aria-hidden="true"><i style={{ width: `${progress}%` }} /></div>
-    <header className="cf-top"><a href="/"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></a>{preview && <span className="cf-preview">Prévia · as respostas não são salvas</span>}</header>
+    <header className="cf-top"><a href="/"><img src={claro ? '/brand/communicali-horizontal.png' : '/brand/communicali-branco.png'} alt="ComuniCALI" /></a>{preview && <span className="cf-preview">Prévia · as respostas não são salvas</span>}</header>
     <main className="cf-stage">
       {phase === 'loading' && <div className="cf-screen cf-center"><span className="cf-spinner" aria-label="Carregando" /></div>}
       {phase === 'missing' && <div className="cf-screen cf-center cf-enter"><small>ComuniCALI</small><h1>Formulário não encontrado</h1><p>Confira o link que você recebeu ou fale com a CALI RH.</p></div>}
       {phase === 'closed' && form && <div className="cf-screen cf-center cf-enter"><small>ComuniCALI</small><h1>{form.title}</h1><p>Este formulário não está mais recebendo respostas. Obrigada pelo interesse.</p></div>}
       {phase === 'welcome' && form && <div className="cf-screen cf-enter">
         <h1>{form.title}</h1>
+        {form.aviso && <p className="cf-aviso" role="note" dangerouslySetInnerHTML={{ __html: richTextHtml(form.aviso) }} />}
         {form.description && <p className="cf-desc" dangerouslySetInnerHTML={{ __html: richTextHtml(form.description) }} />}
         <div className="cf-actions"><button type="button" className="cf-primary" onClick={() => setPhase('questions')}>Começar <ArrowRight size={18} /></button><span className="cf-enter-hint">ou pressione <b>Enter <CornerDownLeft size={13} /></b></span></div>
         <p className="cf-meta">{basicas} {basicas === 1 ? 'pergunta' : 'perguntas'} · cerca de {Math.max(1, Math.round(basicas * 0.4))} min</p>

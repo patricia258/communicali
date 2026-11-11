@@ -18,6 +18,12 @@ import { Votar } from './pages/Votar';
 import { EuVou } from './pages/EuVou';
 import { Convidar, Convite } from './pages/Convidados';
 import { TelaoCheckin, TelaoResultado, TelaoVotacao } from './pages/Telao';
+import { Participante } from './dinamica/Participante';
+import { Sala } from './dinamica/Sala';
+import { PreviaConvidado } from './dinamica/PreviaConvidado';
+import { TelaoUnico } from './dinamica/TelaoUnico';
+import { Apoio } from './dinamica/Apoio';
+import { TelaoDinamica } from './dinamica/TelaoDinamica';
 import { Admin } from './pages/Admin';
 import { StaffForm } from './pages/Staff';
 import { FornecedorForm } from './pages/Fornecedor';
@@ -51,13 +57,19 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/fornecedor" element={<FornecedorForm />} />
       <Route path="/e/:slug" element={<EdicaoPage />} />
       <Route path="/inscricao/:slug" element={<InscricaoPage />} />
-      <Route path="/votar" element={<ComEdicao><PageEvento><Votar /></PageEvento></ComEdicao>} />
+      <Route path="/votar" element={<ComEdicao><Votar /></ComEdicao>} />
       <Route path="/eu-vou" element={<PageEvento><EuVou /></PageEvento>} />
       <Route path="/convidar" element={<ComEdicao><Convidar /></ComEdicao>} />
       <Route path="/convite/:token" element={<Page><Convite /></Page>} />
       <Route path="/telao/checkin" element={<ComEdicao><TelaoCheckin /></ComEdicao>} />
       <Route path="/telao/votacao" element={<ComEdicao><TelaoVotacao /></ComEdicao>} />
       <Route path="/telao/resultado" element={<ComEdicao><TelaoResultado /></ComEdicao>} />
+      <Route path="/telao" element={<ComEdicao><TelaoUnico /></ComEdicao>} />
+      <Route path="/previa-convidado" element={<PreviaConvidado />} />
+      <Route path="/sala" element={<ComEdicao><Sala /></ComEdicao>} />
+      <Route path="/apoio/:token" element={<Apoio />} />
+      <Route path="/dinamica" element={<ComEdicao><Participante /></ComEdicao>} />
+      <Route path="/telao/dinamica" element={<ComEdicao><TelaoDinamica /></ComEdicao>} />
       <Route path="/f/:slug" element={<PublicFormPage />} />
       <Route path="/admin/*" element={<Admin />} />
       <Route path="*" element={<Navigate to="/" replace />} />

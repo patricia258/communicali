@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Dinâmica ao vivo · demonstração</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{--bordo:#5A1E2D;--vinho:#7A1F3D;--marfim:#F7F0EA;--ouro:#C9973B;--ouro2:#DDB160;--noite:#1F0E14;--tinta:#22100F;--linha:#E6D8CC;--fundo:#F3EAE2}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--fundo);color:var(--tinta);font:15px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+.sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+/* Barra da demonstração (não existe no encontro) */
+.barra{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 22px;background:var(--bordo);color:var(--marfim)}
+.barra img{height:26px;width:auto;display:block}
+.barra strong{font:700 15px 'Funnel Display',Inter,sans-serif}
+.barra .selo{padding:4px 12px;border-radius:999px;background:rgba(221,177,96,.22);color:var(--ouro2);font-size:12px;font-weight:600}
+.abas{display:flex;gap:6px;margin-left:auto}
+.abas a{padding:7px 14px;border-radius:999px;color:#EADDD2;text-decoration:none;font-weight:600;font-size:13.5px}
+.abas a.on{background:var(--marfim);color:var(--bordo)}
+
+/* Estrutura */
+.tudo{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;max-width:1560px;margin:0 auto;padding:18px 22px 60px;align-items:start}
+.esq{display:grid;gap:18px;min-width:0}
+.dir{position:sticky;top:76px}
+@media (max-width:1100px){.tudo{grid-template-columns:1fr}.dir{position:static}}
+
+/* ===== TELÃO ===== */
+.stage-wrap{border-radius:16px;overflow:hidden;box-shadow:0 22px 50px rgba(34,16,15,.3);background:#0f0509}
+.stage{position:relative;width:100%;aspect-ratio:16/9;container-type:size;overflow:hidden;color:var(--marfim);background:radial-gradient(70% 90% at 85% 10%,rgba(122,31,61,.5),transparent 70%),var(--noite)}
+.faixa{position:absolute;top:0;left:0;right:0;height:.7cqw;background:linear-gradient(90deg,#7A1F3D 0 25%,#A9502E 25% 50%,#C9973B 50% 75%,#5F6238 75%)}
+.s-head{position:absolute;top:1.7cqw;left:2.4cqw;right:2.4cqw;height:9.6cqw;display:flex;align-items:center;gap:2.6cqw}
+.s-logo{width:15cqw;height:auto;display:block}
+.s-tema{flex:1;min-width:0}
+.s-tema small{display:block;font:600 1cqw Inter,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--ouro2)}
+.s-tema h2{margin:.4cqw 0 0;font:700 2.9cqw/1.1 'Funnel Display',Inter,sans-serif}
+.s-qr{display:flex;align-items:center;gap:1.2cqw;transition:opacity .4s,transform .4s}
+.s-qr span{font:600 1.05cqw/1.4 Inter,sans-serif;color:#EADDD2;text-align:right}
+.s-qr img{width:9.2cqw;height:9.2cqw;display:block;background:#fff;padding:.55cqw;border-radius:1cqw}
+.s-qr.off{opacity:0;visibility:hidden;transform:scale(.9)}
+.s-boards{position:absolute;left:2.4cqw;right:2.4cqw;top:12.8cqw;bottom:2.2cqw;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr);gap:1.6cqw}
+.s-boards.m1{grid-template-columns:1fr}.s-boards.m1 .b2,.s-boards.m1 .seta{display:none}
+.s-boards.m2{grid-template-columns:1fr}.s-boards.m2 .b1,.s-boards.m2 .seta{display:none}
+.board{position:relative;display:flex;flex-direction:column;min-height:0;padding:1.8cqw 2cqw 1.4cqw;border-radius:1.6cqw;overflow:hidden}
+.b1{background:var(--bordo);color:var(--marfim)}
+.b2{background:var(--marfim);color:var(--bordo)}
+.board>header{display:flex;justify-content:space-between;align-items:flex-start;gap:1.2cqw;margin-bottom:.8cqw}
+.board small{display:block;font:700 .95cqw Inter,sans-serif;letter-spacing:.2em;text-transform:uppercase;opacity:.75}
+.board h3{margin:.3cqw 0 0;font:700 2.4cqw/1.1 'Funnel Display',Inter,sans-serif}
+.chip{display:inline-flex;align-items:center;gap:.6cqw;padding:.5cqw 1.1cqw;border-radius:999px;font:600 .95cqw Inter,sans-serif;white-space:nowrap;background:rgba(247,240,234,.14)}
+.b2 .chip{background:rgba(90,30,45,.1)}
+.chip i{width:.7cqw;height:.7cqw;border-radius:50%;background:var(--ouro2)}
+.b2 .chip i{background:var(--ouro)}
+.chip.aberta i{animation:pulsa 1.4s infinite}
+@keyframes pulsa{50%{transform:scale(1.8);opacity:.45}}
+.words{flex:1;min-height:0;position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:calc(var(--s,1)*.8cqw) calc(var(--s,1)*.8cqw);list-style:none;margin:0;padding:.8cqw;overflow:hidden}
+.w{display:block}
+.w.entrando{position:relative;z-index:6}
+.p{display:inline-flex;align-items:center;gap:.5em;padding:.38em .85em;border:.2cqw solid transparent;border-radius:999px;font:700 calc(var(--s,1)*var(--k,1)*1.5cqw)/1.1 'Funnel Display',Inter,sans-serif;white-space:nowrap;transform:rotate(var(--rot,0deg))}
+.n{font:700 .6em Inter,sans-serif;padding:.15em .5em;border-radius:999px;background:rgba(0,0,0,.16);color:inherit}
+.n:empty{display:none}
+.b1 .pa{background:#F7F0EA;color:#5A1E2D}
+.b1 .pb{color:#F7F0EA;border-color:rgba(247,240,234,.85)}
+.b1 .pc{background:#E8D9CE;color:#7A1F3D}
+.b2 .pa{background:#5A1E2D;color:#F7F0EA}
+.b2 .pb{background:#DDB160;color:#4A1620}
+.b2 .pc{color:#7A1F3D;border-color:#C9973B}
+.b2 .n{background:rgba(255,255,255,.28)}.b2 .pb .n{background:rgba(74,22,32,.18)}
+.vazio{position:absolute;left:0;right:0;top:34%;display:grid;place-items:center;text-align:center;font:500 1.5cqw/1.4 Inter,sans-serif;opacity:.55;pointer-events:none;padding:0 4cqw}
+.seta{position:absolute;left:50%;top:50%;z-index:4;transform:translate(-50%,-50%);display:grid;place-items:center;width:4.4cqw;height:4.4cqw;border-radius:50%;background:var(--ouro2);color:var(--bordo);font:700 2.1cqw 'Funnel Display',sans-serif;box-shadow:0 0 0 .7cqw var(--noite)}
+.s-pausa{position:absolute;left:50%;bottom:.5cqw;transform:translateX(-50%);padding:.25cqw 1cqw;border-radius:999px;background:rgba(247,240,234,.14);font:600 .85cqw Inter,sans-serif;color:#EADDD2;opacity:0;transition:opacity .3s}
+.s-pausa.on{opacity:.8}
+
+/* ===== CELULAR ===== */
+.phone{width:320px;margin:0 auto;padding:10px;border-radius:40px;background:#161012;box-shadow:0 24px 50px rgba(34,16,15,.35)}
+.ph-tela{display:flex;flex-direction:column;min-height:610px;border-radius:31px;background:var(--marfim);color:var(--bordo);overflow:hidden}
+.ph-faixa{height:5px;background:linear-gradient(90deg,#7A1F3D 0 25%,#A9502E 25% 50%,#C9973B 50% 75%,#5F6238 75%)}
+.ph-logo{width:150px;height:auto;display:block;margin:20px auto 4px}
+.ph-corpo{flex:1;display:flex;flex-direction:column;gap:12px;padding:14px 22px 22px}
+.ph-etapa{margin:0;font:700 11.5px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--vinho)}
+.ph-corpo h1{margin:0;font:700 21px/1.2 'Funnel Display',Inter,sans-serif;color:var(--tinta)}
+.ph-inst{margin:0;font-size:14px;color:#5A4740}
+.ph-campo{position:relative}
+.ph-campo input{width:100%;height:54px;padding:0 54px 0 16px;border:2px solid var(--ouro);border-radius:14px;background:#fff;font:600 18px Inter,sans-serif;color:var(--tinta);outline:none}
+.ph-campo input:focus{border-color:var(--bordo)}
+.ph-campo small{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:12px;color:#8A7A70}
+.hp{position:absolute;left:-9999px}
+.ph-btn{width:100%;height:52px;margin-top:10px;border:0;border-radius:14px;background:var(--bordo);color:var(--marfim);font:700 16px 'Funnel Display',Inter,sans-serif}
+.ph-btn:disabled{opacity:.4;cursor:default}
+.ph-msg{min-height:20px;margin:0;font-size:13.5px;font-weight:600;color:#3D5A2A}
+.ph-msg.erro{color:#A9502E}
+.ph-meus{display:grid;gap:6px}
+.ph-meus small{font-size:12px;color:#8A7A70}
+.ph-meus div{display:flex;flex-wrap:wrap;gap:6px}
+.ph-meus span{padding:5px 12px;border-radius:999px;background:#EADDD2;color:var(--bordo);font-weight:600;font-size:13px}
+.ph-restam{margin:auto 0 0;font-size:12.5px;color:#8A7A70}
+.ph-centro{flex:1;display:grid;align-content:center;gap:10px;padding:20px 26px 40px;text-align:center}
+.ph-centro h1{margin:0;font:700 24px/1.2 'Funnel Display',Inter,sans-serif;color:var(--bordo)}
+.ph-centro p{margin:0;color:#5A4740}
+.ph-rodape{padding:0 22px 18px;text-align:center;font-size:11.5px;color:#8A7A70}
+.pontos{display:inline-flex;gap:5px;justify-content:center}.pontos i{width:7px;height:7px;border-radius:50%;background:var(--ouro);animation:pontos 1.2s infinite}.pontos i:nth-child(2){animation-delay:.2s}.pontos i:nth-child(3){animation-delay:.4s}
+@keyframes pontos{40%{transform:translateY(-5px);opacity:.5}}
+
+/* ===== PAINEL ===== */
+.painel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{padding:18px 20px;border:1px solid var(--linha);border-radius:16px;background:#fff;min-width:0}
+.card h4{margin:0 0 12px;font:700 17px 'Funnel Display',Inter,sans-serif;color:var(--bordo)}
+.card h4::before{content:'';display:inline-block;width:5px;height:16px;margin-right:9px;vertical-align:-2px;border-radius:3px;background:var(--ouro)}
+.linha-etapa{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--linha)}
+.linha-etapa:first-of-type{border-top:0}
+.linha-etapa .nome{flex:1;min-width:120px}.linha-etapa .nome strong{display:block}.linha-etapa .nome span{font-size:12.5px;color:#7A6A60}
+.status{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#EFE7DF;color:#5A4740}
+.status.aberta{background:#E3EEDC;color:#3D5A2A}.status.encerrada{background:#F3E3DA;color:#A9502E}
+.btn{min-height:36px;padding:0 14px;border:1px solid var(--linha);border-radius:10px;background:#fff;color:var(--bordo);font-weight:600;font-size:13.5px}
+.btn:hover{background:#FBF7F3}
+.btn.pri{background:var(--bordo);border-color:var(--bordo);color:var(--marfim)}.btn.pri:hover{background:var(--vinho)}
+.btn.ouro{background:var(--ouro2);border-color:var(--ouro);color:var(--tinta)}
+.btn.perigo{color:#A9502E;border-color:#E8C9BB}
+.btn.on{background:var(--bordo);border-color:var(--bordo);color:var(--marfim)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.rotulo{display:block;margin:12px 0 6px;font-size:12.5px;font-weight:600;color:#7A6A60}
+.rotulo:first-of-type{margin-top:0}
+.fila-btn{display:flex;flex-wrap:wrap;gap:8px}
+.dica{margin:10px 0 0;font-size:12.5px;color:#7A6A60}
+.lista{max-height:250px;overflow:auto;margin:10px 0 0;padding:0;list-style:none;border-top:1px solid var(--linha)}
+.lista li{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F2EAE3}
+.lista .mt{flex:1;font-weight:600;overflow-wrap:anywhere}.lista time{font-size:11.5px;color:#9A8A80}
+.lista .btn{min-height:28px;padding:0 10px;font-size:12px}
+.lista.rem{max-height:110px;opacity:.75}
+.demo{background:#FFF8EA;border-color:#EBD6A4}
+.demo h4::before{background:var(--vinho)}
+
+/* ===== VISTAS ===== */
+body.v-participante .stage-wrap,body.v-participante .painel,body.v-painel .stage-wrap,body.v-painel .dir{display:none}
+body.v-participante .tudo{grid-template-columns:1fr;max-width:420px}
+body.v-participante .dir{position:static}
+body.v-painel .tudo{grid-template-columns:1fr}
+body.v-telao .barra,body.v-telao .painel,body.v-telao .dir{display:none}
+body.v-telao .tudo{display:block;max-width:none;padding:0}
+body.v-telao .esq{display:block}
+body.v-telao .stage-wrap{position:fixed;inset:0;display:grid;place-items:center;border-radius:0;box-shadow:none}
+body.v-telao .stage{width:min(100vw,177.78vh)}
+.stage-wrap:fullscreen{display:grid;place-items:center;border-radius:0}
+.stage-wrap:fullscreen .stage{width:min(100vw,177.78vh)}
+@media (max-width:560px){
+  body.v-participante .barra{display:none}
+  body.v-participante .tudo{padding:0;max-width:none}
+  body.v-participante .phone{width:100%;padding:0;border-radius:0;background:none;box-shadow:none}
+  body.v-participante .ph-tela{border-radius:0;min-height:100vh}
+}
+@media (max-width:760px){.painel{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.chip.aberta i,.pontos i{animation:none}}
+</style>
+</head>
+<body class="v-tudo">
+
+<header class="barra">
+  <img src="/brand/communicali-branco.png" alt="ComuniCALI">
+  <strong>Dinâmica ao vivo</strong>
+  <span class="selo">Demonstração · palavras fictícias</span>
+  <nav class="abas" aria-label="Telas">
+    <a href="#tudo">Tudo junto</a><a href="#participante">Participante</a><a href="#telao">Telão</a><a href="#painel">Painel</a>
+  </nav>
+</header>
+
+<main class="tudo">
+  <div class="esq">
+    <section class="stage-wrap" id="stageWrap" aria-label="Telão">
+      <div class="stage" id="stage">
+        <div class="faixa"></div>
+        <header class="s-head">
+          <img class="s-logo" src="/brand/communicali-branco.png" alt="ComuniCALI">
+          <div class="s-tema"><small>Dinâmica ao vivo</small><h2>Cuidar de pessoas ainda é relevante?</h2></div>
+          <div class="s-qr" id="sQr"><span>Aponte a câmera<br>e participe</span><img src="/previa-dinamica/qr.png" alt="QR Code da dinâmica"></div>
+        </header>
+        <div class="s-boards m-ambos" id="boards">
+          <section class="board b1" id="b1">
+            <header><div><small id="cont1">Barreiras</small><h3>O que nos impede?</h3></div><span class="chip" id="chip1"><i></i><b></b></span></header>
+            <ul class="words" id="w1"></ul><div class="vazio" id="v1">As palavras vão aparecendo aqui,<br>uma por uma.</div>
+          </section>
+          <span class="seta" aria-hidden="true">→</span>
+          <section class="board b2" id="b2">
+            <header><div><small id="cont2">Caminhos</small><h3>O que precisa mudar?</h3></div><span class="chip" id="chip2"><i></i><b></b></span></header>
+            <ul class="words" id="w2"></ul><div class="vazio" id="v2">As palavras vão aparecendo aqui,<br>uma por uma.</div>
+          </section>
+        </div>
+        <div class="s-pausa" id="sPausa">Exibição congelada</div>
+      </div>
+    </section>
+    <section class="painel" id="painel" aria-label="Painel da apresentadora"></section>
+  </div>
+  <aside class="dir" aria-label="Tela do participante">
+    <div class="phone"><div class="ph-tela" id="phTela"></div></div>
+  </aside>
+</main>
+
+<script>
+(() => {
+const KEY = 'dinamica-demo-v1';
+const ETAPAS = {
+  1: { nome: 'Barreiras', pergunta: 'Na sua percepção, o que mais impede que a gestão de pessoas receba a atenção que merece nas organizações?', instrucao: 'Responda com uma palavra ou expressão curta.' },
+  2: { nome: 'Caminhos', pergunta: 'O que precisa mudar para transformar essa importância em ações concretas?', instrucao: 'Deixe uma palavra ou expressão curta que represente essa mudança.' },
+};
+// Palavras só da demonstração. No encontro, o mural começa vazio.
+const POOL = {
+  1: ['Prioridades','Cultura','Orçamento','Resistência','Imediatismo','Desalinhamento','Falta de tempo','Medo de mudar','Burocracia','Metas de curto prazo','Falta de dados','Ego','Silos','Pressa','Hierarquia','Descrença','Urgências','Falta de escuta','Ruído'],
+  2: ['Visão','Compromisso','Escuta','Investimento','Coerência','Liderança','Dados','Diálogo','Exemplo','Coragem','Propósito','Métricas','Confiança','Humildade','Mesa de decisão','Prática diária','Transparência','Constância','Ação'],
+};
+const MAX = 30, POR_ETAPA = 3, INTERVALO = 3000;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const hash = (s) => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); };
+// Regra de agrupamento: só entram no mesmo grupo respostas iguais depois de tirar maiúsculas, acentos, pontuação e espaços repetidos.
+const norm = (t) => t.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' ').trim();
+const bonito = (t) => { t = t.trim().replace(/\s+/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); };
+const novo = () => ({ status: { 1: 'aguardando', 2: 'aguardando' }, respostas: [], modo: 'ambos', qr: true, congelado: false, snapshot: [], seq: 0 });
+const carregar = () => { try { const j = JSON.parse(localStorage.getItem(KEY)); if (j && j.status) return j; } catch (e) { /* sem armazenamento */ } return novo(); };
+let S = carregar();
+const salvar = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* sem armazenamento */ } };
+const etapaAberta = () => (S.status[1] === 'aberta' ? 1 : S.status[2] === 'aberta' ? 2 : 0);
+const visiveis = () => S.respostas.filter((r) => !r.removida && (!S.congelado || S.snapshot.includes(r.id)));
+function grupos(etapa) {
+  const m = new Map();
+  for (const r of visiveis()) { if (r.etapa !== etapa) continue; const g = m.get(r.chave); if (g) g.n += 1; else m.set(r.chave, { chave: r.chave, texto: r.texto, n: 1 }); }
+  return m;
+}
+function mudar(fn) { fn(); salvar(); atualizar(); }
+
+/* ---------- Telão: lousa com palavras que grudam uma por uma ---------- */
+const B = { 1: { sec: $('#b1'), wrap: $('#w1'), vazio: $('#v1'), itens: new Map() }, 2: { sec: $('#b2'), wrap: $('#w2'), vazio: $('#v2'), itens: new Map() } };
+let fila = [], drenando = false, primeira = true;
+
+function fit(b) {
+  if (!b.sec.offsetParent) return;
+  const lis = [...b.wrap.children];
+  let s = 1.5;
+  for (let i = 0; i < 24; i += 1) {
+    b.wrap.style.setProperty('--s', s.toFixed(3));
+    if (!lis.length) break;
+    let topo = 1e9, base = 0;
+    lis.forEach((l) => { topo = Math.min(topo, l.offsetTop); base = Math.max(base, l.offsetTop + l.offsetHeight); });
+    if (base - topo <= b.wrap.clientHeight - 14) break;
+    s *= 0.94;
+  }
+}
+// Mexe no mural e anima o que mudou de lugar (FLIP), para ninguém perder a leitura.
+function comFlip(b, mutar) {
+  const antes = new Map();
+  b.itens.forEach((it) => { if (it.li.isConnected) antes.set(it, it.li.getBoundingClientRect()); });
+  mutar();
+  fit(b);
+  antes.forEach((r0, it) => {
+    if (!it.li.isConnected) return;
+    const r1 = it.li.getBoundingClientRect(); const dx = r0.left - r1.left, dy = r0.top - r1.top;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    it.li.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'translate(0,0)' }], { duration: 650, easing: 'cubic-bezier(.3,.7,.2,1)' });
+  });
+}
+function ajustaContagem(it) {
+  it.span.style.setProperty('--k', (1 + Math.min(it.n - 1, 5) * 0.22).toFixed(2));
+  it.badge.textContent = it.n > 1 ? `×${it.n}` : '';
+}
+function brilho(it, atraso = 0) {
+  it.span.animate([{ boxShadow: '0 0 0 0 rgba(221,177,96,0)' }, { boxShadow: '0 0 0 .8cqw rgba(221,177,96,.65)', offset: .35 }, { boxShadow: '0 0 0 1.7cqw rgba(221,177,96,0)' }], { duration: 950, delay: atraso });
+}
+function adicionar(e, gr, animar, vel = 1) {
+  const b = B[e];
+  const li = document.createElement('li'); li.className = 'w';
+  const span = document.createElement('span'); span.className = 'p p' + 'abc'[hash(gr.chave) % 3];
+  const rot = ((hash(gr.chave) % 7) - 3) * 0.7; span.style.setProperty('--rot', rot + 'deg');
+  span.append(document.createTextNode(gr.texto)); const badge = document.createElement('b'); badge.className = 'n'; span.append(badge); li.append(span);
+  const it = { li, span, badge, n: gr.n, rot, texto: gr.texto };
+  ajustaContagem(it);
+  if (!animar) { b.itens.set(gr.chave, it); b.wrap.append(li); return; }
+  comFlip(b, () => { b.itens.set(gr.chave, it); b.wrap.append(li); });
+  entrar(b, it, vel);
+}
+// A palavra aparece grande no centro do mural, fica tempo de ler e então gruda no seu lugar.
+function entrar(b, it, vel) {
+  const wr = b.wrap.getBoundingClientRect(), sr = it.li.getBoundingClientRect();
+  const dx = wr.left + wr.width / 2 - (sr.left + sr.width / 2), dy = wr.top + wr.height / 2 - (sr.top + sr.height / 2);
+  const esc2 = Math.min(2.3, (wr.width * 0.78) / Math.max(sr.width, 1));
+  const rapido = vel < 0.5; // muitas respostas de uma vez: sem parada no centro, para não empilhar palavras
+  const dur = rapido ? 700 : Math.max(1300, 2000 * vel), rot = it.rot, reduz = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  it.li.classList.add('entrando');
+  const centro = `translate(${dx}px,${dy}px) scale(${esc2}) rotate(0deg)`;
+  const quadros = reduz
+    ? [{ opacity: 0 }, { opacity: 1 }]
+    : rapido ? [
+      { opacity: 0, transform: `translate(0,-${wr.height * 0.08}px) scale(1.7) rotate(-3deg)`, offset: 0 },
+      { opacity: 1, transform: `translate(0,0) scale(.94) rotate(${rot}deg)`, offset: 0.65, easing: 'ease-out' },
+      { opacity: 1, transform: `translate(0,0) scale(1) rotate(${rot}deg)`, offset: 1 },
+    ] : [
+      { opacity: 0, transform: `translate(${dx}px,${dy - 24}px) scale(${esc2 * 0.7}) rotate(-4deg)`, offset: 0 },
+      { opacity: 1, transform: centro, offset: 0.13, easing: 'linear' },
+      { opacity: 1, transform: centro, offset: 0.52, easing: 'cubic-bezier(.55,0,.25,1)' },
+      { opacity: 1, transform: `translate(0,0) scale(.93) rotate(${rot}deg)`, offset: 0.84, easing: 'ease-out' },
+      { opacity: 1, transform: `translate(0,0) scale(1.04) rotate(${rot}deg)`, offset: 0.93 },
+      { opacity: 1, transform: `translate(0,0) scale(1) rotate(${rot}deg)`, offset: 1 },
+    ];
+  const a = it.span.animate(quadros, { duration: dur, easing: 'linear', fill: 'backwards' });
+  a.onfinish = () => it.li.classList.remove('entrando');
+  brilho(it, dur * 0.82);
+}
+function pulsar(it) {
+  const r = it.rot;
+  it.span.animate([{ transform: `rotate(${r}deg) scale(1)` }, { transform: `rotate(${r}deg) scale(1.3)`, offset: 0.35 }, { transform: `rotate(${r}deg) scale(1)` }], { duration: 750, easing: 'ease-out' });
+  brilho(it);
+}
+function remover(e, chave) {
+  const b = B[e], it = b.itens.get(chave); if (!it) return;
+  b.itens.delete(chave);
+  const a = it.span.animate([{ opacity: 1, transform: `rotate(${it.rot}deg) scale(1)` }, { opacity: 0, transform: `rotate(${it.rot}deg) scale(.3)` }], { duration: 380, fill: 'forwards' });
+  a.onfinish = () => comFlip(b, () => it.li.remove());
+}
+const naFila = (e, c) => fila.some((x) => x.e === e && x.chave === c);
+function passo() {
+  const x = fila.shift();
+  if (!x) { drenando = false; return; }
+  const gr = grupos(x.e).get(x.chave);
+  if (gr && !B[x.e].itens.has(x.chave)) {
+    const vel = fila.length >= 3 ? 0.3 : Math.max(0.55, 1 - fila.length * 0.15);
+    adicionar(x.e, gr, true, vel);
+    setTimeout(passo, vel < 0.5 ? 380 : Math.max(650, 1250 * vel));
+  } else passo();
+}
+// Espera um instante antes de começar, para perceber se chegou uma enxurrada de respostas de uma vez.
+function drenar() { if (drenando) return; drenando = true; setTimeout(passo, 230); }
+function telaoSync() {
+  for (const e of [1, 2]) {
+    const b = B[e], g = grupos(e);
+    for (const chave of [...b.itens.keys()]) if (!g.has(chave)) remover(e, chave);
+    for (const [chave, gr] of g) {
+      const it = b.itens.get(chave);
+      if (it) { if (it.n !== gr.n) { it.n = gr.n; comFlip(b, () => ajustaContagem(it)); pulsar(it); } }
+      else if (primeira) adicionar(e, gr, false);
+      else if (!naFila(e, chave)) fila.push({ e, chave });
+    }
+    if (primeira) fit(b);
+    b.vazio.style.display = b.itens.size || fila.some((x) => x.e === e) ? 'none' : '';
+  }
+  primeira = false;
+  drenar();
+  // chips, contagens, modo, QR e pausa
+  const rotulos = { aguardando: 'Aguardando abertura', aberta: 'Recebendo respostas', encerrada: 'Etapa encerrada' };
+  for (const e of [1, 2]) {
+    const n = visiveis().filter((r) => r.etapa === e).length;
+    $(`#chip${e}`).className = 'chip ' + S.status[e]; $(`#chip${e} b`).textContent = rotulos[S.status[e]];
+    $(`#cont${e}`).textContent = `${ETAPAS[e].nome} · ${n} ${n === 1 ? 'resposta' : 'respostas'}`;
+  }
+  const antes = $('#boards').className; const depois = 's-boards m' + (S.modo === 'ambos' ? '-ambos' : S.modo);
+  if (antes !== depois) { $('#boards').className = depois; requestAnimationFrame(() => { fit(B[1]); fit(B[2]); }); }
+  $('#sQr').classList.toggle('off', !S.qr);
+  $('#sPausa').classList.toggle('on', S.congelado);
+}
+
+/* ---------- Celular do participante ---------- */
+let aviso = '', avisoErro = false, avisoTimer = 0, ultimoEnvio = 0, assinaturaPhone = '';
+const meus = (e) => S.respostas.filter((r) => r.disp === 'voce' && r.etapa === e);
+function renderPhone(forcar) {
+  const e = etapaAberta();
+  const ass = `${S.status[1]}|${S.status[2]}|${meus(1).length}|${meus(2).length}|${meus(1).filter((r) => r.removida).length}${meus(2).filter((r) => r.removida).length}`;
+  if (!forcar && ass === assinaturaPhone) return;
+  assinaturaPhone = ass;
+  const cab = '<div class="ph-faixa"></div><img class="ph-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI">';
+  const rodape = '<p class="ph-rodape">Sem login e sem nome. Só a palavra.</p>';
+  let html;
+  if (e) {
+    const E = ETAPAS[e], enviados = meus(e), restam = POR_ETAPA - enviados.length;
+    html = `${cab}<div class="ph-corpo"><p class="ph-etapa">Etapa ${e} de 2 · ${E.nome}</p><h1>${E.pergunta}</h1><p class="ph-inst">${E.instrucao}</p>
+      <form id="phForm" autocomplete="off"><label class="sr" for="phTxt">Sua resposta</label>
+      <div class="ph-campo"><input id="phTxt" maxlength="${MAX}" placeholder="Digite aqui" enterkeyhint="send" ${restam <= 0 ? 'disabled' : ''}><small id="phCont">0/${MAX}</small></div>
+      <input class="hp" tabindex="-1" aria-hidden="true" name="site" autocomplete="off">
+      <button class="ph-btn" id="phEnv" disabled>Enviar</button></form>
+      <p class="ph-msg${avisoErro ? ' erro' : ''}" id="phMsg" role="status">${esc(aviso)}</p>
+      ${enviados.length ? `<div class="ph-meus"><small>Você enviou</small><div>${enviados.map((r) => `<span>${esc(r.texto)}</span>`).join('')}</div></div>` : ''}
+      <p class="ph-restam">${restam > 0 ? `Você pode enviar mais ${restam}.` : 'Você enviou o máximo desta etapa. Obrigada!'}</p></div>${rodape}`;
+  } else if (S.status[2] === 'encerrada') {
+    html = `${cab}<div class="ph-centro"><h1>Obrigada por participar!</h1><p>Agora é com a gente: acompanhe o debate no telão.</p></div>${rodape}`;
+  } else if (S.status[1] === 'encerrada') {
+    html = `${cab}<div class="ph-centro"><h1>Etapa 1 encerrada</h1><p>A próxima pergunta abre aqui sozinha. É só aguardar.</p><div class="pontos"><i></i><i></i><i></i></div></div>${rodape}`;
+  } else {
+    html = `${cab}<div class="ph-centro"><h1>A dinâmica começa em instantes</h1><p>Quando a pergunta abrir, ela aparece aqui.</p><div class="pontos"><i></i><i></i><i></i></div></div>${rodape}`;
+  }
+  $('#phTela').innerHTML = html;
+  const form = $('#phForm'); if (!form) return;
+  const campo = $('#phTxt'), btn = $('#phEnv');
+  campo.addEventListener('input', () => { $('#phCont').textContent = `${campo.value.length}/${MAX}`; btn.disabled = campo.value.trim().length < 2; });
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    if ($('.hp', form).value) return; // proteção básica: campo escondido que só robô preenche
+    const erro = enviar(campo.value);
+    avisar(erro || 'Recebido. Sua palavra já vai para o telão.', Boolean(erro));
+  });
+}
+function avisar(texto, erro) {
+  aviso = texto; avisoErro = erro;
+  const m = $('#phMsg'); if (m) { m.textContent = texto; m.classList.toggle('erro', erro); }
+  clearTimeout(avisoTimer); avisoTimer = setTimeout(() => { aviso = ''; const x = $('#phMsg'); if (x) x.textContent = ''; }, 3800);
+}
+function enviar(texto) {
+  const e = etapaAberta(); if (!e) return 'Esta pergunta ainda não está aberta.';
+  const t = texto.trim().replace(/\s+/g, ' ');
+  if (t.length < 2) return 'Escreva pelo menos duas letras.';
+  if (t.length > MAX) return `Use até ${MAX} caracteres.`;
+  if (/https?:|www\.|@|\.com/i.test(t)) return 'Use só palavras, sem links ou contatos.';
+  if (!norm(t)) return 'Escreva uma palavra ou expressão.';
+  if (meus(e).length >= POR_ETAPA) return `Você já enviou ${POR_ETAPA} respostas nesta etapa.`;
+  if (Date.now() - ultimoEnvio < INTERVALO) return 'Aguarde alguns segundos para enviar outra.';
+  ultimoEnvio = Date.now();
+  novaResposta(e, t, 'voce');
+  return '';
+}
+function novaResposta(e, t, disp) {
+  mudar(() => { S.seq += 1; S.respostas.push({ id: S.seq, etapa: e, texto: bonito(t), chave: norm(t), disp, em: Date.now(), removida: false }); });
+}
+
+/* ---------- Painel da apresentadora ---------- */
+let abaMod = 1, chuva = 0;
+const hora = (ms) => new Date(ms).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+function linhaEtapa(e) {
+  const st = S.status[e], n = S.respostas.filter((r) => r.etapa === e && !r.removida).length;
+  const texto = { aguardando: 'Ainda não aberta', aberta: 'Recebendo respostas', encerrada: 'Encerrada' }[st];
+  const botao = st === 'aberta' ? `<button class="btn perigo" data-acao="encerrar" data-e="${e}">Encerrar</button>` : `<button class="btn ${st === 'aguardando' ? 'pri' : ''}" data-acao="abrir" data-e="${e}">${st === 'aguardando' ? 'Abrir pergunta' : 'Reabrir'}</button>`;
+  return `<div class="linha-etapa"><div class="nome"><strong>${e}. ${ETAPAS[e].nome}</strong><span>${n} ${n === 1 ? 'resposta' : 'respostas'}</span></div><span class="status ${st}">${texto}</span>${botao}</div>`;
+}
+function renderPainel() {
+  const el = $('#painel'), rolagens = $$('.lista', el).map((l) => l.scrollTop);
+  const todas = S.respostas.filter((r) => r.etapa === abaMod).slice().reverse();
+  const ativas = todas.filter((r) => !r.removida), removidas = todas.filter((r) => r.removida);
+  const novas = S.congelado ? S.respostas.filter((r) => !r.removida && !S.snapshot.includes(r.id)).length : 0;
+  el.innerHTML = `
+  <article class="card"><h4>Etapas</h4>${linhaEtapa(1)}${linhaEtapa(2)}<p class="dica">Abrir uma pergunta fecha a outra: no celular, a pessoa vê uma por vez.</p></article>
+  <article class="card"><h4>No telão</h4>
+    <span class="rotulo">Mostrar</span>
+    <div class="seg">${[['ambos', 'Os dois murais'], ['1', 'Só Barreiras'], ['2', 'Só Caminhos']].map(([m, t]) => `<button class="btn ${S.modo === m ? 'on' : ''}" data-acao="modo" data-m="${m}" aria-pressed="${S.modo === m}">${t}</button>`).join('')}</div>
+    <span class="rotulo">Durante a apresentação</span>
+    <div class="fila-btn"><button class="btn ${S.qr ? 'on' : ''}" data-acao="qr" aria-pressed="${S.qr}">${S.qr ? 'QR Code visível' : 'QR Code oculto'}</button>
+    <button class="btn ${S.congelado ? 'ouro' : ''}" data-acao="congelar" aria-pressed="${S.congelado}">${S.congelado ? 'Descongelar' : 'Congelar para o debate'}</button></div>
+    ${S.congelado ? `<p class="dica">Telão congelado. ${novas ? `${novas} ${novas === 1 ? 'resposta nova espera' : 'respostas novas esperam'} para entrar.` : 'Nenhuma resposta nova esperando.'}</p>` : ''}
+    <span class="rotulo">Projeção</span>
+    <div class="fila-btn"><button class="btn pri" data-acao="cheia">Tela cheia</button><button class="btn" data-acao="janela">Abrir telão em outra janela</button></div></article>
+  <article class="card"><h4>Moderação</h4>
+    <div class="seg">${[1, 2].map((e) => `<button class="btn ${abaMod === e ? 'on' : ''}" data-acao="aba" data-e="${e}">${ETAPAS[e].nome}</button>`).join('')}</div>
+    ${ativas.length ? `<ul class="lista">${ativas.map((r) => `<li><span class="mt">${esc(r.texto)}</span><time>${hora(r.em)}</time><button class="btn perigo" data-acao="rem" data-id="${r.id}">Remover</button></li>`).join('')}</ul>` : '<p class="dica">Nenhuma resposta nesta etapa.</p>'}
+    ${removidas.length ? `<span class="rotulo">Removidas (${removidas.length})</span><ul class="lista rem">${removidas.map((r) => `<li><span class="mt">${esc(r.texto)}</span><button class="btn" data-acao="rest" data-id="${r.id}">Restaurar</button></li>`).join('')}</ul>` : ''}</article>
+  <article class="card"><h4>Exportar</h4>
+    <div class="fila-btn"><button class="btn pri" data-acao="csv">Respostas (planilha)</button><button class="btn pri" data-acao="png">Imagem do mural</button></div>
+    <p class="dica">A planilha traz todas as respostas, inclusive as removidas, com a hora de cada uma. A imagem sai em alta resolução, com os dois murais como estão no telão.</p></article>
+  <article class="card demo" style="grid-column:1/-1"><h4>Só nesta demonstração</h4>
+    <div class="fila-btn"><button class="btn" data-acao="sim" data-n="1">Simular 1 resposta</button><button class="btn" data-acao="sim" data-n="6">Simular 6 respostas</button>
+    <button class="btn ${chuva ? 'on' : ''}" data-acao="chuva">${chuva ? 'Parar respostas ao vivo' : 'Respostas ao vivo'}</button><button class="btn perigo" data-acao="zerar">Zerar tudo</button></div>
+    <p class="dica">No encontro esta caixa não existe e os murais começam vazios. Para testar antes, o botão de zerar apaga as respostas de teste.</p></article>`;
+  $$('.lista', el).forEach((l, i) => { if (rolagens[i]) l.scrollTop = rolagens[i]; });
+}
+function sorteia(e) {
+  const p = POOL[e], i = Math.floor(Math.pow(Math.random(), 1.9) * p.length); let t = p[i];
+  const r = Math.random(); if (r < 0.18) t = t.toLowerCase(); else if (r < 0.28) t += '.';
+  return t;
+}
+function simular(n) {
+  const e = etapaAberta(); if (!e) { alert('Abra uma pergunta primeiro.'); return; }
+  let i = 0; const t = setInterval(() => { const ab = etapaAberta(); if (!ab) { clearInterval(t); return; } novaResposta(ab, sorteia(ab), 'sim' + Math.floor(Math.random() * 90)); i += 1; if (i >= n) clearInterval(t); }, 700);
+}
+function baixar(blob, nome) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+function exportarCsv() {
+  const linhas = [['Etapa', 'Resposta', 'Enviada em', 'Removida pela moderação']];
+  S.respostas.forEach((r) => linhas.push([ETAPAS[r.etapa].nome, r.texto, new Date(r.em).toLocaleString('pt-BR'), r.removida ? 'Sim' : 'Não']));
+  baixar(new Blob(['﻿' + linhas.map((l) => l.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), 'comunicali-dinamica-respostas.csv');
+}
+const carregaImg = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+// Desenha o telão no canvas a partir do que está na tela, em 1920x1080.
+async function desenharMural() {
+  await document.fonts.ready;
+  const st = $('#stage'), R = st.getBoundingClientRect(), k = 1920 / R.width;
+  const c = document.createElement('canvas'); c.width = 1920; c.height = 1080; const x = c.getContext('2d');
+  const rel = (el) => { const r = el.getBoundingClientRect(); return { x: (r.left - R.left) * k, y: (r.top - R.top) * k, w: r.width * k, h: r.height * k }; };
+  x.fillStyle = '#1F0E14'; x.fillRect(0, 0, 1920, 1080);
+  ['#7A1F3D', '#A9502E', '#C9973B', '#5F6238'].forEach((cor, i) => { x.fillStyle = cor; x.fillRect(i * 480, 0, 480, 13); });
+  const logo = await carregaImg('/brand/communicali-branco.png'); const lr = rel($('.s-logo')); if (logo) x.drawImage(logo, lr.x, lr.y, lr.w, lr.h);
+  const texto = (el, extra = '') => { const cs = getComputedStyle(el), r = rel(el); x.fillStyle = cs.color; x.font = `${cs.fontWeight} ${parseFloat(cs.fontSize) * k}px ${cs.fontFamily.split(',')[0].replace(/"/g, '"')}`; x.textBaseline = 'middle'; x.textAlign = 'left'; try { x.letterSpacing = (parseFloat(cs.letterSpacing) || 0) * k + 'px'; } catch (e) { /* sem suporte */ } const t = cs.textTransform === 'uppercase' ? el.textContent.toUpperCase() : el.textContent; x.fillText(t + extra, r.x, r.y + r.h / 2); x.letterSpacing = '0px'; };
+  texto($('.s-tema small')); texto($('.s-tema h2'));
+  if (S.qr) { const qr = await carregaImg('/previa-dinamica/qr.png'), q = rel($('.s-qr img')); if (qr) { x.fillStyle = '#fff'; x.beginPath(); x.roundRect(q.x, q.y, q.w, q.h, 19); x.fill(); x.drawImage(qr, q.x + q.w * .06, q.y + q.h * .06, q.w * .88, q.h * .88); } }
+  for (const e of [1, 2]) {
+    const b = B[e]; if (!b.sec.offsetParent) continue;
+    const br = rel(b.sec); x.fillStyle = getComputedStyle(b.sec).backgroundColor; x.beginPath(); x.roundRect(br.x, br.y, br.w, br.h, 31); x.fill();
+    texto($('small', b.sec)); texto($('h3', b.sec));
+    b.itens.forEach((it) => {
+      if (!it.li.isConnected) return;
+      const cs = getComputedStyle(it.span), r = it.span.getBoundingClientRect(), w = it.span.offsetWidth * k, h = it.span.offsetHeight * k;
+      x.save(); x.translate((r.left + r.width / 2 - R.left) * k, (r.top + r.height / 2 - R.top) * k); x.rotate(it.rot * Math.PI / 180);
+      x.beginPath(); x.roundRect(-w / 2, -h / 2, w, h, h / 2);
+      if (cs.backgroundColor !== 'rgba(0, 0, 0, 0)') { x.fillStyle = cs.backgroundColor; x.fill(); }
+      const bw = parseFloat(cs.borderTopWidth) * k; if (cs.borderTopColor !== 'rgba(0, 0, 0, 0)' && bw > 0) { x.lineWidth = bw; x.strokeStyle = cs.borderTopColor; x.stroke(); }
+      x.fillStyle = cs.color; x.font = `700 ${parseFloat(cs.fontSize) * k}px "Funnel Display", Inter, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.fillText(it.texto + (it.n > 1 ? `  ×${it.n}` : ''), 0, h * 0.04); x.restore();
+    });
+  }
+  return c;
+}
+async function exportarPng() { const c = await desenharMural(); window.__ultimoPng = c.toDataURL('image/png'); c.toBlob((b) => baixar(b, 'comunicali-dinamica-mural.png')); }
+
+$('#painel').addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-acao]'); if (!b) return;
+  const a = b.dataset.acao, e = Number(b.dataset.e), id = Number(b.dataset.id);
+  if (a === 'abrir') mudar(() => { S.status[e] = 'aberta'; const o = e === 1 ? 2 : 1; if (S.status[o] === 'aberta') S.status[o] = 'encerrada'; });
+  else if (a === 'encerrar') mudar(() => { S.status[e] = 'encerrada'; });
+  else if (a === 'modo') mudar(() => { S.modo = b.dataset.m; });
+  else if (a === 'qr') mudar(() => { S.qr = !S.qr; });
+  else if (a === 'congelar') mudar(() => { S.congelado = !S.congelado; S.snapshot = S.congelado ? S.respostas.filter((r) => !r.removida).map((r) => r.id) : []; });
+  else if (a === 'cheia') $('#stageWrap').requestFullscreen?.();
+  else if (a === 'janela') window.open('#telao', 'dinamica-telao', 'width=1280,height=720');
+  else if (a === 'aba') { abaMod = e; renderPainel(); }
+  else if (a === 'rem') mudar(() => { const r = S.respostas.find((x) => x.id === id); if (r) r.removida = true; });
+  else if (a === 'rest') mudar(() => { const r = S.respostas.find((x) => x.id === id); if (r) r.removida = false; });
+  else if (a === 'csv') exportarCsv();
+  else if (a === 'png') exportarPng();
+  else if (a === 'sim') simular(Number(b.dataset.n));
+  else if (a === 'chuva') { if (chuva) { clearInterval(chuva); chuva = 0; } else { if (!etapaAberta()) { alert('Abra uma pergunta primeiro.'); return; } chuva = setInterval(() => { const ab = etapaAberta(); if (!ab) { clearInterval(chuva); chuva = 0; renderPainel(); return; } novaResposta(ab, sorteia(ab), 'sim' + Math.floor(Math.random() * 90)); }, 1900); } renderPainel(); }
+  else if (a === 'zerar') { if (confirm('Apagar todas as respostas e voltar ao começo?')) { clearInterval(chuva); chuva = 0; fila = []; mudar(() => { S = novo(); }); } }
+});
+
+function atualizar() { renderPhone(); renderPainel(); telaoSync(); }
+function rota() {
+  const h = (location.hash || '#tudo').slice(1), v = ['tudo', 'participante', 'telao', 'painel'].includes(h) ? h : 'tudo';
+  document.body.className = 'v-' + v;
+  $$('.abas a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + v));
+  requestAnimationFrame(() => { fit(B[1]); fit(B[2]); });
+}
+window.addEventListener('hashchange', rota);
+window.addEventListener('storage', (ev) => { if (ev.key === KEY) { S = carregar(); atualizar(); } });
+window.addEventListener('resize', () => { fit(B[1]); fit(B[2]); });
+window.__dinamica = { enviar, novaResposta, desenharMural };
+rota(); atualizar();
+document.fonts.ready.then(() => { fit(B[1]); fit(B[2]); });
+})();
+</script>
+</body>
+</html>

@@ -8,6 +8,56 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-10 | Sala do convidado, equipe de apoio e telão único (publicado)
+- Pedido da Patrícia: check-in cai direto na sala (`/sala`), com votação, palavras e pesquisa trancadas; a pessoa do apoio libera uma etapa por vez em `/apoio/:token` (link no painel, bloco "Sala do convidado e equipe de apoio"); o telão `/telao` acompanha sozinho a etapa liberada. Escolha de ser membro fora do check-in (fica para e-mail pós-evento).
+- Migração `20261110110000_sala_apoio` (`dinamicas.etapa_sala`, `token_apoio`, RPCs `communicali_sala_estado`, `_apoio_estado`, `_apoio_definir`). Liberar votação abre a poll; palavras abre as duas perguntas e fecha a poll; pesquisa encerra as palavras. A poll `fundadora` ficou em rascunho até o apoio liberar.
+- Check-in guarda a presença no aparelho e, sem kids/acompanhantes a confirmar, segue sozinho para a sala em 4,5 s; `/checkin` redireciona quem já fez (`?novo=1` registra outra pessoa).
+- Testado: tsc e build. NÃO testado no navegador: fluxo da sala, do apoio e do telão único. Pendente: o fluxo de membro existente ainda pede código por e-mail no check-in (`communicali_situacao_email`); decidir se sai.
+
+### 2026-11-10 | Dia do encontro: dinâmica ao vivo, telas no novo visual e pesquisa automática (publicado)
+- Pedido da Patrícia: as duas perguntas abertas ao mesmo tempo, até 4 palavras por pessoa em cada uma, telas de votação, boas-vindas e check-in no mesmo visual, tudo fácil no painel da edição e pesquisa de satisfação enviada sozinha às 14h aos que fizeram check-in.
+- Banco (migrações `20261110090000_dinamica_ao_vivo` e `20261110100000_pesquisa_satisfacao`, já aplicadas): tabelas `dinamicas` e `dinamica_respostas` (RLS só admin), RPCs públicas `communicali_dinamica_telao`, `_estado`, `_enviar` (limite de 4, agrupa por `communicali_dinamica_chave`), `email_log.tipo` aceita 'pesquisa', `editions.form_pesquisa` e `pesquisa_auto`, formulário `pesquisa-1a-edicao` (11 perguntas, tema claro) ligado à edição fundadora.
+- Telas: `/telao/dinamica` (sonda a cada 2 s, tecla F = tela cheia), `/dinamica` (celular, QR), `/telao/checkin`, `/telao/resultado`, `/votar` e o cartão de embarque do `/checkin` refeitos em `src/dinamica/` + `dinamica.css`. Formulários com `tema: 'claro'` ou categoria 'Pesquisa' usam o visual claro.
+- Painel: seção "Dia do encontro" no topo de `/admin/edicoes` (`DiaDoEncontro.tsx`, isolada por error boundary): telão de boas-vindas, votação, pesquisa (liga/desliga 14h, teste para mim, enviar agora, contagens) e `PainelDinamica` (abrir/encerrar cada pergunta, abrir as duas, modo, QR, congelar, moderar, planilha, imagem do mural, zerar).
+- Pesquisa: `api/email-pesquisa.js` roda no cron `0 17 * * *` UTC (14h BRT), só para quem tem check-in na edição com `data_evento` de hoje e `pesquisa_auto`; `email-admin` ganhou `acao: 'pesquisa'` (teste/agora, uma vez por pessoa).
+- Testado: tsc e build; telões e celular com banco real; painel por harness com banco falso. NÃO testado com sessão de admin real (criar usuário de teste foi bloqueado) nem o e-mail da pesquisa em produção. Dados de teste removidos; as duas perguntas ficam "aguardando".
+- Pendente: Patrícia conferir "Dia do encontro" em /admin/edicoes; testar a pesquisa com "Enviar teste para mim"; logo nova entra no domingo 15/11 (branch `logo-nova`, pode conflitar com Telao/Votar/Checkin).
+
+### 2026-11-10 | Prévia da dinâmica ao vivo (branch `dinamica`, não publicado)
+- Pedido da Patrícia: dinâmica "Cuidar de pessoas ainda é relevante?" para o encontro de 14/11, com dois murais em tempo real (Barreiras em bordô, Caminhos em marfim), QR no canto do telão, celular sem login e painel da apresentadora. Antes de implementar, ela pediu uma demonstração funcional.
+- Demonstração em `public/previa-dinamica/index.html` (HTML único, estado no navegador via localStorage; sincroniza entre janelas). Quatro vistas pelo hash: `#tudo`, `#participante`, `#telao`, `#painel`. Telão em unidades `cqw` (escala igual de prévia a tela cheia), palavras que entram uma por uma (aparecem grandes no centro, grudam no lugar, FLIP nas demais), tamanho proporcional à frequência, ajuste automático para caber, modo rápido quando chegam muitas de uma vez.
+- Regra de agrupamento: só respostas iguais após tirar maiúsculas, acentos, pontuação e espaços repetidos. Sem agrupamento por sentido.
+- Painel: abrir/encerrar cada etapa (abrir uma fecha a outra), mostrar os dois murais ou um só, QR visível/oculto, congelar para o debate (novas respostas esperam), tela cheia, janela própria, moderação com restaurar, exportar CSV e PNG 1920x1080 desenhado em canvas. Caixa "Só nesta demonstração" simula respostas; no evento os murais começam vazios.
+- Participante: 30 caracteres, 3 respostas por etapa, intervalo de 3 s, bloqueio de links e contatos, campo escondido contra robô, sem pedir nome.
+- Prévia protegida: https://communicali-5e6194ecv-cali11.vercel.app/previa-dinamica/ (QR de exemplo aponta para comuni.calirh.com/dinamica, rota que ainda não existe).
+- Para implementar de verdade: tabelas de etapas e respostas no Supabase, inserção pública só pela função com limite por aparelho, leitura do telão por consulta a cada 2 s (como o telão da votação), painel dentro do admin existente.
+
+### 2026-11-07 | Prévia: topo com a CALI RH, Primeira vez e formatos (branch logo-nova)
+- Topo: logo da CALI RH (cali-rh-bordo.png, link para calirh.com), barra fina e a comunicali, como a marca-mãe e a extensão (referência: walljobs.ai/wally).
+- "Primeira vez?" refeita em três passos numerados (cadastre seu interesse, entre no grupo com QR, faça o check-in), cartões da mesma altura e ações alinhadas embaixo; no celular, um embaixo do outro.
+- "Sua próxima escala" (`Escalas` em Home.tsx): foto fixa à esquerda que troca conforme a lista de formatos passa à direita, com etiqueta; no celular, foto em cada item. Tirado o "café" do texto de encontros presenciais.
+- Prévia: https://communicali-lp21rg5hn-cali11.vercel.app (não publicado em produção).
+
+### 2026-11-06 | Lista de espera no mesmo link
+- Edição ganhou `inscricao_modo` (aberta, espera, fechada) e a chave "Inscrição pelo link" no topo de Pessoas (`communicali_modo_inscricao`). Espera: o formulário continua aberto, mostra `forms.aviso` antes da descrição (lido por `cali_form_public`) e a mensagem final de lista de espera; fechada: `forms.status = closed`.
+- Situação nova "Lista de espera" (`espera`) em formulário, site, convites e manual. Gatilho `form_responses_etapa_inscricao`: resposta nova entra como Lista de espera no modo espera, ou Inscrito. Mudar para Confirmado dispara boas-vindas e card como antes. Migrações `20261106090000_lista_de_espera.sql` e `20261106091000_form_publico_aviso.sql`.
+- Testado em transações desfeitas: gatilho, as três posições da chave e o formulário público. Lista de espera ligada em 06/11 a pedido da Patrícia: o link /f/coffee-rh-cwb mostra o aviso e as novas inscrições entram como Lista de espera.
+
+### 2026-11-05 (21) | E-mail que voltou: aviso e reenvio
+- Pessoas da edição: ao abrir, lê na Resend os envios sem retorno (`entregas`) e marca "Voltou" no e-mail de quem teve envio devolvido ou bloqueado, com um aviso acima da tabela listando os nomes.
+- Corrigir o e-mail pelo lápis (formulário ou pessoa manual) de alguém Confirmado chama `email-admin` `limpar_falhas` (apaga do registro os envios que voltaram no endereço antigo) e `confirmados` (boas-vindas e card ao endereço novo). Botão de envelope em cada linha confirmada reenvia só o que ainda não chegou. `RespostaGaveta.mudou` agora recebe a resposta salva.
+- Voltar uma pessoa para Confirmado (por exemplo, de "Não vai") já dispara boas-vindas e card se ela ainda não recebeu.
+- Feito: Paula Gaio corrigida para contato@pgrecursoshumanos.com.br, reenviado e entregue; registros antigos da Lilian e da Paula limpos. Só a Cleia (email@email.com) segue marcada.
+
+### 2026-11-05 (20) | Prévia: página inicial com faixas de cor
+- Branch `logo-nova` (não publicado): topo em marfim com a logo bordô (`public/brand/comunicali-bordo-horizontal.png`); "Primeira vez?" em degradê mostarda; Formatos continua bordô; Próximo encontro e Perguntas frequentes em fundo claro; rodapé mostarda com logo bordô. Faixas por `.faixa--mostarda` e `.faixa--clara` (variáveis de cor locais, fundo em toda a largura). Texto legal do rodapé encurtado para duas linhas. Ajustes seguintes: respiro embaixo dos tickets (#programa), card do próximo encontro com fundo mostarda deslocado e entrada da direita para a esquerda, sem a faixa vazia antes dos parceiros. "Como foram os encontros" só aparece quando já houve encontro; rodapé da página inicial bordô com legal e "Toda honra a Deus!" centralizados em marfim e mostarda. Prévia atual: https://communicali-14c0gg1r1-cali11.vercel.app
+- Post e story do primeiro encontro (logo antiga, fachada) em `~/CALI/communicali-materiais/primeiro-encontro-post-story/`.
+
+### 2026-11-05 (19) | Passaporte da organização e prévia da logo nova
+- `communicali_meu_espaco`: fundadora e organizadores veem o passaporte mesmo sem check-in (migração `20261105220000_passaporte_organizacao.sql`). O check-in de teste da Patrícia saiu quando a edição de teste foi excluída.
+- Prévia da logo nova no branch `logo-nova` (worktree `~/CALI/communicali-logo-nova`, commit separado, não publicado em produção): `public/brand/communicali-branco.png` (fundo escuro), `communicali-horizontal.png` (fundo claro) e `communicali-bordo.png` (empilhado) trocados pelas artes de `~/CALI/ComuniCALI-Logo`; títulos h1 a h3 em Inter 700 para não competir com a logo (Funnel Display fica na logo, números e carimbos). Prévia protegida: https://communicali-1mbwsv3vs-cali11.vercel.app
+- Plano: subir no domingo 15/11, depois do encontro. Falta ainda: topo dos e-mails (`public/email/topo.png`), ícones do app (`public/app/icone-*`), favicon e cards gerados no canvas.
+
 ### 2026-11-05 (18) | Conferência geral de entregas
 - `email-admin` `acao: nao_entregues`: lista os 100 e-mails mais recentes direto na Resend (staff, avisos e edição) e devolve os que não chegaram. Resultado em 05/11: 97 de 100 entregues; problemas só em Lilian (bloqueio na Resend), Cleia (email@email.com) e Paula Gaio (domínio digitado errado, pgrecuroshumanos).
 - Todos os confirmados com endereço válido receberam boas-vindas e card. DNS de calirh.com está na Hostinger (dns-parking.com); DMARC com relatório fica como melhoria opcional.
