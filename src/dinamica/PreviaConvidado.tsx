@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import './dinamica.css';
 
 const PASSOS: [string, string, string][] = [
-  ['1. Check-in', 'A pessoa escaneia o QR Code do telão e informa o e-mail.', '/checkin?novo=1'],
+  ['1. Check-in', 'A pessoa escaneia o QR Code do telão e informa o e-mail.', '/checkin?novo=1&previa=email'],
   ['2. Presença confirmada', 'Depois dos aceites, aparece o cartão de embarque e ela segue sozinha para a sala.', '/checkin?previa=sucesso'],
   ['3. Sala, etapas trancadas', 'Ela fica aqui até a equipe de apoio liberar a próxima etapa.', '/sala?previa=boasvindas'],
   ['4. Votação liberada', 'O apoio libera e a votação aparece no celular, sozinha.', '/sala?previa=votacao'],

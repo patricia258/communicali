@@ -92,7 +92,7 @@ export function Checkin() {
   useEffect(() => {
     supabase.rpc('communicali_edicao', { p_slug: slug }).then(({ data, error: failure }) => {
       if (failure || !data) setLoadError('Não foi possível abrir o check-in. Recarregue a página.');
-      else setEdition(data as Edition);
+      else setEdition(new URLSearchParams(window.location.search).get('previa') === 'email' ? { ...(data as Edition), situacao: 'aberto' } : (data as Edition));
     });
   }, [slug]);
 
