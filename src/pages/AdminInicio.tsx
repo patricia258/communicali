@@ -44,7 +44,7 @@ export function HomePanel() {
   ];
 
   const cards: Array<[typeof Users, string, number, string]> = [
-    [Users, 'Membros', counts.membros, '/admin/membros'],
+    [Users, 'Visitantes', counts.membros, '/admin/membros'],
     [CalendarCheck, 'Presenças', counts.presencas, '/admin/edicoes'],
     [Gift, 'Convidados', counts.convidados, '/admin/convidados'],
     [Handshake, 'Parceiros', counts.parceiros, '/admin/parceiros'],

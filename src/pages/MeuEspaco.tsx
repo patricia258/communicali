@@ -17,6 +17,7 @@ type Carimbo = { slug: string; titulo: string; selo: string; data_evento: string
 type Proxima = { slug: string; titulo: string; data_evento: string; horario: string; local: string; cidade: string; capa_url: string | null; inscricoes_abertas: boolean };
 type Missao = { slug: string; titulo: string; descricao: string; nivel: string; modo: string; status: string };
 type Espaco = {
+  em_breve?: boolean;
   membro: { nome: string; apelido: string | null; email: string; foto_url: string | null; categoria: string; codigo: string; temas: string[]; interesse_palestras: boolean; linkedin: string | null } | null;
   pontos: number;
   encontros: number;
@@ -1034,6 +1035,14 @@ export function MeuEspaco() {
   if (session === undefined) return <div className="passe" aria-busy="true" />;
   if (!session) return <Entrar />;
   if (!espaco) return <div className="passe" aria-busy="true" />;
+  if (!espaco.membro && espaco.em_breve) return (
+    <Pagina>
+      <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <h1>O passaporte ainda não está disponível</h1>
+      <p>Estamos preparando este espaço. Em breve teremos novidades.</p>
+      <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
+    </Pagina>
+  );
   if (!espaco.membro) return (
     <Pagina>
       <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
