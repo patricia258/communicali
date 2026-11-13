@@ -4,7 +4,7 @@ import './dinamica.css';
 
 const PASSOS: [string, string, string][] = [
   ['1. Check-in', 'A pessoa escaneia o QR Code do telão e informa o e-mail.', '/checkin?novo=1&previa=email'],
-  ['2. Presença confirmada', 'Convidados veem o lembrete do crachá; membros, não. Segue sozinha para a sala.', '/checkin?previa=sucesso'],
+  ['2. Presença confirmada', 'Todos entram como Visitante, só com nome e status. Segue sozinha para a sala.', '/checkin?previa=sucesso'],
   ['3. Sala, etapas trancadas', 'Ela fica aqui até a equipe de apoio liberar.', '/sala?previa=boasvindas'],
   ['4. Votação liberada', 'O apoio libera e aparece o botão "Clique aqui".', '/sala?previa=votacao'],
   ['5. Votação', 'Depois do clique, a votação.', '/sala?previa=votacao&entrou=1'],

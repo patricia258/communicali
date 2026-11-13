@@ -37,7 +37,7 @@ function QuemVeio({ codigo, junto }: { codigo: string; junto: Junto[] }) {
     </div>
   );
 }
-type Step = 'email' | 'novo' | 'codigo' | 'inscrito';
+type Step = 'email' | 'novo' | 'codigo' | 'inscrito' | 'recepcao';
 
 export const CATEGORIAS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organizador', kids: 'Kids' };
 
@@ -61,9 +61,8 @@ function Success({ done, previa }: { done: Done; previa?: boolean }) {
           {!!done.junto?.length && <QuemVeio codigo={done.codigo} junto={done.junto} />}
           <dl className="dn-dados">
             <div><dt>Nome</dt><dd>{done.nome}</dd></div>
-            <div><dt>Categoria</dt><dd>{CATEGORIAS[done.categoria] || done.categoria}</dd></div>
+            <div><dt>Status</dt><dd>Visitante</dd></div>
           </dl>
-          {done.categoria === 'convidado' && <p className="dn-bilhete__texto"><strong>Lembrete:</strong> devolva o crachá ao final do encontro.</p>}
           <p className="dn-bilhete__texto">Aproveite o encontro. Qualquer dúvida, chame alguém do staff.</p>
         </section>
       </div>
@@ -104,7 +103,7 @@ export function Checkin() {
         setEmail(clean);
         const situacao = data as { membro: boolean; inscrito: boolean; nome?: string };
         if (situacao.inscrito) { setInscritoNome(situacao.nome || ''); setStep('inscrito'); return ''; }
-        if (!situacao.membro) { setStep('novo'); return ''; }
+        if (!situacao.membro) { setStep('recepcao'); return ''; }
         const { error: sendFailure } = await supabase.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } });
         if (sendFailure) return 'Não conseguimos enviar o código agora. Procure a organização na recepção para registrar sua presença.';
         setStep('codigo');
@@ -149,6 +148,11 @@ export function Checkin() {
 
   if (previaCartao) return <Success previa done={{ nome: 'Maria Silva', categoria: 'convidado', edicao: 'Primeiro encontro', selo: '', codigo: 'EXEMPLO', repetido: false }} />;
   if (done) return <Success done={done} />;
+  if (step === 'recepcao') return (
+    <main className="dn-pg"><div className="dn-pg-faixa" /><img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <div className="dn-pg-corpo"><div className="dn-cartao"><h1>Não encontramos esse e-mail na lista</h1><p className="dn-pg-inst">Sem problema: procure a organização na recepção, que registra a sua presença na hora.</p><a className="dn-link" href="/checkin?novo=1">Tentar com outro e-mail</a></div></div>
+    </main>
+  );
   if (edition?.situacao === 'aberto' && preset) return <PublicFormPage key={step} preset={preset} />;
   if (!edition && !loadError) return <main className="dn-pg" aria-busy="true" />;
 
