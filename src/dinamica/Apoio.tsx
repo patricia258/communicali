@@ -80,6 +80,7 @@ function Cronometro({ segundos, titulo, contar }: { segundos: number; titulo: st
 }
 
 type Pessoa = { fonte: string; id: string; nome: string; categoria: string; email: string | null; chegou_em: string | null };
+const corCategoria = (categoria: string) => (categoria === 'Kids' ? 'kids' : categoria === 'Convidado' ? 'convidado' : categoria === 'Participante' ? 'participante' : 'outro');
 const semAcento = (texto: string) => texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 /** Lista da recepção: quem está confirmado, com busca por nome ou e-mail e botão de chegada. Atualiza sozinha. */
@@ -110,8 +111,8 @@ function Recepcao({ token, qr }: { token: string; qr: string }) {
       )}
       <ul className="dn-lista">
         {visiveis.map((item) => (
-          <li key={`${item.fonte}-${item.id}`} className={item.chegou_em ? 'chegou' : ''}>
-            <span><b>{item.nome}</b><small>{item.categoria}{item.email ? ` · ${item.email}` : ''}</small></span>
+          <li key={`${item.fonte}-${item.id}`} className={`dn-p-${corCategoria(item.categoria)}${item.chegou_em ? ' chegou' : ''}`}>
+            <span><b>{item.nome}</b><small><i className={`dn-cat dn-cat--${corCategoria(item.categoria)}`}>{item.categoria === 'Participante' ? 'Participante / Membro' : item.categoria}</i>{item.email ? ` ${item.email}` : ''}</small></span>
             {item.fonte === 'organizacao' ? <em>{item.chegou_em ? 'Chegou' : ''}</em>
               : item.chegou_em ? <button type="button" className="dn-link" onClick={() => void marcar(item, false)}>Chegou ✓ (desfazer)</button>
               : <button type="button" className="dn-btn" onClick={() => void marcar(item, true)}>Chegou</button>}
