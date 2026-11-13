@@ -79,12 +79,56 @@ function Cronometro({ segundos, titulo, contar }: { segundos: number; titulo: st
   );
 }
 
+type Pessoa = { fonte: string; id: string; nome: string; categoria: string; email: string | null; chegou_em: string | null };
+const semAcento = (texto: string) => texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/** Lista da recepção: quem está confirmado, com busca por nome ou e-mail e botão de chegada. Atualiza sozinha. */
+function Recepcao({ token, qr }: { token: string; qr: string }) {
+  const [lista, setLista] = useState<Pessoa[] | null>(null);
+  const [busca, setBusca] = useState('');
+  const [erro, setErro] = useState('');
+  const carregar = useCallback(() => { supabase.rpc('communicali_apoio_lista', { p_token: token }).then(({ data, error }) => { if (!error && Array.isArray(data)) setLista(data as Pessoa[]); }); }, [token]);
+  useEffect(() => { carregar(); const t = window.setInterval(carregar, 5000); return () => window.clearInterval(t); }, [carregar]);
+
+  async function marcar(pessoa: Pessoa, chegou: boolean) {
+    setErro('');
+    setLista((atual) => (atual || []).map((item) => (item.id === pessoa.id ? { ...item, chegou_em: chegou ? new Date().toISOString() : null } : item)));
+    const { error } = await supabase.rpc('communicali_apoio_chegada', { p_token: token, p_fonte: pessoa.fonte, p_id: pessoa.id, p_chegou: chegou });
+    if (error) { setErro('Não foi possível marcar agora. Tente de novo.'); carregar(); }
+  }
+  if (!lista) return <p className="dn-pg-inst">Carregando a lista…</p>;
+  const termo = semAcento(busca.trim());
+  const visiveis = termo ? lista.filter((item) => semAcento(`${item.nome} ${item.email || ''}`).includes(termo)) : lista;
+  const chegaram = lista.filter((item) => item.chegou_em).length;
+  return (
+    <div className="dn-recepcao">
+      <p className="dn-pg-inst"><b>{chegaram}</b> de <b>{lista.length}</b> confirmados já chegaram.</p>
+      <input className="dn-busca" type="search" value={busca} onChange={(event) => setBusca(event.target.value)} placeholder="Buscar por nome ou e-mail" aria-label="Buscar por nome ou e-mail" autoComplete="off" />
+      {erro && <p className="dn-aviso alerta">{erro}</p>}
+      {termo && !visiveis.length && (
+        <div className="dn-aviso alerta dn-fora"><b>Não está na lista.</b> Quem não está confirmado não entra. Se a pessoa usou outro e-mail, ela pode tentar o check-in por este QR Code.{qr && <img src={qr} alt="QR Code do check-in" />}</div>
+      )}
+      <ul className="dn-lista">
+        {visiveis.map((item) => (
+          <li key={`${item.fonte}-${item.id}`} className={item.chegou_em ? 'chegou' : ''}>
+            <span><b>{item.nome}</b><small>{item.categoria}{item.email ? ` · ${item.email}` : ''}</small></span>
+            {item.fonte === 'organizacao' ? <em>{item.chegou_em ? 'Chegou' : ''}</em>
+              : item.chegou_em ? <button type="button" className="dn-link" onClick={() => void marcar(item, false)}>Chegou ✓ (desfazer)</button>
+              : <button type="button" className="dn-btn" onClick={() => void marcar(item, true)}>Chegou</button>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export function Apoio() {
   const { token = '' } = useParams();
   const [estado, setEstado] = useState<Estado | null | undefined>(undefined);
   const [busy, setBusy] = useState('');
   const [erro, setErro] = useState('');
   const [qr, setQr] = useState('');
+  const [aba, setAba] = useState<'programacao' | 'recepcao'>(() => (new URLSearchParams(window.location.search).get('aba') === 'recepcao' ? 'recepcao' : 'programacao'));
   useEffect(() => { QRCode.toDataURL(linkEvento('/checkin'), { width: 600, margin: 1, color: QR_COR }).then(setQr); }, []);
   const buscar = useCallback(() => { supabase.rpc('communicali_apoio_estado', { p_token: token }).then(({ data, error }) => { if (!error) setEstado((data as Estado) || null); }); }, [token]);
   useEffect(() => { buscar(); const t = window.setInterval(buscar, 4000); return () => window.clearInterval(t); }, [buscar]);
@@ -106,6 +150,12 @@ export function Apoio() {
         {estado && <>
           <p className="dn-pg-etapa">Equipe de apoio</p>
           <h1>{estado.titulo}</h1>
+          <div className="dn-abas" role="tablist">
+            <button type="button" role="tab" aria-selected={aba === 'programacao'} className={aba === 'programacao' ? 'on' : ''} onClick={() => setAba('programacao')}>Programação</button>
+            <button type="button" role="tab" aria-selected={aba === 'recepcao'} className={aba === 'recepcao' ? 'on' : ''} onClick={() => setAba('recepcao')}>Recepção</button>
+          </div>
+          {aba === 'recepcao' && <Recepcao token={token} qr={qr} />}
+          {aba === 'programacao' && <>
           <p className="dn-pg-inst"><b>{estado.checkins}</b> {estado.checkins === 1 ? 'pessoa fez' : 'pessoas fizeram'} check-in. Libere uma etapa por vez, quando a apresentação chegar nela.</p>
           <ul className="dn-apoio">
             {ETAPAS.map(([id, rotulo], i) => (
@@ -121,6 +171,7 @@ export function Apoio() {
           </ul>
           {erro && <p className="dn-aviso alerta">{erro}</p>}
           {qr && <div className="dn-apoio-qr"><p>Quem perdeu a janela escaneia este QR Code e volta para a sala.</p><img src={qr} alt="QR Code do check-in" /></div>}
+          </>}
         </>}
       </div></div>
     </main>
