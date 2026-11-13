@@ -312,12 +312,13 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
         <p className="cf-meta">{basicas} {basicas === 1 ? 'pergunta' : 'perguntas'} · cerca de {Math.max(1, Math.round(basicas * 0.4))} min</p>
       </div>}
       {(phase === 'questions' || phase === 'sending') && question && <div className={`cf-screen cf-q cf-${direction}${question.kind === 'statement' ? ' cf-statement' : ''}`} key={question.id}>
+        {question.imagem && <img className="cf-foto" src={question.imagem} alt="" />}
         <div className="cf-label">
           {isAnswerable(question) && <span className="cf-num">{numberOf(question)}<ArrowRight size={14} /></span>}
           <h2>{comRespostas(question.label, answers)}{isAnswerable(question) && (question.required ? <em className="cf-req" aria-label="obrigatória">*</em> : <span className="cf-optional">Opcional</span>)}</h2>
         </div>
         {question.help && <p className="cf-help" dangerouslySetInnerHTML={{ __html: richTextHtml(comRespostas(question.help, answers)) }} />}
-        {question.attachment && <a className="cf-anexo" href={question.attachment.url} target="_blank" rel="noopener noreferrer"><img src={question.attachment.cover} alt="" /><span><strong>{question.attachment.title}</strong>{question.attachment.text && <small>{question.attachment.text}</small>}<em>Abrir apresentação <ArrowRight size={14} /></em></span></a>}
+        {question.attachment && <a className="cf-anexo" href={question.attachment.url} target="_blank" rel="noopener noreferrer"><img src={question.attachment.cover} alt="" /><span><strong>{question.attachment.title}</strong>{question.attachment.text && <small>{question.attachment.text}</small>}<em>{question.attachment.cta || 'Abrir apresentação'} <ArrowRight size={14} /></em></span></a>}
         {renderInput(question)}
         {error && <p className="cf-error" role="alert">{error}</p>}
         {sendError && isLast && <p className="cf-error" role="alert">{sendError}</p>}
@@ -343,7 +344,7 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
       </div>}
     </main>
     {phase === 'questions' && questions.length > 1 && <nav className="cf-nav" aria-label="Navegar entre perguntas">
-      <span>{question && caminho.includes(question) ? caminho.indexOf(question) + 1 : index + 1} de {caminho.length}</span>
+      {!preset && <span>{question && caminho.includes(question) ? caminho.indexOf(question) + 1 : index + 1} de {caminho.length}</span>}
       <button type="button" aria-label="Pergunta anterior" disabled={!trail.length} onClick={goBack}><ArrowUp size={18} /></button>
       <button type="button" aria-label="Próxima pergunta" disabled={isLast} onClick={goNext}><ArrowDown size={18} /></button>
     </nav>}

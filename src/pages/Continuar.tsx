@@ -8,17 +8,6 @@ import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 type Dados = { encontrado: boolean; nome?: string; tipo?: 'convidado' | 'visitante'; convidado_de?: string | null };
 type Passo = 'email' | 'confirma';
 
-const BENEFICIOS = [
-  '**Pontuação**: a sua participação passa a pontuar.',
-  '**Programa de categorias**: a jornada de Visitante, Membro, Conector e Embaixador.',
-  '**Indicação**: você poderá indicar pessoas para os encontros.',
-  '**Cupons e vantagens** com parceiros da comunidade.',
-  '**Lista de parceiros** para você conhecer e contar com eles.',
-  '**Conexões** com outras pessoas dentro da comunidade.',
-  '**Palestras** sobre pessoas, liderança e trabalho.',
-  '**Encontros*** presenciais e virtuais, experiências, almoços e jantares em grupos menores.',
-].join('\n');
-
 export function Continuar() {
   const slug = editionSlug();
   const [passo, setPasso] = useState<Passo>('email');
@@ -35,7 +24,9 @@ export function Continuar() {
         successText: 'Pronto!\n**Você vai receber um e-mail para participar da nossa comunidade e do nosso aplicativo.**\nObrigada por seguir com a gente.',
         questions: [
           { id: 'ola', kind: 'statement', label: `Oi, ${primeiro}!`, help: `Encontramos a sua participação no encontro:\n\n==${tipoTexto}==${convidadoDe}` },
-          { id: 'comunidade', kind: 'statement', label: 'O que você encontra na comunidade', help: `${BENEFICIOS}\n\n* Alguns encontros serão exclusivos e poderão ter taxa de inscrição.` },
+          { id: 'ganha', kind: 'statement', imagem: '/fotos/home/reuniao.jpg', label: 'Você ganha por participar', help: '==Pontuação== pela sua presença e participação.\nUma jornada de **Visitante a Embaixador**.\n**Cupons e vantagens** com parceiros da comunidade.' },
+          { id: 'conecta', kind: 'statement', imagem: '/fotos/home/presencial.jpg', label: 'Você se conecta com pessoas', help: '**Conexões** dentro da comunidade.\n**Lista de parceiros** para você conhecer e contar com eles.\n**Indicação**: você poderá indicar pessoas para os encontros.' },
+          { id: 'vive', kind: 'statement', imagem: '/fotos/home/palestra.jpg', label: 'Você vive experiências', help: '**Palestras** sobre pessoas, liderança e trabalho.\n**Encontros*** presenciais e virtuais.\n**Experiências**, almoços e jantares em grupos menores.\n\n* Alguns encontros serão exclusivos e poderão ter taxa de inscrição.', attachment: { url: 'https://comuni.calirh.com', cover: '/fotos/home/experiencia.jpg', title: 'Saiba mais pelo nosso site', text: 'comuni.calirh.com', cta: 'Abrir o site' } },
           { id: 'email_novo', kind: 'email', label: 'Quer receber as novidades em outro e-mail?', help: 'Se o e-mail da inscrição serve, é só avançar.' },
         ],
         submit: async (respostas) => {

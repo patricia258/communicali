@@ -24,7 +24,9 @@ export type FormQuestion = {
   /** Pergunta de arquivo: 'images_pdf' aceita só PDF e imagens; padrão aceita também documentos, áudio e vídeo. */
   accept?: 'images_pdf' | 'any';
   /** Tela de texto pode mostrar um material: capa, link e chamada. */
-  attachment?: { url: string; cover: string; title: string; text?: string };
+  attachment?: { url: string; cover: string; title: string; text?: string; cta?: string };
+  /** Foto de destaque no alto da tela (caminho no site). */
+  imagem?: string;
 };
 
 export const END_OF_FORM = '__end';
