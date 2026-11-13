@@ -112,6 +112,13 @@ export function TelaoVotacao() {
 }
 
 type Resultado = { titulo: string; pergunta: string; pergunta_2: string | null; situacao: 'rascunho' | 'ativa' | 'encerrada'; votos: number; media: number | null; media_2: number | null; dist: Record<string, number>; dist_2: Record<string, number> };
+/** Tira "De 0 a 10, quanto você acredita/percebe que" para a legenda ficar só com o que está sendo avaliado. */
+const curta = (texto?: string | null) => {
+  const t = (texto || '').trim();
+  const m = t.match(/^de 0 a 10,?\s+quanto você \w+ que\s+(.+)$/i);
+  const corpo = (m ? m[1] : t).replace(/essa importância em/i, 'isso em');
+  return corpo ? corpo.charAt(0).toUpperCase() + corpo.slice(1) : '';
+};
 const virgula = (valor: number | null) => (valor === null || valor === undefined ? '–' : Number(valor).toFixed(1).replace('.', ','));
 
 /** Tela ao vivo da votação, aberta pelo link do slide: QR Code para votar e o resultado mudando enquanto a sala responde.
@@ -150,13 +157,13 @@ export function TelaoResultado() {
         <div className="dn-faixa" />
         <header className="dn-head">
           <img className="dn-logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
-          <div className="dn-tema"><h2>Sua opinião conta</h2></div>
+          <div className="dn-tema"><h2><span className="dn-vivo" />Votação ao vivo</h2></div>
           <div className="dn-qr"><span>Aponte a câmera<br />e vote</span>{qr && <img src={qr} alt="QR Code para votar" />}</div>
         </header>
         <section className="dn-g">
           <div className="dn-leg">
-            <div className="dn-leg__item dn-leg__item--1"><i /><div><span>{duas ? 'Na opinião' : 'Resultado'}</span><b>{virgula(dados?.media ?? null)}</b></div></div>
-            {duas && <div className="dn-leg__item dn-leg__item--2"><i /><div><span>Na prática</span><b>{virgula(dados?.media_2 ?? null)}</b></div></div>}
+            <div className="dn-leg__item dn-leg__item--1"><i /><div className="dn-leg__txt"><span>{duas ? 'Na sua opinião' : 'Resultado'}</span><small>{curta(dados?.pergunta)}</small></div><b>{virgula(dados?.media ?? null)}</b></div>
+            {duas && <div className="dn-leg__item dn-leg__item--2"><i /><div className="dn-leg__txt"><span>Na prática</span><small>{curta(dados?.pergunta_2)}</small></div><b>{virgula(dados?.media_2 ?? null)}</b></div>}
             <div className="dn-sala">
               <span>Votaram</span>
               <b>{votos} <small>de {naSala || '–'} na sala</small></b>

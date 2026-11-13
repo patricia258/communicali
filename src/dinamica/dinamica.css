@@ -229,3 +229,16 @@ a.dn-btn{display:flex;align-items:center;justify-content:center;text-decoration:
 .dn-par i.s1 b{color:#DDB160}.dn-par i.s2 b{color:#F7F0EA}
 .dn-gcol>span{text-align:center;padding-top:.6cqw;font:700 1.6cqw Inter,sans-serif;color:#EADDD2}
 .dn-grp .dn-vazio{position:absolute;inset:0 0 3cqw;display:grid;place-items:center;text-align:center;font:500 2cqw/1.5 Inter,sans-serif;color:#A8948B;pointer-events:none}
+
+/* Legenda com as perguntas e a média de cada série */
+.dn-leg{align-items:flex-start;gap:2.4cqw;margin-bottom:1.4cqw}
+.dn-leg__item{flex:1;min-width:0;align-items:center;gap:1.2cqw;padding:1.1cqw 1.4cqw;border-radius:1.2cqw;background:rgba(255,255,255,.05)}
+.dn-leg__item i{flex:none;align-self:flex-start;margin-top:.5cqw}
+.dn-leg__txt{flex:1;min-width:0;display:grid;gap:.4cqw}
+.dn-leg__txt span{font:700 1.7cqw Inter,sans-serif;color:#F7F0EA}
+.dn-leg__txt small{font:500 1.3cqw/1.4 Inter,sans-serif;color:#CBB9B1}
+.dn-leg__item>b{flex:none;font:800 4.8cqw/1 'Funnel Display',Inter,sans-serif}
+.dn-leg__item--1>b{color:#DDB160}.dn-leg__item--2>b{color:#F7F0EA}
+.dn-sala{min-width:15cqw}
+.dn-vivo{display:inline-block;width:1.1cqw;height:1.1cqw;margin-right:1.1cqw;border-radius:50%;background:#E5584B;vertical-align:middle;animation:dn-pulso 1.6s ease-in-out infinite}
+@keyframes dn-pulso{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
