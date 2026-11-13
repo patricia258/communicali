@@ -20,6 +20,7 @@ import { Convidar, Convite } from './pages/Convidados';
 import { TelaoCheckin, TelaoResultado, TelaoVotacao } from './pages/Telao';
 import { Participante } from './dinamica/Participante';
 import { Sala } from './dinamica/Sala';
+import { Continuar } from './pages/Continuar';
 import { PreviaConvidado } from './dinamica/PreviaConvidado';
 import { TelaoUnico } from './dinamica/TelaoUnico';
 import { Apoio } from './dinamica/Apoio';
@@ -66,6 +67,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/telao/resultado" element={<ComEdicao><TelaoResultado /></ComEdicao>} />
       <Route path="/telao" element={<ComEdicao><TelaoUnico /></ComEdicao>} />
       <Route path="/previa-convidado" element={<PreviaConvidado />} />
+      <Route path="/continuar" element={<ComEdicao><Continuar /></ComEdicao>} />
       <Route path="/sala" element={<ComEdicao><Sala /></ComEdicao>} />
       <Route path="/apoio/:token" element={<Apoio />} />
       <Route path="/dinamica" element={<ComEdicao><Participante /></ComEdicao>} />

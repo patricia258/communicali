@@ -334,7 +334,10 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
           const botao = ligacao ? <a className="cf-primary" href={ligacao[2]} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', marginTop: 18 }}>{ligacao[1]} <ArrowRight size={18} /></a> : null;
           if (!custom) return <><h1>Muito obrigado!</h1><p>Recebemos suas respostas e agradecemos a colaboração.</p></>;
           const match = custom.match(/^(.{4,70}?[!.?])\s+(.+)$/s);
-          return <>{match ? <><h1>{match[1]}</h1><p>{match[2]}</p></> : <><h1>Muito obrigado!</h1><p>{custom}</p></>}{botao}</>;
+          // **negrito** e *itálico*, uma linha por parágrafo.
+          const marcas = (texto: string) => texto.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).map((parte, i) => (parte.startsWith('**') ? <strong key={i}>{parte.slice(2, -2)}</strong> : parte.startsWith('*') && parte.length > 2 ? <em key={i}>{parte.slice(1, -1)}</em> : parte));
+          const paragrafos = (texto: string) => texto.split('\n').filter((linha) => linha.trim()).map((linha, i) => <p key={i}>{marcas(linha)}</p>);
+          return <>{match ? <><h1>{match[1]}</h1>{paragrafos(match[2])}</> : <><h1>Muito obrigado!</h1>{paragrafos(custom)}</>}{botao}</>;
         })()}
       </div>}
     </main>

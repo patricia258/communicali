@@ -194,3 +194,12 @@ a.dn-btn{display:flex;align-items:center;justify-content:center;text-decoration:
 .dn-cat--convidado{background:#D9A21B;color:#22100F}
 
 .dn-selo{display:block;width:150px;height:auto;margin:6px auto 2px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.28))}
+
+/* Página "Continue com a gente" */
+.dn-continuar{margin-bottom:14px}
+.dn-continuar h2{margin:0 0 4px;font-size:20px;color:#5A1E2D}
+.dn-continuar p{margin:0 0 10px}
+.dn-destaque{background:#FBF1EC;border:1px solid #E8C9A0}
+.dn-chip{display:inline-block;padding:8px 18px;border-radius:999px;background:#5A1E2D;color:#F7F0EA;font:700 16px 'Funnel Display',Inter,sans-serif}
+.dn-beneficios{margin:6px 0 10px;padding-left:20px;display:grid;gap:8px}
+.dn-chip{align-self:flex-start;margin:0 0 10px}
