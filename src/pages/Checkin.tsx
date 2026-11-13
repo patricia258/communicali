@@ -59,9 +59,10 @@ function Success({ done, previa }: { done: Done; previa?: boolean }) {
           <h1>Presença confirmada!</h1>
           <p className="dn-bilhete__texto">Que bom ter você aqui.</p>
           {!!done.junto?.length && <QuemVeio codigo={done.codigo} junto={done.junto} />}
+          <img className="dn-selo" src={`/selos/postal-${done.categoria === 'convidado' ? 'convidado' : 'visitante'}.png`} alt={`Selo de ${done.categoria === 'convidado' ? 'Convidado' : 'Visitante'}`} />
           <dl className="dn-dados">
             <div><dt>Nome</dt><dd>{done.nome}</dd></div>
-            <div><dt>Status</dt><dd>Visitante</dd></div>
+            <div><dt>Status</dt><dd>{done.categoria === 'convidado' ? 'Convidado' : 'Visitante'}</dd></div>
           </dl>
           <p className="dn-bilhete__texto">Aproveite o encontro. Qualquer dúvida, chame alguém do staff.</p>
         </section>
@@ -146,7 +147,7 @@ export function Checkin() {
     };
   }, [step, email, slug, meta, texts, inscritoNome]);
 
-  if (previaCartao) return <Success previa done={{ nome: 'Maria Silva', categoria: 'convidado', edicao: 'Primeiro encontro', selo: '', codigo: 'EXEMPLO', repetido: false }} />;
+  if (previaCartao) return <Success previa done={{ nome: 'Maria Silva', categoria: new URLSearchParams(window.location.search).get('tipo') === 'visitante' ? 'participante' : 'convidado', edicao: 'Primeiro encontro', selo: '', codigo: 'EXEMPLO', repetido: false }} />;
   if (done) return <Success done={done} />;
   if (step === 'recepcao') return (
     <main className="dn-pg"><div className="dn-pg-faixa" /><img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />

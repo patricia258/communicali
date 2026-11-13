@@ -192,3 +192,5 @@ a.dn-btn{display:flex;align-items:center;justify-content:center;text-decoration:
 .dn-cat--kids{background:#3F8F4F;color:#fff}
 .dn-cat--participante{background:#7A1F3D;color:#fff}
 .dn-cat--convidado{background:#D9A21B;color:#22100F}
+
+.dn-selo{display:block;width:150px;height:auto;margin:6px auto 2px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.28))}
