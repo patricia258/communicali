@@ -8,7 +8,7 @@ type Etapa = 1 | 2;
 type Item = { li: HTMLLIElement; span: HTMLSpanElement; badge: HTMLElement; n: number; rot: number; texto: string };
 type Quadro = { sec: HTMLElement; wrap: HTMLElement; vazio: HTMLElement; chip: HTMLElement; cont: HTMLElement; itens: Map<string, Item> };
 
-export const TEMA = 'Cuidar de pessoas ainda é relevante?';
+export const TEMA = 'Dinâmica ao vivo';
 const ROTULOS: Record<string, string> = { aguardando: 'Aguardando abertura', aberta: 'Recebendo respostas', encerrada: 'Etapa encerrada' };
 const NOMES: Record<Etapa, string> = { 1: 'Barreiras', 2: 'Caminhos' };
 const hash = (texto: string) => { let h = 0; for (const c of texto) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); };
@@ -17,7 +17,7 @@ export const palcoHtml = (qr: string) => `
   <div class="dn-faixa"></div>
   <header class="dn-head">
     <img class="dn-logo" src="/brand/communicali-branco.png" alt="ComuniCALI">
-    <div class="dn-tema"><small>Dinâmica ao vivo</small><h2>${TEMA}</h2></div>
+    <div class="dn-tema"><h2><span class="dn-vivo"></span>${TEMA}</h2></div>
     <div class="dn-qr"><span>Aponte a câmera<br>e participe</span><img src="${qr}" alt="QR Code da dinâmica"></div>
   </header>
   <div class="dn-boards">
@@ -205,7 +205,7 @@ export class Mural {
       x.fillText(cs.textTransform === 'uppercase' ? (el.textContent || '').toUpperCase() : el.textContent || '', r.x, r.y + r.h / 2);
       try { (x as unknown as { letterSpacing: string }).letterSpacing = '0px'; } catch { /* sem suporte */ }
     };
-    texto(st.querySelector('.dn-tema small') as Element); texto(st.querySelector('.dn-tema h2') as Element);
+    texto(st.querySelector('.dn-tema h2') as Element);
     const qrEl = st.querySelector('.dn-qr img') as HTMLImageElement;
     if (this.estado?.qr !== false) { const q = rel(qrEl), qr = await carrega(qrEl.src); if (qr) { x.fillStyle = '#fff'; x.beginPath(); x.roundRect(q.x, q.y, q.w, q.h, 19); x.fill(); x.drawImage(qr, q.x + q.w * 0.06, q.y + q.h * 0.06, q.w * 0.88, q.h * 0.88); } }
     for (const e of [1, 2] as Etapa[]) {
