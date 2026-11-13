@@ -134,24 +134,15 @@ export function TelaoResultado() {
   const duas = Boolean(dados?.pergunta_2);
   const contagem = (dist: Record<string, number> | undefined, nota: number) => Number(dist?.[nota] || 0);
   const topo = Math.max(1, ...Array.from({ length: 11 }, (_, nota) => Math.max(contagem(dados?.dist, nota), duas ? contagem(dados?.dist_2, nota) : 0)));
-  const distancia = dados && duas && dados.media !== null && dados.media_2 !== null ? Math.abs(Number(dados.media) - Number(dados.media_2)) : null;
   const votos = dados?.votos ?? 0;
-  const situacao = dados?.situacao === 'ativa' ? ['aberta', 'Recebendo votos'] : dados?.situacao === 'encerrada' ? ['encerrada', 'Votação encerrada'] : ['aguardando', 'Aguardando abertura'];
-  const quadro = (classe: string, rotulo: string, pergunta: string | null | undefined, media: number | null | undefined, dist: Record<string, number> | undefined) => (
-    <section className={`dn-board ${classe} dn-res-quadro`}>
-      <header><div><small>{rotulo}</small><h3>{virgula(media ?? null)} <span style={{ fontSize: '.5em', fontWeight: 600, opacity: .75 }}>de média</span></h3></div><span className={`dn-chip ${situacao[0]}`}><i /><b>{situacao[1]}</b></span></header>
-      <p className="dn-res-pergunta">{pergunta}</p>
-      <div className="dn-barras" role="img" aria-label={`Distribuição das notas de 0 a 10: ${rotulo}`}>
-        {Array.from({ length: 11 }, (_, nota) => (
-          <div className="dn-col" key={nota}>
-            <i style={{ ['--r' as string]: contagem(dist, nota) / topo }}>{contagem(dist, nota) > 0 && <b>{contagem(dist, nota)}</b>}</i>
-            <span>{nota}</span>
-          </div>
-        ))}
-      </div>
-      {!votos && <div className="dn-vazio">Leia o QR Code e vote.<br />O gráfico se monta aqui, ao vivo.</div>}
-    </section>
-  );
+  const [numeros, setNumeros] = useState({ presentes: 0, confirmados: 0 });
+  useEffect(() => {
+    const ler = () => supabase.rpc('communicali_sala_numeros', { p_slug: slug }).then(({ data }) => { if (data) setNumeros(data as typeof numeros); });
+    void ler(); const t = window.setInterval(ler, 5000);
+    return () => window.clearInterval(t);
+  }, [slug]);
+  const naSala = Math.max(numeros.presentes, votos);
+  const parte = naSala ? Math.min(1, votos / naSala) : 0;
 
   return (
     <main className="dn-tela">
@@ -159,14 +150,32 @@ export function TelaoResultado() {
         <div className="dn-faixa" />
         <header className="dn-head">
           <img className="dn-logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
-          <div className="dn-tema"><small>Votação ao vivo{edicao ? ` · ${edicao}ª Edição` : ''} · {votos} {votos === 1 ? 'pessoa votou' : 'pessoas votaram'}</small><h2>Antes de debater, vamos votar!</h2></div>
+          <div className="dn-tema"><h2>Sua opinião conta</h2></div>
           <div className="dn-qr"><span>Aponte a câmera<br />e vote</span>{qr && <img src={qr} alt="QR Code para votar" />}</div>
         </header>
-        <div className={`dn-boards${duas ? '' : ' dn-m1'}`}>
-          {quadro('dn-b1', duas ? 'Na opinião' : 'Resultado', dados?.pergunta, dados?.media, dados?.dist)}
-          {duas && quadro('dn-b2', 'Na prática', dados?.pergunta_2, dados?.media_2, dados?.dist_2)}
-          {distancia !== null && <span className="dn-dist"><b>{virgula(distancia)}</b><small>{distancia === 1 ? 'ponto' : 'pontos'} de distância</small></span>}
-        </div>
+        <section className="dn-g">
+          <div className="dn-leg">
+            <div className="dn-leg__item dn-leg__item--1"><i /><div><span>{duas ? 'Na opinião' : 'Resultado'}</span><b>{virgula(dados?.media ?? null)}</b></div></div>
+            {duas && <div className="dn-leg__item dn-leg__item--2"><i /><div><span>Na prática</span><b>{virgula(dados?.media_2 ?? null)}</b></div></div>}
+            <div className="dn-sala">
+              <span>Votaram</span>
+              <b>{votos} <small>de {naSala || '–'} na sala</small></b>
+              <em><u style={{ width: `${Math.round(parte * 100)}%` }} /></em>
+            </div>
+          </div>
+          <div className="dn-grp" role="img" aria-label="Notas de 0 a 10: na opinião e na prática">
+            {Array.from({ length: 11 }, (_, nota) => (
+              <div className="dn-gcol" key={nota}>
+                <div className="dn-par">
+                  <i className="s1" style={{ ['--r' as string]: contagem(dados?.dist, nota) / topo }}>{contagem(dados?.dist, nota) > 0 && <b>{contagem(dados?.dist, nota)}</b>}</i>
+                  {duas && <i className="s2" style={{ ['--r' as string]: contagem(dados?.dist_2, nota) / topo }}>{contagem(dados?.dist_2, nota) > 0 && <b>{contagem(dados?.dist_2, nota)}</b>}</i>}
+                </div>
+                <span>{nota}</span>
+              </div>
+            ))}
+            {!votos && <div className="dn-vazio">Leia o QR Code e vote.<br />O gráfico se monta aqui, ao vivo.</div>}
+          </div>
+        </section>
       </div>
     </main>
   );
