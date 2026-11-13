@@ -20,6 +20,8 @@ export type FormPreset = {
   /** 'claro': marfim com bordô, no visual das telas do encontro. */
   tema?: 'claro';
   description?: string;
+  /** Cartão de destaque na abertura (aceita **negrito**, *itálico* e ==destaque==). */
+  aviso?: string;
   questions: FormQuestion[];
   submitLabel?: string;
   successText?: string;
@@ -50,7 +52,7 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
   useEffect(() => {
     document.title = 'ComuniCALI';
     if (preset) {
-      setForm({ id: 'preset', slug: 'preset', title: preset.title, category: preset.category, description: preset.description || '', thank_you: '', status: 'open', confirm_email: false, questions: preset.questions, submit_label: preset.submitLabel, success_text: preset.successText });
+      setForm({ id: 'preset', slug: 'preset', title: preset.title, category: preset.category, description: preset.description || '', aviso: preset.aviso, thank_you: '', status: 'open', confirm_email: false, questions: preset.questions, submit_label: preset.submitLabel, success_text: preset.successText });
       setPhase(preset.skipWelcome ? 'questions' : 'welcome');
       return;
     }
@@ -303,8 +305,9 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
       {phase === 'closed' && form && <div className="cf-screen cf-center cf-enter"><small>ComuniCALI</small><h1>{form.title}</h1><p>Este formulário não está mais recebendo respostas. Obrigada pelo interesse.</p></div>}
       {phase === 'welcome' && form && <div className="cf-screen cf-enter">
         <h1>{form.title}</h1>
+        {preset && form.description && <p className="cf-desc" dangerouslySetInnerHTML={{ __html: richTextHtml(form.description) }} />}
         {form.aviso && <p className="cf-aviso" role="note" dangerouslySetInnerHTML={{ __html: richTextHtml(form.aviso) }} />}
-        {form.description && <p className="cf-desc" dangerouslySetInnerHTML={{ __html: richTextHtml(form.description) }} />}
+        {!preset && form.description && <p className="cf-desc" dangerouslySetInnerHTML={{ __html: richTextHtml(form.description) }} />}
         <div className="cf-actions"><button type="button" className="cf-primary" onClick={() => setPhase('questions')}>Começar <ArrowRight size={18} /></button><span className="cf-enter-hint">ou pressione <b>Enter <CornerDownLeft size={13} /></b></span></div>
         <p className="cf-meta">{basicas} {basicas === 1 ? 'pergunta' : 'perguntas'} · cerca de {Math.max(1, Math.round(basicas * 0.4))} min</p>
       </div>}
@@ -334,9 +337,7 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
           const botao = ligacao ? <a className="cf-primary" href={ligacao[2]} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', marginTop: 18 }}>{ligacao[1]} <ArrowRight size={18} /></a> : null;
           if (!custom) return <><h1>Muito obrigado!</h1><p>Recebemos suas respostas e agradecemos a colaboração.</p></>;
           const match = custom.match(/^(.{4,70}?[!.?])\s+(.+)$/s);
-          // **negrito** e *itálico*, uma linha por parágrafo.
-          const marcas = (texto: string) => texto.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).map((parte, i) => (parte.startsWith('**') ? <strong key={i}>{parte.slice(2, -2)}</strong> : parte.startsWith('*') && parte.length > 2 ? <em key={i}>{parte.slice(1, -1)}</em> : parte));
-          const paragrafos = (texto: string) => texto.split('\n').filter((linha) => linha.trim()).map((linha, i) => <p key={i}>{marcas(linha)}</p>);
+          const paragrafos = (texto: string) => texto.split('\n').filter((linha) => linha.trim()).map((linha, i) => <p key={i} dangerouslySetInnerHTML={{ __html: richTextHtml(linha) }} />);
           return <>{match ? <><h1>{match[1]}</h1>{paragrafos(match[2])}</> : <><h1>Muito obrigado!</h1>{paragrafos(custom)}</>}{botao}</>;
         })()}
       </div>}

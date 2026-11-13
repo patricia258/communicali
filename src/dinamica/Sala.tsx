@@ -27,7 +27,7 @@ export function Sala() {
   useEffect(() => {
     let vivo = true;
     const buscar = () => { supabase.rpc('communicali_sala_estado', { p_slug: slug }).then(({ data }) => { if (vivo && data) setEstado(data as typeof estado); }); };
-    if (previa) { setEstado({ etapa: previa as Etapa, form_pesquisa: 'pesquisa-1a-edicao' }); return; }
+    if (previa) { setEstado({ etapa: previa as Etapa, form_pesquisa: 'pesquisa-de-satisfacao' }); return; }
     buscar(); const timer = window.setInterval(buscar, 3000);
     return () => { vivo = false; window.clearInterval(timer); };
   }, [slug, previa]);
