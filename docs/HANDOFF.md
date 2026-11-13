@@ -8,6 +8,13 @@ Documento único de continuidade entre as IAs que trabalham com Patrícia Lima. 
 2. O que está na lista "Decisões aprovadas" não muda sem pedido explícito dela. Em dúvida, pergunte antes.
 3. Antes de começar, leia este arquivo e o "Registro de mudanças". Ao terminar, acrescente uma entrada com data, autor, o que mudou, o que foi testado e o que ficou pendente.
 
+### 2026-11-13 | Check-in como Visitante, e-mails do dia do encontro e correções (publicado)
+- Check-in: a tela de presença mostra só Nome e "Status: Visitante" (sem categoria, sem milhas, sem lembrete de devolver o crachá: neste encontro todos ficam com o crachá). E-mail que não está na lista vê "Procure a organização na recepção" em vez do cadastro de 13 perguntas (`step 'recepcao'` em `Checkin.tsx`). Membro já cadastrado continua entrando por código no e-mail.
+- Pendente de decisão: o check-in ainda cria uma linha em `members` (`communicali_novo_membro`, categoria padrão `membro`). Mudar para uma categoria Visitante mexe em 19 funções e 14 telas; deixado como está até depois do evento.
+- E-mails: modelo `consumo` (lembrete de consumação mínima, enviado 12/11 às 19h53 manualmente aos 29 confirmados, tipo liberado em `email_log`), reenvio de um e-mail por pessoa no painel (`reenviar_um`), e-mail automático ao entrar na lista de espera (`api/email-confirmacao.js` com `form`). Cron `email-lembretes` ganhou o bloco da consumação (data 12/11). Limite do plano Hobby: 12 funções, não criar arquivos novos em `api/`.
+- comuni@calirh.com virou caixa real (alias criado pela Patrícia), para as respostas aos e-mails não voltarem.
+- Pendente: identidade nova entra no ar sábado 14/11 às 14h por agendamento do Mac (`~/CALI/publicar-identidade-nova.sh`, `vercel promote` do deployment staged da branch logo-nova). Toda mudança na main precisa ser mesclada na logo-nova e re-staged.
+
 ### 2026-11-10 | Sala do convidado, equipe de apoio e telão único (publicado)
 - Pedido da Patrícia: check-in cai direto na sala (`/sala`), com votação, palavras e pesquisa trancadas; a pessoa do apoio libera uma etapa por vez em `/apoio/:token` (link no painel, bloco "Sala do convidado e equipe de apoio"); o telão `/telao` acompanha sozinho a etapa liberada. Escolha de ser membro fora do check-in (fica para e-mail pós-evento).
 - Migração `20261110110000_sala_apoio` (`dinamicas.etapa_sala`, `token_apoio`, RPCs `communicali_sala_estado`, `_apoio_estado`, `_apoio_definir`). Liberar votação abre a poll; palavras abre as duas perguntas e fecha a poll; pesquisa encerra as palavras. A poll `fundadora` ficou em rascunho até o apoio liberar.

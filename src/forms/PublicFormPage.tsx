@@ -104,6 +104,10 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
     if (rpcError || !data?.ok) { setSendError(rpcError?.message || 'Não foi possível enviar agora.'); setPhase('questions'); return; }
     setConfirmation(Boolean(data.confirmation)); setPhase('done');
     void fetch('/api/avisos', { method: 'POST' }).catch(() => null);
+    // Se a edição está em lista de espera, quem acabou de entrar recebe o aviso por e-mail (o servidor confere e envia uma vez só).
+    const perguntaEmail = questions.find((item) => item.kind === 'email');
+    const emailInformado = perguntaEmail ? sent[perguntaEmail.id] : null;
+    if (typeof emailInformado === 'string' && emailInformado.includes('@')) void fetch('/api/email-confirmacao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form: form.slug, email: emailInformado }) }).catch(() => null);
   }, [answers, form, preset, preview, trail, index, questions]);
 
   const [buscando, setBuscando] = useState(false);

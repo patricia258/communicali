@@ -104,6 +104,16 @@ export default async function handler(req, res) {
   }
 
   const pessoas = await destinatarios(edition.id);
+
+  // Reenvio de UM e-mail para UMA pessoa, por escolha da equipe (ignora o "só o que ainda não chegou").
+  if (acao === 'reenviar_um') {
+    const alvo = String(req.body?.email || '').trim().toLowerCase();
+    const modelo = String(req.body?.modelo || '');
+    if (!alvo.includes('@') || !['boasvindas', 'card'].includes(modelo)) return res.status(400).json({ error: 'Escolha o e-mail e o modelo.' });
+    const pessoa = pessoas.find((item) => item.email && item.email.toLowerCase() === alvo) || { email: alvo, nome: alvo };
+    const resultado = await enviar(alvo, montar(modelo, edition, pessoa));
+    return res.status(200).json({ enviado: !resultado.erro, erro: resultado.erro || null });
+  }
   const log = await (await banco(`email_log?edition_id=eq.${edition.id}&select=email,tipo,situacao,created_at,aberto_em,clicado_em,entrega`)).json();
   const enviados = (item) => new Set(log.filter((row) => row.tipo === item && row.situacao === 'enviado').map((row) => row.email));
 
