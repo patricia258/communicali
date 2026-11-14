@@ -449,3 +449,13 @@ html{scroll-behavior:smooth}
 
 /* Primeira vez: fundo claro, sem o amarelo forte */
 .faixa--mostarda::before{background:linear-gradient(160deg,#FBF6EE,#F0E4D3)!important}
+
+/* Ajustes: nota dos selos, aplicativo maior e com símbolos */
+.selos__nota{margin:-36px auto 0;max-width:560px;text-align:center;font-size:13.5px;line-height:1.6;color:var(--soft)}
+#aplicativo{padding-bottom:96px}
+.app__grade{grid-template-columns:minmax(0,1fr) 320px!important;gap:64px!important}
+.app__celular{width:300px!important}
+.app__lista li{grid-template-columns:44px minmax(0,1fr);column-gap:14px;align-items:center;padding:14px 16px}
+.app__lista li>div{display:grid;gap:3px}
+.app__icone{display:grid!important;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(201,151,59,.12);color:var(--gold-2)!important}
+@media (max-width:860px){.app__grade{grid-template-columns:1fr!important}.app__celular{width:min(300px,80%)!important}}

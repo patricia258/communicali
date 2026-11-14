@@ -24,11 +24,11 @@ const FAIXA = {
   pesquisa: { etiqueta: '#5F6238', fundo: VIVAS.oliva, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
   boasvindas: { etiqueta: '#B83A62', fundo: VIVAS.rosa, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
 };
-const FONTES = '<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@600;700&family=Inter:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">';
+const FONTES = '<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">';
 const NAO_RESPONDA = 'Este é um e-mail automático. Por favor, não responda.';
 const WHATS = 'https://wa.me/554187879244';
 
-const TITULO = "'Funnel Display',Helvetica,Arial,sans-serif";
+const TITULO = "Inter,Helvetica,Arial,sans-serif";
 const TEXTO = 'Inter,Helvetica,Arial,sans-serif';
 
 export const escape = (value) => String(value ?? '').replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));

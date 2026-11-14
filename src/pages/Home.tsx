@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import QRCode from 'qrcode';
-import { ArrowRight, Award, CalendarDays, Route, Stamp, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Sparkles, UserPlus, Users } from 'lucide-react';
+import { ArrowRight, Award, CalendarDays, Route, Stamp, Handshake, Lightbulb, MessageCircle, Network, PackageOpen, Plane, Sparkles, Target, UserPlus, UserRound, Users } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 import { SiteFooter } from '../components/SiteFooter';
 import { EDITION_FIELDS, EditionCard, Share, type EditionRow } from './Edicao';
@@ -39,11 +39,12 @@ function SelosParceria() {
 
 const FAQ = [
   ['Fazer parte da comunidade é gratuito?', 'Sim. Fazer parte da ComuniCALI é gratuito.'],
+  ['Todos os eventos são gratuitos?', 'Não. Nem todos os eventos são gratuitos: alguns serão, outros não. As informações de cada edição, inclusive se há taxa de participação, ficam sempre na página da edição.'],
   ['Preciso ser de RH para participar?', 'Não. A base da comunidade é de profissionais de RH e administrativos, e líderes, empreendedores e especialistas de qualquer área são bem-vindos, do estágio à transição de carreira.'],
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
   ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
-  ['Como acompanho minha participação?', 'Depois do primeiro encontro presencial, você entra no seu passaporte online com o e-mail do check-in e acompanha carimbos, milhas, missões, indicações e fotos.'],
+  ['Como acompanho minha participação?', 'O passaporte é o aplicativo da comunidade, exclusivo para membros oficiais. Nele você acompanha carimbos, milhas, missões, indicações e fotos.'],
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
@@ -138,11 +139,11 @@ function People({ joinHref }: { joinHref: string }) {
 }
 
 const CATEGORIAS = [
-  ['convidado', 'Convidado', 'Chegou a convite de um membro. Ainda não pontua.', -7, 0.55],
-  ['visitante', 'Visitante', 'Conhece a comunidade nos encontros abertos. Aqui a pontuação começa.', -3, 0.55],
-  ['membro', 'Membro', 'Faz o cadastro gratuito e ganha o passaporte, com milhas e vantagens.', 2, 0.55],
-  ['conector', 'Conector', 'Aproxima pessoas e ideias. Chega por convite.', 6, 0.55],
-  ['embaixador', 'Embaixador', 'Ajuda a desenvolver a comunidade. Chega por convite.', 0, 0.55],
+  ['convidado', 'Convidado', 'Chega a convite de um membro. Ainda não pontua.', -7, 0.55],
+  ['visitante', 'Visitante', 'Participa dos encontros abertos e começa a pontuar.', -3, 0.55],
+  ['membro', 'Membro', 'Chega com participação e contribuição na comunidade. Só pontos não bastam.', 2, 0.55],
+  ['conector', 'Conector', 'Aproxima pessoas e ideias. Chega por convite, depois de uma avaliação.', 6, 0.55],
+  ['embaixador', 'Embaixador', 'Ajuda a desenvolver a comunidade. Chega por convite, com presença e contribuição constantes.', 0, 0.55],
 ] as const;
 
 /** Selos empilhados, um sobre o outro. Com o mouse em cima, o selo cresce e vira sozinho; no celular, o toque vira. */
@@ -176,15 +177,15 @@ function Celular() {
 }
 
 const APP_ITENS = [
-  ['Suas milhas', 'Acompanhe o que você soma.'],
-  ['Edições em primeira mão', 'Saiba antes de todo mundo.'],
-  ['Missões', 'Tarefas para você pontuar.'],
-  ['Rede de parceiros e prestadores', 'Contato direto com a comunidade.'],
-  ['Indicações', 'Indique parceiros e lugares, e pontue.'],
-  ['Programa da sua jornada', 'Mais selos e milhas, mais vantagens.'],
-  ['Matches', 'Serviços para prestadores. Vagas para quem está open to work.'],
-  ['Seu perfil', 'Deixe seu Instagram e seus dados.'],
-];
+  [Plane, 'Suas milhas', 'Acompanhe o que você soma.'],
+  [CalendarDays, 'Edições em primeira mão', 'Saiba antes de todo mundo.'],
+  [Target, 'Missões', 'Tarefas para você pontuar.'],
+  [Network, 'Rede de parceiros e prestadores', 'Contato direto com a comunidade.'],
+  [UserPlus, 'Indicações', 'Indique parceiros e lugares, e pontue.'],
+  [Route, 'Programa da sua jornada', 'Mais selos e milhas, mais vantagens.'],
+  [Handshake, 'Matches', 'Serviços para prestadores. Vagas para quem está open to work.'],
+  [UserRound, 'Seu perfil', 'Deixe seu Instagram e seus dados.'],
+] as const;
 
 /** Faz os blocos entrarem suavemente quando aparecem na tela. */
 function useAparecer() {
@@ -319,6 +320,7 @@ export function Home() {
           </div>
         </div>
         <Selos />
+        <p className="selos__nota">A jornada avança por presença, participação e contribuição, e não por pontos isolados.</p>
         <div className="passaporte">
           {PASSAPORTE.map(([titulo, texto], indice) => { const Icone = [Stamp, Award, Route][indice]; return <article className="ticket" key={titulo}><span className="ticket__numero" aria-hidden="true">Nº 000{indice + 1}</span><Icone size={30} strokeWidth={1.6} aria-hidden="true" /><span className="ticket__estrelas" aria-hidden="true">★ ★ ★</span><strong>{titulo}</strong><p>{texto}</p></article>; })}
         </div>
@@ -333,7 +335,7 @@ export function Home() {
         </div>
         <div className="app__grade">
           <ul className="app__lista">
-            {APP_ITENS.map(([titulo, texto]) => <li key={titulo}><strong>{titulo}</strong><span>{texto}</span></li>)}
+            {APP_ITENS.map(([Icone, titulo, texto]) => <li key={titulo}><span className="app__icone"><Icone size={20} strokeWidth={1.7} aria-hidden="true" /></span><div><strong>{titulo}</strong><span>{texto}</span></div></li>)}
           </ul>
           <Celular />
         </div>
