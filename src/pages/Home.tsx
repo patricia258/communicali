@@ -134,15 +134,17 @@ function People({ joinHref }: { joinHref: string }) {
           <div className="person__body">
             <h3>Patrícia Lima</h3>
             <p className="muted">People Advisory Executive, fundadora da CALI RH</p>
-            <p>Mais de 15 anos em RH, ao lado de lideranças e equipes. Criou a comunidade para que a conversa sobre pessoas saísse dos grupos de repasse e virasse relacionamento.</p>
+            <p>Há <strong>mais de 16 anos</strong> no planejamento do RH das empresas, ao lado de lideranças e equipes. Criou a ComuniCALI para que a <strong>conversa sobre pessoas</strong> saísse dos grupos de repasse e virasse <strong>relacionamento</strong>.</p>
             <a className="outline" href="https://www.linkedin.com/in/patriciaazumi/" target="_blank" rel="noopener noreferrer">Conhecer no LinkedIn</a>
           </div>
         </article>
-        <article className={`person person--text${current === 1 ? ' is-on' : ''}`}>
+        <article className={`person person--selo${current === 1 ? ' is-on' : ''}`}>
+          <div className="person__selo"><img src="/selos/postal-embaixador.png" alt="Selo Embaixador" /></div>
           <div className="person__body">
             <p className="tag">Embaixadores</p>
-            <h3>Faça parte desse ecossistema</h3>
-            <p>Quem participa, contribui e conecta pessoas pode aparecer aqui como embaixador da comunidade.</p>
+            <h3>Quem contribui, a comunidade reconhece.</h3>
+            <p>Quem participa, contribui e conecta pessoas pode se tornar <strong>embaixador</strong> da ComuniCALI. O caminho começa como visitante, passa por membro e conector, e <strong>leva a comunidade longe</strong>.</p>
+            <a className="outline" href="#programa">Ver a jornada</a>
           </div>
         </article>
       </div>
@@ -153,6 +155,42 @@ function People({ joinHref }: { joinHref: string }) {
     </div>
   );
 }
+
+const CATEGORIAS = [
+  ['convidado', 'Convidado', 'Chegou a convite', 'Quem é indicado por um membro e vem conhecer a comunidade no encontro. Ainda não pontua: a pontuação começa ao se tornar visitante.'],
+  ['visitante', 'Visitante', 'Chegando ao caminho', 'Conhece a comunidade nos encontros abertos, sem compromisso. É aqui que a sua participação começa a pontuar.'],
+  ['membro', 'Membro', 'Chegou e faz parte', 'Faz o cadastro gratuito e recebe o passaporte, com carimbos, milhas e as vantagens da comunidade.'],
+  ['conector', 'Conector', 'Faz as pontes', 'Aproxima pessoas e ideias dentro da comunidade. Chega por convite, depois de uma avaliação.'],
+  ['embaixador', 'Embaixador', 'Leva a comunidade longe', 'Ajuda a desenvolver a comunidade e a programação. Também chega por convite.'],
+] as const;
+
+/** Cinco selos: toque no cartão e ele vira, com uma explicação curta do que cada categoria é. */
+function Selos() {
+  const [aberto, setAberto] = useState<string | null>(null);
+  return (
+    <div className="selos" role="list">
+      {CATEGORIAS.map(([id, nome, frase, texto], indice) => (
+        <button key={id} type="button" role="listitem" style={{ ['--cor' as string]: ({ convidado: '#A9502E', visitante: '#5A1E2D', membro: '#7A1F3D', conector: '#4F5A2A', embaixador: '#8A6A1E' } as Record<string, string>)[id] }} className={`selo-card${aberto === id ? ' virado' : ''}`} aria-pressed={aberto === id} aria-label={`${nome}: ${frase}. Toque para ${aberto === id ? 'voltar' : 'saber mais'}`} onClick={() => setAberto(aberto === id ? null : id)}>
+          <span className="selo-card__giro">
+            <span className="selo-card__lado selo-card__frente"><img src={`/selos/postal-${id}.png`} alt={`Selo ${nome}`} /><em>Toque para saber mais</em></span>
+            <span className="selo-card__lado selo-card__verso"><small>{String(indice + 1).padStart(2, '0')}</small><strong>{nome}</strong><i>{frase}</i><span>{texto}</span></span>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+const APP_ITENS = [
+  ['Suas milhas', 'Acompanhe o que você soma.'],
+  ['Edições em primeira mão', 'Saiba antes de todo mundo.'],
+  ['Missões', 'Tarefas para você pontuar.'],
+  ['Rede de parceiros e prestadores', 'Contato direto com a comunidade.'],
+  ['Indicações', 'Indique parceiros e lugares, e pontue.'],
+  ['Programa da sua jornada', 'Mais selos e milhas, mais vantagens.'],
+  ['Matches', 'Serviços para prestadores. Vagas para quem está open to work.'],
+  ['Seu perfil', 'Deixe seu Instagram e seus dados.'],
+];
 
 export function Home() {
   const [qr, setQr] = useState('');
@@ -202,7 +240,7 @@ export function Home() {
       <header className="hero">
         <Arches photos={photos} />
         <div className="wrap hero__body">
-          <p className="hero__sign">Café & Pessoas</p>
+          <p className="hero__sign">Uma comunidade da CALI RH</p>
           <h1>Falar de pessoas <em>pode mudar o mundo.</em></h1>
           <p className="hero__text">Cada pessoa chega com sua própria bagagem. Quando histórias diferentes se encontram, novos caminhos aparecem.</p>
           <div className="hero__actions">
@@ -222,10 +260,14 @@ export function Home() {
         <div className="founder__text">
           <p className="eyebrow">A comunidade</p>
           <h2>Caminhos que se cruzam <em>e seguem juntos.</em></h2>
-          <p>A ComuniCALI reúne <strong>quem se interessa por gente</strong>: profissionais de RH, lideranças, empreendedores e todas as pessoas que querem falar de <strong>gestão e desenvolvimento humano</strong>.</p>
-          <p>Cada pessoa chega com a <strong>sua bagagem</strong>, com histórias, escolhas e vivências próprias. Quando escutamos alguém, <strong>descobrimos caminhos</strong> que talvez nunca percorreríamos sozinhos. É isso que acontece nos encontros e <strong>continua entre um encontro e outro</strong>.</p>
-          <p>A comunidade nasceu nos canais digitais e ganhou vida nos encontros, com <strong>escuta, respeito e coragem</strong> para debater temas difíceis. Quem organiza é a <strong>CALI RH</strong>.</p>
-          <p>Acreditamos que <strong>nenhum encontro acontece por acaso</strong>. Servimos às pessoas com fé e integridade, e damos <strong>toda honra a Deus</strong> por cada caminho que se cruza aqui.</p>
+          <p className="founder__lead">A ComuniCALI reúne <strong>quem se interessa por gente</strong>: profissionais de RH, lideranças, empreendedores e todas as pessoas que querem falar de <strong>gestão e desenvolvimento humano</strong>.</p>
+          <blockquote className="founder__frase">Cada pessoa chega com a <strong>sua bagagem</strong>. Quando escutamos alguém, <strong>descobrimos caminhos</strong> que talvez nunca percorreríamos sozinhos.</blockquote>
+          <div className="founder__info">
+            <article><small>Como nasceu</small><p>Nos <strong>canais digitais</strong>, e ganhou vida nos <strong>encontros presenciais</strong>, em Curitiba.</p></article>
+            <article><small>Como funciona</small><p>A conversa <strong>continua entre um encontro e outro</strong>, no grupo, com pessoas do Brasil inteiro.</p></article>
+            <article><small>Quem organiza</small><p>A <strong>CALI RH</strong>, com <strong>escuta, respeito e coragem</strong> para debater temas difíceis.</p></article>
+          </div>
+          <p className="founder__fim">Acreditamos que <strong>nenhum encontro acontece por acaso</strong>. Servimos às pessoas com fé e integridade, e damos <strong>toda honra a Deus</strong> por cada caminho que se cruza aqui.</p>
         </div>
         <People joinHref={joinHref} />
       </section>
@@ -251,9 +293,9 @@ export function Home() {
             <div className="caminho__acao caminho__grupo">{qr && <img src={qr} alt="QR Code do grupo da comunidade" />}<a className="link" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a></div>
           </article>
           <article>
-            <header><span className="caminho__n">03</span><span className="caminho__icone"><Stamp size={20} aria-hidden="true" /></span></header>
-            <h3>Faça o check-in no encontro</h3>
-            <p>No dia, o check-in pelo QR Code abre o seu passaporte, com o primeiro carimbo e as primeiras milhas. A partir daí, você é membro.</p>
+            <header><span className="caminho__n">03</span><span className="caminho__icone"><Handshake size={20} aria-hidden="true" /></span></header>
+            <h3>Interaja</h3>
+            <p>Converse, tire dúvidas, compartilhe experiências e conheça pessoas. A comunidade vive da <strong>conversa</strong> entre um encontro e outro.</p>
             <a className="link caminho__acao" href="#proximo">Ver o próximo encontro</a>
           </article>
         </div>
@@ -276,15 +318,23 @@ export function Home() {
             <h2>Cada pessoa, uma jornada. <em>Cada encontro, novos horizontes.</em></h2>
           </div>
         </div>
-        <div className="trilha">
-          {TRILHA.map(([id, nome]) => (
-            <article key={id}>
-              <img src={`/selos/postal-${id}.png`} alt={`Selo ${nome}`} />
-            </article>
-          ))}
-        </div>
+        <Selos />
         <div className="passaporte">
           {PASSAPORTE.map(([titulo, texto], indice) => { const Icone = [Stamp, Award, Route][indice]; return <article className="ticket" key={titulo}><span className="ticket__numero" aria-hidden="true">Nº 000{indice + 1}</span><Icone size={30} strokeWidth={1.6} aria-hidden="true" /><span className="ticket__estrelas" aria-hidden="true">★ ★ ★</span><strong>{titulo}</strong><p>{texto}</p></article>; })}
+        </div>
+      </section>
+
+      <section className="app" id="aplicativo">
+        <div className="wrap app__grade">
+          <div className="app__texto">
+            <p className="eyebrow">O aplicativo</p>
+            <p className="app__exclusivo">Exclusivo para membros oficiais da comunidade</p>
+            <h2>Seu passaporte <em>está te esperando.</em></h2>
+            <ul className="app__lista">
+              {APP_ITENS.map(([titulo, texto]) => <li key={titulo}><strong>{titulo}</strong><span>{texto}</span></li>)}
+            </ul>
+          </div>
+          <div className="app__celular"><img src="/app/mockup-passaporte.png" alt="Tela de entrada do passaporte da comunidade, no celular" loading="lazy" /></div>
         </div>
       </section>
 
