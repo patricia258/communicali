@@ -24,7 +24,9 @@ export type FormQuestion = {
   /** Pergunta de arquivo: 'images_pdf' aceita só PDF e imagens; padrão aceita também documentos, áudio e vídeo. */
   accept?: 'images_pdf' | 'any';
   /** Tela de texto pode mostrar um material: capa, link e chamada. */
-  attachment?: { url: string; cover: string; title: string; text?: string };
+  attachment?: { url: string; cover: string; title: string; text?: string; cta?: string };
+  /** Foto de destaque no alto da tela (caminho no site). */
+  imagem?: string;
 };
 
 export const END_OF_FORM = '__end';
@@ -240,6 +242,7 @@ const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({ '&'
 export function richTextHtml(value: string) {
   return escapeHtml(value)
     .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/==([^=\n]+?)==/g, '<mark class="cf-hl">$1</mark>')
     .replace(/__([^_\n]+?)__/g, '<u>$1</u>')
     .replace(/(^|[^*])\*([^*\n]+?)\*/g, '$1<em>$2</em>')
     // Links digitados viram clicáveis (abrem em nova aba). Com nome: [texto](https://...).
@@ -247,7 +250,7 @@ export function richTextHtml(value: string) {
 }
 
 export function stripRichText(value: string) {
-  return value.replace(/\*\*([^*\n]+?)\*\*/g, '$1').replace(/__([^_\n]+?)__/g, '$1').replace(/(^|[^*])\*([^*\n]+?)\*/g, '$1$2');
+  return value.replace(/==([^=\n]+?)==/g, '$1').replace(/\*\*([^*\n]+?)\*\*/g, '$1').replace(/__([^_\n]+?)__/g, '$1').replace(/(^|[^*])\*([^*\n]+?)\*/g, '$1$2');
 }
 
 /** Próxima pergunta, respeitando a lógica condicional da atual. Devolve -1 para encerrar. */

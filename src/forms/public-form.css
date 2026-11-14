@@ -235,3 +235,14 @@
 .cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-primary:hover{background:#7A1F3D!important}
 .cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-text:focus,.cali-form-page.cali-form-page.cali-form-page.cf-claro :is(.cf-options button,.cf-scale button):hover{border-color:#5A1E2D}
 .cali-form-page.cali-form-page.cali-form-page.cf-claro .cf-aviso{background:rgba(201,151,59,.16)}
+
+/* Destaque ==texto== nos textos dos formulários */
+.cali-form-page mark.cf-hl{background:#F2D58E;color:#5A1E2D!important;padding:.04em .32em;border-radius:5px;font-weight:700}
+.cali-form-page .cf-aviso{background:#FBF1EC;border:1px solid #E8C9A0;border-left:5px solid #C9973B;border-radius:12px;padding:16px 18px;color:#3A2A26}
+.cali-form-page .cf-aviso{white-space:pre-line;line-height:1.75;max-width:620px}
+.cali-form-page .cf-aviso strong{color:#5A1E2D}
+
+/* Foto de destaque e cartão de link nas telas de texto */
+.cali-form-page .cf-foto{display:block;width:min(460px,100%);aspect-ratio:16/9;object-fit:cover;border-radius:16px;margin:0 0 20px;box-shadow:0 10px 28px rgba(90,30,45,.22)}
+.cali-form-page.cf-claro .cf-anexo,.cf-claro .cf-anexo{background:#fff;border:2px solid #C9973B;color:#5A1E2D}
+.cali-form-page .cf-anexo img{width:110px;aspect-ratio:4/3;object-fit:cover}

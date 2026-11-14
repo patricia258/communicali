@@ -6,9 +6,9 @@ export type RespostaMural = { id: number; etapa: 1 | 2; texto: string; chave: st
 export type EstadoMural = { status_1: string; status_2: string; modo: 'ambos' | '1' | '2'; qr: boolean; congelado: boolean; respostas: RespostaMural[] };
 type Etapa = 1 | 2;
 type Item = { li: HTMLLIElement; span: HTMLSpanElement; badge: HTMLElement; n: number; rot: number; texto: string };
-type Quadro = { sec: HTMLElement; wrap: HTMLElement; vazio: HTMLElement; chip: HTMLElement; cont: HTMLElement; itens: Map<string, Item> };
+type Quadro = { total: HTMLElement; sec: HTMLElement; wrap: HTMLElement; vazio: HTMLElement; chip: HTMLElement; cont: HTMLElement; itens: Map<string, Item> };
 
-export const TEMA = 'Cuidar de pessoas ainda é relevante?';
+export const TEMA = 'Dinâmica ao vivo';
 const ROTULOS: Record<string, string> = { aguardando: 'Aguardando abertura', aberta: 'Recebendo respostas', encerrada: 'Etapa encerrada' };
 const NOMES: Record<Etapa, string> = { 1: 'Barreiras', 2: 'Caminhos' };
 const hash = (texto: string) => { let h = 0; for (const c of texto) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); };
@@ -17,14 +17,14 @@ export const palcoHtml = (qr: string) => `
   <div class="dn-faixa"></div>
   <header class="dn-head">
     <img class="dn-logo" src="/brand/communicali-branco.png" alt="ComuniCALI">
-    <div class="dn-tema"><small>Dinâmica ao vivo</small><h2>${TEMA}</h2></div>
+    <div class="dn-tema"><h2><span class="dn-vivo"></span>${TEMA}</h2></div>
     <div class="dn-qr"><span>Aponte a câmera<br>e participe</span><img src="${qr}" alt="QR Code da dinâmica"></div>
   </header>
   <div class="dn-boards">
-    <section class="dn-board dn-b1"><header><div><small class="dn-cont">Barreiras</small><h3>O que nos impede?</h3></div><span class="dn-chip"><i></i><b></b></span></header>
+    <section class="dn-board dn-b1"><header><div><small class="dn-cont">Barreiras</small><h3>O que nos impede?</h3></div><div class="dn-hd-r"><span class="dn-chip"><i></i><b></b></span><span class="dn-total"><b>0</b><small>palavras</small></span></div></header>
       <ul class="dn-words"></ul><div class="dn-vazio">As palavras vão aparecendo aqui,<br>uma por uma.</div></section>
     <span class="dn-seta" aria-hidden="true">→</span>
-    <section class="dn-board dn-b2"><header><div><small class="dn-cont">Caminhos</small><h3>O que precisa mudar?</h3></div><span class="dn-chip"><i></i><b></b></span></header>
+    <section class="dn-board dn-b2"><header><div><small class="dn-cont">Caminhos</small><h3>O que precisa mudar?</h3></div><div class="dn-hd-r"><span class="dn-chip"><i></i><b></b></span><span class="dn-total"><b>0</b><small>palavras</small></span></div></header>
       <ul class="dn-words"></ul><div class="dn-vazio">As palavras vão aparecendo aqui,<br>uma por uma.</div></section>
   </div>
   <div class="dn-pausa">Exibição congelada</div>`;
@@ -42,7 +42,7 @@ export class Mural {
     host.innerHTML = palcoHtml(qr);
     const quadro = (n: number): Quadro => {
       const sec = host.querySelector(`.dn-b${n}`) as HTMLElement;
-      return { sec, wrap: sec.querySelector('.dn-words') as HTMLElement, vazio: sec.querySelector('.dn-vazio') as HTMLElement, chip: sec.querySelector('.dn-chip') as HTMLElement, cont: sec.querySelector('.dn-cont') as HTMLElement, itens: new Map() };
+      return { total: sec.querySelector('.dn-total') as HTMLElement, sec, wrap: sec.querySelector('.dn-words') as HTMLElement, vazio: sec.querySelector('.dn-vazio') as HTMLElement, chip: sec.querySelector('.dn-chip') as HTMLElement, cont: sec.querySelector('.dn-cont') as HTMLElement, itens: new Map() };
     };
     this.B = { 1: quadro(1), 2: quadro(2) };
     window.addEventListener('resize', this.refit);
@@ -78,8 +78,14 @@ export class Mural {
       const n = estado.respostas.filter((r) => r.etapa === e).length;
       const status = e === 1 ? estado.status_1 : estado.status_2;
       b.chip.className = 'dn-chip ' + status; (b.chip.querySelector('b') as HTMLElement).textContent = ROTULOS[status] || '';
-      b.cont.textContent = `${NOMES[e]} · ${n} ${n === 1 ? 'resposta' : 'respostas'}`;
+      b.cont.textContent = NOMES[e];
+      (b.total.querySelector('b') as HTMLElement).textContent = String(n);
+      (b.total.querySelector('small') as HTMLElement).textContent = n === 1 ? 'palavra' : 'palavras';
     }
+    // Quem tem mais palavras pisca: mais barreiras acende em vermelho, como alerta; mais caminhos, em verde.
+    const n1 = estado.respostas.filter((r) => r.etapa === 1).length, n2 = estado.respostas.filter((r) => r.etapa === 2).length;
+    this.B[1].sec.classList.toggle('dn-lidera', n1 > n2);
+    this.B[2].sec.classList.toggle('dn-lidera', n2 > n1);
     this.primeira = false;
     this.drenar();
     const boards = this.host.querySelector('.dn-boards') as HTMLElement;
@@ -205,7 +211,7 @@ export class Mural {
       x.fillText(cs.textTransform === 'uppercase' ? (el.textContent || '').toUpperCase() : el.textContent || '', r.x, r.y + r.h / 2);
       try { (x as unknown as { letterSpacing: string }).letterSpacing = '0px'; } catch { /* sem suporte */ }
     };
-    texto(st.querySelector('.dn-tema small') as Element); texto(st.querySelector('.dn-tema h2') as Element);
+    texto(st.querySelector('.dn-tema h2') as Element);
     const qrEl = st.querySelector('.dn-qr img') as HTMLImageElement;
     if (this.estado?.qr !== false) { const q = rel(qrEl), qr = await carrega(qrEl.src); if (qr) { x.fillStyle = '#fff'; x.beginPath(); x.roundRect(q.x, q.y, q.w, q.h, 19); x.fill(); x.drawImage(qr, q.x + q.w * 0.06, q.y + q.h * 0.06, q.w * 0.88, q.h * 0.88); } }
     for (const e of [1, 2] as Etapa[]) {

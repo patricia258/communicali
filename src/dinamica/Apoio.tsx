@@ -112,7 +112,7 @@ function Recepcao({ token, qr }: { token: string; qr: string }) {
       <ul className="dn-lista">
         {visiveis.map((item) => (
           <li key={`${item.fonte}-${item.id}`} className={`dn-p-${corCategoria(item.categoria)}${item.chegou_em ? ' chegou' : ''}`}>
-            <span><b>{item.nome}</b><small><i className={`dn-cat dn-cat--${corCategoria(item.categoria)}`}>{item.categoria === 'Participante' ? 'Participante / Membro' : item.categoria}</i>{item.email ? ` ${item.email}` : ''}</small></span>
+            <span><b>{item.nome}</b><small><i className={`dn-cat dn-cat--${corCategoria(item.categoria)}`}>{item.categoria === 'Participante' ? 'Visitante / Membro' : item.categoria}</i>{item.email ? ` ${item.email}` : ''}</small></span>
             {item.fonte === 'organizacao' ? <em>{item.chegou_em ? 'Chegou' : ''}</em>
               : item.chegou_em ? <button type="button" className="dn-link" onClick={() => void marcar(item, false)}>Chegou às {new Date(item.chegou_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' })} ✓ (desfazer)</button>
               : <button type="button" className="dn-btn" onClick={() => void marcar(item, true)}>Chegou</button>}
