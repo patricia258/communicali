@@ -119,64 +119,58 @@ const PASSAPORTE = [
   ['Milhas', 'Tudo o que você vive na comunidade soma milhas e mostra até onde a sua jornada já chegou.'],
 ];
 
-const PEOPLE_CARDS = ['fundadora', 'embaixadores'] as const;
-
 function People({ joinHref }: { joinHref: string }) {
-  const [current, setCurrent] = useState(0);
+  void joinHref;
   return (
-    <div className="people">
-      <div className="people__track" style={{ '--current': current } as CSSProperties}>
-        <article className={`person${current === 0 ? ' is-on' : ''}`}>
-          <div className="person__photo">
-            <img src="/fotos/patricia-lima.jpg" alt="Patrícia Lima" />
-            <span className="person__carimbo"><small>ComuniCALI</small>Idealizadora</span>
-          </div>
-          <div className="person__body">
-            <h3>Patrícia Lima</h3>
-            <p className="muted">People Advisory Executive, fundadora da CALI RH</p>
-            <p>Há <strong>mais de 16 anos</strong> no planejamento do RH das empresas, ao lado de lideranças e equipes. Criou a ComuniCALI para que a <strong>conversa sobre pessoas</strong> saísse dos grupos de repasse e virasse <strong>relacionamento</strong>.</p>
-            <a className="outline" href="https://www.linkedin.com/in/patriciaazumi/" target="_blank" rel="noopener noreferrer">Conhecer no LinkedIn</a>
-          </div>
-        </article>
-        <article className={`person person--selo${current === 1 ? ' is-on' : ''}`}>
-          <div className="person__selo"><img src="/selos/postal-embaixador.png" alt="Selo Embaixador" /></div>
-          <div className="person__body">
-            <p className="tag">Embaixadores</p>
-            <h3>Quem contribui, a comunidade reconhece.</h3>
-            <p>Quem participa, contribui e conecta pessoas pode se tornar <strong>embaixador</strong> da ComuniCALI. O caminho começa como visitante, passa por membro e conector, e <strong>leva a comunidade longe</strong>.</p>
-            <a className="outline" href="#programa">Ver a jornada</a>
-          </div>
-        </article>
+    <article className="person is-on">
+      <div className="person__photo">
+        <img src="/fotos/patricia-lima.jpg" alt="Patrícia Lima" />
+        <span className="person__carimbo"><small>ComuniCALI</small>Idealizadora</span>
       </div>
-      <div className="people__nav">
-        {PEOPLE_CARDS.map((card, index) => <button key={card} type="button" aria-label={`Ver cartão ${index + 1}`} className={index === current ? 'is-on' : ''} onClick={() => setCurrent(index)} />)}
-        <button type="button" className="people__next" aria-label="Próximo cartão" onClick={() => setCurrent((current + 1) % PEOPLE_CARDS.length)}><ArrowRight size={16} aria-hidden="true" /></button>
+      <div className="person__body">
+        <h3>Patrícia Lima</h3>
+        <p className="muted">People Advisory Executive, fundadora da CALI RH</p>
+        <p>Há mais de 16 anos no planejamento do RH das empresas. Criou a ComuniCALI para que a conversa sobre pessoas virasse relacionamento.</p>
+        <a className="outline" href="https://www.linkedin.com/in/patriciaazumi/" target="_blank" rel="noopener noreferrer">Conhecer no LinkedIn</a>
       </div>
-    </div>
+    </article>
   );
 }
 
 const CATEGORIAS = [
-  ['convidado', 'Convidado', 'Chegou a convite', 'Quem é indicado por um membro e vem conhecer a comunidade no encontro. Ainda não pontua: a pontuação começa ao se tornar visitante.'],
-  ['visitante', 'Visitante', 'Chegando ao caminho', 'Conhece a comunidade nos encontros abertos, sem compromisso. É aqui que a sua participação começa a pontuar.'],
-  ['membro', 'Membro', 'Chegou e faz parte', 'Faz o cadastro gratuito e recebe o passaporte, com carimbos, milhas e as vantagens da comunidade.'],
-  ['conector', 'Conector', 'Faz as pontes', 'Aproxima pessoas e ideias dentro da comunidade. Chega por convite, depois de uma avaliação.'],
-  ['embaixador', 'Embaixador', 'Leva a comunidade longe', 'Ajuda a desenvolver a comunidade e a programação. Também chega por convite.'],
+  ['convidado', 'Convidado', 'Chegou a convite de um membro. Ainda não pontua.', -7, 0.55],
+  ['visitante', 'Visitante', 'Conhece a comunidade nos encontros abertos. Aqui a pontuação começa.', -3, 0.55],
+  ['membro', 'Membro', 'Faz o cadastro gratuito e ganha o passaporte, com milhas e vantagens.', 2, 0.55],
+  ['conector', 'Conector', 'Aproxima pessoas e ideias. Chega por convite.', 6, 0.55],
+  ['embaixador', 'Embaixador', 'Ajuda a desenvolver a comunidade. Chega por convite.', 0, 0.55],
 ] as const;
 
-/** Cinco selos: toque no cartão e ele vira, com uma explicação curta do que cada categoria é. */
+/** Selos empilhados, um sobre o outro. Com o mouse em cima, o selo cresce e vira sozinho; no celular, o toque vira. */
 function Selos() {
   const [aberto, setAberto] = useState<string | null>(null);
   return (
     <div className="selos" role="list">
-      {CATEGORIAS.map(([id, nome, frase, texto], indice) => (
-        <button key={id} type="button" role="listitem" style={{ ['--cor' as string]: ({ convidado: '#A9502E', visitante: '#5A1E2D', membro: '#7A1F3D', conector: '#4F5A2A', embaixador: '#8A6A1E' } as Record<string, string>)[id] }} className={`selo-card${aberto === id ? ' virado' : ''}`} aria-pressed={aberto === id} aria-label={`${nome}: ${frase}. Toque para ${aberto === id ? 'voltar' : 'saber mais'}`} onClick={() => setAberto(aberto === id ? null : id)}>
+      {CATEGORIAS.map(([id, nome, texto, giro], indice) => (
+        <button key={id} type="button" role="listitem" style={{ ['--r' as string]: `${giro}deg`, ['--z' as string]: indice + 1 }} className={`selo-card selo-card--${id}${aberto === id ? ' virado' : ''}`} aria-pressed={aberto === id} aria-label={`${nome}. ${texto}`} onClick={() => setAberto(aberto === id ? null : id)} onBlur={() => setAberto(null)}>
           <span className="selo-card__giro">
-            <span className="selo-card__lado selo-card__frente"><img src={`/selos/postal-${id}.png`} alt={`Selo ${nome}`} /><em>Toque para saber mais</em></span>
-            <span className="selo-card__lado selo-card__verso"><small>{String(indice + 1).padStart(2, '0')}</small><strong>{nome}</strong><i>{frase}</i><span>{texto}</span></span>
+            <span className="selo-card__lado selo-card__frente"><img src={`/selos/postal-${id}.png`} alt={`Selo ${nome}`} /></span>
+            <span className="selo-card__lado selo-card__verso"><strong>{nome}</strong><span>{texto}</span></span>
           </span>
         </button>
       ))}
+    </div>
+  );
+}
+
+const MOCKUPS = ['/app/mockup-passaporte.png'];
+
+/** Celular com o aplicativo. Hoje há uma tela; quando houver mais, elas trocam sozinhas, com transição. */
+function Celular() {
+  const [i, setI] = useState(0);
+  useEffect(() => { if (MOCKUPS.length < 2) return undefined; const t = window.setInterval(() => setI((x) => (x + 1) % MOCKUPS.length), 4200); return () => window.clearInterval(t); }, []);
+  return (
+    <div className="app__celular">
+      {MOCKUPS.map((src, n) => <img key={src} className={n === i ? 'is-on' : ''} src={src} alt="Tela do passaporte da comunidade, no celular" loading="lazy" />)}
     </div>
   );
 }
@@ -192,7 +186,19 @@ const APP_ITENS = [
   ['Seu perfil', 'Deixe seu Instagram e seus dados.'],
 ];
 
+/** Faz os blocos entrarem suavemente quando aparecem na tela. */
+function useAparecer() {
+  useEffect(() => {
+    const alvos = Array.from(document.querySelectorAll<HTMLElement>('.home .block__head, .home .founder__text > *, .home .founder .person, .home .selos, .home .caminho article, .home .passaporte article, .home .app__lista li, .home .app__celular, .home .stats .stat'));
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const obs = new IntersectionObserver((itens) => itens.forEach((item) => { if (item.isIntersecting) { item.target.classList.add('is-in'); obs.unobserve(item.target); } }), { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    alvos.forEach((el, n) => { el.classList.add('aparece'); el.style.setProperty('--d', `${(n % 4) * 90}ms`); obs.observe(el); });
+    return () => obs.disconnect();
+  }, []);
+}
+
 export function Home() {
+  useAparecer();
   const [qr, setQr] = useState('');
   const [editions, setEditions] = useState<EditionRow[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -240,7 +246,6 @@ export function Home() {
       <header className="hero">
         <Arches photos={photos} />
         <div className="wrap hero__body">
-          <p className="hero__sign">Uma comunidade da CALI RH</p>
           <h1>Falar de pessoas <em>pode mudar o mundo.</em></h1>
           <p className="hero__text">Cada pessoa chega com sua própria bagagem. Quando histórias diferentes se encontram, novos caminhos aparecem.</p>
           <div className="hero__actions">
@@ -260,14 +265,9 @@ export function Home() {
         <div className="founder__text">
           <p className="eyebrow">A comunidade</p>
           <h2>Caminhos que se cruzam <em>e seguem juntos.</em></h2>
-          <p className="founder__lead">A ComuniCALI reúne <strong>quem se interessa por gente</strong>: profissionais de RH, lideranças, empreendedores e todas as pessoas que querem falar de <strong>gestão e desenvolvimento humano</strong>.</p>
-          <blockquote className="founder__frase">Cada pessoa chega com a <strong>sua bagagem</strong>. Quando escutamos alguém, <strong>descobrimos caminhos</strong> que talvez nunca percorreríamos sozinhos.</blockquote>
-          <div className="founder__info">
-            <article><small>Como nasceu</small><p>Nos <strong>canais digitais</strong>, e ganhou vida nos <strong>encontros presenciais</strong>, em Curitiba.</p></article>
-            <article><small>Como funciona</small><p>A conversa <strong>continua entre um encontro e outro</strong>, no grupo, com pessoas do Brasil inteiro.</p></article>
-            <article><small>Quem organiza</small><p>A <strong>CALI RH</strong>, com <strong>escuta, respeito e coragem</strong> para debater temas difíceis.</p></article>
-          </div>
-          <p className="founder__fim">Acreditamos que <strong>nenhum encontro acontece por acaso</strong>. Servimos às pessoas com fé e integridade, e damos <strong>toda honra a Deus</strong> por cada caminho que se cruza aqui.</p>
+          <p className="founder__lead">Reunimos <strong>quem se interessa por gente</strong>: RH, lideranças, empreendedores e todas as pessoas que querem falar de gestão e desenvolvimento humano.</p>
+          <p>A conversa nasceu nos canais digitais, ganhou vida nos encontros e <strong>continua entre um encontro e outro</strong>.</p>
+          <p className="founder__fim">Nenhum encontro acontece por acaso. Toda honra a Deus.</p>
         </div>
         <People joinHref={joinHref} />
       </section>
@@ -324,17 +324,18 @@ export function Home() {
         </div>
       </section>
 
-      <section className="app" id="aplicativo">
-        <div className="wrap app__grade">
-          <div className="app__texto">
-            <p className="eyebrow">O aplicativo</p>
-            <p className="app__exclusivo">Exclusivo para membros oficiais da comunidade</p>
+      <section className="wrap block" id="aplicativo">
+        <div className="block__head">
+          <div>
+            <p className="eyebrow">O aplicativo · exclusivo para membros</p>
             <h2>Seu passaporte <em>está te esperando.</em></h2>
-            <ul className="app__lista">
-              {APP_ITENS.map(([titulo, texto]) => <li key={titulo}><strong>{titulo}</strong><span>{texto}</span></li>)}
-            </ul>
           </div>
-          <div className="app__celular"><img src="/app/mockup-passaporte.png" alt="Tela de entrada do passaporte da comunidade, no celular" loading="lazy" /></div>
+        </div>
+        <div className="app__grade">
+          <ul className="app__lista">
+            {APP_ITENS.map(([titulo, texto]) => <li key={titulo}><strong>{titulo}</strong><span>{texto}</span></li>)}
+          </ul>
+          <Celular />
         </div>
       </section>
 
