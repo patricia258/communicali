@@ -178,6 +178,86 @@ export function emailStaff(item) {
   };
 }
 
+/**
+ * E-mails do fluxo de entrada e adesão (regras v23, 15/11/2026). Ainda NÃO ligados a nenhum envio: entram em uso nas partes 3 e 4 do plano (ver docs/regras-v23).
+ * d: { nome, edicao, quando, onde, n (experiência pré-Membro, de 2), indicador, motivo, prazo, fim, pendencias[], link }.
+ * Prazos e janelas vêm da configuração da edição; nada é fixado aqui.
+ */
+export const COMUNIDADE_WHATSAPP = 'https://chat.whatsapp.com/Lu9uzReUxAlJZcQaU1is01';
+export function emailFluxo(tipo, d = {}) {
+  const nome = escape(primeiroNome(d.nome));
+  const saudacao = nome ? `Oi, ${nome}!` : 'Oi!';
+  const edicao = escape(d.edicao || 'o encontro');
+  const dados = [['Quando', d.quando], ['Onde', d.onde]];
+  const comunidade = `Entre na <a href="${COMUNIDADE_WHATSAPP}" style="color:${COR.vivo}">comunidade no WhatsApp</a> para acompanhar os avisos.`;
+  const ctaMembro = { texto: 'Quero ser Membro', href: `${SITE}/meu-passaporte` };
+  const etiqueta = (cor, texto = '#FFFFFF') => ({ ...base, etiqueta: cor, etiquetaTexto: texto });
+  const m = {
+    entrada_confirmada: {
+      assunto: `Sua vaga está confirmada: ${d.edicao || ''}`.trim(), previa: 'Veja os detalhes e entre na comunidade.', titulo: 'Vaga confirmada', cor: etiqueta(COR.bordo),
+      paragrafos: [d.indicador ? `Você vem como <strong>Convidado</strong> de ${escape(d.indicador)}.` : 'Você vem como <strong>Visitante</strong>.', `Sua vaga em <strong>${edicao}</strong> está confirmada.`, `Esta é a sua <strong>experiência ${Number(d.n) || 1} de 2</strong> antes de se tornar Membro. Ela só conta depois do check-in.`],
+      itens: dados, depois: `${comunidade}<br><br>Se não puder ir, cancele com pelo menos 24 horas de antecedência, para liberarmos o seu lugar.`,
+    },
+    pos_presenca: {
+      assunto: 'Foi muito bom ter você com a gente', previa: 'Você já pode pedir a adesão gratuita como Membro.', titulo: 'Que bom ter você aqui', cor: etiqueta(COR.bordo),
+      paragrafos: [`Foi muito bom ter você em <strong>${edicao}</strong>.`, `Você já viveu <strong>${Number(d.n) || 1} de 2</strong> experiências abertas antes da adesão.`, 'Se quiser fazer parte, você já pode pedir a adesão gratuita como <strong>Membro</strong>. Não precisa usar a segunda experiência.'],
+      botao: ctaMembro, depois: 'Ser Membro é gratuito e continua gratuito. Ir ao encontro não torna ninguém Membro automaticamente: a adesão passa pela análise da organização.',
+    },
+    limite_atingido: {
+      assunto: 'Suas duas experiências antes da adesão foram usadas', previa: 'Para continuar nas atividades abertas, peça a adesão como Membro.', titulo: 'Próximo passo', cor: etiqueta(COR.bordo),
+      paragrafos: ['Você já viveu as <strong>2 experiências</strong> abertas e gratuitas que a comunidade oferece antes da adesão.', 'Para participar de novas atividades abertas e gratuitas, é preciso ser <strong>Membro</strong>. O pedido é gratuito e você pode fazê-lo agora.'],
+      botao: ctaMembro, depois: 'Atividades pagas e especiais têm regras próprias e não usam esse limite, salvo aviso da edição.',
+    },
+    adesao_recebida: {
+      assunto: 'Recebemos o seu pedido para ser Membro', previa: 'A organização vai analisar e você recebe o retorno por e-mail.', titulo: 'Pedido recebido', cor: etiqueta('#6F6770'),
+      paragrafos: ['Recebemos o seu pedido para ser <strong>Membro</strong> da ComuniCALI.', 'A organização vai analisar e você recebe o <strong>retorno por e-mail</strong>.'],
+      itens: [['Situação', 'Em análise']],
+    },
+    adesao_aprovada: {
+      assunto: 'Você agora é Membro da ComuniCALI', previa: 'Seu Meu Passaporte está liberado.', titulo: 'Boas-vindas, Membro', cor: etiqueta(COR.bordo),
+      paragrafos: ['Seu pedido foi <strong>aprovado</strong>. Você agora é Membro da ComuniCALI.', 'Seu <strong>Meu Passaporte</strong> está liberado. As milhas começam a contar a partir de hoje, e suas presenças anteriores continuam no seu histórico.'],
+      botao: { texto: 'Abrir meu passaporte', href: `${SITE}/meu-passaporte` }, depois: 'Ser Membro é gratuito e continua gratuito. Conector e Embaixador são reconhecimentos de quem contribui com a comunidade.',
+    },
+    adesao_ajustes: {
+      assunto: 'Falta pouco para a sua adesão', previa: 'Precisamos de um ajuste no seu pedido.', titulo: 'Ajustes necessários', cor: etiqueta(COR.bordo),
+      paragrafos: ['Analisamos o seu pedido para ser Membro e precisamos de um <strong>ajuste</strong> antes de continuar.'],
+      aviso: d.motivo || 'Motivo informado pela organização.', botao: { texto: 'Atualizar meu pedido', href: `${SITE}/meu-passaporte` }, depois: 'Assim que você atualizar, a organização analisa de novo.',
+    },
+    adesao_nao_aprovada: {
+      assunto: 'Retorno sobre o seu pedido de adesão', previa: 'Veja o retorno da organização.', titulo: 'Retorno do pedido', cor: etiqueta('#6F6770'),
+      paragrafos: ['Agradecemos o seu interesse em fazer parte da ComuniCALI. Neste momento, o seu pedido <strong>não foi aprovado</strong>.'],
+      aviso: d.motivo || 'Motivo informado pela organização.', depois: `Se quiser conversar sobre o retorno, escreva para <a href="mailto:contato@calirh.com" style="color:${COR.vivo}">contato@calirh.com</a>.`,
+    },
+    janela_membros: {
+      assunto: `Inscrições abertas para Membros: ${d.edicao || ''}`.trim(), previa: 'Você tem acesso antecipado.', titulo: 'Acesso antecipado', cor: etiqueta(COR.bordo),
+      paragrafos: [`As inscrições de <strong>${edicao}</strong> abriram primeiro para você, Membro.`, d.fim ? `A janela de Membros vai até <strong>${escape(d.fim)}</strong>. Depois, as vagas que restarem abrem para Visitantes e convidados.` : 'Depois da janela de Membros, as vagas que restarem abrem para Visitantes e convidados.'],
+      itens: dados, botao: { texto: 'Fazer minha inscrição', href: d.link || SITE }, depois: 'A inscrição antecipada não garante vaga sem confirmação.',
+    },
+    abertura_geral: {
+      assunto: `Vagas abertas: ${d.edicao || ''}`.trim(), previa: 'Restam vagas para Visitantes e convidados.', titulo: 'Inscrições abertas', cor: etiqueta(COR.bordo),
+      paragrafos: [`Depois da janela dos Membros, ainda há vagas em <strong>${edicao}</strong> para Visitantes e convidados.`, 'Lembrando: você pode viver até <strong>2 experiências</strong> abertas e gratuitas antes de se tornar Membro.'],
+      itens: dados, botao: { texto: 'Fazer minha inscrição', href: d.link || SITE }, depois: 'A inscrição não garante vaga sem confirmação.',
+    },
+    espera_vaga: {
+      assunto: `Abriu uma vaga para você: ${d.edicao || ''}`.trim(), previa: 'Confirme dentro do prazo.', titulo: 'Vaga liberada', cor: etiqueta(COR.bordo),
+      paragrafos: [`Uma vaga abriu em <strong>${edicao}</strong> e você era a próxima da lista de espera.`, d.prazo ? `Confirme até <strong>${escape(d.prazo)}</strong>.` : 'Confirme dentro do prazo informado para esta edição.'],
+      itens: dados, botao: { texto: 'Confirmar minha vaga', href: d.link || SITE }, depois: 'Se a vaga não for confirmada no prazo, ela passa para a próxima pessoa da lista.',
+    },
+    pendencias: {
+      assunto: 'Falta pouco para finalizar o seu cadastro', previa: 'Veja o que está pendente.', titulo: 'Pendências', cor: etiqueta('#6F6770'),
+      paragrafos: ['Para deixar tudo pronto, falta só isto:', ...(d.pendencias || []).map((item) => `• ${escape(item)}`)],
+      botao: { texto: 'Resolver agora', href: d.link || `${SITE}/meu-passaporte` }, depois: comunidade,
+    },
+    ausencia: {
+      assunto: `Sentimos sua falta em ${d.edicao || 'nosso encontro'}`, previa: 'Se houve um imprevisto, você pode enviar uma justificativa.', titulo: 'Ausência registrada', cor: etiqueta('#6F6770'),
+      paragrafos: [`Sentimos a sua falta em <strong>${edicao}</strong>.`, 'Se houve um imprevisto, você pode enviar uma <strong>justificativa</strong> em até 7 dias corridos. A organização responde em até 7 dias úteis.', 'Não peça atestado nem informe dados de saúde: basta dizer, em poucas palavras, o que aconteceu.'],
+      botao: { texto: 'Enviar justificativa', href: d.link || `${SITE}/meu-passaporte` },
+    },
+  }[tipo];
+  if (!m) throw new Error(`Tipo de e-mail desconhecido: ${tipo}`);
+  return { assunto: m.assunto, html: layoutCartao({ ...m, saudacao }) };
+}
+
 /** Aviso para a organização a cada cadastro de STAFF. Sem CPF, endereço nem Pix: os dados completos ficam no painel. */
 export function emailStaffOrganizacao(item, painel) {
   const voltou = item.primeira_vez === false;
