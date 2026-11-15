@@ -397,6 +397,11 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 15/11/2026, Claude Code — site atualizado com as regras v23 (publicado)
+- Textos oficiais no banco (site_settings): regras_texto (seções novas 7 e 8: cancelamento e ausências; Conector e Embaixador), privacidade_texto (versão 15/11: estágio de entrada, adesão, justificativas, contatos de Visitantes não repassados, Rede só para Membros, retenção 'em definição'), termos_texto NOVO (coluna nova; página /termos; editável em Painel > Site > Regras e privacidade). Texto anterior em docs/regras-v23/backup-textos-anteriores.json.
+- Home: seção Como entrar reescrita (antes de aderir / Membros / convite), selos explicam entrada x pertencimento, FAQ com 3 perguntas novas e resposta do passaporte corrigida. Rodapé ganhou Termos. Continuar.tsx sem 'Visitante / Membro'.
+- ATENÇÃO: members.na_rede ainda tem default true no banco; a política diz que a Rede é só de Membros aprovados com saída a qualquer momento. Ajustar na parte 4. O botão 'Quero ser Membro' da home ainda leva ao formulário de interesse (joinHref); o pedido de adesão no app é parte 4. Textos aguardam revisão humana final da Patrícia e jurídica.
+
 ### 15/11/2026, Claude Code — painel refeito: menu lateral, páginas em abas (publicado)
 - Nova moldura (AdminPainel.tsx + Admin.tsx): menu lateral Início / Operação (Edições, Pessoas, Aprovações) / Programa (Programa de membros, Rede e parceiros) / Comunicação (E-mails, Formulários) / Conteúdo (Site, App do membro) / Sistema (Configurações). Endereços antigos redirecionam.
 - Edição em abas (Dados e vagas, Pessoas, E-mails, Dia do encontro, Site e fotos) via ?secao=. Pessoas e Aprovações em abas via ?aba=. Aprovações unifica adesões, missões/recomendações e comentários, com contador no menu.
