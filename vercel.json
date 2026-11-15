@@ -26,6 +26,13 @@
   "rewrites": [
     {
       "source": "/e/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(whatsapp|facebookexternalhit|facebot|linkedinbot|twitterbot|slackbot|telegrambot|discordbot|skypeuripreview|googlebot|bingbot|crawler|spider).*"
+        }
+      ],
       "destination": "/api/edicao?slug=:slug"
     },
     {

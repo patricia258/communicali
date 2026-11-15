@@ -1,6 +1,7 @@
 /* Área administrativa: login por link no e-mail. Quem não está em public.admins não entra; o banco repete essa regra. */
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { ComentariosPanel } from './AdminComentarios';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
@@ -432,7 +433,7 @@ function CounterPanel() {
 const GRUPOS: Array<{ nome: string; itens: Array<[string, string]> }> = [
   { nome: 'Início', itens: [['/admin', 'Início']] },
   { nome: 'Pessoas', itens: [['/admin/membros', 'Membros'], ['/admin/indicacoes', 'Indicações'], ['/admin/matches', 'Matches']] },
-  { nome: 'Edições', itens: [['/admin/edicoes', 'Edições']] },
+  { nome: 'Edições', itens: [['/admin/edicoes', 'Edições'], ['/admin/comentarios', 'Comentários']] },
   { nome: 'Programa', itens: [['/admin/programa', 'Como funciona'], ['/admin/missoes', 'Missões'], ['/admin/impacto', 'Impacto']] },
   { nome: 'Formulários', itens: [['/admin/formularios', 'Formulários'], ['/admin/staff', 'Staff'], ['/admin/fornecedores', 'Fornecedores']] },
   { nome: 'Parceiros', itens: [['/admin/parceiros', 'Parceiros']] },
@@ -498,6 +499,7 @@ export function Admin() {
         <Route path="fornecedores" element={<FornecedorPanel />} />
         <Route path="formularios" element={<AdminFormsPage />} />
         <Route path="edicoes" element={<EditionsPanel />} />
+        <Route path="comentarios" element={<ComentariosPanel />} />
         <Route path="parceiros" element={<PartnersPanel />} />
         <Route path="contador" element={<CounterPanel />} />
         <Route path="membros" element={<MembersPanel />} />

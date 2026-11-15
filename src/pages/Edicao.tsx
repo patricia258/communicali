@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { HnFooter } from '../components/HnFooter';
+import { Compartilhar } from '../components/Compartilhar';
+import '../home-nova.css';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Link2 } from 'lucide-react';
 import { COMMUNITY_URL, errorMessage, formatDate, supabase } from '../lib';
@@ -71,20 +74,133 @@ function useEdition(slug: string) {
   return edition;
 }
 
+type FotoEdicao = { id: string; url: string; legenda: string | null };
+
+
+/** Satisfação da edição (NPS). Só aparece quando houver dados reais da pesquisa. */
+export function Nps({ nota, respostas, promotores, neutros, detratores, exemplo }: { nota: number; respostas: number; promotores: number; neutros: number; detratores: number; exemplo?: boolean }) {
+  return (
+    <section className="hn-ed__bloco hn-nps">
+      <h2>Satisfação da edição</h2>
+      <div className="hn-nps__corpo">
+        <div className="hn-nps__nota"><strong>{nota}</strong><span>NPS{exemplo ? ' (exemplo)' : ''}</span></div>
+        <div className="hn-nps__barra" role="img" aria-label={`${promotores}% promotores, ${neutros}% neutros, ${detratores}% detratores`}>
+          <span style={{ flex: promotores, background: '#5A1E2D' }} /><span style={{ flex: neutros, background: '#C9C2C6' }} /><span style={{ flex: detratores, background: '#1B0A10' }} />
+        </div>
+        <ul className="hn-nps__leg"><li><i style={{ background: '#5A1E2D' }} />{promotores}% promotores</li><li><i style={{ background: '#C9C2C6' }} />{neutros}% neutros</li><li><i style={{ background: '#1B0A10' }} />{detratores}% detratores</li></ul>
+        <p className="hn-ed__lead">Com base em {respostas} respostas da pesquisa de satisfação.</p>
+      </div>
+    </section>
+  );
+}
+
+type ComentarioPublico = { id: string; nome: string | null; texto: string; created_at: string };
+
+/** Comentários da edição encerrada: qualquer pessoa comenta, com nome ou anônimo; só aparece depois de aprovado. */
+function Comentarios({ slug }: { slug: string }) {
+  const [lista, setLista] = useState<ComentarioPublico[]>([]);
+  const [texto, setTexto] = useState('');
+  const [nome, setNome] = useState('');
+  const [anonimo, setAnonimo] = useState(true);
+  const [armadilha, setArmadilha] = useState('');
+  const [estado, setEstado] = useState<'' | 'enviando' | 'enviado'>('');
+  const [erro, setErro] = useState('');
+  useEffect(() => {
+    supabase.rpc('communicali_comentarios', { p_slug: slug }).then(({ data, error }) => { if (!error) setLista((data || []) as ComentarioPublico[]); });
+  }, [slug]);
+  async function enviar(evento: FormEvent) {
+    evento.preventDefault();
+    setErro(''); setEstado('enviando');
+    const { error } = await supabase.rpc('communicali_comentar', { p_slug: slug, p_texto: texto, p_nome: nome, p_anonimo: anonimo, p_site: armadilha });
+    if (error) { setEstado(''); setErro(/não recebe|precisa ter|muitos/i.test(error.message) ? error.message : 'Não foi possível enviar agora. Tente de novo em instantes.'); return; }
+    setEstado('enviado'); setTexto(''); setNome('');
+  }
+  return (
+    <section className="hn-ed__bloco hn-coment" aria-label="Comentários">
+      <h2>Comentários</h2>
+      {lista.length > 0
+        ? <ul className="hn-coment__lista">{lista.map((c) => <li key={c.id}><p>{c.texto}</p><small>{c.nome || 'Anônimo'} · {new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(c.created_at))}</small></li>)}</ul>
+        : <p className="hn-ed__lead">Seja a primeira pessoa a comentar sobre este encontro.</p>}
+      {estado === 'enviado'
+        ? <p className="hn-coment__ok" role="status">Obrigada! Seu comentário aparece aqui depois de aprovado.</p>
+        : (
+          <form className="hn-coment__form" onSubmit={(e) => void enviar(e)}>
+            <label>Seu comentário<textarea required minLength={3} maxLength={600} rows={4} value={texto} onChange={(e) => setTexto(e.target.value)} /></label>
+            <fieldset>
+              <legend>Como quer aparecer?</legend>
+              <label className="hn-coment__op"><input type="radio" name="aparecer" checked={anonimo} onChange={() => setAnonimo(true)} /> Anônimo</label>
+              <label className="hn-coment__op"><input type="radio" name="aparecer" checked={!anonimo} onChange={() => setAnonimo(false)} /> Mostrar meu nome</label>
+            </fieldset>
+            {!anonimo && <label>Seu nome<input required maxLength={80} value={nome} onChange={(e) => setNome(e.target.value)} autoComplete="name" /></label>}
+            <input className="hn-coment__armadilha" tabIndex={-1} autoComplete="off" aria-hidden="true" value={armadilha} onChange={(e) => setArmadilha(e.target.value)} name="site" />
+            {erro && <p className="hn-coment__erro" role="alert">{erro}</p>}
+            <button className="hn-pill" type="submit" disabled={estado === 'enviando'}>{estado === 'enviando' ? 'Enviando...' : 'Enviar comentário'}</button>
+            <small className="hn-coment__aviso">Todo comentário passa por aprovação antes de aparecer.</small>
+          </form>
+        )}
+    </section>
+  );
+}
+
 export function EdicaoPage() {
   const { slug = '' } = useParams();
   const edition = useEdition(slug);
+  const [fotosBanco, setFotos] = useState<FotoEdicao[]>([]);
+  const fotos = fotosBanco;
+  useEffect(() => {
+    if (!edition?.id) return;
+    supabase.from('edition_photos').select('id,url,legenda').eq('edition_id', edition.id).order('ordem').then(({ data }) => setFotos((data || []) as FotoEdicao[]));
+  }, [edition?.id]);
   const past = edition ? edition.data_evento < new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }) : false;
+  const inscricao = edition ? signupHref(edition) : '';
+  const mapa = edition ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([edition.local, edition.endereco, edition.cidade].filter(Boolean).join(', '))}` : '';
   return (
-    <div className="home">
-      <nav className="nav"><div className="wrap nav__row"><a href="/" className="nav__logo"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></a><a className="link" href="/">Conhecer a comunidade</a></div></nav>
-      <main className="wrap block">
-        {edition === null && <p className="muted">Encontro não encontrado.</p>}
-        {edition && <EditionCard edition={edition} badge={past ? 'Realizado' : 'Próximo encontro'} />}
-        {edition?.resumo && <p className="block__lead">{edition.resumo}</p>}
-        {edition?.fotos_url && <a className="link" href={edition.fotos_url} target="_blank" rel="noopener noreferrer">Baixar as fotos</a>}
+    <div className="hn hn-ed">
+      <nav className="hn-ed__nav" aria-label="Principal">
+        <a href="/" className="hn-nav__logo"><img src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /></a>
+        <a className="hn-nav__membro" href="/#agenda">Voltar à agenda</a>
+      </nav>
+      <main>
+        {edition === null && <section className="hn-ed__bloco"><h1>Encontro não encontrado.</h1><p className="hn-ed__lead">Veja a agenda para encontrar a edição que você procura.</p><a className="hn-pill" href="/#agenda">Ver a agenda</a></section>}
+        {edition && (
+          <>
+            <header className="hn-ed__hero">
+              <p className="hn-eyebrow">{past ? 'EDIÇÃO ENCERRADA' : 'PRÓXIMO ENCONTRO'}</p>
+              <h1>{edition.titulo}</h1>
+              <p className="hn-ed__lead">{longDate(edition.data_evento)} · {edition.horario} · {edition.cidade}</p>
+              <div className="hn-ed__foto" role="img" aria-label={`Local do encontro: ${edition.local}`} style={{ backgroundImage: `url(${edition.capa_url || '/fotos/legacy-coffee.jpg'})` }}><span className="hn-detail__tag">{past ? 'Realizado' : 'Encontro aberto'}</span></div>
+            </header>
+            <section className="hn-ed__grid">
+              <dl className="hn-ed__dl">
+                <div><dt>Quando</dt><dd>{longDate(edition.data_evento)}, {edition.horario}</dd></div>
+                <div><dt>Onde</dt><dd><a className="hn-detail__local" href={mapa} target="_blank" rel="noopener noreferrer">{edition.local}, {edition.cidade}</a></dd></div>
+                {edition.endereco && <div><dt>Endereço</dt><dd><a className="hn-detail__local" href={mapa} target="_blank" rel="noopener noreferrer">{edition.endereco}</a></dd></div>}
+                <div><dt>Valor</dt><dd>{past ? 'Encerrada' : 'Informado com a edição'}</dd></div>
+              </dl>
+              <div className="hn-ed__texto">
+                <h2>{past ? 'Como foi' : 'Sobre este encontro'}</h2>
+                <p>{edition.resumo || (past ? 'O resumo desta edição será publicado aqui.' : 'Os detalhes desta edição saem em breve.')}</p>
+                {!past && (inscricao ? <a className="hn-pill" href={inscricao}>Garantir minha vaga</a> : <a className="hn-pill" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>)}
+              </div>
+            </section>
+            {past && (
+              <section className="hn-ed__bloco">
+                <h2>Fotos do encontro</h2>
+                {fotos.length > 0 && <div className="hn-ed__galeria">{fotos.map((foto) => <img key={foto.id} src={foto.url} alt={foto.legenda || `Foto do encontro ${edition.titulo}`} loading="lazy" />)}</div>}
+                {edition.fotos_url
+                  ? <><p className="hn-ed__lead">Acesse o álbum para ver todas as fotos e baixar as suas.</p><a className="hn-pill" href={edition.fotos_url} target="_blank" rel="noopener noreferrer">Ver e baixar as fotos</a></>
+                  : fotos.length === 0 && <p className="hn-ed__lead">As fotos desta edição serão publicadas aqui.</p>}
+              </section>
+            )}
+            {past && <Comentarios slug={edition.slug} />}
+            <section className="hn-ed__bloco hn-ed__acoes">
+              <a className="hn-pill hn-pill--line-ink" href="/#agenda">Voltar à agenda</a>
+              <Compartilhar slug={edition.slug} titulo={edition.titulo} />
+            </section>
+          </>
+        )}
       </main>
-      <SiteFooter />
+      <HnFooter />
     </div>
   );
 }

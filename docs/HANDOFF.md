@@ -397,6 +397,15 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 15/11/2026, Claude Code — nova home e identidade (direção v1), no ar às 01h de 16/11
+- Pedido da Patrícia: a nova home e o logo B entram no ar às 01h de 16/11/2026, por agendamento (`~/CALI/publicar-home-nova.sh`, `vercel promote` do deployment já preparado). Base: `main` (b16dd34) + branch `home-nova`. A branch `logo-nova` (versões anteriores de 14/11) NÃO entra: é outra direção visual, superada pela home v1.
+- Home nova em `src/pages/Home.tsx` + `src/home-nova.css` (escopo `.hn`), sem mostarda: abertura, formatos, faixa Passaporte | Encontros | Grupo (+300), manifesto da fundadora, selos do kit novo, agenda com detalhe que abre (um por vez, "+" bloqueado quando não há data), como entrar, encontros anteriores, parceiros com faixa de logos, FAQ, convite e rodapé (CALI RH, CNPJ, e-mail). Embaixadores: carrossel pronto, oculto até haver embaixador com foto.
+- Página da edição `/e/:slug` refeita (`Edicao.tsx`): resumo, fotos, comentários e bloco de NPS (`Nps`, ainda sem dados reais). `/e/:slug` só passa pela função `api/edicao.js` para robôs de pré-visualização (`vercel.json`). Tela de entrada do passaporte no visual novo (`entrada-nova.css`); o resto do app, os e-mails e o painel seguem na identidade antiga (briefing próprio, depois).
+- Comentários nas edições encerradas: migração `20261115100000_comentarios_edicao.sql` JÁ aplicada no banco (tabela `edition_comments`, RPCs `communicali_comentar` e `communicali_comentarios`); qualquer pessoa comenta (nome ou anônimo) e nada aparece sem aprovação em Admin > Edições > Comentários.
+- Abertura animada (`src/components/Abertura.tsx`): logo antiga vira a nova nas 72 h depois de `LANCAMENTO` (16/11 01h), uma vez por pessoa (`cali_abertura_v1`, entra na política de cookies como essencial). Só na home.
+- PENDENTE: favicon, ícones do app (`public/app/icone-*`), topo dos e-mails e cartões de convite ainda no logo antigo; textos legais novos (cookies, termos, acessibilidade) e título da 1ª edição ("Coffee RH") a decidir; foto/logos reais; NPS real exige função agregada no banco; a migração dos comentários já está no banco.
+- Testado: tsc e build; home e página da edição no navegador (computador) e prévias na Vercel; comentários de ponta a ponta no banco real (teste apagado). NÃO testado: celular real, cliques na produção.
+
 ### 03/11/2026, Claude Code — fotos, acesso de membro e animações
 - Fotos livres do Unsplash (licença gratuita) em `public/fotos/home/`: reuniao, virtual, palestra, jantar e experiencia no mosaico do topo; presencial, virtual, experiencia e jantar nas capas de "Sua próxima escala". IDs: 1542744173, 1588196749597, 1540575467063, 1581954548122, 1544928147, 1517048676732.
 - "Já sou membro" no topo do site, ao lado de "Registrar interesse"; saiu o link do fim da seção do passaporte. A trilha mostra só os selos (o texto embaixo repetia o selo).

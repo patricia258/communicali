@@ -1,4 +1,5 @@
 /* Espaço do membro: passaporte com carimbos, edições, missões, indicações, programa e perfil. Abre com código enviado ao e-mail. */
+import '../entrada-nova.css';
 import { useEffect, useId, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { Bell, Building2, CalendarDays, Check, ChevronDown, ExternalLink, Handshake, Images, LockKeyhole, Mail, MapPin, Megaphone, Mic, Pencil, Share2, Target, UserPlus, Users } from 'lucide-react';
@@ -155,13 +156,12 @@ function Entrar() {
       <div className="passe__faixa" aria-hidden="true"><span /><span /><span /><span /></div>
       <main className="passe__entrada">
         <div className="passe__colagem" aria-hidden="true">
-          <img src="/selos/postal-membro.png" alt="" />
-          <img src="/selos/postal-conector.png" alt="" />
-          <img src="/selos/postal-embaixador.png" alt="" />
-          <img src="/selos/carimbo-fundadora.png" alt="" />
+          <img src="/selos/novo/membro.svg" alt="" />
+          <img src="/selos/novo/conector.svg" alt="" />
+          <img src="/selos/novo/embaixador.svg" alt="" />
         </div>
         <section className="passe__acesso">
-          <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+          <img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
           <h1>Seu passaporte está <em>te esperando</em></h1>
           <p>{enviado ? `Enviamos um código para ${email.trim()}. Ele chega em instantes.` : 'Carimbos, milhas, missões e conexões da comunidade em um só lugar.'}</p>
           <form className="passe__form" onSubmit={(event) => void enviar(event)}>
