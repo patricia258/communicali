@@ -1,7 +1,7 @@
 import { HnFooter } from '../components/HnFooter';
 import { Compartilhar } from '../components/Compartilhar';
 import '../home-nova.css';
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Link2 } from 'lucide-react';
 import { COMMUNITY_URL, errorMessage, formatDate, supabase } from '../lib';
@@ -232,12 +232,14 @@ export function InscricaoPage() {
   const texts = useSiteTexts();
   const [params] = useSearchParams();
   const codigo = params.get('c') || '';
+  const faltouRef = useRef('');
   const preset = useMemo<FormPreset | null>(() => edition?.inscricoes_abertas && texts ? {
     title: edition.titulo,
     category: 'Inscrição ComuniCALI',
     description: `${longDate(edition.data_evento)}, ${edition.horario}, ${edition.local}, ${edition.cidade}.`,
     submitLabel: 'Enviar inscrição',
     successText: 'Recebemos sua intenção de participar! A equipe vai analisar e você recebe a confirmação por e-mail.',
+    successTextFor: () => (faltouRef.current ? `Recebemos sua intenção de participar!\nPoxa, que pena que você não conseguiu ir na ${faltouRef.current}. Vamos ver se agora dá certo? A equipe vai analisar e você recebe a confirmação por e-mail.` : ''),
     questions: [
       { id: 'nome', kind: 'name', label: 'Qual é o seu nome completo?', required: true },
       { id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', required: true },
@@ -251,6 +253,7 @@ export function InscricaoPage() {
       const value = (key: string) => String(answers[key] ?? '');
       const { error } = await supabase.rpc('communicali_inscrever', { p_slug: slug, p_nome: value('nome'), p_email: value('email'), p_whatsapp: value('whatsapp'), p_cidade: value('cidade'), p_empresa: value('empresa'), p_cargo: value('cargo'), p_privacidade: answers.privacidade === 'Li e aceito' });
       if (error) return errorMessage(error);
+      { const { data: antes } = await supabase.rpc('communicali_faltou_antes', { p_slug: slug, p_email: value('email') }); faltouRef.current = (antes as { faltou?: boolean; edicao?: string } | null)?.faltou ? String(antes?.edicao || '') : ''; }
       if (codigo) await supabase.rpc('communicali_vincular_indicacao', { p_slug: slug, p_email: value('email'), p_codigo: codigo });
       if (codigo) void fetch('/api/email-indicacao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, email: value('email') }) });
       void fetch('/api/email-confirmacao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, email: value('email') }) });

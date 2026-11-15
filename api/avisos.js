@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     if (!r.erro && !r.pulado) total.adesoes += 1;
     if (item.para === 'solicitada') {
       for (const email of admins) {
-        await enviar(email, { assunto: `Novo pedido de adesão: ${item.member.nome}`, html: layoutSimples({ titulo: 'Pedido de adesão', saudacao: 'Chegou um pedido!', linhas: [`<strong>${escape(item.member.nome)}</strong> pediu para ser Membro.`, 'Abra o painel para aprovar, pedir ajustes ou não aprovar, sempre com o motivo.'], botao: { texto: 'Abrir os pedidos', href: `${PAINEL}/aprovacoes` }, semSair: true }) });
+        await enviar(email, { assunto: `Novo pedido de adesão: ${item.member.nome}`, html: layoutSimples({ titulo: 'Pedido de adesão', saudacao: 'Chegou um pedido!', linhas: [`<strong>${escape(item.member.nome)}</strong> pediu para fazer parte da comunidade.`, 'Abra o painel para aprovar, pedir ajustes ou não aprovar, sempre com o motivo.'], botao: { texto: 'Abrir os pedidos', href: `${PAINEL}/aprovacoes` }, semSair: true }) });
         await pausa();
       }
     }

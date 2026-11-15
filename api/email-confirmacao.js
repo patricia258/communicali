@@ -26,6 +26,10 @@ export default async function handler(req, res) {
   const signup = await banco(`registrations?edition_id=eq.${edition.id}&email=eq.${encodeURIComponent(email)}&status=in.(analise,inscrito,espera)&select=nome,email,status`);
   const pessoa = signup.ok ? (await signup.json())[0] : null;
   if (!pessoa) return res.status(404).json({ ok: false });
+  // Quem se inscreveu numa edição anterior e não fez check-in recebe um recado carinhoso.
+  const antes = await banco('rpc/communicali_faltou_antes', { method: 'POST', body: JSON.stringify({ p_slug: slug, p_email: email }) });
+  const faltou = antes.ok ? await antes.json() : null;
+  if (faltou?.faltou) pessoa.faltou = faltou.edicao;
   const situacao = await enviarUmaVez(({ analise: 'recebido', espera: 'espera', inscrito: 'confirmacao' })[pessoa.status], edition, pessoa);
   res.status(situacao === 'erro' ? 502 : 200).json({ ok: situacao !== 'erro' });
 }

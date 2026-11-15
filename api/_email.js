@@ -190,37 +190,37 @@ export function emailFluxo(tipo, d = {}) {
   const edicao = escape(d.edicao || 'o encontro');
   const dados = [['Quando', d.quando], ['Onde', d.onde]];
   const comunidade = `Entre na <a href="${COMUNIDADE_WHATSAPP}" style="color:${COR.vivo}">comunidade no WhatsApp</a> para acompanhar os avisos.`;
-  const ctaMembro = { texto: 'Quero ser Membro', href: `${SITE}/meu-passaporte` };
+  const ctaMembro = { texto: 'Quero fazer parte da comunidade', href: `${SITE}/meu-passaporte` };
   const etiqueta = (cor, texto = '#FFFFFF') => ({ ...base, etiqueta: cor, etiquetaTexto: texto });
   const m = {
     entrada_confirmada: {
       assunto: `Sua vaga está confirmada: ${d.edicao || ''}`.trim(), previa: 'Veja os detalhes e entre na comunidade.', titulo: 'Vaga confirmada', cor: etiqueta(COR.bordo),
-      paragrafos: [d.indicador ? `Você vem como <strong>Convidado</strong> de ${escape(d.indicador)}.` : 'Você vem como <strong>Visitante</strong>.', `Sua vaga em <strong>${edicao}</strong> está confirmada.`, `Esta é a sua <strong>experiência ${Number(d.n) || 1} de 2</strong> antes de se tornar Membro. Ela só conta depois do check-in.`],
+      paragrafos: [d.indicador ? `Você vem como <strong>Convidado</strong> de ${escape(d.indicador)}.` : 'Você vem como <strong>Visitante</strong>.', `Sua vaga em <strong>${edicao}</strong> está confirmada.`, `Esta é a sua <strong>visita ${Number(d.n) || 1} de 2</strong> antes de fazer parte da comunidade. Ela só conta depois do check-in.`],
       itens: dados, depois: `${comunidade}<br><br>Se não puder ir, cancele com pelo menos 24 horas de antecedência, para liberarmos o seu lugar.`,
     },
     pos_presenca: {
-      assunto: 'Foi muito bom ter você com a gente', previa: 'Você já pode pedir a adesão gratuita como Membro.', titulo: 'Que bom ter você aqui', cor: etiqueta(COR.bordo),
-      paragrafos: [`Foi muito bom ter você em <strong>${edicao}</strong>.`, `Você já viveu <strong>${Number(d.n) || 1} de 2</strong> experiências abertas antes da adesão.`, 'Se quiser fazer parte, você já pode pedir a adesão gratuita como <strong>Membro</strong>. Não precisa usar a segunda experiência.'],
-      botao: ctaMembro, depois: 'Ser Membro é gratuito e continua gratuito. Ir ao encontro não torna ninguém Membro automaticamente: a adesão passa pela análise da organização.',
+      assunto: 'Foi muito bom ter você com a gente', previa: 'Você já pode pedir para fazer parte da comunidade. É gratuito.', titulo: 'Que bom ter você aqui', cor: etiqueta(COR.bordo),
+      paragrafos: [`Foi muito bom ter você em <strong>${edicao}</strong>.`, `Você já fez <strong>${Number(d.n) || 1} de 2</strong> visitas abertas e gratuitas.`, 'Se quiser continuar com a gente, você já pode pedir para <strong>fazer parte da comunidade</strong>. Não precisa usar a segunda visita.'],
+      botao: ctaMembro, depois: 'Fazer parte da comunidade é gratuito e continua gratuito. Ir ao encontro não vira adesão automática: a organização analisa cada pedido.',
     },
     limite_atingido: {
-      assunto: 'Suas duas experiências antes da adesão foram usadas', previa: 'Para continuar nas atividades abertas, peça a adesão como Membro.', titulo: 'Próximo passo', cor: etiqueta(COR.bordo),
-      paragrafos: ['Você já viveu as <strong>2 experiências</strong> abertas e gratuitas que a comunidade oferece antes da adesão.', 'Para participar de novas atividades abertas e gratuitas, é preciso ser <strong>Membro</strong>. O pedido é gratuito e você pode fazê-lo agora.'],
+      assunto: 'Suas duas visitas já foram usadas', previa: 'Para continuar nas atividades abertas, peça para fazer parte da comunidade.', titulo: 'Próximo passo', cor: etiqueta(COR.bordo),
+      paragrafos: ['Você já fez as <strong>2 visitas</strong> abertas e gratuitas que a comunidade oferece antes da adesão.', 'Para participar de novas atividades abertas e gratuitas, é preciso <strong>fazer parte da comunidade</strong>. O pedido é gratuito e você pode fazê-lo agora.'],
       botao: ctaMembro, depois: 'Atividades pagas e especiais têm regras próprias e não usam esse limite, salvo aviso da edição.',
     },
     adesao_recebida: {
-      assunto: 'Recebemos o seu pedido para ser Membro', previa: 'A organização vai analisar e você recebe o retorno por e-mail.', titulo: 'Pedido recebido', cor: etiqueta('#6F6770'),
-      paragrafos: ['Recebemos o seu pedido para ser <strong>Membro</strong> da ComuniCALI.', 'A organização vai analisar e você recebe o <strong>retorno por e-mail</strong>.'],
+      assunto: 'Recebemos o seu pedido para fazer parte da comunidade', previa: 'A organização vai analisar e você recebe o retorno por e-mail.', titulo: 'Pedido recebido', cor: etiqueta('#6F6770'),
+      paragrafos: ['Recebemos o seu pedido para <strong>fazer parte da comunidade</strong> ComuniCALI.', 'A organização vai analisar e você recebe o <strong>retorno por e-mail</strong>.'],
       itens: [['Situação', 'Em análise']],
     },
     adesao_aprovada: {
-      assunto: 'Você agora é Membro da ComuniCALI', previa: 'Seu Meu Passaporte está liberado.', titulo: 'Boas-vindas, Membro', cor: etiqueta(COR.bordo),
-      paragrafos: ['Seu pedido foi <strong>aprovado</strong>. Você agora é Membro da ComuniCALI.', d.passaporteAberto === false ? 'O seu <strong>Meu Passaporte</strong> abre em breve, e a gente avisa por aqui. As milhas começam a contar a partir do dia em que ele abrir, e suas presenças anteriores continuam no seu histórico.' : 'Seu <strong>Meu Passaporte</strong> está liberado. As milhas começam a contar a partir de hoje, e suas presenças anteriores continuam no seu histórico.'],
+      assunto: 'Você agora faz parte da ComuniCALI', previa: 'Seu Meu Passaporte está liberado.', titulo: 'Boas-vindas, Membro', cor: etiqueta(COR.bordo),
+      paragrafos: ['Seu pedido foi <strong>aprovado</strong>. Você agora faz parte da comunidade, como <strong>Membro</strong>.', d.passaporteAberto === false ? 'O seu <strong>Meu Passaporte</strong> abre em breve, e a gente avisa por aqui. As milhas começam a contar a partir do dia em que ele abrir, e suas presenças anteriores continuam no seu histórico.' : 'Seu <strong>Meu Passaporte</strong> está liberado. As milhas começam a contar a partir de hoje, e suas presenças anteriores continuam no seu histórico.'],
       botao: d.passaporteAberto === false ? undefined : { texto: 'Abrir meu passaporte', href: `${SITE}/meu-passaporte` }, depois: 'Ser Membro é gratuito e continua gratuito. Conector e Embaixador são reconhecimentos de quem contribui com a comunidade.',
     },
     adesao_ajustes: {
       assunto: 'Falta pouco para a sua adesão', previa: 'Precisamos de um ajuste no seu pedido.', titulo: 'Ajustes necessários', cor: etiqueta(COR.bordo),
-      paragrafos: ['Analisamos o seu pedido para ser Membro e precisamos de um <strong>ajuste</strong> antes de continuar.'],
+      paragrafos: ['Analisamos o seu pedido para fazer parte da comunidade e precisamos de um <strong>ajuste</strong> antes de continuar.'],
       aviso: d.motivo || 'Motivo informado pela organização.', botao: { texto: 'Atualizar meu pedido', href: `${SITE}/meu-passaporte` }, depois: 'Assim que você atualizar, a organização analisa de novo.',
     },
     adesao_nao_aprovada: {
@@ -312,8 +312,8 @@ export function montar(tipo, edition, pessoa) {
   const agenda = { texto: 'Colocar na minha agenda', href: linkGoogle(edition) };
   const responder = `Se não puder ir, avise a gente pelo <a href="${WHATS}" style="color:${COR.vivo}">WhatsApp</a> para liberarmos o seu lugar.`;
   const textos = {
-    recebido: { assunto: `Recebemos sua inscrição: ${edition.titulo}`, previa: 'A equipe vai analisar e você recebe a confirmação por e-mail.', titulo: 'Inscrição recebida', saudacao, paragrafos: ['Ficamos muito felizes com o seu interesse!', `Recebemos sua inscrição para o encontro<br><strong>${titulo}</strong>`, 'A equipe vai analisar e você recebe<br>a <strong>confirmação por e-mail</strong>.'], detalhes: false, anexo: false },
-    confirmacao: { assunto: `Reserva confirmada: ${edition.titulo}`, previa: 'Sua vaga está reservada.', titulo: 'Reserva confirmada!', saudacao, paragrafos: ['Boa notícia!', `Sua vaga no encontro<br><strong>${titulo}</strong><br>está reservada.`, 'Coloque na sua agenda pelo botão abaixo.'], botao: agenda, depois: `Para Outlook ou celular, use o convite anexo. ${responder}`, anexo: true },
+    recebido: { assunto: `Recebemos sua inscrição: ${edition.titulo}`, previa: 'A equipe vai analisar e você recebe a confirmação por e-mail.', titulo: 'Inscrição recebida', saudacao, paragrafos: ['Ficamos muito felizes com o seu interesse!', ...(pessoa.faltou ? [`Poxa, que pena que você não conseguiu ir na <strong>${escape(pessoa.faltou)}</strong>. Vamos ver se agora dá certo?`] : []), `Recebemos sua inscrição para o encontro<br><strong>${titulo}</strong>`, 'A equipe vai analisar e você recebe<br>a <strong>confirmação por e-mail</strong>.'], detalhes: false, anexo: false },
+    confirmacao: { assunto: `Reserva confirmada: ${edition.titulo}`, previa: 'Sua vaga está reservada.', titulo: 'Reserva confirmada!', saudacao, paragrafos: ['Boa notícia!', ...(pessoa.faltou ? [`Poxa, que pena que você não conseguiu ir na <strong>${escape(pessoa.faltou)}</strong>. Agora a gente se vê!`] : []), `Sua vaga no encontro<br><strong>${titulo}</strong><br>está reservada.`, 'Coloque na sua agenda pelo botão abaixo.'], botao: agenda, depois: `Para Outlook ou celular, use o convite anexo. ${responder}`, anexo: true },
     espera: { assunto: `Lista de espera: ${edition.titulo}`, previa: 'Avisaremos você se abrir um lugar.', titulo: 'Lista de espera', saudacao, paragrafos: ['Ficamos muito felizes com o seu interesse!', `As vagas do encontro<br><strong>${titulo}</strong><br>estão preenchidas.`, 'Seu nome entrou na <strong>lista de espera</strong>.', 'Se abrir um lugar, avisamos você por e-mail.'], detalhes: false, anexo: false },
     consumo: { assunto: `Sábado tem encontro, ${nome}: um lembrete importante`, previa: 'Consumação mínima de R$ 30 no local. Veja os detalhes.', titulo: 'Quase lá!', saudacao, paragrafos: ['Estamos muito felizes em receber você no nosso primeiro encontro.', '<strong>Lembrete:</strong> a consumação mínima de R$ 30 é no local, para convidados e membros.<br>Crianças não têm essa obrigatoriedade, tá bem!?', 'Se tiver qualquer dúvida, chama a gente!'], botao: { texto: 'Adicionar à minha agenda', href: linkGoogle(edition) }, depois: responder, anexo: true },
     lembrete: { assunto: `É amanhã: ${edition.titulo}`, previa: `Nos vemos ${longDate(edition.data_evento)}.`, titulo: 'É amanhã!', saudacao, paragrafos: ['Amanhã é dia de ComuniCALI!', '<strong>Na chegada</strong>, a recepção confirma o seu nome<br>e indica a sua mesa.', '<strong>Na mesa</strong>, é só fazer o check-in<br>pelo QR Code.'], botao: agenda, depois: responder, anexo: true },

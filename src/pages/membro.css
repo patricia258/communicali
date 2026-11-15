@@ -715,3 +715,22 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__aceite a{color:#5A1E2D}
 .passe__nota{margin:16px 0 8px;font-size:13px;color:#6F6770}
 .passe__aceite>span{min-width:0}
+.visita{display:grid;gap:36px;padding:8px 0 40px}
+.visita__topo{display:grid;gap:14px}
+.visita__topo h1{margin:0}
+.visita__topo p{margin:0}
+.visita__rotulo{justify-self:start;padding:4px 12px;border:1px solid #5A1E2D;border-radius:999px;color:#5A1E2D;font-size:12px;font-weight:600}
+.visita__bloco{display:grid;gap:14px;padding-top:22px;border-top:1px solid #1B0A10}
+.visita__bloco h2{margin:0;font-size:22px}
+.visita__bloco p{margin:0;line-height:1.55}
+.visita__bloco--destaque{padding:22px 24px;border-top:0;border-radius:6px 6px 26px 6px;background:#D3E3F2}
+.visita__contador{font:700 44px/1 'Funnel Display',sans-serif;color:#5A1E2D}
+.visita__contador strong{font-size:64px}
+.visita__lista{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.visita__lista li{display:grid;gap:12px;padding:16px 0;border-bottom:1px solid #D9D2CB}
+.visita__lista li div{display:grid;gap:4px}
+.visita__lista li span{color:#5D4F55;font-size:14px}
+.visita__aceites{display:grid;gap:14px}
+.visita__aceites .passe__aceite{margin:0}
+.visita__bloco .passe__botao{margin-top:6px}
+.visita__rodape{padding-top:8px}

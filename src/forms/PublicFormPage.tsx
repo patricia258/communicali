@@ -25,6 +25,8 @@ export type FormPreset = {
   questions: FormQuestion[];
   submitLabel?: string;
   successText?: string;
+  /** Mensagem final calculada depois do envio (ex.: recado para quem faltou na edição anterior). */
+  successTextFor?: () => string;
   skipWelcome?: boolean;
   /** Devolve a mensagem de erro, ou vazio quando deu certo. */
   submit: (answers: Record<string, FormAnswer>) => Promise<string>;
@@ -331,7 +333,7 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
         <span className="cf-done-mark"><img src="/brand/cali-oak-mark-light.svg" alt="" /></span>
         {(() => {
           // Mensagem própria do formulário: a primeira frase curta vira o título; o resto, o texto.
-          const bruto = form.success_text?.trim();
+          const bruto = (preset?.successTextFor?.() || form.success_text)?.trim();
           // Uma última linha [texto](/endereço) vira um botão que abre em outra aba (ex.: da pesquisa anônima para o formulário identificado).
           const ligacao = bruto?.match(/\n?\[([^\]]+)\]\((\/[^)\s]*)\)\s*$/);
           const custom = ligacao ? bruto!.slice(0, ligacao.index).trim() : bruto;

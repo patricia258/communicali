@@ -37,10 +37,10 @@ const FAQ = [
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
   ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
-  ['Posso ir a um encontro antes de ser Membro?', 'Pode. Você vive até 2 experiências abertas e gratuitas antes de se tornar Membro. Se um Membro convidou você, entra como Convidado. Se veio por interesse próprio, entra como Visitante. As duas somam no mesmo contador.'],
-  ['Ir a um encontro me torna Membro?', 'Não automaticamente. Depois da primeira presença, você já pode pedir a adesão. O pedido passa pelo cadastro, pelo aceite das regras e pela análise da organização.'],
-  ['Quanto custa ser Membro?', 'Nada. A identidade de Membro é gratuita e continua gratuita.'],
-  ['Como acompanho minha participação?', 'O passaporte online é dos Membros. Depois que a sua adesão for aprovada, você entra com o e-mail cadastrado e acompanha carimbos, milhas, missões, indicações e fotos.'],
+  ['Posso ir a um encontro antes de fazer parte?', 'Pode. Você vive até 2 visitas abertas e gratuitas antes de fazer parte da comunidade. Se alguém da comunidade convidou você, entra como Convidado. Se veio por interesse próprio, entra como Visitante. As duas somam no mesmo contador, e só conta a visita em que você fez o check-in.'],
+  ['Ir a um encontro me faz parte da comunidade?', 'Não automaticamente. Depois da primeira visita, você já pode pedir para fazer parte. O pedido passa pelo cadastro, pelo aceite das regras e pela análise da organização.'],
+  ['Quanto custa fazer parte da comunidade?', 'Nada. É gratuito e continua gratuito.'],
+  ['Como acompanho minha participação?', 'O Meu passaporte é de quem faz parte da comunidade. Depois que o seu pedido for aprovado, você entra com o e-mail cadastrado e acompanha carimbos, milhas, missões, indicações e fotos.'],
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
@@ -262,7 +262,7 @@ export function Home() {
       <section className="hn-band" aria-label="Passaporte, encontros e jornada">
         <div className="hn-band__passaporte">
           <h3>Seu passaporte</h3>
-          <p>Para Membros: carimbos, selos e milhas. Cada encontro vira uma parada na sua jornada.</p>
+          <p>Para quem faz parte da comunidade: carimbos, selos e milhas. Cada encontro vira uma parada na sua jornada.</p>
           <a className="hn-pill hn-pill--line" href="#selos">Conhecer</a>
         </div>
         <div className="hn-band__foto">
@@ -313,20 +313,20 @@ export function Home() {
 
       <section className="hn-entrar" id="como-entrar" aria-label="Como entrar">
         <div className="hn-entrar__a">
-          <span>ANTES DE ADERIR</span><h3>Conheça a comunidade</h3>
-          <p>Você pode viver até 2 experiências abertas e gratuitas antes de se tornar Membro.</p>
-          <ul><li>Visitante: você chega por interesse próprio</li><li>Convidado: um Membro convida você</li><li>As duas somam no mesmo contador</li><li>Valor de cada encontro informado na agenda</li></ul>
+          <span>ANTES DE FAZER PARTE</span><h3>Conheça a comunidade</h3>
+          <p>Você pode viver até 2 visitas abertas e gratuitas antes de fazer parte da comunidade.</p>
+          <ul><li>Visitante: você chega por interesse próprio</li><li>Convidado: um Membro convida você</li><li>As duas somam no mesmo contador</li><li>Só conta a visita com check-in</li><li>Valor de cada encontro informado na agenda</li></ul>
           <a className="hn-pill" href={joinHref}>Cadastrar meu interesse</a>
         </div>
         <div className="hn-entrar__b">
-          <span>MEMBROS</span><h3>Para Membros</h3>
-          <p>Ser Membro é gratuito. Depois da primeira experiência, você já pode pedir a adesão, e a organização analisa o pedido.</p>
-          <ul><li>Inscrição antecipada nos encontros abertos</li><li>Pode indicar 1 convidado por encontro</li><li>Meu passaporte: carimbos, selos e milhas</li><li>Sempre gratuito</li></ul>
-          <a className="hn-pill hn-pill--white" href={joinHref}>Quero ser Membro</a>
+          <span>DEPOIS DA VISITA</span><h3>Faça parte</h3>
+          <p>Depois da primeira visita, você já pode pedir para fazer parte da comunidade. É gratuito, e a organização analisa cada pedido.</p>
+          <ul><li>Meu passaporte: carimbos, selos e milhas</li><li>A Rede da comunidade</li><li>Convidar pessoas para os encontros</li><li>Sempre gratuito</li></ul>
+          <a className="hn-pill hn-pill--white" href={joinHref}>Quero fazer parte</a>
         </div>
         <div className="hn-entrar__c">
           <span>CONVITE</span><h3>Por convite</h3>
-          <p>Um Membro convida você e você entra como Convidado. A presença conta nas suas 2 experiências.</p>
+          <p>Alguém da comunidade convida você e você entra como Convidado. A visita conta nas suas 2 visitas.</p>
           <ul><li>O convite não garante vaga</li><li>A vaga depende de inscrição e confirmação</li></ul>
           <a className="hn-pill hn-pill--white" href="/termos">Como funciona</a>
         </div>
