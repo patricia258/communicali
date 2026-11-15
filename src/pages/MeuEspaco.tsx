@@ -13,6 +13,7 @@ import { ParceirosExemplos } from './ParceirosExemplos';
 import { TrilhaPrograma } from './TrilhaPrograma';
 import { buscar, esquecerTudo, lembrado, preCarregarFotos, useLembrado } from './lembrar';
 import { FONTE_CONVITE } from './ConviteMembro';
+import { AdesaoMembro, type Adesao } from './AdesaoMembro';
 import './membro.css';
 
 type Carimbo = { slug: string; titulo: string; selo: string; data_evento: string; local: string; cidade: string; capa_url: string | null; carimbo_url: string | null; fotos_url: string | null };
@@ -20,6 +21,7 @@ type Proxima = { slug: string; titulo: string; data_evento: string; horario: str
 type Missao = { slug: string; titulo: string; descricao: string; nivel: string; modo: string; status: string };
 type Espaco = {
   em_breve?: boolean;
+  adesao?: Adesao;
   membro: { nome: string; apelido: string | null; email: string; foto_url: string | null; categoria: string; codigo: string; temas: string[]; interesse_palestras: boolean; linkedin: string | null } | null;
   pontos: number;
   encontros: number;
@@ -1044,12 +1046,13 @@ export function MeuEspaco() {
       <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
     </Pagina>
   );
+  if (!espaco.membro && espaco.adesao) return <Pagina><AdesaoMembro dados={espaco.adesao} recarregar={carregar} /></Pagina>;
   if (!espaco.membro) return (
     <Pagina>
       <img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
-      <h1>Seu passaporte abre no primeiro encontro</h1>
-      <p>Quem participa de um encontro presencial se torna membro. Depois do check-in, este espaço libera seus carimbos, milhas e missões.</p>
-      <a className="passe__botao" href="/#proximo">Ver o próximo encontro</a>
+      <h1>O passaporte é dos Membros</h1>
+      <p>Não encontramos um cadastro com este e-mail. Você pode conhecer a ComuniCALI em até 2 experiências abertas e gratuitas. Depois da primeira presença, já dá para pedir a adesão como Membro, que é gratuita.</p>
+      <a className="passe__botao" href="/#agenda">Ver os próximos encontros</a>
       <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
     </Pagina>
   );

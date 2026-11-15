@@ -708,3 +708,10 @@ img.passe__carimbo{transform:rotate(-8deg)}
   body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#1B0A10;z-index:150}
   .passe__menu{bottom:max(8px,calc(env(safe-area-inset-bottom) - 14px))}
 }
+
+/* Pedido de adesão a Membro */
+.passe__aceite{display:flex;align-items:flex-start;gap:10px;margin:0 0 10px;font-size:15px;line-height:1.45;color:#1B0A10;cursor:pointer}
+.passe__aceite input{flex:none;width:20px;height:20px;margin-top:2px;accent-color:#5A1E2D}
+.passe__aceite a{color:#5A1E2D}
+.passe__nota{margin:16px 0 8px;font-size:13px;color:#6F6770}
+.passe__aceite>span{min-width:0}

@@ -215,8 +215,8 @@ export function emailFluxo(tipo, d = {}) {
     },
     adesao_aprovada: {
       assunto: 'Você agora é Membro da ComuniCALI', previa: 'Seu Meu Passaporte está liberado.', titulo: 'Boas-vindas, Membro', cor: etiqueta(COR.bordo),
-      paragrafos: ['Seu pedido foi <strong>aprovado</strong>. Você agora é Membro da ComuniCALI.', 'Seu <strong>Meu Passaporte</strong> está liberado. As milhas começam a contar a partir de hoje, e suas presenças anteriores continuam no seu histórico.'],
-      botao: { texto: 'Abrir meu passaporte', href: `${SITE}/meu-passaporte` }, depois: 'Ser Membro é gratuito e continua gratuito. Conector e Embaixador são reconhecimentos de quem contribui com a comunidade.',
+      paragrafos: ['Seu pedido foi <strong>aprovado</strong>. Você agora é Membro da ComuniCALI.', d.passaporteAberto === false ? 'O seu <strong>Meu Passaporte</strong> abre em breve, e a gente avisa por aqui. As milhas começam a contar a partir do dia em que ele abrir, e suas presenças anteriores continuam no seu histórico.' : 'Seu <strong>Meu Passaporte</strong> está liberado. As milhas começam a contar a partir de hoje, e suas presenças anteriores continuam no seu histórico.'],
+      botao: d.passaporteAberto === false ? undefined : { texto: 'Abrir meu passaporte', href: `${SITE}/meu-passaporte` }, depois: 'Ser Membro é gratuito e continua gratuito. Conector e Embaixador são reconhecimentos de quem contribui com a comunidade.',
     },
     adesao_ajustes: {
       assunto: 'Falta pouco para a sua adesão', previa: 'Precisamos de um ajuste no seu pedido.', titulo: 'Ajustes necessários', cor: etiqueta(COR.bordo),

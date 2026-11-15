@@ -50,6 +50,9 @@ function Success({ done, previa }: { done: Done; previa?: boolean }) {
   useEffect(() => {
     QRCode.toDataURL(`${window.location.origin}/validar/${done.codigo}`, { width: 320, margin: 1, color: { dark: '#5A1E2D', light: '#FFFFFF' } }).then(setQr);
   }, [done.codigo]);
+  // Regras v23: quem ainda não é Membro aparece como Convidado ou Visitante; Membros mantêm a própria categoria.
+  const estagio = ['convidado', 'visitante', 'membro', 'conector', 'embaixador', 'fundadora', 'organizador'].includes(done.categoria) ? done.categoria : 'visitante';
+  const rotuloEstagio = estagio === 'visitante' ? 'Visitante' : estagio === 'convidado' ? 'Convidado' : CATEGORIAS[estagio] || 'Membro';
   return (
     <main className="dn-pg">
       <div className="dn-pg-faixa" />
@@ -60,10 +63,10 @@ function Success({ done, previa }: { done: Done; previa?: boolean }) {
           <h1>Presença confirmada!</h1>
           <p className="dn-bilhete__texto">Que bom ter você aqui.</p>
           {!!done.junto?.length && <QuemVeio codigo={done.codigo} junto={done.junto} />}
-          <img className="dn-selo" src={seloUrl(done.categoria === 'convidado' ? 'convidado' : 'visitante')} alt={`Selo de ${done.categoria === 'convidado' ? 'Convidado' : 'Visitante'}`} />
+          <img className="dn-selo" src={seloUrl(estagio)} alt={`Selo de ${rotuloEstagio}`} />
           <dl className="dn-dados">
             <div><dt>Nome</dt><dd>{done.nome}</dd></div>
-            <div><dt>Status</dt><dd>{done.categoria === 'convidado' ? 'Convidado' : 'Visitante'}</dd></div>
+            <div><dt>Status</dt><dd>{rotuloEstagio}</dd></div>
           </dl>
           <p className="dn-bilhete__texto">Aproveite o encontro. Qualquer dúvida, chame alguém do staff.</p>
         </section>

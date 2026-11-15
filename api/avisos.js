@@ -1,6 +1,6 @@
 // Envia os avisos pendentes: nível, missão e perfil indicado para o membro; formulário preenchido, inscrição em encontro e cadastro de staff para a organização.
 // Pode ser chamado a qualquer momento: cada aviso é marcado antes do envio e vai uma vez só.
-import { banco, emailFornecedorOrganizacao, emailStaff, emailStaffOrganizacao, enviar, escape, layoutSimples, pausa } from './_email.js';
+import { banco, emailFluxo, emailFornecedorOrganizacao, emailStaff, emailStaffOrganizacao, enviar, escape, layoutSimples, pausa } from './_email.js';
 
 const MEU = 'https://comuni.calirh.com/meu-passaporte';
 const PAINEL = 'https://comuni.calirh.com/admin';
@@ -36,7 +36,7 @@ function mensagemMembro(aviso, nome, missoes, edicoes) {
 const valor = (resposta) => (Array.isArray(resposta) ? resposta.join(', ') : resposta && typeof resposta === 'object' ? (resposta.name || resposta.nome || 'arquivo enviado') : String(resposta ?? ''));
 
 export default async function handler(req, res) {
-  const total = { membros: 0, formularios: 0, inscricoes: 0, staff: 0, fornecedores: 0 };
+  const total = { membros: 0, adesoes: 0, pos_presenca: 0, formularios: 0, inscricoes: 0, staff: 0, fornecedores: 0 };
   const admins = ((await (await banco('admins?select=email')).json()) || []).map((item) => item.email);
 
   const avisos = await (await banco(`notifications?email_em=is.null&tipo=in.(nivel,missao,perfil,carimbo)&created_at=gte.${desde()}&select=id,tipo,texto,member:members!member_id(nome,email)&limit=30`)).json();
@@ -46,6 +46,36 @@ export default async function handler(req, res) {
     if (!aviso.member?.email || aviso.member.email.endsWith('.test') || !(await reservar('notifications', aviso.id, 'email_em'))) continue;
     const r = await enviar(aviso.member.email, mensagemMembro(aviso, aviso.member.nome, missoes, edicoes));
     if (!r.erro && !r.pulado) total.membros += 1;
+    await pausa();
+  }
+
+  // Regras v23: e-mails da adesão a Membro (pedido recebido, aprovado, ajustes, não aprovado) e aviso à organização quando chega um pedido.
+  const configuracao = (await (await banco('site_settings?select=passaporte_aberto')).json()) || [];
+  const passaporteAberto = Boolean(configuracao[0]?.passaporte_aberto);
+  const adesoes = await (await banco(`adesao_log?email_enviado_em=is.null&para=in.(solicitada,aprovada,ajustes,nao_aprovada)&em=gte.${desde()}&select=id,para,motivo,member:members!member_id(nome,email)&limit=20`)).json();
+  for (const item of Array.isArray(adesoes) ? adesoes : []) {
+    if (!item.member?.email || item.member.email.endsWith('.test') || !(await reservar('adesao_log', item.id, 'email_enviado_em'))) continue;
+    const tipo = { solicitada: 'adesao_recebida', aprovada: 'adesao_aprovada', ajustes: 'adesao_ajustes', nao_aprovada: 'adesao_nao_aprovada' }[item.para];
+    const r = await enviar(item.member.email, emailFluxo(tipo, { nome: item.member.nome, motivo: item.motivo, passaporteAberto }));
+    if (!r.erro && !r.pulado) total.adesoes += 1;
+    if (item.para === 'solicitada') {
+      for (const email of admins) {
+        await enviar(email, { assunto: `Novo pedido de adesão: ${item.member.nome}`, html: layoutSimples({ titulo: 'Pedido de adesão', saudacao: 'Chegou um pedido!', linhas: [`<strong>${escape(item.member.nome)}</strong> pediu para ser Membro.`, 'Abra o painel para aprovar, pedir ajustes ou não aprovar, sempre com o motivo.'], botao: { texto: 'Abrir os pedidos', href: `${PAINEL}/aprovacoes` }, semSair: true }) });
+        await pausa();
+      }
+    }
+    await pausa();
+  }
+
+  // Depois da presença de quem ainda não é Membro: convite à adesão (1ª presença) ou aviso do limite (2ª presença).
+  const presencas = await (await banco(`checkins?email_pos_em=is.null&checked_in_at=gte.${desde()}&select=id,member:members!member_id(id,nome,email,adesao_status),edition:editions!edition_id(titulo,elegivel_pre_membro)&limit=30`)).json();
+  for (const item of Array.isArray(presencas) ? presencas : []) {
+    if (!item.member?.email || item.member.email.endsWith('.test') || !(await reservar('checkins', item.id, 'email_pos_em'))) continue;
+    if (item.member.adesao_status || item.edition?.elegivel_pre_membro === false) continue;
+    const contagem = await banco('rpc/communicali_presencas_pre_membro', { method: 'POST', body: JSON.stringify({ p_member: item.member.id }) });
+    const n = contagem.ok ? Number(await contagem.json()) : 1;
+    const r = await enviar(item.member.email, emailFluxo(n >= 2 ? 'limite_atingido' : 'pos_presenca', { nome: item.member.nome, edicao: item.edition?.titulo, n }));
+    if (!r.erro && !r.pulado) total.pos_presenca += 1;
     await pausa();
   }
 
