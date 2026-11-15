@@ -704,3 +704,7 @@ Acrescente entradas no topo.
 - Mudou: painel em tabelas, auditoria de recusas, Indicações, Impacto, open to work, currículo, logos brancos, Rede bloqueada, matches, convite com aceite e aprovação de inscrições. Último commit antes deste repasse: `88395bd`.
 - Testado: Membros, Missões, Edições, Indicações, Matches, Impacto e a faixa de logos no site publicado.
 - Pendente: ver a lista acima.
+
+## 14/11/2026 — Revisão da home (identidade nova, só prévia)
+- Aplicados os itens 1 a 7 do briefing: alt revisado, textos a partir de 12px, alvos de toque de 44px, ordem de títulos (H1, H2 oculto, H3), espaço entre "Apoie este encontro." e "Seja um parceiro.", carrossel pausa ao passar o mouse, text-wrap balance/pretty.
+- Branch logo-nova, commit b54c63c. Nada no ar: a identidade nova segue sem data.
