@@ -397,7 +397,8 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
-### 15/11/2026, Claude Code — nova home e identidade (direção v1), no ar às 01h de 16/11
+### 15/11/2026, Claude Code — nova home e identidade (direção v1), NO AR desde 15/11 (adiantado a pedido da Patrícia)
+- Promovido na Vercel em 15/11 (deployment communicali-m0r5d5qmn); agendamento das 01h cancelado; main atualizada (fast-forward). E-mails de teste (boas-vindas e reserva confirmada) enviados à Patrícia.
 - Pedido da Patrícia: a nova home e o logo B entram no ar às 01h de 16/11/2026, por agendamento (`~/CALI/publicar-home-nova.sh`, `vercel promote` do deployment já preparado). Base: `main` (b16dd34) + branch `home-nova`. A branch `logo-nova` (versões anteriores de 14/11) NÃO entra: é outra direção visual, superada pela home v1.
 - Home nova em `src/pages/Home.tsx` + `src/home-nova.css` (escopo `.hn`), sem mostarda: abertura, formatos, faixa Passaporte | Encontros | Grupo (+300), manifesto da fundadora, selos do kit novo, agenda com detalhe que abre (um por vez, "+" bloqueado quando não há data), como entrar, encontros anteriores, parceiros com faixa de logos, FAQ, convite e rodapé (CALI RH, CNPJ, e-mail). Embaixadores: carrossel pronto, oculto até haver embaixador com foto.
 - Página da edição `/e/:slug` refeita (`Edicao.tsx`): resumo, fotos, comentários e bloco de NPS (`Nps`, ainda sem dados reais). `/e/:slug` só passa pela função `api/edicao.js` para robôs de pré-visualização (`vercel.json`). Tela de entrada do passaporte no visual novo (`entrada-nova.css`); o resto do app, os e-mails e o painel seguem na identidade antiga (briefing próprio, depois).
