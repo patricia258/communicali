@@ -397,6 +397,9 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 15/11/2026, Claude Code — regras v23 e reorganização do painel (em partes, nada publicado)
+- Ver docs/regras-v23/LEIA.md. Parte 1 (regras e políticas) entregue como minuta; partes 2 a 4 aguardam aprovação. Painel: mapa e estrutura nova aguardam decisões.
+
 ### 15/11/2026, Claude Code — nova home e identidade (direção v1), NO AR desde 15/11 (adiantado a pedido da Patrícia)
 - Promovido na Vercel em 15/11 (deployment communicali-m0r5d5qmn); agendamento das 01h cancelado; main atualizada (fast-forward). E-mails de teste (boas-vindas e reserva confirmada) enviados à Patrícia.
 - Pedido da Patrícia: a nova home e o logo B entram no ar às 01h de 16/11/2026, por agendamento (`~/CALI/publicar-home-nova.sh`, `vercel promote` do deployment já preparado). Base: `main` (b16dd34) + branch `home-nova`. A branch `logo-nova` (versões anteriores de 14/11) NÃO entra: é outra direção visual, superada pela home v1.

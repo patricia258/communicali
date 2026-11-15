@@ -1,0 +1,202 @@
+<title>Mapa do painel ComuniCALI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: documento de trabalho em coluna única, com um diagrama da navegação nova e tabelas com filetes, no padrão limpo da ComuniCALI. */
+:root{--ink:#1B0A10;--bordo:#5A1E2D;--sky:#D3E3F2;--paper:#FFFFFF;--rule:#D9D2CB;--gray:#6F6770;--soft:#F4F8FC;--display:'Funnel Display',Helvetica,Arial,sans-serif;--text:'Inter',Helvetica,Arial,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#F3EDEF;--bordo:#E7A9B8;--sky:#1E2A36;--paper:#14090D;--rule:#3A2B31;--gray:#A89DA3;--soft:#1A1015;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#F3EDEF;--bordo:#E7A9B8;--sky:#1E2A36;--paper:#14090D;--rule:#3A2B31;--gray:#A89DA3;--soft:#1A1015;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--text);font-size:15px;line-height:1.6;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 80px}
+.wrap{max-width:920px;margin:0 auto}
+small.k{display:inline-block;padding:4px 12px;border:1px solid var(--bordo);border-radius:999px;color:var(--bordo);font-size:12px;font-weight:600;letter-spacing:.02em}
+h1{font-family:var(--display);font-size:clamp(34px,6vw,54px);line-height:1.05;letter-spacing:-.03em;margin:14px 0 12px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--bordo)}
+h2{font-family:var(--display);font-size:26px;line-height:1.15;letter-spacing:-.02em;margin:0 0 6px;text-wrap:balance}
+h3{font-family:var(--display);font-size:17px;margin:0 0 4px}
+p{margin:0 0 12px;max-width:68ch}
+.lead{font-size:17px;color:var(--ink);max-width:62ch}
+section{padding-top:48px}
+.sec-top{border-top:1px solid var(--ink);padding-top:18px;margin-bottom:18px}
+.sec-top p{color:var(--gray);margin:0}
+.tbl{overflow-x:auto;border-top:1px solid var(--ink)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+th{text-align:left;font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--gray);padding:10px 12px 10px 0;border-bottom:1px solid var(--rule)}
+td{vertical-align:top;padding:12px 12px 12px 0;border-bottom:1px solid var(--rule)}
+td:first-child{font-weight:600;white-space:nowrap}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;border:1px solid var(--rule);font-size:12px;font-weight:600;white-space:nowrap}
+.pill.no{border-color:var(--bordo);color:var(--bordo)}
+.pill.ok{background:var(--sky)}
+ul.flat{margin:0;padding:0;list-style:none}
+ul.flat li{padding:10px 0;border-bottom:1px solid var(--rule)}
+ul.flat li b{font-weight:600}
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);border:1px solid var(--rule);border-radius:6px 6px 26px 6px;overflow:hidden;background:var(--paper)}
+.side{background:var(--soft);padding:18px 14px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:2px}
+.side .logo{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.03em;padding:0 8px 12px}
+.side .logo span{color:var(--bordo)}
+.side a{display:block;padding:7px 8px;border-radius:8px;font-size:14px;color:var(--ink);text-decoration:none}
+.side a.on{background:var(--paper);font-weight:600;box-shadow:inset 3px 0 0 var(--bordo)}
+.side .grp{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);padding:14px 8px 4px}
+.main{padding:20px 22px;min-width:0}
+.main .tt{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.02em}
+.main .sub{color:var(--gray);font-size:13px;margin-bottom:14px}
+.tabs{display:flex;gap:18px;flex-wrap:wrap;border-bottom:1px solid var(--rule);margin-bottom:14px;font-size:13px}
+.tabs span{padding:6px 0}
+.tabs .on{font-weight:600;box-shadow:0 2px 0 var(--bordo)}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);margin-bottom:14px}
+.strip div{padding:10px 0 10px 0;font-size:12px;color:var(--gray)}
+.strip b{display:block;font-family:var(--display);font-size:26px;color:var(--ink);line-height:1.1}
+.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--rule);font-size:13px}
+.row span:last-child{color:var(--gray);text-align:right}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 28px}
+.g{padding:16px 0;border-top:1px solid var(--ink)}
+.g p{font-size:14px;color:var(--gray);margin:0 0 8px}
+.g ul{margin:0;padding-left:18px;font-size:14px}
+.step{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.step b.n{font-family:var(--display);font-size:22px;color:var(--bordo)}
+.q{border-left:3px solid var(--bordo);padding:2px 0 2px 14px;margin:0 0 14px}
+@media(max-width:720px){.shell{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--rule)}.cols{grid-template-columns:1fr}td:first-child{white-space:normal}}
+</style>
+<div class="wrap">
+<small class="k">Passo 1 · Mapa e estrutura</small>
+<h1>Mapa do painel <em>ComuniCALI</em></h1>
+<p class="lead">Este documento mostra tudo o que o painel faz hoje, onde cada coisa deve ficar e o que ainda depende de mim para mudar. Nenhum código foi alterado. Você revisa, ajusta, e só então eu construo.</p>
+
+<section>
+<div class="sec-top"><h2>1. O que está acontecendo</h2></div>
+<ul class="flat">
+<li><b>O painel cresceu por pedido.</b> Cada tela foi adicionada quando surgiu a necessidade, sem uma regra de onde as coisas ficam. A troca de cor não mexeu nisso.</li>
+<li><b>Há telas sem lugar no menu.</b> Convidados, Votações, Contador e Textos não têm item próprio no menu principal. Votações vive dentro da edição, Contador e Textos ficam atrás da engrenagem.</li>
+<li><b>Staff e Fornecedores estão em “Formulários”,</b> mas são pessoas e equipe. A edição é uma página longa com 9 blocos em sequência.</li>
+<li><b>A maior parte do que aparece no site, nos e-mails e no app é texto fixo no código.</b> Para mudar uma frase, você precisa me pedir. É o que vamos resolver.</li>
+</ul>
+</section>
+
+<section>
+<div class="sec-top"><h2>2. Regras novas (documento v23) e o que muda no fluxo</h2><p>Comparei o documento-mestre com o que o sistema faz hoje. O painel precisa nascer já com isso, senão o fluxo errado fica escondido em tudo.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Regra v23</th><th>Hoje no sistema</th><th>O que muda</th></tr></thead>
+<tbody>
+<tr><td>Check-in não cria Membro</td><td><span class="pill no">diferente</span> O check-in cria a pessoa na tabela de membros e ela abre o Meu Passaporte com código por e-mail.</td><td>Convidado e Visitante passam a ser estágios de entrada. Passaporte completo só depois de aprovada como Membro.</td></tr>
+<tr><td>Limite de 2 presenças pré-Membro, contador único</td><td><span class="pill no">não existe</span></td><td>Contador por pessoa, só com check-in validado em atividade aberta e gratuita. Bloqueia a 3ª inscrição sem adesão aprovada.</td></tr>
+<tr><td>“Quero ser Membro” e validação</td><td><span class="pill no">não existe</span></td><td>Pedido de adesão com status (solicitado, em análise, ajustes, aprovado, recusado) e motivo. Fila nova em Aprovações.</td></tr>
+<tr><td>Milhas só a partir da adesão</td><td><span class="pill no">a conferir</span> Hoje as milhas começam na primeira presença.</td><td>Presenças anteriores ficam no histórico, sem crédito retroativo.</td></tr>
+<tr><td>Membros se inscrevem primeiro (janela de 48h)</td><td><span class="pill no">não existe</span> A edição tem capacidade, limite de convidados e inscrições abertas ou fechadas.</td><td>Parâmetros novos por edição: início e fim da janela de Membros, abertura geral, cota de convidados, prazo da lista de espera.</td></tr>
+<tr><td>Categoria separada de assinatura</td><td><span class="pill ok">ok</span> Ainda não há assinatura.</td><td>Reservar o campo agora; sem nenhuma cobrança na tela.</td></tr>
+<tr><td>Textos de site, termos e privacidade</td><td><span class="pill no">desatualizados</span></td><td>Reescritos a partir do v23 e publicados pelo painel. A parte jurídica fica para revisão, como o próprio documento pede.</td></tr>
+</tbody></table></div>
+<p style="margin-top:14px">Trilha oficial: <b>Convidado ou Visitante → Membro → Conector → Embaixador.</b> Atualizo a home, o app e os e-mails conforme isso, depois que você terminar de ler e confirmar.</p>
+</section>
+
+<section>
+<div class="sec-top"><h2>3. O que o painel faz hoje</h2><p>Levantado do código atual, tela por tela.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Menu de hoje</th><th>Tela</th><th>O que faz</th></tr></thead>
+<tbody>
+<tr><td>Início</td><td>Painel</td><td>Contadores (visitantes, presenças, convidados, parceiros), roteiro do dia do encontro em 6 passos, links para testar como participante, lista de quem parou de receber e-mails.</td></tr>
+<tr><td>Pessoas</td><td>Membros</td><td>Tabela de membros; ficha com perfil, extrato de milhas e histórico de presenças; ajuste de categoria.</td></tr>
+<tr><td></td><td>Indicações · Matches</td><td>Quem cada membro trouxe e a aprovação; sugestões de conexão criadas pelo que cada pessoa busca.</td></tr>
+<tr><td>Edições</td><td>Edições</td><td>Lista e editor: dia do encontro, dados (data, local, vagas, check-in, inscrições), capa e fotos, presenças, pessoas da edição (por categoria e situação), e-mails enviados com abertura e clique, card “Eu vou” e mimos, votações, planilha.</td></tr>
+<tr><td></td><td>Comentários</td><td>Aprovar ou recusar comentários sobre a edição.</td></tr>
+<tr><td>Programa</td><td>Como funciona · Missões · Impacto</td><td>Perfil do membro e níveis; envios de missão para analisar e recomendações para validar; relatos de impacto.</td></tr>
+<tr><td>Formulários</td><td>Formulários</td><td>Criar e editar formulários, ver respostas, compartilhar, lixeira de 30 dias, e-mail de confirmação por formulário.</td></tr>
+<tr><td></td><td>Staff · Fornecedores</td><td>Cadastros recebidos por formulário, com dados e comprovantes.</td></tr>
+<tr><td>Parceiros</td><td>Parceiros</td><td>Cadastro de parceiros confirmados, logo, perfil na Rede, revisão de comentários.</td></tr>
+<tr class="x"><td>Sem item no menu</td><td>Convidados · Votações · Contador · Textos</td><td>Convidados por encontro; perguntas para o telão; número de membros mostrado no site; regras, privacidade, abertura do cadastro e opções de “Como conheceu”.</td></tr>
+</tbody></table></div>
+</section>
+
+<section>
+<div class="sec-top"><h2>4. Estrutura nova</h2><p>Menu lateral fixo à esquerda, como na referência: poucos grupos, cada um com suas telas. Configurações com menu próprio, separado do resto.</p></div>
+
+<div class="shell" aria-label="Esboço da navegação nova">
+<nav class="side">
+<div class="logo">comuni<span>cali</span></div>
+<a class="on">Início</a>
+<div class="grp">Operação</div>
+<a>Edições</a><a>Pessoas</a><a>Aprovações</a>
+<div class="grp">Programa</div>
+<a>Missões e níveis</a><a>Rede e parceiros</a>
+<div class="grp">Comunicação</div>
+<a>E-mails</a><a>Formulários</a>
+<div class="grp">Conteúdo</div>
+<a>Site</a><a>App do membro</a>
+<div class="grp">Sistema</div>
+<a>Configurações</a>
+</nav>
+<div class="main">
+<div class="tt">Edições</div>
+<div class="sub">Cada edição tem uma página própria, com abas.</div>
+<div class="tabs"><span class="on">Visão geral</span><span>Pessoas</span><span>E-mails</span><span>Dia do encontro</span><span>Site e fotos</span></div>
+<div class="strip"><div><b>42</b>confirmados</div><div><b>8</b>falta confirmar</div><div><b>5</b>equipe e kids</div></div>
+<div class="row"><span>Maria Souza · Participante</span><span>Confirmada</span></div>
+<div class="row"><span>João Lima · Convidado</span><span>Inscrito</span></div>
+<div class="row"><span>Ana Reis · Staff</span><span>Confirmada</span></div>
+</div>
+</div>
+<p style="margin-top:14px;color:var(--gray);font-size:13px">Esboço só da organização. O visual segue a identidade nova.</p>
+
+<div class="groups" style="margin-top:22px">
+<div class="g"><h3>Início</h3><p>O que pede ação agora.</p><ul><li>Fazer agora: aprovações pendentes, e-mails com erro, edição sem data</li><li>Próxima edição em números</li><li>Atalhos do dia do encontro</li></ul></div>
+<div class="g"><h3>Edições</h3><p>Uma página por edição, com abas.</p><ul><li><b>Visão geral:</b> dados, vagas, check-in, janela de Membros e abertura geral</li><li><b>Pessoas:</b> todas as categorias</li><li><b>E-mails:</b> envios e card Eu vou</li><li><b>Dia do encontro:</b> roteiro, votações, telão</li><li><b>Site e fotos:</b> capa, resumo, comentários</li></ul></div>
+<div class="g"><h3>Pessoas</h3><p>Todo mundo num lugar só.</p><ul><li>Membros (com contador pré-Membro e categoria separada de assinatura)</li><li>Convidados e visitantes</li><li>Indicações</li><li>Staff e fornecedores</li><li>Matches</li></ul></div>
+<div class="g"><h3>Aprovações</h3><p>Uma fila única para tudo que espera decisão.</p><ul><li><b>Pedidos de adesão a Membro</b></li><li>Missões e recomendações</li><li>Comentários</li><li>Posts do card Eu vou</li><li>Relatos de impacto</li></ul></div>
+<div class="g"><h3>Missões e níveis</h3><p>As regras do programa.</p><ul><li>Missões (criar, pontos)</li><li>Níveis e selos</li><li>Milhas e regras de acesso</li></ul></div>
+<div class="g"><h3>Rede e parceiros</h3><ul><li>Parceiros e logos</li><li>Perfis na Rede</li></ul></div>
+<div class="g"><h3>E-mails</h3><p>Modelos e histórico.</p><ul><li>Modelos (texto editável)</li><li>Envios, abertura, erros</li><li>Quem parou de receber</li></ul></div>
+<div class="g"><h3>Formulários</h3><ul><li>Lista e respostas</li><li>Lixeira</li></ul></div>
+<div class="g"><h3>Site</h3><p>Cada seção da home e das páginas.</p><ul><li>Home por seção</li><li>Edições publicadas</li><li>Contador, perguntas frequentes</li></ul></div>
+<div class="g"><h3>App do membro</h3><ul><li>Textos do passaporte e do onboarding</li><li>Avisos e notificações</li></ul></div>
+<div class="g"><h3>Configurações</h3><p>Menu próprio, como na referência.</p><ul><li>Geral e identidade</li><li>Equipe do painel (quem é admin)</li><li>Textos legais e cadastro aberto</li><li>Integrações</li><li>Registro de alterações</li></ul></div>
+</div>
+</section>
+
+<section>
+<div class="sec-top"><h2>5. O que você passa a controlar sozinha</h2><p>Para cada área, onde o conteúdo vive hoje e onde ele passa a viver.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Área</th><th>Hoje</th><th>Painel depois</th></tr></thead>
+<tbody>
+<tr><td>Home do site</td><td><span class="pill no">no código</span> 11 seções: embaixadores, manifesto, passaporte e jornada, selos, agenda, como entrar, edições, parceiros, perguntas frequentes, convite. Só contador, edições e parceiros vêm do painel.</td><td><span class="pill ok">Site › Home</span> Um bloco por seção, com texto, imagem e ordem editáveis, e “Publicar”.</td></tr>
+<tr><td>Páginas legais</td><td><span class="pill ok">no painel</span> Regras e privacidade em Textos.</td><td>Passam para Configurações. Entram cookies, termos e acessibilidade.</td></tr>
+<tr><td>E-mails</td><td><span class="pill no">no código</span> 11 modelos (inscrição, confirmação, lembrete, boas-vindas, card, pesquisa e outros). Só o histórico de envios aparece no painel.</td><td><span class="pill ok">E-mails › Modelos</span> Assunto e texto editáveis, com envio de teste para você.</td></tr>
+<tr><td>Formulários</td><td><span class="pill ok">no painel</span> CALI Forms completo, e-mail de confirmação por formulário.</td><td>Mantém. Ganha o mesmo padrão de tela e ligação com a edição.</td></tr>
+<tr><td>App do membro</td><td><span class="pill no">no código</span> Textos do passaporte, nomes dos níveis, missões fixas na tela.</td><td><span class="pill ok">App › Textos</span> e <span class="pill ok">Missões e níveis</span> editáveis.</td></tr>
+<tr><td>Selos e imagens</td><td><span class="pill no">no código</span></td><td>Biblioteca de imagens no painel, com envio de arquivo.</td></tr>
+<tr><td>Pessoas, edições, missões enviadas</td><td><span class="pill ok">no painel</span></td><td>Mantém, reorganizado.</td></tr>
+</tbody></table></div>
+<p style="margin-top:14px">Regra de ouro: <b>uma informação, um lugar.</b> O que você muda no painel aparece sozinho no site, no app, nos formulários e nos e-mails, sem pedido e sem nova publicação do código.</p>
+</section>
+
+<section>
+<div class="sec-top"><h2>6. Padrão de tela</h2><p>Toda tela segue o mesmo desenho, para você nunca precisar procurar onde fica o botão.</p></div>
+<ul class="flat">
+<li><b>Topo:</b> título, uma frase de apoio e, à direita, um único botão principal (o mesmo lugar em todas as telas).</li>
+<li><b>Faixa de números:</b> até 4 números, com filetes, sem caixas.</li>
+<li><b>Lista:</b> filtros, busca e tabela. Situação sempre em etiqueta de contorno. Clique na linha abre uma gaveta lateral para ver ou editar.</li>
+<li><b>Edição:</b> sempre na gaveta ou em abas. “Salvar” fixo no mesmo canto, com aviso curto no canto da tela.</li>
+<li><b>Nomes:</b> o mesmo termo em todo lugar. Pessoa, Edição, Missão, Modelo.</li>
+<li><b>Densidade e visual:</b> 13px, branco com céu só no topo, Funnel nos títulos, bordô só no que está ativo.</li>
+</ul>
+</section>
+
+<section>
+<div class="sec-top"><h2>7. Ordem de trabalho</h2></div>
+<div class="step"><b class="n">1</b><div><b>Mapa e estrutura</b> (este documento). Você revisa.</div></div>
+<div class="step"><b class="n">2</b><div><b>Moldura nova:</b> menu lateral, padrão de tela, Início com “Fazer agora”. As telas atuais entram dentro dela, sem perder nada.</div></div>
+<div class="step"><b class="n">3</b><div><b>Reorganizar o que existe:</b> Pessoas, Aprovações e a página da edição com abas.</div></div>
+<div class="step"><b class="n">4</b><div><b>Site editável:</b> tabela de conteúdo no banco, editor por seção, a home lendo dali.</div></div>
+<div class="step"><b class="n">5</b><div><b>E-mails editáveis:</b> modelos no painel, envio de teste.</div></div>
+<div class="step"><b class="n">6</b><div><b>App e formulários:</b> textos e regras do programa no painel; formulários ligados à edição.</div></div>
+<p style="margin-top:14px">Cada passo vai para o ar sozinho e sem quebrar o anterior. Alterações no banco de dados em produção só com o seu aviso.</p>
+</section>
+
+<section>
+<div class="sec-top"><h2>8. Preciso da sua decisão</h2></div>
+<div class="q"><b>Aprovações em fila única?</b> Missões, comentários, posts e relatos numa só tela, ou cada um no seu lugar como hoje.</div>
+<div class="q"><b>Menu lateral como na referência?</b> Troca a barra de cima do painel atual por uma barra lateral.</div>
+<div class="q"><b>Quem mais mexe no painel?</b> Só você, ou também a equipe CALI. Muda o desenho de “Equipe do painel” e o que fica visível para cada pessoa.</div>
+<div class="q"><b>Quem aprova os pedidos de adesão?</b> Só você ou também a equipe CALI. O documento deixa a moderação em aberto.</div>
+<div class="q"><b>Falta alguma coisa na lista?</b> Qualquer rotina que você faz hoje fora do painel (planilha, WhatsApp, Canva) que deva morar aqui.</div>
+</section>
+</div>

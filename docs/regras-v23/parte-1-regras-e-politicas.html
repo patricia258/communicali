@@ -1,0 +1,175 @@
+<title>Regras e políticas v23</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: documento de trabalho em coluna única, com um diagrama da navegação nova e tabelas com filetes, no padrão limpo da ComuniCALI. */
+:root{--ink:#1B0A10;--bordo:#5A1E2D;--sky:#D3E3F2;--paper:#FFFFFF;--rule:#D9D2CB;--gray:#6F6770;--soft:#F4F8FC;--display:'Funnel Display',Helvetica,Arial,sans-serif;--text:'Inter',Helvetica,Arial,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#F3EDEF;--bordo:#E7A9B8;--sky:#1E2A36;--paper:#14090D;--rule:#3A2B31;--gray:#A89DA3;--soft:#1A1015;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#F3EDEF;--bordo:#E7A9B8;--sky:#1E2A36;--paper:#14090D;--rule:#3A2B31;--gray:#A89DA3;--soft:#1A1015;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--text);font-size:15px;line-height:1.6;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 80px}
+.wrap{max-width:920px;margin:0 auto}
+small.k{display:inline-block;padding:4px 12px;border:1px solid var(--bordo);border-radius:999px;color:var(--bordo);font-size:12px;font-weight:600;letter-spacing:.02em}
+h1{font-family:var(--display);font-size:clamp(34px,6vw,54px);line-height:1.05;letter-spacing:-.03em;margin:14px 0 12px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--bordo)}
+h2{font-family:var(--display);font-size:26px;line-height:1.15;letter-spacing:-.02em;margin:0 0 6px;text-wrap:balance}
+h3{font-family:var(--display);font-size:17px;margin:0 0 4px}
+p{margin:0 0 12px;max-width:68ch}
+.lead{font-size:17px;color:var(--ink);max-width:62ch}
+section{padding-top:48px}
+.sec-top{border-top:1px solid var(--ink);padding-top:18px;margin-bottom:18px}
+.sec-top p{color:var(--gray);margin:0}
+.tbl{overflow-x:auto;border-top:1px solid var(--ink)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+th{text-align:left;font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--gray);padding:10px 12px 10px 0;border-bottom:1px solid var(--rule)}
+td{vertical-align:top;padding:12px 12px 12px 0;border-bottom:1px solid var(--rule)}
+td:first-child{font-weight:600;white-space:nowrap}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;border:1px solid var(--rule);font-size:12px;font-weight:600;white-space:nowrap}
+.pill.no{border-color:var(--bordo);color:var(--bordo)}
+.pill.ok{background:var(--sky)}
+ul.flat{margin:0;padding:0;list-style:none}
+ul.flat li{padding:10px 0;border-bottom:1px solid var(--rule)}
+ul.flat li b{font-weight:600}
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);border:1px solid var(--rule);border-radius:6px 6px 26px 6px;overflow:hidden;background:var(--paper)}
+.side{background:var(--soft);padding:18px 14px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:2px}
+.side .logo{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.03em;padding:0 8px 12px}
+.side .logo span{color:var(--bordo)}
+.side a{display:block;padding:7px 8px;border-radius:8px;font-size:14px;color:var(--ink);text-decoration:none}
+.side a.on{background:var(--paper);font-weight:600;box-shadow:inset 3px 0 0 var(--bordo)}
+.side .grp{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);padding:14px 8px 4px}
+.main{padding:20px 22px;min-width:0}
+.main .tt{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.02em}
+.main .sub{color:var(--gray);font-size:13px;margin-bottom:14px}
+.tabs{display:flex;gap:18px;flex-wrap:wrap;border-bottom:1px solid var(--rule);margin-bottom:14px;font-size:13px}
+.tabs span{padding:6px 0}
+.tabs .on{font-weight:600;box-shadow:0 2px 0 var(--bordo)}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink);border-bottom:1px solid var(--rule);margin-bottom:14px}
+.strip div{padding:10px 0 10px 0;font-size:12px;color:var(--gray)}
+.strip b{display:block;font-family:var(--display);font-size:26px;color:var(--ink);line-height:1.1}
+.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--rule);font-size:13px}
+.row span:last-child{color:var(--gray);text-align:right}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 28px}
+.g{padding:16px 0;border-top:1px solid var(--ink)}
+.g p{font-size:14px;color:var(--gray);margin:0 0 8px}
+.g ul{margin:0;padding-left:18px;font-size:14px}
+.step{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.step b.n{font-family:var(--display);font-size:22px;color:var(--bordo)}
+.q{border-left:3px solid var(--bordo);padding:2px 0 2px 14px;margin:0 0 14px}
+@media(max-width:720px){.shell{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--rule)}.cols{grid-template-columns:1fr}td:first-child{white-space:normal}}
+.minuta{border:1px solid var(--rule);border-left:3px solid var(--bordo);padding:14px 18px;margin:0 0 16px;background:var(--soft)}
+.minuta p{margin:0 0 10px}.minuta p:last-child{margin:0}.minuta h3{margin-bottom:8px}
+.minuta ul{margin:0 0 10px;padding-left:20px}.minuta li{margin-bottom:6px}
+.tag{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--gray);font-weight:600;margin-bottom:6px;display:block}
+</style>
+<div class="wrap">
+<small class="k">Parte 1 de 4 · Regras e políticas</small>
+<h1>Regras e políticas <em>v23</em></h1>
+<p class="lead">Quadro do que mudou em cada texto publicado e as minutas novas, escritas a partir do documento-mestre v23. Nada foi publicado. O próprio documento pede revisão jurídica antes de qualquer texto entrar no ar.</p>
+
+<section>
+<div class="sec-top"><h2>1. Como as 4 partes se encaixam</h2><p>Cada parte termina com você aprovando antes da seguinte. Tudo fica registrado no repositório.</p></div>
+<div class="step"><b class="n">1</b><div><b>Regras e políticas</b> (esta página): lacunas e minutas. Ainda sem código.</div></div>
+<div class="step"><b class="n">2</b><div><b>E-mails novos</b> para o fluxo: convite de visitante, pedido de adesão, aprovação, ajustes, recusa, limite de 2 presenças, janela de Membros, lista de espera. Você recebe cada um de teste.</div></div>
+<div class="step"><b class="n">3</b><div><b>Ficha da pessoa no painel:</b> estágio (Convidado, Visitante, Membro), contador de presenças pré-Membro, limite automático, pedido de adesão, histórico.</div></div>
+<div class="step"><b class="n">4</b><div><b>Fluxo no site e no app:</b> “Quero ser Membro”, bloqueio automático após 2 presenças, passaporte completo só após aprovação, janela de Membros por edição.</div></div>
+</section>
+
+<section>
+<div class="sec-top"><h2>2. Quadro de lacunas</h2><p>Texto atual no ar, o que falta ou conflita com o v23, a alteração proposta e quem precisa aprovar.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Texto</th><th>Lacuna ou conflito</th><th>Alteração proposta</th><th>Aprovação</th></tr></thead>
+<tbody>
+<tr><td>Regras de participação (/regras)</td><td>Boa para convivência. Não fala de entrada, limite de 2 presenças, cancelamento e ausências, nem de quem pode ajudar na moderação.</td><td>Manter o texto. Acrescentar duas seções curtas (cancelamento e ausências; papel de Conector e Embaixador). Entrada e adesão vão para uma página própria.</td><td>Patrícia</td></tr>
+<tr><td>Termos de participação</td><td>Não existe página. O v23 pede que distinga Convidado, Visitante e Membro e explique o limite e a adesão.</td><td>Página nova com a minuta da seção 4 abaixo, em /termos.</td><td>Patrícia e jurídico</td></tr>
+<tr><td>Como entrar e virar Membro</td><td>O site não explica a trilha. A home ainda mostra Membro como consequência de ir ao encontro.</td><td>Texto público da seção 3 abaixo, na home e em /termos.</td><td>Patrícia</td></tr>
+<tr><td>Política de privacidade (/privacidade)</td><td><b>Conflito:</b> diz que quem participa de um encontro passa a aparecer na Rede. Pelo v23, a Rede é só de Membros aprovados e o diretório é uma escolha separada. Faltam também: dados de Convidado e Visitante, contador de presenças, pedido de adesão, justificativas de ausência, lista de espera, marketing e imagem como aceites separados.</td><td>Preservar o texto e alterar nos pontos da seção 5 abaixo. Não substituir.</td><td>Jurídico, LGPD</td></tr>
+<tr><td>Imagem e gravações</td><td>Está misturado às regras. O v23 pede aceite próprio e voluntário, e a recusa não impede participar.</td><td>Aceite separado no cadastro e no check-in, com a minuta do documento-mestre.</td><td>Jurídico</td></tr>
+<tr><td>Textos do site sobre mensalidade ou kit</td><td>O v23 proíbe anunciar preço, ecobag ou kit completo.</td><td>Revisar a home inteira e os e-mails. Dizer só que poderá haver planos opcionais.</td><td>Patrícia</td></tr>
+</tbody></table></div>
+</section>
+
+<section>
+<div class="sec-top"><h2>3. Texto público: como entrar</h2><p>Para a home e para /termos. Segue o texto aprovado no documento, com a janela de Membros no final.</p></div>
+<div class="minuta">
+<span class="tag">Minuta · site</span>
+<h3>Conheça antes de se tornar Membro</h3>
+<p>Você pode conhecer a ComuniCALI em até duas experiências abertas e gratuitas antes de se tornar Membro.</p>
+<p>Se um Membro convidou você, entra como <b>Convidado</b>. Se veio por interesse próprio, entra como <b>Visitante</b>. As duas experiências somam no mesmo contador.</p>
+<p>Depois da primeira experiência, você já pode pedir a adesão gratuita como Membro. A aprovação segue as regras da comunidade. Ir ao encontro não torna ninguém Membro automaticamente.</p>
+<p>Os Membros têm acesso antecipado às inscrições dos encontros abertos. Depois do período informado em cada edição, as vagas que restarem abrem para Visitantes e convidados. A inscrição antecipada não garante vaga sem confirmação.</p>
+<p>Ser Membro é gratuito e continua gratuito. Conector e Embaixador são reconhecimentos de quem contribui, nunca faixas de preço.</p>
+</div>
+</section>
+
+<section>
+<div class="sec-top"><h2>4. Minuta: termos de participação</h2><p>Resumo em linguagem simples. A redação jurídica final fica para a revisão.</p></div>
+<div class="minuta">
+<span class="tag">Minuta · /termos</span>
+<h3>Quem participa e como</h3>
+<ul>
+<li><b>Convidado:</b> chega por indicação de um Membro para uma edição. Ainda não é Membro.</li>
+<li><b>Visitante:</b> participa por interesse próprio. Ainda não é Membro.</li>
+<li><b>Membro:</b> pessoa com adesão aprovada. A identidade de Membro é gratuita e permanece mesmo que um dia existam planos pagos.</li>
+<li><b>Limite antes da adesão:</b> até 2 presenças em atividades abertas e gratuitas, somando Convidado e Visitante, presenciais ou online. Só conta a presença confirmada no check-in. Inscrição, reserva, cancelamento e ausência não contam.</li>
+<li><b>Depois do limite:</b> nova participação nessas atividades exige adesão aprovada como Membro.</li>
+<li><b>Atividades pagas e especiais:</b> têm regras próprias e, salvo aviso da edição, não gastam o limite.</li>
+</ul>
+<h3>Como virar Membro</h3>
+<ul>
+<li>Ter pelo menos 1 presença validada.</li>
+<li>Pedir a adesão (“Quero ser Membro”).</li>
+<li>Preencher o cadastro mínimo.</li>
+<li>Aceitar os Termos, o Código de Convivência e a Política de Privacidade. Marketing, imagem e diretório são escolhas separadas.</li>
+<li>Passar pela validação da organização, que não pode discriminar por profissão, cargo, empresa, gênero, idade, crença ou origem.</li>
+<li>Resultado: aprovado, ajustes necessários ou recusado, sempre com motivo.</li>
+</ul>
+<h3>Vagas, indicação e cancelamento</h3>
+<ul>
+<li>Cada Membro pode indicar, inicialmente, 1 convidado por atividade aberta. A indicação não garante vaga.</li>
+<li>Membros têm janela padrão de 48 horas de inscrição antes da abertura geral, ajustável por edição e sempre divulgada.</li>
+<li>Quem não puder ir deve cancelar até 24 horas antes. Duas ausências sem aviso em 12 meses fazem a pessoa perder a janela prioritária do encontro seguinte.</li>
+<li>Justificativa: em até 7 dias corridos após o encontro, com resposta da organização em até 7 dias úteis e uma reconsideração possível.</li>
+</ul>
+<h3>Milhas, Conector e Embaixador</h3>
+<ul>
+<li>As milhas começam a contar na adesão aprovada. As presenças anteriores ficam no histórico, sem crédito retroativo.</li>
+<li>Presença validada +10, convidado que comparece +5, experiência ou conteúdo aprovado +15, parceiro indicado que contribui +20.</li>
+<li>Conector: 60 pontos, 4 presenças e 1 contribuição validada. Embaixador: 180 pontos, 6 presenças, 2 contribuições de tipos diferentes e 12 meses como Conector. Sempre com avaliação da organização e aceite voluntário.</li>
+</ul>
+</div>
+</section>
+
+<section>
+<div class="sec-top"><h2>5. Privacidade: o que alterar, sem substituir</h2><p>Pontos do texto atual e a mudança proposta.</p></div>
+<div class="tbl"><table>
+<thead><tr><th>Trecho atual</th><th>Mudança</th></tr></thead>
+<tbody>
+<tr><td>“Ao aceitar esta política, quem participa de um encontro passa a aparecer na Rede.”</td><td>Trocar por: a Rede é só para Membros com adesão aprovada, e aparecer no diretório é uma escolha à parte, que a pessoa liga ou desliga.</td></tr>
+<tr><td>Dados coletados</td><td>Incluir: estágio de entrada, presenças pré-Membro, pedido de adesão com status e motivo, justificativas de ausência, lista de espera, preferências de comunicação e de imagem.</td></tr>
+<tr><td>Para que usamos</td><td>Incluir: aplicar o limite de 2 presenças, analisar pedidos de adesão, organizar inscrições e lista de espera. Marketing e imagem seguem só com consentimento.</td></tr>
+<tr><td>Com quem compartilhamos</td><td>Acrescentar: contatos de Visitantes não são repassados a parceiros e a lista de presenças não é publicada. A equipe autorizada é a única a ver a ficha completa.</td></tr>
+<tr><td>Convidados</td><td>Informar que o Membro pode indicar uma pessoa e que usamos esses dados só para o convite daquela edição.</td></tr>
+<tr><td>Justificativas</td><td>Não pedir atestado nem dado de saúde. Se alguém enviar, o acesso é restrito.</td></tr>
+<tr><td>“Enquanto seu cadastro estiver ativo”</td><td>Os prazos de retenção por tipo de dado precisam da definição do jurídico. Não inventei prazo.</td></tr>
+</tbody></table></div>
+</section>
+
+<section>
+<div class="sec-top"><h2>6. Pontos que o documento deixa em aberto ou que se contradizem</h2></div>
+<ul class="flat">
+<li><b>Cores.</b> A seção 1 do documento lista a paleta antiga com dourado (#C9973B, #DDB160). A identidade nova que aprovamos não tem mostarda. Seguimos a nova. Quer atualizar o Brand Guide?</li>
+<li><b>Visitantes e dois encontros.</b> A minuta 34.1 e a seção 17 ainda falam “Visitantes podem participar de até dois encontros”. A seção 37 (v23) corrigiu: o limite é de 2 somando Convidado e Visitante. Usei o v23 nas minutas acima.</li>
+<li><b>Quatro categorias.</b> A seção 33 cita “Visitante, Membro, Conector e Embaixador”. Pelo v23, Convidado e Visitante são portas de entrada. Usei a trilha do v23.</li>
+<li><b>Ainda sem decisão no documento:</b> acesso de Membro sem assinatura a atividades pagas, benefícios de parceiros, o que aparece no diretório e quem modera na operação solo (itens 7 a 10 da seção 11).</li>
+<li><b>Dados que não inventei:</b> preço de assinatura, kit futuro, reposição de crachá e retenção de dados. Ficam fora dos textos públicos.</li>
+</ul>
+</section>
+
+<section>
+<div class="sec-top"><h2>7. Preciso de você</h2></div>
+<div class="q"><b>As minutas das seções 3 e 4 estão no tom certo?</b> Se algo estiver diferente do que você quer dizer, anote aqui ou me mande.</div>
+<div class="q"><b>Posso usar a seção 5 como lista de mudanças</b> para encaminhar ao jurídico?</div>
+<div class="q"><b>Concorda com seguir a trilha do v23 onde o documento se contradiz?</b></div>
+</section>
+</div>
