@@ -126,7 +126,7 @@ function People({ joinHref }: { joinHref: string }) {
     <article className="person is-on">
       <div className="person__photo">
         <img src="/fotos/patricia-lima.jpg" alt="Patrícia Lima" />
-        <span className="person__carimbo"><small>ComuniCALI</small>Idealizadora</span>
+        <span className="person__carimbo" aria-hidden="true"><small>ComuniCALI</small>Idealizadora</span>
       </div>
       <div className="person__body">
         <h3>Patrícia Lima</h3>
@@ -257,6 +257,7 @@ export function Home() {
       </header>
 
       <section className="wrap stats">
+        <h2 className="sr-only">A comunidade em números</h2>
         <article className="stat ticket"><Users size={20} aria-hidden="true" /><strong>+300</strong><h3>Pessoas</h3><p>Na comunidade, nos canais e nos encontros</p></article>
         <article className="stat ticket"><CalendarDays size={20} aria-hidden="true" /><strong>{next?.numero || Math.max(1, editions.length)}ª</strong><h3>Edição presencial</h3><p>{next ? `${formatDate(next.data_evento)} em ${next.cidade}` : 'Encontros em Curitiba'}</p></article>
         <article className="stat ticket"><Handshake size={20} aria-hidden="true" /><strong>Brasil</strong><h3>Inteiro</h3><p>Pessoas de vários estados no grupo</p></article>
@@ -392,7 +393,7 @@ export function Home() {
         <div className="wrap sponsors__body">
           <div>
             <p className="eyebrow">Para empresas e profissionais</p>
-            <h2>Apoie este encontro.<br /><em className="nowrap">Seja um parceiro.</em></h2>
+            <h2>Apoie este encontro.{' '}<br /><em className="nowrap">Seja um parceiro.</em></h2>
             <p className="muted">Nem toda contribuição é financeira: cada parceiro oferece o que faz bem, e a proposta é combinada individualmente.</p>
             <div className="hero__actions">
               <a className="pill" href={PARTNER_FORM_URL}>Quero ser parceiro</a>
@@ -405,7 +406,7 @@ export function Home() {
           <div className="logos__track">
             {(partners.length ? [...partners, ...partners, ...partners] : Array.from({ length: 12 }, (_, index) => ({ id: String(index), nome: '', logo_url: null, site_url: null }))).map((partner, index) => (
               partner.nome
-                ? <a key={`${partner.id}-${index}`} className="logo" href={partner.site_url || undefined} target="_blank" rel="noopener noreferrer" title={partner.nome}>{partner.logo_url ? <img src={partner.logo_url} alt={partner.nome} /> : <span>{partner.nome}</span>}</a>
+                ? <a key={`${partner.id}-${index}`} className="logo" href={partner.site_url || undefined} target="_blank" rel="noopener noreferrer" title={partner.nome} aria-hidden={index >= partners.length ? true : undefined} tabIndex={index >= partners.length ? -1 : undefined}>{partner.logo_url ? <img src={partner.logo_url} alt={partner.nome} /> : <span>{partner.nome}</span>}</a>
                 : <a key={index} className="logo logo--empty" href={PARTNER_FORM_URL}>Sua marca aqui</a>
             ))}
           </div>

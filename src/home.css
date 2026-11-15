@@ -172,7 +172,7 @@
 .selo{display:grid;grid-template-columns:minmax(0,1fr);width:118px;height:146px;color:#F7F0EA}
 .selo__miolo{display:grid;place-items:center;align-content:center;gap:6px;min-width:0;text-align:center;padding:10px 6px}
 .selo__miolo strong{font-family:var(--display);font-size:13px;line-height:1.15}
-.selo__base{font-size:8px;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
+.selo__base{font-size:12px;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
 .selo--postal{padding:6px;background:radial-gradient(circle at 5px 5px,transparent 3px,#F7F0EA 3.4px) -5px -5px/10px 10px;transform:rotate(-2deg)}
 .selo--postal .selo__miolo{background:#C9973B;color:#22100F;outline:1px solid rgba(34,16,15,.35);outline-offset:-6px}
 .selo--carimbo{height:118px;padding:4px;border-radius:50%;background:#F7F0EA;transform:rotate(4deg)}
@@ -209,7 +209,7 @@
 .stat h3{padding-top:10px;border-top:1.5px dashed rgba(221,177,96,.3);width:100%}
 /* Carimbo da idealizadora sobre a foto, como na Rede. */
 .person__carimbo{position:absolute;left:18px;bottom:18px;display:grid;justify-items:center;padding:6px 12px;border:2px solid #7A1F3D;border-radius:4px;outline:1px dashed #7A1F3D;outline-offset:-6px;background:rgba(255,253,250,.94);color:#7A1F3D;font:800 15px/1.1 'Funnel Display',sans-serif;letter-spacing:.1em;text-transform:uppercase;transform:rotate(-8deg);box-shadow:0 4px 10px rgba(0,0,0,.25)}
-.person__carimbo small{font:700 8px Inter,sans-serif;letter-spacing:.2em}
+.person__carimbo small{font:700 10px Inter,sans-serif;letter-spacing:.2em}
 /* Formatos de encontro como bilhetes pequenos. */
 .formatos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 22px;padding:0;list-style:none}
 .formatos li{position:relative;display:grid;gap:4px;padding:14px 16px;border:1px dashed rgba(221,177,96,.4);border-radius:12px;background:rgba(201,151,59,.06)}
@@ -226,7 +226,7 @@
 .ticket h3,.ticket strong,.ticket p,.ticket span,.ticket svg{color:#1F0E14!important;position:relative}
 .ticket h3{border-top:1.5px dashed rgba(31,14,20,.4)}
 .ticket p{opacity:.85}
-.ticket__numero{position:absolute!important;right:24px;top:50%;transform:translateY(-50%) rotate(90deg);transform-origin:center;font:700 11px Inter,sans-serif;letter-spacing:.2em;opacity:.7}
+.ticket__numero{position:absolute!important;right:24px;top:50%;transform:translateY(-50%) rotate(90deg);transform-origin:center;font:700 12px Inter,sans-serif;letter-spacing:.2em;opacity:.7}
 .ticket__estrelas{display:block;margin:6px 0 4px;font-size:12px;letter-spacing:.4em;opacity:.8}
 /* Topo: ticket escuro e compacto, só moldura e números em dourado. */
 .stats .ticket{padding:14px 22px!important;background:linear-gradient(160deg,#3A1F28,#2A151C)!important;color:var(--ivory,#F7F0EA)!important;box-shadow:0 10px 28px rgba(0,0,0,.25)}
@@ -241,17 +241,17 @@
   .stats .ticket::before{inset:5px 9px}
   .stats .ticket svg,.stats .ticket p{display:none}
   .stats .ticket strong{font-size:20px}
-  .stats .ticket h3{font-size:11px;padding-top:4px}
+  .stats .ticket h3{font-size:12px;padding-top:4px}
 }
 /* Passaporte: ticket vazado com canhoto do ícone à esquerda. */
 .passaporte .ticket{display:grid;grid-template-columns:52px 1fr;column-gap:18px;align-items:center;padding:20px 46px 20px 22px!important;background:rgba(201,151,59,.07)!important;color:#F7F0EA!important}
 .passaporte .ticket::before{inset:6px 12px;border:1px solid rgba(221,177,96,.4)}
 .passaporte .ticket svg{grid-row:1/4;color:#DDB160!important;justify-self:center}
 .passaporte .ticket::after{content:'';display:block;position:absolute;left:74px;top:14px;bottom:14px;border-left:1px dashed rgba(221,177,96,.4);width:0;height:auto;background:none;clip-path:none;border-radius:0}
-.passaporte .ticket .ticket__estrelas{grid-column:2;color:#C9973B!important;font-size:10px;margin:0}
+.passaporte .ticket .ticket__estrelas{grid-column:2;color:#C9973B!important;font-size:12px;margin:0}
 .passaporte .ticket strong{grid-column:2;margin:2px 0 4px;font:700 18px var(--display);text-transform:uppercase;letter-spacing:.05em;color:#DDB160!important}
 .passaporte .ticket p{grid-column:2;color:var(--soft)!important;font-size:14px;opacity:1}
-.passaporte .ticket .ticket__numero{color:#C9973B!important;right:12px;font-size:10px}
+.passaporte .ticket .ticket__numero{color:#C9973B!important;right:12px;font-size:12px}
 /* Formatos com capa. */
 .escalas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .escala{overflow:hidden;border:1px solid var(--edge);border-radius:18px;background:var(--panel)}
@@ -323,7 +323,7 @@ html{scroll-behavior:smooth}
 .home .site-footer{background:linear-gradient(135deg,#DDB160,#C9973B);border-top:0;color:#3A2420}
 .home .site-footer__logo img{content:url(/brand/comunicali-bordo-horizontal.png)}
 .home .site-footer a{color:#22100F}
-.home .site-footer__legal{border-top-color:rgba(34,16,15,.15);color:#4A3832;font-size:10px;line-height:1.5}
+.home .site-footer__legal{border-top-color:rgba(34,16,15,.15);color:#4A3832;font-size:12px;line-height:1.5}
 .home .site-footer__faith{color:#5A1E2D}
 .faixa{padding-top:64px;padding-bottom:64px}
 .faixa--emenda{padding-bottom:72px}
@@ -343,7 +343,7 @@ html{scroll-behavior:smooth}
 .home .site-footer__logo img{content:url(/brand/communicali-branco.png)}
 .home .site-footer a{color:#F7F0EA}
 .home .site-footer a:hover{color:#DDB160}
-.home .site-footer__legal{justify-items:center;text-align:center;border-top-color:rgba(247,240,234,.18);color:#EADDD2;font-size:11px}
+.home .site-footer__legal{justify-items:center;text-align:center;border-top-color:rgba(247,240,234,.18);color:#EADDD2;font-size:12px}
 .home .site-footer__legal p{max-width:none}
 .home .site-footer__faith{text-align:center;color:#DDB160;font-size:14px;padding-top:6px}
 
@@ -421,7 +421,7 @@ html{scroll-behavior:smooth}
 .selo-card__frente img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 12px 18px rgba(0,0,0,.45))}
 .selo-card__verso{transform:rotateY(180deg);display:grid;align-content:center;justify-items:start;gap:10px;padding:17% 16%;background:url(/selos/postal-verso.png) center/100% 100% no-repeat;filter:drop-shadow(0 12px 18px rgba(0,0,0,.45));color:#22100F;text-align:left}
 .selo-card__verso strong{font:700 clamp(15px,1.5vw,19px)/1.1 Inter,sans-serif;color:var(--cor)}
-.selo-card__verso span{font:400 clamp(11.5px,1vw,13px)/1.45 Inter,sans-serif;color:#4A3832}
+.selo-card__verso span{font:400 clamp(12px,1vw,13px)/1.45 Inter,sans-serif;color:#4A3832}
 .selo-card:focus-visible{outline:2px solid var(--gold-2);outline-offset:6px;border-radius:10px}
 @media (hover:hover){.selo-card:hover{transform:rotate(0) scale(1.28);z-index:20}.selo-card:hover .selo-card__giro{transform:rotateY(180deg)}}
 .selo-card.virado{transform:rotate(0) scale(1.28);z-index:20}
@@ -459,3 +459,15 @@ html{scroll-behavior:smooth}
 .app__lista li>div{display:grid;gap:3px}
 .app__icone{display:grid!important;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(201,151,59,.12);color:var(--gold-2)!important}
 @media (max-width:860px){.app__grade{grid-template-columns:1fr!important}.app__celular{width:min(300px,80%)!important}}
+
+/* Acessibilidade: texto, toque, carrossel e quebras de linha */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.nav__links a,.nav__membro{display:inline-flex;align-items:center;min-height:44px}
+.hero__actions .link,.caminho__grupo .link,.caminho__acao.link,.block .link{display:inline-flex;align-items:center;min-height:44px}
+.logos:hover .logos__track,.logos:focus-within .logos__track{animation-play-state:paused}
+.home h1,.home h2,.home h3{text-wrap:balance}
+.home p,.home li,.home blockquote,.home summary{text-wrap:pretty}
+.pill,.nav__cali,.nav__logo,.site-footer__logo,.site-links a{display:inline-flex;align-items:center;min-height:44px}
+.share a,.share button,.site-socials a{min-width:44px;min-height:44px}
+.selo-card{min-height:44px;min-width:44px}
+.site-links a{min-width:44px;justify-content:center}
