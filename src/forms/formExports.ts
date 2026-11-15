@@ -86,7 +86,7 @@ export async function downloadShareCard(card: { title: string; category: string;
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   const context = canvas.getContext('2d')!;
   const bg = context.createLinearGradient(0, 0, W, H);
-  bg.addColorStop(0, '#7A2840'); bg.addColorStop(0.55, '#5A1E2D'); bg.addColorStop(1, '#3A111C');
+  bg.addColorStop(0, '#5A1E2D'); bg.addColorStop(0.55, '#5A1E2D'); bg.addColorStop(1, '#3A111C');
   context.fillStyle = bg; context.fillRect(0, 0, W, H);
   const glow = context.createRadialGradient(160, 120, 0, 160, 120, 620);
   glow.addColorStop(0, 'rgba(217,185,138,.22)'); glow.addColorStop(1, 'rgba(217,185,138,0)');
@@ -96,10 +96,10 @@ export async function downloadShareCard(card: { title: string; category: string;
     context.save(); context.translate(1010, 560); context.rotate(-0.18); context.drawImage(lime, -450, -450, 900, 900); context.restore();
   } catch { /* segue sem a lima */ }
   try { const logo = await loadImage('/brand/cali-logo-light.svg'); const h = 104; context.drawImage(logo, P, 78, (logo.width / logo.height) * h || 190, h); } catch { /* sem logo */ }
-  try { const oak = await tintedMark('/brand/cali-oak-mark.svg', 120, (ctx) => { ctx.fillStyle = '#F3E9E1'; }); context.drawImage(oak, W - P - 104, 72, 104, 104); } catch { /* sem folha */ }
+  try { const oak = await tintedMark('/brand/cali-oak-mark.svg', 120, (ctx) => { ctx.fillStyle = '#EAF2F9'; }); context.drawImage(oak, W - P - 104, 72, 104, 104); } catch { /* sem folha */ }
 
   let y = 300;
-  context.fillStyle = '#D9B98A'; context.font = '700 26px Inter, Arial, sans-serif';
+  context.fillStyle = '#D3E3F2'; context.font = '700 26px Inter, Arial, sans-serif';
   (context as CanvasRenderingContext2D & { letterSpacing?: string }).letterSpacing = '5px';
   context.fillText((card.category || 'Formulário').toUpperCase(), P, y);
   (context as CanvasRenderingContext2D & { letterSpacing?: string }).letterSpacing = '0px';
@@ -115,7 +115,7 @@ export async function downloadShareCard(card: { title: string; category: string;
   }
 
   const panelY = 900, panelH = 350;
-  context.fillStyle = '#F7F3EE'; context.beginPath(); context.roundRect(P, panelY, W - P * 2, panelH, 34); context.fill();
+  context.fillStyle = '#F7F9FB'; context.beginPath(); context.roundRect(P, panelY, W - P * 2, panelH, 34); context.fill();
   const qr = await loadImage(await qrDataUrl(url, 600));
   context.fillStyle = '#FFFFFF'; context.beginPath(); context.roundRect(P + 30, panelY + 30, 290, 290, 22); context.fill();
   context.drawImage(qr, P + 45, panelY + 45, 260, 260);
@@ -124,7 +124,7 @@ export async function downloadShareCard(card: { title: string; category: string;
   context.fillText('Responda pelo celular', tx, panelY + 110);
   context.fillStyle = '#6B5D63'; context.font = '400 26px Inter, Arial, sans-serif';
   wrap(context, 'Aponte a câmera para o QR Code ou acesse o link:', W - P - tx - 30, 2).forEach((line, index) => context.fillText(line, tx, panelY + 160 + index * 36));
-  context.fillStyle = '#7A1F3D'; context.font = '600 24px Inter, Arial, sans-serif';
+  context.fillStyle = '#5A1E2D'; context.font = '600 24px Inter, Arial, sans-serif';
   wrap(context, url.replace(/^https?:\/\//, ''), W - P - tx - 30, 2).forEach((line, index) => context.fillText(line, tx, panelY + 250 + index * 32));
   context.fillStyle = 'rgba(243,233,225,.7)'; context.font = '500 22px Inter, Arial, sans-serif'; context.textAlign = 'center';
   context.fillText('ComuniCALI  ·  Café & Pessoas  ·  comuni.calirh.com', W / 2, H - 38);

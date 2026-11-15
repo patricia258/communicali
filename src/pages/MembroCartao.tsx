@@ -1,5 +1,6 @@
 /* Cartão para compartilhar o nível e aviso de parabéns quando o nível muda. A imagem é desenhada no próprio aparelho. */
 import { useEffect, useState } from 'react';
+import { seloUrl } from '../selosNovos';
 
 const SELOS: Record<string, string> = { fundadora: 'postal-fundadora', membro: 'postal-membro', conector: 'postal-conector', embaixador: 'postal-embaixador' };
 const VANTAGENS: Record<string, string[]> = {
@@ -21,13 +22,13 @@ async function desenhar(nome: string, nivel: string, categoria: string, foto: st
   tela.width = 1080;
   tela.height = 1350;
   const c = tela.getContext('2d')!;
-  c.fillStyle = '#F7F0EA';
+  c.fillStyle = '#F3F6F9';
   c.fillRect(0, 0, 1080, 1350);
-  c.strokeStyle = 'rgba(201,151,59,.22)';
+  c.strokeStyle = 'rgba(198,218,234,.22)';
   c.lineWidth = 2;
   for (let raio = 30; raio < 1500; raio += 26) { c.beginPath(); c.arc(960, 120, raio, 0, Math.PI * 2); c.stroke(); }
-  [['#7A1F3D', 0, 405], ['#A9502E', 405, 270], ['#C9973B', 675, 270], ['#5F6238', 945, 135]].forEach(([cor, x, largura]) => { c.fillStyle = String(cor); c.fillRect(Number(x), 0, Number(largura), 16); });
-  const logo = await carregar('/brand/communicali-horizontal.png');
+  [['#5A1E2D', 0, 405], ['#3F6E9A', 405, 270], ['#C6DAEA', 675, 270], ['#6F6770', 945, 135]].forEach(([cor, x, largura]) => { c.fillStyle = String(cor); c.fillRect(Number(x), 0, Number(largura), 16); });
+  const logo = await carregar('/brand/novo/comunicali-b-fundo-claro.svg');
   c.drawImage(logo, 70, 58, 460, 460 * logo.height / logo.width);
   c.save();
   c.translate(330, 590);
@@ -45,28 +46,28 @@ async function desenhar(nome: string, nivel: string, categoria: string, foto: st
     const altura = 544 / razao;
     c.drawImage(imagem, (imagem.width - largura) / 2, Math.max((imagem.height - altura) * 0.12, 0), largura, altura, -212, -272, 424, 544);
   } else {
-    c.fillStyle = '#EFD9D2';
+    c.fillStyle = '#E3EAF1';
     c.fillRect(-212, -272, 424, 544);
-    c.fillStyle = '#7A1F3D';
+    c.fillStyle = '#5A1E2D';
     c.font = '800 180px "Funnel Display", sans-serif';
     c.textAlign = 'center';
     c.fillText(nome.charAt(0), 0, 60);
   }
   c.restore();
-  const selo = await carregar(`/selos/${SELOS[categoria] || 'postal-membro'}.png`);
+  const selo = await carregar(seloUrl(SELOS[categoria] ? categoria : 'membro'));
   c.save();
   c.translate(790, 620);
   c.rotate(0.08);
   c.drawImage(selo, -210, -263, 420, 525);
   c.restore();
   c.textAlign = 'left';
-  c.fillStyle = '#22100F';
+  c.fillStyle = '#1B0A10';
   c.font = '800 76px "Funnel Display", sans-serif';
   c.fillText(nome, 70, 1000, 940);
-  c.fillStyle = '#7A1F3D';
+  c.fillStyle = '#5A1E2D';
   c.font = '700 54px "Funnel Display", sans-serif';
   c.fillText(`${nivel} da ComuniCALI`, 70, 1075, 940);
-  c.fillStyle = '#C9973B';
+  c.fillStyle = '#C6DAEA';
   c.fillRect(70, 1120, 300, 5);
   c.fillStyle = '#5A1E2D';
   c.font = '400 36px Inter, sans-serif';

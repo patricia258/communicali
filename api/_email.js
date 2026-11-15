@@ -9,20 +9,15 @@ export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,c
 
 // Topo em imagem (fundo vinho, logo branco, faixa de cores): nenhum aplicativo inverte imagem, então a marca
 // aparece igual no modo claro e no escuro. Página branca, sem moldura. A cor de cada tipo aparece na etiqueta e no botão; os blocos têm cantos arredondados.
-const COR = { tinta: '#22100F', bordo: '#5A1E2D', vivo: '#7A1F3D', mostarda: '#C9973B', clara: '#DDB160', suave: '#CBB9B1', marfim: '#F7F0EA', rose: '#FBF1EC', oliva: '#5F6238', terra: '#A9502E' };
-const VIVAS = { ouro: 'linear-gradient(135deg,#E8B954,#C9973B)', vinho: 'linear-gradient(135deg,#A8275A,#7A1F3D)', terra: 'linear-gradient(135deg,#D9673A,#A9502E)', oliva: 'linear-gradient(135deg,#8A9A3E,#5F6238)', rosa: 'linear-gradient(135deg,#E86A8E,#B83A62)' };
+const COR = { tinta: '#1B0A10', bordo: '#5A1E2D', vivo: '#5A1E2D', mostarda: '#C6DAEA', clara: '#D3E3F2', suave: '#C9D1D9', marfim: '#FFFFFF', rose: '#EEF4FA', oliva: '#6F6770', terra: '#3F6E9A' };
+// Identidade nova (15/11/2026): etiqueta em céu com texto de tinta, botão em pílula de tinta. Sem mostarda, sem degradê.
+const base = { etiqueta: '#C6DAEA', fundo: 'none', etiquetaTexto: COR.tinta, botao: COR.tinta, botaoTexto: '#FFFFFF' };
 const FAIXA = {
-  consumo: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
-  recebido: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta },
-  confirmacao: { etiqueta: '#7A1F3D', fundo: VIVAS.vinho, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
-  espera: { etiqueta: '#5F6238', fundo: VIVAS.oliva, etiquetaTexto: '#FFFFFF' },
-  lembrete: { etiqueta: '#A9502E', fundo: VIVAS.terra, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
-  convite: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
-  agradecimento: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
-  card: { etiqueta: '#C9973B', fundo: VIVAS.ouro, etiquetaTexto: COR.tinta, botao: COR.vivo, botaoTexto: COR.marfim },
-  posevento: { etiqueta: '#5F6238', fundo: VIVAS.oliva, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
-  pesquisa: { etiqueta: '#5F6238', fundo: VIVAS.oliva, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
-  boasvindas: { etiqueta: '#B83A62', fundo: VIVAS.rosa, etiquetaTexto: '#FFFFFF', botao: COR.vivo, botaoTexto: COR.marfim },
+  consumo: base, recebido: base, convite: base, agradecimento: base, card: base, posevento: base, pesquisa: base,
+  confirmacao: { ...base, etiqueta: COR.bordo, etiquetaTexto: '#FFFFFF' },
+  boasvindas: { ...base, etiqueta: COR.bordo, etiquetaTexto: '#FFFFFF' },
+  lembrete: { ...base, etiqueta: COR.bordo, etiquetaTexto: '#FFFFFF' },
+  espera: { ...base, etiqueta: '#6F6770', etiquetaTexto: '#FFFFFF' },
 };
 const FONTES = '<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@600;700&family=Inter:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">';
 const NAO_RESPONDA = 'Este é um e-mail automático. Por favor, não responda.';
@@ -106,7 +101,7 @@ function semViuva(html) {
 function rodape() {
   return `<tr><td align="center" style="padding:32px 0 0;font-family:${TEXTO};font-size:15px;line-height:22px;font-style:italic;color:${COR.vivo}">Falar de pessoas pode mudar o mundo.</td></tr>
 <tr><td align="center" style="padding:4px 0 0;font-family:${TEXTO};font-size:14px;line-height:22px;color:${COR.tinta}"><strong>Toda honra a Deus! 🙏</strong><br><a href="${SITE}" style="color:${COR.vivo}">comuni.calirh.com</a> · <a href="https://www.instagram.com/calirh_/" style="color:${COR.vivo}">@calirh_</a></td></tr>
-<tr><td align="center" style="padding:18px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#8A7A72">${NAO_RESPONDA}</td></tr>`;
+<tr><td align="center" style="padding:18px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#6F6770">${NAO_RESPONDA}</td></tr>`;
 }
 
 function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, cor, destaque, detalhes = true, comFoto = true }) {
@@ -119,7 +114,7 @@ function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, 
 <tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:14px"></td></tr>
 ${comFoto ? foto(edition) : ''}
 <tr><td align="center" style="padding:0 0 14px"><span style="display:inline-block;padding:8px 18px;border-radius:999px;background-color:${cor.etiqueta};background-image:${cor.fundo};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
-<tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.vivo}">${saudacao}</td></tr>
+<tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.tinta}">${saudacao}</td></tr>
 <tr><td style="padding:0 0 8px">${texto}</td></tr>
 ${detalhes ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:22px 24px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 ${detalhe('Quando', `${longDate(edition.data_evento)}, ${edition.horario}`)}${detalhe('Onde', endereco(edition))}
@@ -141,11 +136,11 @@ function layoutCartao({ previa, titulo, cor, saudacao, paragrafos, itens = [], a
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 <tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:14px"></td></tr>
 <tr><td align="center" style="padding:0 0 14px"><span style="display:inline-block;padding:8px 18px;border-radius:999px;background-color:${cor.etiqueta};background-image:${cor.fundo};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
-<tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.vivo}">${saudacao}</td></tr>
+<tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.tinta}">${saudacao}</td></tr>
 <tr><td style="padding:0 0 8px">${texto}</td></tr>
-${aviso ? `<tr><td style="padding:0 0 16px"><div style="padding:14px 18px;border-radius:14px;background:#FBEDE6;border-left:4px solid ${COR.terra};font-family:${TEXTO};font-size:15px;line-height:23px;font-weight:600;color:${COR.terra}">${semViuva(escape(aviso))}</div></td></tr>` : ''}
+${aviso ? `<tr><td style="padding:0 0 16px"><div style="padding:14px 18px;border-radius:14px;background:#F4F8FB;border-left:4px solid ${COR.bordo};font-family:${TEXTO};font-size:15px;line-height:23px;font-weight:600;color:${COR.bordo}">${semViuva(escape(aviso))}</div></td></tr>` : ''}
 ${itens.length ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:22px 24px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${itens.filter(([, valor]) => valor).map(([rotulo, valor]) => detalhe(rotulo, valor)).join('')}</table></td></tr>` : ''}
-${botao ? `<tr><td align="center" style="padding:24px 0 4px"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.vivo};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
+${botao ? `<tr><td align="center" style="padding:24px 0 4px"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.tinta};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
 ${depois ? `<tr><td style="padding:22px 0 0"><div style="padding:18px 22px;border-radius:20px;border:1px dashed ${COR.mostarda};font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${depois}</div></td></tr>` : ''}
 ${rodape()}
 </table></td></tr></table></body></html>`;
@@ -211,12 +206,12 @@ export function layoutSimples({ titulo, saudacao, texto, destaque, linhas, botao
 <tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:14px"></td></tr>
 ${imagem ? `<tr><td align="center" style="padding:0 0 18px"><img src="${escape(imagem)}" width="200" alt="" style="display:block;width:200px;max-width:70%;height:auto;border:0"></td></tr>` : ''}
 <tr><td align="center" style="padding:0 0 12px"><span style="display:inline-block;padding:7px 16px;border-radius:999px;background:${COR.mostarda};font-family:${TEXTO};font-size:14px;font-weight:600;color:${COR.tinta}">${escape(titulo)}</span></td></tr>
-<tr><td align="center" style="padding:0 0 12px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;color:${COR.vivo}">${escape(saudacao)}</td></tr>
+<tr><td align="center" style="padding:0 0 12px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;color:${COR.tinta}">${escape(saudacao)}</td></tr>
 <tr><td align="center" style="padding:0 0 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${linhas ? linhas.map((item) => `<div style="margin:0 0 8px">${semViuva(item)}</div>`).join('') : `${semViuva(escape(texto))}${destaque ? `<br><strong>${semViuva(escape(destaque))}</strong>` : ''}`}</td></tr>
 ${itens.length ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:18px 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${itens.map((item) => `✓ ${escape(item)}`).join('<br>')}</td></tr><tr><td height="20"></td></tr>` : ''}
-${botao ? `<tr><td align="center"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.vivo};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
+${botao ? `<tr><td align="center"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.tinta};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
 ${rodape()}
-${semSair ? '' : `<tr><td align="center" style="padding:8px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#8A7A72"><a href="${DESCADASTRO}" style="color:#8A7A72">Parar de receber estes e-mails</a></td></tr>`}
+${semSair ? '' : `<tr><td align="center" style="padding:8px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#6F6770"><a href="${DESCADASTRO}" style="color:#6F6770">Parar de receber estes e-mails</a></td></tr>`}
 </table></td></tr></table></body></html>`;
 }
 

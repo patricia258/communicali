@@ -63,7 +63,7 @@ export function Participante() {
   return (
     <main className="dn-pg">
       <div className="dn-pg-faixa" />
-      <img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <img className="dn-pg-logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
       {falha && !estado && <div className="dn-pg-corpo"><p className="dn-aviso alerta">Não foi possível abrir a dinâmica. Recarregue a página.</p></div>}
       {estado && nenhuma && <div className="dn-centro"><h1>A dinâmica começa em instantes</h1><p>Quando as perguntas abrirem, elas aparecem aqui.</p></div>}
       {estado && !nenhuma && (

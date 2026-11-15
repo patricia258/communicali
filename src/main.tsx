@@ -33,6 +33,7 @@ import { ErrorBoundary, reportError } from './components/ErrorBoundary';
 import { PublicFormPage } from './forms/PublicFormPage';
 import { FooterLinks, SiteFooter } from './components/SiteFooter';
 import type { ReactNode } from 'react';
+import './identidade.css'; // por último: sobrepõe os estilos antigos das telas
 
 const Page = ({ children }: { children: ReactNode }) => <>{children}<SiteFooter /></>;
 // Telas do dia do encontro (votar, check-in): rodapé de uma linha, para não roubar a tela do celular.

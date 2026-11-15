@@ -33,7 +33,7 @@ export function Sala() {
   }, [slug, previa]);
 
   const molde = (corpo: React.ReactNode) => (
-    <main className="dn-pg"><div className="dn-pg-faixa" /><img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" /><div className="dn-pg-corpo">{corpo}</div></main>
+    <main className="dn-pg"><div className="dn-pg-faixa" /><img className="dn-pg-logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /><div className="dn-pg-corpo">{corpo}</div></main>
   );
   if (!presenca) return molde(<div className="dn-cartao"><h1>Faça seu check-in para entrar</h1><p className="dn-pg-inst">Assim a gente sabe que você está aqui e libera as interações no seu celular.</p><a className="dn-btn" href="/checkin?novo=1" style={{ textAlign: 'center', textDecoration: 'none' }}>Fazer check-in</a></div>);
   if (!estado) return <main className="dn-pg" aria-busy="true" />;

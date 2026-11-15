@@ -40,7 +40,7 @@ export function Votar() {
   return (
     <main className="dn-pg">
       <div className="dn-pg-faixa" />
-      <img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <img className="dn-pg-logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
       <div className="dn-pg-corpo">
         <div className="dn-cartao">
           <p className="dn-pg-etapa">{poll?.pergunta_2 && !sent && poll.situacao === 'ativa' ? `Pergunta ${etapa} de 2` : 'Votação ao vivo'}</p>

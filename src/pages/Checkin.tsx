@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { seloUrl } from '../selosNovos';
 import { useParams } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { IdCard } from 'lucide-react';
@@ -52,14 +53,14 @@ function Success({ done, previa }: { done: Done; previa?: boolean }) {
   return (
     <main className="dn-pg">
       <div className="dn-pg-faixa" />
-      <img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <img className="dn-pg-logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
       <div className="dn-pg-corpo">
         <section className="dn-bilhete">
           <p className="dn-bilhete__etapa">Check-in feito</p>
           <h1>Presença confirmada!</h1>
           <p className="dn-bilhete__texto">Que bom ter você aqui.</p>
           {!!done.junto?.length && <QuemVeio codigo={done.codigo} junto={done.junto} />}
-          <img className="dn-selo" src={`/selos/postal-${done.categoria === 'convidado' ? 'convidado' : 'visitante'}.png`} alt={`Selo de ${done.categoria === 'convidado' ? 'Convidado' : 'Visitante'}`} />
+          <img className="dn-selo" src={seloUrl(done.categoria === 'convidado' ? 'convidado' : 'visitante')} alt={`Selo de ${done.categoria === 'convidado' ? 'Convidado' : 'Visitante'}`} />
           <dl className="dn-dados">
             <div><dt>Nome</dt><dd>{done.nome}</dd></div>
             <div><dt>Status</dt><dd>{done.categoria === 'convidado' ? 'Convidado' : 'Visitante'}</dd></div>
@@ -150,7 +151,7 @@ export function Checkin() {
   if (previaCartao) return <Success previa done={{ nome: 'Maria Silva', categoria: new URLSearchParams(window.location.search).get('tipo') === 'visitante' ? 'participante' : 'convidado', edicao: 'Primeiro encontro', selo: '', codigo: 'EXEMPLO', repetido: false }} />;
   if (done) return <Success done={done} />;
   if (step === 'recepcao') return (
-    <main className="dn-pg"><div className="dn-pg-faixa" /><img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+    <main className="dn-pg"><div className="dn-pg-faixa" /><img className="dn-pg-logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
       <div className="dn-pg-corpo"><div className="dn-cartao"><h1>Não encontramos esse e-mail na lista</h1><p className="dn-pg-inst">Sem problema: procure a organização na recepção, que registra a sua presença na hora.</p><a className="dn-link" href="/checkin?novo=1">Tentar com outro e-mail</a></div></div>
     </main>
   );
@@ -160,7 +161,7 @@ export function Checkin() {
   return (
     <main className="dn-pg">
       <div className="dn-pg-faixa" />
-      <img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <img className="dn-pg-logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
       <div className="dn-centro">
         <h1>Bem-vindas e bem-vindos!</h1>
         {loadError && <p className="dn-aviso alerta">{loadError}</p>}

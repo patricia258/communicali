@@ -18,7 +18,7 @@ export function TelaoUnico() {
   if (etapa === 'palavras') return <TelaoDinamica />;
   if (etapa === 'pesquisa') return (
     <main className="dn-pg" style={{ display: 'grid', placeItems: 'center', textAlign: 'center', minHeight: '100vh' }}>
-      <div className="dn-centro"><img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" /><h1 style={{ fontSize: 'clamp(32px,4vw,64px)' }}>Obrigada por estar aqui!</h1><p style={{ fontSize: 'clamp(18px,2vw,32px)' }}>Responda a pesquisa de satisfação no seu celular, na sala do encontro.</p></div>
+      <div className="dn-centro"><img className="dn-pg-logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /><h1 style={{ fontSize: 'clamp(32px,4vw,64px)' }}>Obrigada por estar aqui!</h1><p style={{ fontSize: 'clamp(18px,2vw,32px)' }}>Responda a pesquisa de satisfação no seu celular, na sala do encontro.</p></div>
     </main>
   );
   return <TelaoCheckin />;

@@ -12,7 +12,7 @@ function folhaHtml(folha: Folha) {
     <tr class="grupo"><td colspan="${folha.colunas.length + 2}"><span class="tag tag--${grupo.cor || 'vinho'}">${esc(grupo.nome)}<i>${String(grupo.linhas.length).padStart(2, '0')}</i></span></td></tr>
     ${grupo.linhas.map((linha) => { n += 1; return `<tr><td class="caixa"><span></span></td><td class="n">${String(n).padStart(2, '0')}</td>${linha.map((celula, i) => `<td${i === 0 ? ' class="nome"' : ''}>${celula || '—'}</td>`).join('')}</tr>`; }).join('')}`).join('');
   return `<section class="folha">
-    <header><img src="${window.location.origin}/brand/communicali-bordo.png" alt="ComuniCALI"><div class="ticket"><small>${esc(folha.etiqueta)}</small><strong>${esc(folha.titulo)}</strong><span>${esc(folha.meta)}</span></div></header>
+    <header><img src="${window.location.origin}/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI"><div class="ticket"><small>${esc(folha.etiqueta)}</small><strong>${esc(folha.titulo)}</strong><span>${esc(folha.meta)}</span></div></header>
     <p class="linha"><span>${folha.instrucao}</span><span>${folha.resumo}</span></p>
     <table><thead><tr><th></th><th>Nº</th>${folha.colunas.map((coluna) => `<th>${esc(coluna)}</th>`).join('')}</tr></thead><tbody>${grupos || `<tr><td colspan="${folha.colunas.length + 2}">Ninguém nesta lista ainda.</td></tr>`}</tbody></table>
     <footer><span>CommuniCALI · comuni.calirh.com</span><span>${esc(folha.rodape)}</span></footer>
@@ -28,32 +28,32 @@ export function imprimirFolhas(titulo: string, folhas: Folha[]) {
   <style>
     @page{size:A4;margin:12mm}
     *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    body{margin:0;font-family:Inter,Arial,sans-serif;color:#22100F;font-size:11.5px}
+    body{margin:0;font-family:Inter,Arial,sans-serif;color:#1B0A10;font-size:11.5px}
     .folha{padding:8mm 4mm;page-break-after:always}.folha:last-child{page-break-after:auto}
     header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:14px}
     header img{height:44px}
-    .ticket{position:relative;display:grid;gap:2px;min-width:270px;padding:12px 22px;border-radius:6px;background:#5a1e2d;color:#F7F0EA;outline:1px dashed rgba(221,177,96,.7);outline-offset:-5px}
-    .ticket small{font-size:8.5px;font-weight:600;letter-spacing:.2em;color:#ddb160}
+    .ticket{position:relative;display:grid;gap:2px;min-width:270px;padding:12px 22px;border-radius:6px;background:#5a1e2d;color:#F3F6F9;outline:1px dashed rgba(198,218,234,.7);outline-offset:-5px}
+    .ticket small{font-size:8.5px;font-weight:600;letter-spacing:.2em;color:#C6DAEA}
     .ticket strong{font:700 21px 'Funnel Display',Inter,sans-serif}
-    .ticket span{font-size:9.5px;color:#e9dccf}
-    .linha{display:flex;justify-content:space-between;gap:12px;margin:0 0 4px;padding-top:8px;border-top:1px solid #e2d6cb;font-size:10.5px;color:#5a4740}
-    .linha mark{background:#f4dc6b;padding:0 3px}
+    .ticket span{font-size:9.5px;color:#EAF2F9}
+    .linha{display:flex;justify-content:space-between;gap:12px;margin:0 0 4px;padding-top:8px;border-top:1px solid #D3E3F2;font-size:10.5px;color:#5D4F55}
+    .linha mark{background:#D3E3F2;padding:0 3px}
     .linha b{font:700 14px 'Funnel Display',Inter,sans-serif;color:#5a1e2d}
     table{width:100%;border-collapse:collapse}
-    th{padding:7px 6px;border-bottom:1px solid #22100F;text-align:left;font-size:8.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#5a4740}
-    td{padding:6px 6px;border-bottom:1px solid #efe6de;vertical-align:middle;line-height:1.25}
+    th{padding:7px 6px;border-bottom:1px solid #1B0A10;text-align:left;font-size:8.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#5D4F55}
+    td{padding:6px 6px;border-bottom:1px solid #EAF2F9;vertical-align:middle;line-height:1.25}
     tr{page-break-inside:avoid}
-    tbody tr:not(.grupo):nth-child(even) td{background:#fbf7f3}
-    td.caixa{width:22px}td.caixa span{display:block;width:13px;height:13px;border:1.3px solid #b39b8a;border-radius:3px}
-    td.n{width:26px;font-weight:600;color:#c9973b}
+    tbody tr:not(.grupo):nth-child(even) td{background:#F7F9FB}
+    td.caixa{width:22px}td.caixa span{display:block;width:13px;height:13px;border:1.3px solid #D3E3F2;border-radius:3px}
+    td.n{width:26px;font-weight:600;color:#C6DAEA}
     td.nome{font-weight:700;font-size:12.5px}
-    td.nome small.sub{display:block;margin-top:1px;font-weight:500;font-size:9.5px;color:#7a1f3d}
+    td.nome small.sub{display:block;margin-top:1px;font-weight:500;font-size:9.5px;color:#5A1E2D}
     tr.grupo td{padding:12px 0 6px;border:0;background:none!important}
     .tag{position:relative;display:inline-flex;align-items:center;gap:8px;padding:4px 18px 4px 10px;color:#fff;font-weight:700;font-size:11.5px;clip-path:polygon(0 0,100% 0,calc(100% - 9px) 50%,100% 100%,0 100%)}
-    .tag i{font-style:normal;font-weight:600;font-size:9.5px;color:#ddb160;padding-left:8px;border-left:1px solid rgba(255,255,255,.35)}
-    .tag--vinho{background:#5a1e2d}.tag--ouro{background:#c9973b;color:#22100F}.tag--ouro i{color:#5a1e2d;border-color:rgba(34,16,15,.25)}
-    .pill{display:inline-block;padding:1px 8px;border:1px solid #7f9a6c;border-radius:999px;background:#eef3e8;color:#3d5a2a;font-size:9.5px;font-weight:600}
-    footer{display:flex;justify-content:space-between;margin-top:18px;padding-top:8px;border-top:1px dashed #cdbcae;font-size:9.5px;color:#8a7a70}
+    .tag i{font-style:normal;font-weight:600;font-size:9.5px;color:#C6DAEA;padding-left:8px;border-left:1px solid rgba(255,255,255,.35)}
+    .tag--vinho{background:#5a1e2d}.tag--ouro{background:#C6DAEA;color:#1B0A10}.tag--ouro i{color:#5a1e2d;border-color:rgba(34,16,15,.25)}
+    .pill{display:inline-block;padding:1px 8px;border:1px solid #7f9a6c;border-radius:999px;background:#F4F8FB;color:#3d5a2a;font-size:9.5px;font-weight:600}
+    footer{display:flex;justify-content:space-between;margin-top:18px;padding-top:8px;border-top:1px dashed #D3E3F2;font-size:9.5px;color:#6F6770}
   </style></head><body>${folhas.map(folhaHtml).join('')}
   <script>document.fonts.ready.then(()=>setTimeout(()=>window.print(),300))<\/script></body></html>`);
   janela.document.close();

@@ -144,7 +144,7 @@ export function Apoio() {
   }
   const atual = estado ? ETAPAS.findIndex(([id]) => id === estado.etapa) : 0;
   return (
-    <main className="dn-pg"><div className="dn-pg-faixa" /><img className="dn-pg-logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+    <main className="dn-pg"><div className="dn-pg-faixa" /><img className="dn-pg-logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
       <div className="dn-pg-corpo"><div className="dn-cartao">
         {estado === undefined && <p className="dn-pg-inst">Carregando…</p>}
         {estado === null && <><h1>Link não reconhecido</h1><p className="dn-pg-inst">Peça um link novo para a Patrícia.</p></>}

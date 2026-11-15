@@ -3,9 +3,9 @@ import { assinatura, banco } from './_email.js';
 
 const pagina = (titulo, texto) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titulo} · ComuniCALI</title>
 <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet"></head>
-<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#1F0E14;color:#F7F0EA;font:16px/1.6 Inter,sans-serif;text-align:center;padding:24px;box-sizing:border-box">
-<main style="max-width:460px"><img src="/brand/communicali-branco.png" alt="ComuniCALI" style="width:220px;max-width:100%"><h1 style="font:700 30px/1.2 'Funnel Display',sans-serif;margin:28px 0 12px">${titulo}</h1><p style="color:#CBB9B1;margin:0 0 24px">${texto}</p>
-<a href="/" style="display:inline-block;padding:10px 22px;border-radius:999px;background:#C9973B;color:#22100F;font-weight:600;text-decoration:none">Voltar ao site</a></main></body></html>`;
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:linear-gradient(180deg,#C6DAEA 0%,#E4EEF6 40%,#fff 100%);color:#1B0A10;font:16px/1.6 Inter,sans-serif;text-align:center;padding:24px;box-sizing:border-box">
+<main style="max-width:460px"><img src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" style="width:220px;max-width:100%"><h1 style="font:700 30px/1.2 'Funnel Display',sans-serif;margin:28px 0 12px">${titulo}</h1><p style="color:#5D4F55;margin:0 0 24px">${texto}</p>
+<a href="/" style="display:inline-block;padding:10px 22px;border-radius:999px;background:#1B0A10;color:#fff;font-weight:700;text-decoration:none">Voltar ao site</a></main></body></html>`;
 
 export default async function handler(req, res) {
   const email = String(req.query?.e || '').trim().toLowerCase();

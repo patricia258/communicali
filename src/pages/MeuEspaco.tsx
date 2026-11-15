@@ -1,5 +1,6 @@
 /* Espaço do membro: passaporte com carimbos, edições, missões, indicações, programa e perfil. Abre com código enviado ao e-mail. */
 import '../entrada-nova.css';
+import { seloUrl } from '../selosNovos';
 import { useEffect, useId, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { Bell, Building2, CalendarDays, Check, ChevronDown, ExternalLink, Handshake, Images, LockKeyhole, Mail, MapPin, Megaphone, Mic, Pencil, Share2, Target, UserPlus, Users } from 'lucide-react';
@@ -181,7 +182,7 @@ function Entrar() {
 
 function CarimboEdicao({ carimbo, indice }: { carimbo: Carimbo; indice: number }) {
   if (carimbo.carimbo_url) return <img className="passe__carimbo" src={carimbo.carimbo_url} alt={`Carimbo: ${carimbo.titulo}`} draggable={false} />;
-  const cor = ['#5F6238', '#A9502E', '#7A1F3D'][indice % 3];
+  const cor = ['#6F6770', '#3F6E9A', '#5A1E2D'][indice % 3];
   const data = carimbo.data_evento.split('-').reverse().join('.');
   return (
     <svg className="passe__carimbo" viewBox="0 0 400 400" role="img" aria-label={`Carimbo: ${carimbo.titulo}`} style={{ transform: `rotate(${indice % 2 ? 5 : -6}deg)` }}>
@@ -235,7 +236,7 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
   }
   return (
     <>
-      <header className="passe__topo"><img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" /><span>PASSAPORTE</span></header>
+      <header className="passe__topo"><img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /><span>PASSAPORTE</span></header>
       <div className="passe__saudacao">
         <h1>Olá, <em>{(m.apelido || m.nome).split(' ')[0]}!</em></h1>
         <button type="button" className="passe__sino" aria-label={`Alertas${extra ? `: ${avisos.length} ${avisos.length === 1 ? 'não lido' : 'não lidos'}` : ''}`} aria-expanded={alertasAbertos} aria-controls="passaporte-alertas" onClick={() => setAlertasAbertos(!alertasAbertos)}>
@@ -274,7 +275,7 @@ function Inicio({ espaco, extra, abrir, atualizar, compartilhar, verPerfil }: { 
           {(cartao?.cargo || cartao?.empresa) && <p>{[cartao.cargo, cartao.empresa].filter(Boolean).join(' · ')}</p>}
         </div>
         {!!cartao?.temas?.length && <div className="passe__heroi-temas">{cartao.temas.slice(0, 3).map((tema) => <span key={tema}>{tema}</span>)}</div>}
-        <img className="passe__heroi-selo" src={`/selos/postal-${m.categoria === 'organizador' ? 'fundadora' : m.categoria}.png`} alt={`Selo ${NIVEIS[m.categoria] || m.categoria}`} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+        <img className="passe__heroi-selo" src={seloUrl(m.categoria)} alt={`Selo ${NIVEIS[m.categoria] || m.categoria}`} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
         <div className="passe__heroi-pontos">
           <p className="passe__numero"><strong>{espaco.pontos}</strong> milhas{meta ? <>, <b>{faltam ? `faltam ${faltam} para ${meta.nome}` : `milhas alcançadas para ${meta.nome}`}</b></> : ''}</p>
           <div className="passe__barra" aria-hidden="true">
@@ -456,23 +457,23 @@ function contornoSelo(serrilhado: boolean) {
 
 // Selo redondo de missão: cor e ícone próprios, diferente dos selos postais do programa.
 const SELO_MISSAO: Record<string, { cor: string; Icone: typeof Users }> = {
-  convidados: { cor: '#7A1F3D', Icone: UserPlus }, conexao: { cor: '#A9502E', Icone: Handshake }, lugar: { cor: '#5F6238', Icone: MapPin },
-  palestra: { cor: '#C9973B', Icone: Mic }, parceiro: { cor: '#4A1424', Icone: Building2 }, representar: { cor: '#B83A62', Icone: Megaphone },
+  convidados: { cor: '#5A1E2D', Icone: UserPlus }, conexao: { cor: '#3F6E9A', Icone: Handshake }, lugar: { cor: '#6F6770', Icone: MapPin },
+  palestra: { cor: '#C6DAEA', Icone: Mic }, parceiro: { cor: '#4A1424', Icone: Building2 }, representar: { cor: '#5A1E2D', Icone: Megaphone },
 };
 function SeloMissao({ slug, conquistado }: { slug: string; conquistado: boolean }) {
   const arco = useId();
   const legenda = (MISSAO_SELOS[slug] || ['', 'Missão'])[1];
-  const { cor, Icone } = SELO_MISSAO[slug] || { cor: '#7A1F3D', Icone: Target };
+  const { cor, Icone } = SELO_MISSAO[slug] || { cor: '#5A1E2D', Icone: Target };
   return (
     <svg className={`passe__selo-redondo${conquistado ? ' is-conquistado' : ''}`} viewBox="0 0 120 120" role="img" aria-label={`Selo ${legenda}: ${conquistado ? 'conquistado' : 'a conquistar'}`}>
-      <circle cx="60" cy="60" r="58" fill="#F7F0EA" />
+      <circle cx="60" cy="60" r="58" fill="#F3F6F9" />
       <circle cx="60" cy="60" r="54" fill={cor} />
-      <circle cx="60" cy="60" r="47" fill="none" stroke="#F7F0EA" strokeWidth="1" strokeDasharray="2.5 3" opacity=".75" />
+      <circle cx="60" cy="60" r="47" fill="none" stroke="#F3F6F9" strokeWidth="1" strokeDasharray="2.5 3" opacity=".75" />
       <defs><path id={arco} d="M 22 60 A 38 38 0 0 1 98 60" /></defs>
-      <text fill="#F7F0EA" fontFamily="Inter, sans-serif" fontWeight="700" fontSize="8.5" letterSpacing="2.4"><textPath href={`#${arco}`} startOffset="50%" textAnchor="middle">MISSÃO</textPath></text>
-      <Icone x="44" y="40" width="32" height="32" color="#F7F0EA" strokeWidth={1.6} />
-      <text x="60" y="88" textAnchor="middle" fill="#F7F0EA" fontFamily="'Funnel Display', Inter, sans-serif" fontWeight="700" fontSize="11">{legenda}</text>
-      {conquistado && <g><circle cx="96" cy="24" r="13" fill="#DDB160" stroke="#F7F0EA" strokeWidth="2.5" /><path d="M90 24l4 4 8-8" fill="none" stroke="#22100F" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></g>}
+      <text fill="#F3F6F9" fontFamily="Inter, sans-serif" fontWeight="700" fontSize="8.5" letterSpacing="2.4"><textPath href={`#${arco}`} startOffset="50%" textAnchor="middle">MISSÃO</textPath></text>
+      <Icone x="44" y="40" width="32" height="32" color="#F3F6F9" strokeWidth={1.6} />
+      <text x="60" y="88" textAnchor="middle" fill="#F3F6F9" fontFamily="'Funnel Display', Inter, sans-serif" fontWeight="700" fontSize="11">{legenda}</text>
+      {conquistado && <g><circle cx="96" cy="24" r="13" fill="#C6DAEA" stroke="#F3F6F9" strokeWidth="2.5" /><path d="M90 24l4 4 8-8" fill="none" stroke="#1B0A10" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></g>}
     </svg>
   );
 }
@@ -883,7 +884,7 @@ function FichaPessoa({ pessoa, contatos, eu, voltar, recarregar, outras = [] }: 
           {(pessoa.cidade_uf || pessoa.regiao) && <p>{pessoa.cidade_uf || pessoa.regiao}</p>}
         </div>
         {pessoa.segmento && <div className="passe__heroi-temas"><span>{pessoa.segmento}</span></div>}
-        <img className="passe__heroi-selo" src={`/selos/postal-${pessoa.categoria === 'organizador' ? 'fundadora' : pessoa.categoria}.png`} alt={`Selo ${NIVEIS[pessoa.categoria] || pessoa.categoria}`} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+        <img className="passe__heroi-selo" src={seloUrl(pessoa.categoria)} alt={`Selo ${NIVEIS[pessoa.categoria] || pessoa.categoria}`} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
       </section>
       {!eu && (conexao
         ? <p className="passe__ok" role="status">{conexao}</p>
@@ -1013,7 +1014,7 @@ export function MeuEspaco() {
 
   useEffect(() => {
     const anterior = document.documentElement.style.background;
-    document.documentElement.style.background = '#F7F0EA';
+    document.documentElement.style.background = '#F3F6F9';
     document.documentElement.classList.add('passe-html');
     void supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
@@ -1037,7 +1038,7 @@ export function MeuEspaco() {
   if (!espaco) return <div className="passe" aria-busy="true" />;
   if (!espaco.membro && espaco.em_breve) return (
     <Pagina>
-      <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
       <h1>O passaporte ainda não está disponível</h1>
       <p>Estamos preparando este espaço. Em breve teremos novidades.</p>
       <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
@@ -1045,7 +1046,7 @@ export function MeuEspaco() {
   );
   if (!espaco.membro) return (
     <Pagina>
-      <img className="passe__logo" src="/brand/communicali-horizontal.png" alt="ComuniCALI" />
+      <img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
       <h1>Seu passaporte abre no primeiro encontro</h1>
       <p>Quem participa de um encontro presencial se torna membro. Depois do check-in, este espaço libera seus carimbos, milhas e missões.</p>
       <a className="passe__botao" href="/#proximo">Ver o próximo encontro</a>

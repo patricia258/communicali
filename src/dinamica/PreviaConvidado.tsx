@@ -14,7 +14,7 @@ const PASSOS: [string, string, string][] = [
 export function PreviaConvidado() {
   useEffect(() => { document.title = 'Caminho do convidado'; }, []);
   return (
-    <main style={{ background: '#F7F0EA', minHeight: '100vh', padding: '28px 20px 60px', fontFamily: "Inter,sans-serif", color: '#3A2A26' }}>
+    <main style={{ background: '#F3F6F9', minHeight: '100vh', padding: '28px 20px 60px', fontFamily: "Inter,sans-serif", color: '#3A2A26' }}>
       <h1 style={{ color: '#5A1E2D', margin: '0 0 6px' }}>Caminho do convidado, passo a passo</h1>
       <p style={{ margin: '0 0 24px', maxWidth: 720 }}>É o que a pessoa vê no celular, na ordem. Só para visualizar: nada aqui é gravado e as telas não respondem ao toque.</p>
       <div style={{ display: 'flex', gap: 24, overflowX: 'auto', paddingBottom: 16 }}>

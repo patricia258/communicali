@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { seloUrl } from '../selosNovos';
 import { createPortal } from 'react-dom';
 import { Flag, TrendingUp, X } from 'lucide-react';
 
@@ -31,7 +32,7 @@ function SeloDetalhe({ etapa, estado, fechar }: { etapa: Etapa; estado: string; 
     <div className="selo-zoom" role="dialog" aria-modal="true" aria-label={`Etapa ${etapa.nome}`} onClick={fechar}>
       <div className="selo-zoom__cartao" onClick={(event) => event.stopPropagation()}>
         <div className="selo-zoom__giro">
-          <div className="selo-zoom__frente"><img src={`/selos/postal-${etapa.id}.png`} alt="" /></div>
+          <div className="selo-zoom__frente"><img src={seloUrl(etapa.id)} alt="" /></div>
           <div className="selo-zoom__verso">
             <button ref={botao} type="button" className="selo-zoom__fechar" onClick={fechar} aria-label="Fechar"><X size={18} aria-hidden="true" /></button>
             <span>{estado}</span>
@@ -57,7 +58,7 @@ export function TrilhaPrograma({ categoria, previa }: { categoria: string; previ
     <p>Uma trajetória de participação, contribuição e reconhecimento.</p>
     {previa && <p className="passe__previa-aviso" role="status">Prévia de Membro. Sua categoria e seu histórico permanecem iguais.</p>}
     <section className="passe__programa-atual" aria-label="Seu papel na comunidade">
-      {atual || categoria === 'fundadora' ? <img src={`/selos/postal-${categoria}.png`} alt={`Selo ${atual?.nome || 'Fundadora'}`} /> : <Flag size={30} aria-hidden="true" />}
+      {atual || categoria === 'fundadora' ? <img src={seloUrl(categoria)} alt={`Selo ${atual?.nome || 'Fundadora'}`} /> : <Flag size={30} aria-hidden="true" />}
       <div><span>{previa ? 'NÍVEL NA PRÉVIA' : 'SEU PAPEL NA COMUNIDADE'}</span><h2>{atual?.nome || FORA[categoria] || categoria}</h2><p>{categoria === 'fundadora' ? 'Quem plantou esta comunidade.' : atual?.descricao || 'Seu papel tem condições próprias, fora da sequência de níveis abaixo.'}</p></div>
     </section>
     <p className="passe__programa-dica">Toque em um selo para ver o que cada etapa pede.</p>
@@ -65,7 +66,7 @@ export function TrilhaPrograma({ categoria, previa }: { categoria: string; previ
       {ETAPAS.map((etapa, n) => <li key={etapa.id} className={`${n === indice ? 'is-atual' : n < indice ? 'is-anterior' : 'is-proxima'}`} aria-current={n === indice ? 'step' : undefined}>
         <span className="passe__programa-passo" aria-hidden="true">{n + 1}</span>
         <button type="button" className="passe__programa-etapa" onClick={() => setAberta(n)} aria-haspopup="dialog">
-          <img src={`/selos/postal-${etapa.id}.png`} alt={`Selo ${etapa.nome}`} />
+          <img src={seloUrl(etapa.id)} alt={`Selo ${etapa.nome}`} />
           <div><span className="passe__programa-estado">{estado(n)}</span><h3>{etapa.nome}</h3><p>{etapa.descricao}</p><em>Ver detalhes</em></div>
         </button>
       </li>)}

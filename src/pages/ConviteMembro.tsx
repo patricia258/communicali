@@ -15,11 +15,11 @@ const imagem = (url: string) => new Promise<HTMLImageElement>((resolve, reject) 
 // Carimbo redondo do canto superior: texto em volta e "Café & Pessoas" no meio.
 function carimbo(c: CanvasRenderingContext2D, x: number, y: number, r: number) {
   c.save(); c.translate(x, y); c.rotate(-0.2);
-  c.fillStyle = '#A9502E'; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
-  c.strokeStyle = '#F7F0EA'; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, r - 9, 0, Math.PI * 2); c.stroke();
+  c.fillStyle = '#3F6E9A'; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = '#F3F6F9'; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, r - 9, 0, Math.PI * 2); c.stroke();
   c.setLineDash([4, 5]); c.lineWidth = 1.5; c.beginPath(); c.arc(0, 0, r - 46, 0, Math.PI * 2); c.stroke(); c.setLineDash([]);
   const texto = 'CONVITE · COMUNICALI · CONVITE · COMUNICALI · ';
-  c.fillStyle = '#F7F0EA'; c.font = '700 17px Inter, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillStyle = '#F3F6F9'; c.font = '700 17px Inter, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
   const passo = (Math.PI * 2) / texto.length;
   [...texto].forEach((letra, n) => { c.save(); c.rotate(n * passo); c.translate(0, -(r - 27)); c.fillText(letra, 0, 0); c.restore(); });
   c.font = '700 27px "Funnel Display", sans-serif'; c.fillText('Café &', 0, -15); c.fillText('Pessoas', 0, 17);
@@ -29,44 +29,44 @@ function carimbo(c: CanvasRenderingContext2D, x: number, y: number, r: number) {
 export async function gerarCartaoConvite(nome: string, codigo: string): Promise<Blob> {
   await Promise.all([document.fonts.load('700 72px "Funnel Display"'), document.fonts.load('400 36px Inter'), document.fonts.load('600 32px Inter'), document.fonts.load('700 17px Inter')]);
   const [logo, qr] = await Promise.all([
-    imagem('/brand/communicali-horizontal.png'),
-    QRCode.toDataURL(linkConvite(codigo), { width: 360, margin: 2, errorCorrectionLevel: 'M', color: { dark: '#22100F', light: '#FFFFFF' } }).then(imagem),
+    imagem('/brand/novo/comunicali-b-fundo-claro.svg'),
+    QRCode.toDataURL(linkConvite(codigo), { width: 360, margin: 2, errorCorrectionLevel: 'M', color: { dark: '#1B0A10', light: '#FFFFFF' } }).then(imagem),
   ]);
   const primeiro = (nome.trim().split(/\s+/)[0] || '').toUpperCase();
   const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = 1350;
   const c = canvas.getContext('2d'); if (!c) throw new Error('canvas');
-  c.fillStyle = '#F7F0EA'; c.fillRect(0, 0, 1080, 1350);
+  c.fillStyle = '#F3F6F9'; c.fillRect(0, 0, 1080, 1350);
   // Faixa com as cores da marca, como no topo do site.
-  [['#7A1F3D', 0], ['#A9502E', 270], ['#C9973B', 540], ['#5F6238', 810]].forEach(([cor, x]) => { c.fillStyle = cor as string; c.fillRect(x as number, 0, 270, 16); });
+  [['#5A1E2D', 0], ['#3F6E9A', 270], ['#C6DAEA', 540], ['#6F6770', 810]].forEach(([cor, x]) => { c.fillStyle = cor as string; c.fillRect(x as number, 0, 270, 16); });
   c.drawImage(logo, 80, 80, 400, 400 * logo.height / logo.width);
   carimbo(c, 888, 205, 132);
   c.textAlign = 'left'; c.textBaseline = 'alphabetic';
-  c.fillStyle = '#A9502E'; c.font = '600 24px Inter, sans-serif'; c.fillText(primeiro ? `CONVITE DE ${primeiro}` : 'UM CONVITE ESPECIAL', 80, 330, 640);
-  c.fillStyle = '#22100F'; c.font = '700 74px "Funnel Display", sans-serif';
+  c.fillStyle = '#3F6E9A'; c.font = '600 24px Inter, sans-serif'; c.fillText(primeiro ? `CONVITE DE ${primeiro}` : 'UM CONVITE ESPECIAL', 80, 330, 640);
+  c.fillStyle = '#1B0A10'; c.font = '700 74px "Funnel Display", sans-serif';
   c.fillText('Tem um lugar para', 80, 415); c.fillText('você nessa mesa.', 80, 495);
-  c.fillStyle = '#5A4740'; c.font = '400 32px Inter, sans-serif';
+  c.fillStyle = '#5D4F55'; c.font = '400 32px Inter, sans-serif';
   c.fillText('Quero convidar você para a ComuniCALI,', 80, 565, 920);
   c.fillText('uma comunidade de quem gosta de falar', 80, 610, 920);
   c.fillText('sobre gente, gestão e desenvolvimento humano.', 80, 655, 920);
   // Bilhete com picote lateral e o código em destaque.
-  const grad = c.createLinearGradient(80, 700, 1000, 900); grad.addColorStop(0, '#7A1F3D'); grad.addColorStop(1, '#4A1424');
+  const grad = c.createLinearGradient(80, 700, 1000, 900); grad.addColorStop(0, '#5A1E2D'); grad.addColorStop(1, '#4A1424');
   c.fillStyle = grad; c.beginPath(); c.roundRect(80, 705, 920, 200, 22); c.fill();
-  c.fillStyle = '#F7F0EA'; for (const x of [80, 1000]) { c.beginPath(); c.arc(x, 805, 18, 0, Math.PI * 2); c.fill(); }
-  c.strokeStyle = 'rgba(221,177,96,.7)'; c.lineWidth = 2; c.setLineDash([2, 9]); c.beginPath(); c.moveTo(760, 725); c.lineTo(760, 885); c.stroke(); c.setLineDash([]);
-  c.fillStyle = '#DDB160'; c.font = '600 22px Inter, sans-serif'; c.fillText('MEU CÓDIGO DE CONVITE', 125, 765);
+  c.fillStyle = '#F3F6F9'; for (const x of [80, 1000]) { c.beginPath(); c.arc(x, 805, 18, 0, Math.PI * 2); c.fill(); }
+  c.strokeStyle = 'rgba(198,218,234,.7)'; c.lineWidth = 2; c.setLineDash([2, 9]); c.beginPath(); c.moveTo(760, 725); c.lineTo(760, 885); c.stroke(); c.setLineDash([]);
+  c.fillStyle = '#C6DAEA'; c.font = '600 22px Inter, sans-serif'; c.fillText('MEU CÓDIGO DE CONVITE', 125, 765);
   c.fillStyle = '#FFFFFF'; let tamanho = 84;
   do { c.font = `700 ${tamanho}px "Funnel Display", sans-serif`; tamanho -= 1; } while (c.measureText(codigo).width > 600 && tamanho > 30);
   c.fillText(codigo, 125, 860, 600);
-  c.textAlign = 'center'; c.fillStyle = '#F7F0EA'; c.font = '600 22px Inter, sans-serif'; c.fillText('use na', 880, 795); c.fillText('inscrição', 880, 828);
+  c.textAlign = 'center'; c.fillStyle = '#F3F6F9'; c.font = '600 22px Inter, sans-serif'; c.fillText('use na', 880, 795); c.fillText('inscrição', 880, 828);
   c.textAlign = 'left';
   c.fillStyle = '#FFFFFF'; c.beginPath(); c.roundRect(80, 955, 290, 290, 20); c.fill();
   c.drawImage(qr, 95, 970, 260, 260);
-  c.fillStyle = '#22100F'; c.font = '700 40px "Funnel Display", sans-serif'; c.fillText('Inscreva-se pelo QR', 420, 1025, 580);
-  c.fillStyle = '#5A4740'; c.font = '400 28px Inter, sans-serif';
+  c.fillStyle = '#1B0A10'; c.font = '700 40px "Funnel Display", sans-serif'; c.fillText('Inscreva-se pelo QR', 420, 1025, 580);
+  c.fillStyle = '#5D4F55'; c.font = '400 28px Inter, sans-serif';
   c.fillText('Aponte a câmera do celular e escolha', 420, 1080, 580); c.fillText('o próximo encontro.', 420, 1120, 580);
-  c.fillStyle = '#7A1F3D'; c.font = '600 28px Inter, sans-serif'; c.fillText('A equipe confirma sua vaga por e-mail.', 420, 1185, 580);
-  c.strokeStyle = '#D8C7B9'; c.lineWidth = 1; c.beginPath(); c.moveTo(80, 1282); c.lineTo(1000, 1282); c.stroke();
-  c.fillStyle = '#7A1F3D'; c.font = '600 24px Inter, sans-serif'; c.fillText('comuni.calirh.com', 80, 1322);
+  c.fillStyle = '#5A1E2D'; c.font = '600 28px Inter, sans-serif'; c.fillText('A equipe confirma sua vaga por e-mail.', 420, 1185, 580);
+  c.strokeStyle = '#D3E3F2'; c.lineWidth = 1; c.beginPath(); c.moveTo(80, 1282); c.lineTo(1000, 1282); c.stroke();
+  c.fillStyle = '#5A1E2D'; c.font = '600 24px Inter, sans-serif'; c.fillText('comuni.calirh.com', 80, 1322);
   c.textAlign = 'right'; c.fillStyle = '#5A1E2D'; c.font = '600 24px Inter, sans-serif'; c.fillText('Toda honra a Deus!', 1000, 1322);
   return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('imagem')), 'image/png'));
 }
@@ -183,7 +183,7 @@ function carimboGasto(semente: string) {
   const acaso = () => { n = (n * 1664525 + 1013904223) >>> 0; return n / 4294967296; };
   const tela = document.createElement('canvas'); tela.width = 220; tela.height = 220;
   const t = tela.getContext('2d')!;
-  t.translate(110, 110); t.strokeStyle = '#7A1F3D'; t.fillStyle = '#7A1F3D'; t.textAlign = 'center';
+  t.translate(110, 110); t.strokeStyle = '#5A1E2D'; t.fillStyle = '#5A1E2D'; t.textAlign = 'center';
   // Anel externo com espessura irregular, como pressão desigual.
   for (let i = 0; i < 72; i += 1) { const a0 = (i / 72) * Math.PI * 2; t.lineWidth = 4 + acaso() * 3; t.beginPath(); t.arc(0, 0, 96, a0, a0 + Math.PI / 36 + 0.01); t.stroke(); }
   t.lineWidth = 2; t.beginPath(); t.arc(0, 0, 81, 0, Math.PI * 2); t.stroke();
@@ -204,44 +204,44 @@ function carimboGasto(semente: string) {
 
 export async function gerarCartaoEuVou(nome: string, foto: string | null, encontro: { titulo: string; data: string; local: string }, frase = 'Vou estar no próximo encontro da ComuniCALI.', formato: 'feed' | 'story' = 'feed'): Promise<Blob> {
   await Promise.all([document.fonts.load('700 72px "Funnel Display"'), document.fonts.load('400 36px Inter'), document.fonts.load('600 32px Inter'), document.fonts.load('700 20px Inter')]);
-  const [logo, retrato] = await Promise.all([imagem('/brand/communicali-branco.png'), foto ? imagem(foto).catch(() => null) : Promise.resolve(null)]);
+  const [logo, retrato] = await Promise.all([imagem('/brand/novo/comunicali-b-fundo-escuro.svg'), foto ? imagem(foto).catch(() => null) : Promise.resolve(null)]);
   // Story (1080x1920): a mesma arte do feed, centralizada, longe das áreas que o Instagram cobre no topo e embaixo.
   const story = formato === 'story'; const altura = story ? 1920 : 1350;
   const canvas = document.createElement('canvas'); canvas.width = 1080; canvas.height = altura;
   const c = canvas.getContext('2d'); if (!c) throw new Error('canvas');
-  const fundo = c.createLinearGradient(0, 0, 0, altura); fundo.addColorStop(0, '#2A151C'); fundo.addColorStop(1, '#1F0E14');
+  const fundo = c.createLinearGradient(0, 0, 0, altura); fundo.addColorStop(0, '#2A151C'); fundo.addColorStop(1, '#1B0A10');
   c.fillStyle = fundo; c.fillRect(0, 0, 1080, altura);
-  [['#7A1F3D', 0], ['#A9502E', 270], ['#C9973B', 540], ['#5F6238', 810]].forEach(([cor, x]) => { c.fillStyle = cor as string; c.fillRect(x as number, 0, 270, 12); });
+  [['#5A1E2D', 0], ['#3F6E9A', 270], ['#C6DAEA', 540], ['#6F6770', 810]].forEach(([cor, x]) => { c.fillStyle = cor as string; c.fillRect(x as number, 0, 270, 12); });
   if (story) c.translate(0, (1920 - 1350) / 2);
   // Rota pontilhada ao fundo, discreta.
-  c.strokeStyle = 'rgba(221,177,96,.18)'; c.lineWidth = 3; c.setLineDash([2, 14]);
+  c.strokeStyle = 'rgba(198,218,234,.18)'; c.lineWidth = 3; c.setLineDash([2, 14]);
   c.beginPath(); c.moveTo(-20, 760); c.bezierCurveTo(260, 620, 820, 900, 1100, 700); c.stroke(); c.setLineDash([]);
   const largura = 300; c.drawImage(logo, (1080 - largura) / 2, 70, largura, largura * logo.height / logo.width);
   c.textAlign = 'center';
-  c.fillStyle = '#DDB160'; c.font = '700 168px "Funnel Display", sans-serif'; c.fillText('Eu vou!', 540, 330);
-  c.fillStyle = '#E9DDD5'; c.font = '400 34px Inter, sans-serif'; c.fillText(frase, 540, 392, 900);
+  c.fillStyle = '#C6DAEA'; c.font = '700 168px "Funnel Display", sans-serif'; c.fillText('Eu vou!', 540, 330);
+  c.fillStyle = '#EAF2F9'; c.font = '400 34px Inter, sans-serif'; c.fillText(frase, 540, 392, 900);
   // Foto de passaporte no centro.
   c.save(); c.translate(540, 640); c.rotate(-0.035);
   c.shadowColor = 'rgba(0,0,0,.45)'; c.shadowBlur = 30; c.shadowOffsetY = 12;
   c.fillStyle = '#FFFFFF'; c.fillRect(-165, -200, 330, 400); c.shadowColor = 'transparent';
   if (retrato) { const proporcao = 300 / 370; const w = Math.min(retrato.width, retrato.height * proporcao); const h = w / proporcao; c.drawImage(retrato, (retrato.width - w) / 2, (retrato.height - h) / 2, w, h, -150, -185, 300, 370); }
-  else { c.fillStyle = '#F3E9E0'; c.fillRect(-150, -185, 300, 370); c.fillStyle = '#7A1F3D'; c.font = '700 150px "Funnel Display", sans-serif'; c.fillText(nome.charAt(0), 0, 50); }
+  else { c.fillStyle = '#EAF2F9'; c.fillRect(-150, -185, 300, 370); c.fillStyle = '#5A1E2D'; c.font = '700 150px "Funnel Display", sans-serif'; c.fillText(nome.charAt(0), 0, 50); }
   c.restore();
   // Cartão de embarque.
   const y = 900, h = 300;
-  c.fillStyle = '#F7F0EA'; c.beginPath(); c.roundRect(70, y, 940, h, 26); c.fill();
-  c.fillStyle = '#1F0E14'; for (const px of [70, 1010]) { c.beginPath(); c.arc(px, y + h / 2, 22, 0, Math.PI * 2); c.fill(); }
+  c.fillStyle = '#F3F6F9'; c.beginPath(); c.roundRect(70, y, 940, h, 26); c.fill();
+  c.fillStyle = '#1B0A10'; for (const px of [70, 1010]) { c.beginPath(); c.arc(px, y + h / 2, 22, 0, Math.PI * 2); c.fill(); }
   c.textAlign = 'left';
-  c.fillStyle = '#A9502E'; c.font = '700 20px Inter, sans-serif'; c.fillText('CARTÃO DE EMBARQUE', 120, y + 58);
-  c.fillStyle = '#22100F'; let t = 46; do { c.font = `700 ${t}px "Funnel Display", sans-serif`; t -= 2; } while (c.measureText(encontro.titulo).width > 600 && t > 28); c.fillText(encontro.titulo, 120, y + 118);
-  c.fillStyle = '#8A7A72'; c.font = '700 18px Inter, sans-serif'; c.fillText('DATA', 120, y + 172); c.fillText('LOCAL', 120, y + 232);
-  c.fillStyle = '#3A2A24'; c.font = '600 26px Inter, sans-serif'; c.fillText(encontro.data, 210, y + 174, 530); c.fillText(encontro.local, 210, y + 234, 530);
+  c.fillStyle = '#3F6E9A'; c.font = '700 20px Inter, sans-serif'; c.fillText('CARTÃO DE EMBARQUE', 120, y + 58);
+  c.fillStyle = '#1B0A10'; let t = 46; do { c.font = `700 ${t}px "Funnel Display", sans-serif`; t -= 2; } while (c.measureText(encontro.titulo).width > 600 && t > 28); c.fillText(encontro.titulo, 120, y + 118);
+  c.fillStyle = '#6F6770'; c.font = '700 18px Inter, sans-serif'; c.fillText('DATA', 120, y + 172); c.fillText('LOCAL', 120, y + 232);
+  c.fillStyle = '#1B0A10'; c.font = '600 26px Inter, sans-serif'; c.fillText(encontro.data, 210, y + 174, 530); c.fillText(encontro.local, 210, y + 234, 530);
   // Carimbo "Presença confirmada" com falhas de tinta, afastado da borda do ticket.
   c.save(); c.translate(855, y + h / 2); c.rotate(-0.24); c.globalAlpha = 0.88;
   c.drawImage(carimboGasto(nome), -110, -110, 220, 220);
   c.restore();
   c.textAlign = 'center';
-  c.fillStyle = '#DDB160'; c.font = 'italic 400 30px Inter, sans-serif'; c.fillText('Falar de pessoas pode mudar o mundo.', 540, 1268);
-  c.fillStyle = '#CBB9B1'; c.font = '600 22px Inter, sans-serif'; c.fillText('comuni.calirh.com  ·  Toda honra a Deus!', 540, 1312);
+  c.fillStyle = '#C6DAEA'; c.font = 'italic 400 30px Inter, sans-serif'; c.fillText('Falar de pessoas pode mudar o mundo.', 540, 1268);
+  c.fillStyle = '#C9D1D9'; c.font = '600 22px Inter, sans-serif'; c.fillText('comuni.calirh.com  ·  Toda honra a Deus!', 540, 1312);
   return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('imagem')), 'image/png'));
 }

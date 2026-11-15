@@ -26,7 +26,7 @@ export function TelaoCheckin() {
         <div className="dn-faixa" />
         <div className="dn-boasvindas">
           <section className="dn-bv-texto">
-            <img src="/brand/communicali-branco.png" alt="ComuniCALI" />
+            <img src="/brand/novo/comunicali-b-fundo-escuro.svg" alt="ComuniCALI" />
             <h1>Bem-vindas <em>e bem-vindos!</em></h1>
             <p>Sinta-se à vontade e escolha uma mesa. Faça o seu check-in pelo QR Code e levante a mão: o seu crachá chega à mesa.</p>
           </section>
@@ -94,7 +94,7 @@ export function TelaoVotacao() {
   return (
     <main className={`screen screen--poll${poll?.revelada ? ' screen--revealed' : ''}`}>
       <div className="screen__text">
-        <img className="screen__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
+        <img className="screen__logo" src="/brand/novo/comunicali-b-fundo-escuro.svg" alt="ComuniCALI" />
         <p className="eyebrow">Percepção de quem está nesta sala</p>
         <h1>{poll?.pergunta}</h1>
         {poll?.revelada ? <Results poll={poll} /> : (
@@ -156,7 +156,7 @@ export function TelaoResultado() {
       <div className="dn-stage">
         <div className="dn-faixa" />
         <header className="dn-head">
-          <img className="dn-logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
+          <img className="dn-logo" src="/brand/novo/comunicali-b-fundo-escuro.svg" alt="ComuniCALI" />
           <div className="dn-tema"><h2><span className="dn-vivo" />Votação ao vivo</h2></div>
           <div className="dn-qr"><span>Aponte a câmera<br />e vote</span>{qr && <img src={qr} alt="QR Code para votar" />}</div>
         </header>

@@ -20,7 +20,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-footer__row">
-        <a href="/" className="site-footer__logo"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></a>
+        <a href="/" className="site-footer__logo"><img src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /></a>
         <FooterLinks />
         <nav className="site-socials" aria-label="Canais da CALI">
           <a href="https://www.instagram.com/calirh_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram da CALI" title="Instagram"><Instagram size={20} /></a>

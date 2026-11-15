@@ -91,7 +91,7 @@ function Login() {
   return (
     <main className="adm-login">
       <section className="adm-login__marca">
-        <img className="adm-login__logo" src="/brand/communicali-branco.png" alt="ComuniCALI" />
+        <img className="adm-login__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
         <div>
           <p className="adm-login__eyebrow">Painel da organização</p>
           <h1>Bastidores da <em>ComuniCALI</em></h1>
@@ -101,7 +101,6 @@ function Login() {
             <li><span>03</span>Formulários, parceiros e e-mails</li>
           </ul>
         </div>
-        <img className="adm-login__selo" src="/selos/carimbo-fundadora.png" alt="" aria-hidden="true" />
       </section>
       <section className="adm-login__acesso">
         <h2>Entrar no painel</h2>
@@ -448,7 +447,7 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
   return (
     <div className="adm">
       <header className="adm__top">
-        <NavLink to="/admin" className="adm__logo"><img src="/brand/communicali-branco.png" alt="ComuniCALI" /></NavLink>
+        <NavLink to="/admin" className="adm__logo"><img src="/brand/novo/comunicali-b-fundo-escuro.svg" alt="ComuniCALI" /></NavLink>
         <nav>
           {GRUPOS.map((grupo) => <NavLink key={grupo.nome} to={grupo.itens[0][0]} end={grupo.itens[0][0] === '/admin'} className={() => (grupoAtual === grupo ? 'active' : '')}>{grupo.nome}</NavLink>)}
         </nav>

@@ -16,7 +16,7 @@ const hash = (texto: string) => { let h = 0; for (const c of texto) h = (h * 31 
 export const palcoHtml = (qr: string) => `
   <div class="dn-faixa"></div>
   <header class="dn-head">
-    <img class="dn-logo" src="/brand/communicali-branco.png" alt="ComuniCALI">
+    <img class="dn-logo" src="/brand/novo/comunicali-b-fundo-escuro.svg" alt="ComuniCALI">
     <div class="dn-tema"><h2><span class="dn-vivo"></span>${TEMA}</h2></div>
     <div class="dn-qr"><span>Aponte a câmera<br>e participe</span><img src="${qr}" alt="QR Code da dinâmica"></div>
   </header>
@@ -126,7 +126,7 @@ export class Mural {
     it.badge.textContent = it.n > 1 ? `×${it.n}` : '';
   }
   private brilho(it: Item, atraso = 0) {
-    it.span.animate([{ boxShadow: '0 0 0 0 rgba(221,177,96,0)' }, { boxShadow: '0 0 0 .8cqw rgba(221,177,96,.65)', offset: 0.35 }, { boxShadow: '0 0 0 1.7cqw rgba(221,177,96,0)' }], { duration: 950, delay: atraso });
+    it.span.animate([{ boxShadow: '0 0 0 0 rgba(198,218,234,0)' }, { boxShadow: '0 0 0 .8cqw rgba(198,218,234,.65)', offset: 0.35 }, { boxShadow: '0 0 0 1.7cqw rgba(198,218,234,0)' }], { duration: 950, delay: atraso });
   }
   private adicionar(e: Etapa, gr: { chave: string; texto: string; n: number }, animar: boolean, vel = 1) {
     const b = this.B[e];
@@ -201,9 +201,9 @@ export class Mural {
     const c = document.createElement('canvas'); c.width = 1920; c.height = 1080; const x = c.getContext('2d') as CanvasRenderingContext2D;
     const rel = (el: Element) => { const r = el.getBoundingClientRect(); return { x: (r.left - R.left) * k, y: (r.top - R.top) * k, w: r.width * k, h: r.height * k }; };
     const carrega = (src: string) => new Promise<HTMLImageElement | null>((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
-    x.fillStyle = '#1F0E14'; x.fillRect(0, 0, 1920, 1080);
-    ['#7A1F3D', '#A9502E', '#C9973B', '#5F6238'].forEach((cor, i) => { x.fillStyle = cor; x.fillRect(i * 480, 0, 480, 13); });
-    const logo = await carrega('/brand/communicali-branco.png'), lr = rel(st.querySelector('.dn-logo') as Element); if (logo) x.drawImage(logo, lr.x, lr.y, lr.w, lr.h);
+    x.fillStyle = '#1B0A10'; x.fillRect(0, 0, 1920, 1080);
+    ['#5A1E2D', '#3F6E9A', '#C6DAEA', '#6F6770'].forEach((cor, i) => { x.fillStyle = cor; x.fillRect(i * 480, 0, 480, 13); });
+    const logo = await carrega('/brand/novo/comunicali-b-fundo-escuro.svg'), lr = rel(st.querySelector('.dn-logo') as Element); if (logo) x.drawImage(logo, lr.x, lr.y, lr.w, lr.h);
     const texto = (el: Element) => {
       const cs = getComputedStyle(el), r = rel(el);
       x.fillStyle = cs.color; x.font = `${cs.fontWeight} ${parseFloat(cs.fontSize) * k}px ${cs.fontFamily.split(',')[0]}`; x.textBaseline = 'middle'; x.textAlign = 'left';
