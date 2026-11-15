@@ -54,6 +54,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/meu-espaco" element={<MeuEspaco />} />
       <Route path="/c/:codigo" element={<CodigoConvite />} />
       <Route path="/regras" element={<Page><TextoPagina tipo="regras" /></Page>} />
+      <Route path="/termos" element={<Page><TextoPagina tipo="termos" /></Page>} />
       <Route path="/privacidade" element={<Page><TextoPagina tipo="privacidade" /></Page>} />
       <Route path="/staff" element={<StaffForm />} />
       <Route path="/fornecedor" element={<FornecedorForm />} />

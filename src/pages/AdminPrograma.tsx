@@ -388,15 +388,15 @@ export function PollsPanel() {
 }
 
 export function TextsPanel() {
-  const [form, setForm] = useState({ cadastro_aberto: false, regras_texto: '', privacidade_texto: '', opcoes: '' });
+  const [form, setForm] = useState({ cadastro_aberto: false, regras_texto: '', privacidade_texto: '', termos_texto: '', opcoes: '' });
   const [note, setNote] = useState('');
   useEffect(() => {
-    supabase.from('site_settings').select('cadastro_aberto,regras_texto,privacidade_texto,como_conheceu_opcoes').single().then(({ data }) => { if (data) setForm({ ...data, opcoes: data.como_conheceu_opcoes.join('\n') }); });
+    supabase.from('site_settings').select('cadastro_aberto,regras_texto,privacidade_texto,termos_texto,como_conheceu_opcoes').single().then(({ data }) => { if (data) setForm({ ...data, termos_texto: data.termos_texto || '', opcoes: data.como_conheceu_opcoes.join('\n') }); });
   }, []);
 
   async function save() {
     if (form.cadastro_aberto && (!form.regras_texto.trim() || !form.privacidade_texto.trim())) { setNote('Para abrir o cadastro, preencha as regras e a política.'); return; }
-    const { error } = await supabase.from('site_settings').update({ cadastro_aberto: form.cadastro_aberto, regras_texto: form.regras_texto.trim(), privacidade_texto: form.privacidade_texto.trim(), como_conheceu_opcoes: form.opcoes.split('\n').map((item) => item.trim()).filter(Boolean), updated_at: new Date().toISOString() }).eq('id', true);
+    const { error } = await supabase.from('site_settings').update({ cadastro_aberto: form.cadastro_aberto, regras_texto: form.regras_texto.trim(), privacidade_texto: form.privacidade_texto.trim(), termos_texto: form.termos_texto.trim(), como_conheceu_opcoes: form.opcoes.split('\n').map((item) => item.trim()).filter(Boolean), updated_at: new Date().toISOString() }).eq('id', true);
     setNote(error ? 'Não foi possível salvar.' : 'Alterações salvas.');
   }
 
@@ -409,6 +409,7 @@ export function TextsPanel() {
           <label className="v2-forms-check wide"><input type="checkbox" checked={form.cadastro_aberto} onChange={(event) => setForm({ ...form, cadastro_aberto: event.target.checked })} /><span><strong>Cadastro aberto ao público</strong></span></label>
           <label className="wide"><span>Regras de participação</span><textarea rows={10} value={form.regras_texto} onChange={(event) => setForm({ ...form, regras_texto: event.target.value })} /></label>
           <label className="wide"><span>Política de privacidade</span><textarea rows={12} value={form.privacidade_texto} onChange={(event) => setForm({ ...form, privacidade_texto: event.target.value })} /></label>
+          <label className="wide"><span>Termos de participação</span><textarea rows={12} value={form.termos_texto} onChange={(event) => setForm({ ...form, termos_texto: event.target.value })} /></label>
           <label className="wide"><span>Opções de “Como conheceu”, uma por linha</span><textarea rows={6} value={form.opcoes} onChange={(event) => setForm({ ...form, opcoes: event.target.value })} /></label>
         </div>
       </section>

@@ -11,6 +11,7 @@ export function FooterLinks({ legalOnly = false }: { legalOnly?: boolean }) {
       {!legalOnly && <a href="/meu-passaporte">Meu passaporte</a>}
       {/* Nos formulários abre em outra aba, para não perder o que já foi preenchido. */}
       <a href="/regras" {...(legalOnly ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>Regras</a>
+      <a href="/termos" {...(legalOnly ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>Termos</a>
       <a href="/privacidade" {...(legalOnly ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>Privacidade</a>
     </nav>
   );

@@ -37,7 +37,10 @@ const FAQ = [
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
   ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
-  ['Como acompanho minha participação?', 'Depois do primeiro encontro presencial, você entra no seu passaporte online com o e-mail do check-in e acompanha carimbos, milhas, missões, indicações e fotos.'],
+  ['Posso ir a um encontro antes de ser Membro?', 'Pode. Você vive até 2 experiências abertas e gratuitas antes de se tornar Membro. Se um Membro convidou você, entra como Convidado. Se veio por interesse próprio, entra como Visitante. As duas somam no mesmo contador.'],
+  ['Ir a um encontro me torna Membro?', 'Não automaticamente. Depois da primeira presença, você já pode pedir a adesão. O pedido passa pelo cadastro, pelo aceite das regras e pela análise da organização.'],
+  ['Quanto custa ser Membro?', 'Nada. A identidade de Membro é gratuita e continua gratuita.'],
+  ['Como acompanho minha participação?', 'O passaporte online é dos Membros. Depois que a sua adesão for aprovada, você entra com o e-mail cadastrado e acompanha carimbos, milhas, missões, indicações e fotos.'],
   ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
@@ -259,7 +262,7 @@ export function Home() {
       <section className="hn-band" aria-label="Passaporte, encontros e jornada">
         <div className="hn-band__passaporte">
           <h3>Seu passaporte</h3>
-          <p>Carimbos, selos e milhas. Cada encontro vira uma parada na sua jornada.</p>
+          <p>Para Membros: carimbos, selos e milhas. Cada encontro vira uma parada na sua jornada.</p>
           <a className="hn-pill hn-pill--line" href="#selos">Conhecer</a>
         </div>
         <div className="hn-band__foto">
@@ -289,7 +292,7 @@ export function Home() {
 
       <section className="hn-selos" id="selos">
         <h2>Os selos contam o seu caminho.</h2>
-        <p>Da primeira visita até levar a comunidade mais longe.</p>
+        <p>Convidado e Visitante são portas de entrada. Membro, Conector e Embaixador são o seu caminho dentro da comunidade.</p>
         <ul className="hn-selos__lista">
           {SELOS.map(([id, nome, frase]) => <li key={id}><img src={`/selos/novo/${id}.svg`} alt={`Selo ${nome}: ${frase.toLowerCase()}`} /></li>)}
         </ul>
@@ -310,22 +313,22 @@ export function Home() {
 
       <section className="hn-entrar" id="como-entrar" aria-label="Como entrar">
         <div className="hn-entrar__a">
-          <span>ABERTO</span><h3>Encontro aberto</h3>
-          <p>Visitantes e convidados são bem-vindos. Na primeira vez, você participa como visitante.</p>
-          <ul><li>Até 2 encontros abertos como visitante</li><li>Valor informado em cada encontro, na agenda</li><li>Cadastre seu interesse e avisamos</li></ul>
+          <span>ANTES DE ADERIR</span><h3>Conheça a comunidade</h3>
+          <p>Você pode viver até 2 experiências abertas e gratuitas antes de se tornar Membro.</p>
+          <ul><li>Visitante: você chega por interesse próprio</li><li>Convidado: um Membro convida você</li><li>As duas somam no mesmo contador</li><li>Valor de cada encontro informado na agenda</li></ul>
           <a className="hn-pill" href={joinHref}>Cadastrar meu interesse</a>
         </div>
         <div className="hn-entrar__b">
-          <span>MEMBROS</span><h3>Para membros</h3>
-          <p>O cadastro de Membro é gratuito e abre o passaporte inteiro.</p>
-          <ul><li>Inscrição antecipada</li><li>Pode indicar 1 convidado por encontro</li><li>Carimbos, selos e milhas</li><li>Cadastro de Membro: sempre gratuito</li></ul>
-          <a className="hn-pill hn-pill--white" href={joinHref}>Quero ser membro</a>
+          <span>MEMBROS</span><h3>Para Membros</h3>
+          <p>Ser Membro é gratuito. Depois da primeira experiência, você já pode pedir a adesão, e a organização analisa o pedido.</p>
+          <ul><li>Inscrição antecipada nos encontros abertos</li><li>Pode indicar 1 convidado por encontro</li><li>Meu passaporte: carimbos, selos e milhas</li><li>Sempre gratuito</li></ul>
+          <a className="hn-pill hn-pill--white" href={joinHref}>Quero ser Membro</a>
         </div>
         <div className="hn-entrar__c">
           <span>CONVITE</span><h3>Por convite</h3>
-          <p>Um membro convida você. Quem chega a convite entra como convidado.</p>
-          <ul><li>Convidado não pontua</li><li>Só pontua ao se tornar visitante</li></ul>
-          <a className="hn-pill hn-pill--white" href="/regras">Como funciona</a>
+          <p>Um Membro convida você e você entra como Convidado. A presença conta nas suas 2 experiências.</p>
+          <ul><li>O convite não garante vaga</li><li>A vaga depende de inscrição e confirmação</li></ul>
+          <a className="hn-pill hn-pill--white" href="/termos">Como funciona</a>
         </div>
       </section>
 

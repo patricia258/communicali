@@ -17,7 +17,7 @@ export function Continuar() {
 
   const preset = useMemo<FormPreset>(() => {
     if (passo === 'confirma' && dados?.encontrado) {
-      const tipoTexto = dados.tipo === 'convidado' ? 'Convidado' : 'Visitante / Membro';
+      const tipoTexto = dados.tipo === 'convidado' ? 'Convidado' : 'Visitante';
       const convidadoDe = dados.tipo === 'convidado' && dados.convidado_de ? `\n\nConvidado de **${dados.convidado_de}**.` : '';
       return {
         title: 'Continue com a gente!', category: 'Pesquisa', tema: 'claro', skipWelcome: true, submitLabel: 'Quero fazer parte da comunidade',
@@ -30,7 +30,7 @@ export function Continuar() {
           { id: 'email_novo', kind: 'email', label: 'Quer receber as novidades em outro e-mail?', help: 'Se o e-mail da inscrição serve, é só avançar.' },
         ],
         submit: async (respostas) => {
-          const envio: Record<string, string> = { nome: dados.nome || '', email, tipo: dados.tipo === 'convidado' ? 'Como convidado' : 'Como visitante / membro' };
+          const envio: Record<string, string> = { nome: dados.nome || '', email, tipo: dados.tipo === 'convidado' ? 'Como convidado' : 'Como visitante' };
           if (dados.tipo === 'convidado' && dados.convidado_de) envio.convidou = dados.convidado_de;
           const outro = String(respostas.email_novo || '').trim().toLowerCase();
           if (outro.includes('@')) envio.email_novo = outro;
