@@ -8,6 +8,11 @@ import { FAIXAS, PONTOS } from './AdminInicio';
 import { Categoria, Email, Rede, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 
 type Member = { segmento: string | null; regiao: string | null; busca: string[]; aberto_trabalho: boolean; recrutador: boolean; curriculo_path: string | null; na_rede: boolean; presta_servicos: boolean; instagram: string | null; codigo: string | null; temas: string[]; interesse_palestras: boolean; foto_url: string | null; id: string; status: string; nome: string; apelido: string | null; email: string; whatsapp: string | null; cidade_uf: string | null; empresa: string | null; cargo: string | null; linkedin: string | null; interesses: string[]; como_conheceu: string | null; categoria: string; cracha_status: string; autoriza_imagem: boolean; autoriza_comunicacoes: boolean; created_at: string };
+type Extra = { adesao_status: string | null; adesao_motivo: string | null; adesao_origem: string | null; estagio_entrada: string | null; na_comunidade_whatsapp: boolean; termos_aceitos_em: string | null; privacidade_aceita_em: string | null; regras_aceitas_em: string | null };
+type Ficha = { member_id: string; estagio: string; presencas_pre_membro: number; limite_pre_membro: number; limite_atingido: boolean };
+type LogAdesao = { id: string; de: string | null; para: string; motivo: string | null; por: string | null; em: string };
+const ESTAGIO: Record<string, string> = { convidado: 'Convidado', visitante: 'Visitante', membro: 'Membro' };
+const ADESAO: Record<string, string> = { solicitada: 'Solicitada', em_analise: 'Em análise', ajustes: 'Ajustes necessários', aprovada: 'Aprovada', nao_aprovada: 'Não aprovada' };
 type History = { id: string; checked_in_at: string; codigo: string; editions: { titulo: string } };
 type Point = { id: string; acao: string; pontos: number; created_at: string; motivo: string | null };
 type Poll = { id: string; slug: string; titulo: string; pergunta: string; pergunta_2: string | null; tipo: 'nota' | 'multipla' | 'aberta'; opcoes: string[]; anonima: boolean; status: 'rascunho' | 'ativa' | 'encerrada'; revelada: boolean; edition_id: string };
@@ -25,8 +30,14 @@ export function exportPresencasCsv(slug: string, rows: Array<Array<string | numb
   csv(`communicali-${slug}-presencas.csv`, rows);
 }
 
-function MemberEditor({ member, onBack, alternar, excluir }: { member: Member; onBack: () => void; alternar: () => void; excluir: () => void }) {
+function MemberEditor({ member: base, ficha, onBack, alternar, excluir }: { member: Member & Extra; ficha?: Ficha; onBack: () => void; alternar: () => void; excluir: () => void }) {
+  const member = base;
   const [draft, setDraft] = useState(member);
+  const [adesao, setAdesao] = useState({ status: member.adesao_status, motivo: member.adesao_motivo || '' });
+  const [motivoAdesao, setMotivoAdesao] = useState('');
+  const [naComunidade, setNaComunidade] = useState(member.na_comunidade_whatsapp);
+  const [logAdesao, setLogAdesao] = useState<LogAdesao[]>([]);
+  const [fichaAtual, setFichaAtual] = useState<Ficha | undefined>(ficha);
   const [history, setHistory] = useState<History[]>([]);
   const [points, setPoints] = useState<Point[]>([]);
   const [note, setNote] = useState('');
@@ -36,6 +47,10 @@ function MemberEditor({ member, onBack, alternar, excluir }: { member: Member; o
   useEffect(() => {
     supabase.from('checkins').select('id,checked_in_at,codigo,editions(titulo)').eq('member_id', member.id).order('checked_in_at', { ascending: false }).then(({ data }) => setHistory((data || []) as unknown as History[]));
     supabase.from('point_events').select('id,acao,pontos,created_at,motivo').eq('member_id', member.id).order('created_at', { ascending: false }).then(({ data }) => setPoints((data || []) as Point[]));
+  }, [member.id, launch]);
+  useEffect(() => {
+    supabase.from('adesao_log').select('id,de,para,motivo,por,em').eq('member_id', member.id).order('em', { ascending: false }).then(({ data }) => setLogAdesao((data || []) as LogAdesao[]));
+    supabase.from('members_ficha').select('*').eq('member_id', member.id).maybeSingle().then(({ data }) => { if (data) setFichaAtual(data as Ficha); });
   }, [member.id, launch]);
   const text = (key: 'nome' | 'apelido' | 'whatsapp' | 'cidade_uf' | 'empresa' | 'cargo' | 'linkedin', label: string) => (
     <label><span>{label}</span><input value={draft[key] || ''} onChange={(event) => { setDraft({ ...draft, [key]: event.target.value }); setNote(''); }} /></label>
@@ -52,6 +67,20 @@ function MemberEditor({ member, onBack, alternar, excluir }: { member: Member; o
     const { error } = await supabase.from('point_events').insert({ member_id: member.id, acao: `${kind}:${crypto.randomUUID()}`, pontos: valor, motivo: motivo.trim() });
     setNote(error ? `Não foi possível lançar: ${error.message}` : 'Pontos lançados.');
     if (!error) { setMotivo(''); setLaunch(launch + 1); }
+  }
+
+  async function decidir(status: string) {
+    if ((status === 'ajustes' || status === 'nao_aprovada') && !motivoAdesao.trim()) { setNote('Escreva o motivo para esta decisão.'); return; }
+    if (!window.confirm(`${{ em_analise: 'Marcar como em análise', aprovada: 'Aprovar a adesão de', ajustes: 'Pedir ajustes a', nao_aprovada: 'Não aprovar a adesão de' }[status]} ${member.nome}?`)) return;
+    const { error } = await supabase.rpc('communicali_decidir_adesao', { p_member: member.id, p_status: status, p_motivo: motivoAdesao.trim() || null });
+    if (error) { setNote(`Não foi possível registrar: ${error.message}`); return; }
+    setAdesao({ status, motivo: motivoAdesao.trim() }); setMotivoAdesao(''); setNote('Decisão registrada.'); setLaunch((valor) => valor + 1);
+  }
+
+  async function marcarComunidade(valor: boolean) {
+    setNaComunidade(valor);
+    const { error } = await supabase.from('members').update({ na_comunidade_whatsapp: valor, na_comunidade_whatsapp_em: valor ? new Date().toISOString() : null }).eq('id', member.id);
+    if (error) { setNaComunidade(!valor); setNote('Não foi possível salvar.'); }
   }
 
   async function save() {
@@ -84,6 +113,34 @@ function MemberEditor({ member, onBack, alternar, excluir }: { member: Member; o
         </div>
       </section>
       <section className="v2-forms-card">
+        <header><small>ENTRADA E ADESÃO</small><h2>{ESTAGIO[fichaAtual?.estagio || 'visitante']}{adesao.status ? `, adesão ${ADESAO[adesao.status].toLowerCase()}` : ', sem pedido de adesão'}</h2></header>
+        <div className="adm-perfil">
+          <div><strong>Presenças antes da adesão</strong><p>{member.adesao_origem === 'legado' ? 'Membro desde antes da regra nova' : `${fichaAtual?.presencas_pre_membro ?? 0} de ${fichaAtual?.limite_pre_membro ?? 2}`}</p></div>
+          <div><strong>Limite automático</strong><p>{fichaAtual?.limite_atingido ? 'Atingido: nova participação aberta exige adesão aprovada' : adesao.status === 'aprovada' ? 'Não se aplica (adesão aprovada)' : 'Dentro do limite'}</p></div>
+          <div><strong>Pode pedir adesão</strong><p>{adesao.status === 'aprovada' ? 'Já é Membro' : (fichaAtual?.presencas_pre_membro ?? 0) >= 1 ? 'Sim, tem ao menos 1 presença validada' : 'Ainda não: falta a primeira presença validada'}</p></div>
+          {adesao.motivo && <div><strong>Motivo registrado</strong><p>{adesao.motivo}</p></div>}
+        </div>
+        <ul className="adm-checklist">
+          <li><b>{member.foto_url ? '✓' : '○'}</b> Foto enviada</li>
+          <li><b>{member.whatsapp ? '✓' : '○'}</b> WhatsApp informado</li>
+          <li><b>{member.termos_aceitos_em || member.regras_aceitas_em ? '✓' : '○'}</b> Aceite dos termos e regras</li>
+          <li><b>{member.privacidade_aceita_em ? '✓' : '○'}</b> Aceite da política de privacidade</li>
+          <li><label><input type="checkbox" checked={naComunidade} onChange={(event) => void marcarComunidade(event.target.checked)} /> <b>{naComunidade ? '✓' : '○'}</b> Está na comunidade do WhatsApp <em>(você marca)</em></label></li>
+        </ul>
+        {adesao.status !== 'aprovada' && (
+          <div className="v2-forms-grid">
+            <label className="wide"><span>Motivo <em>obrigatório para pedir ajustes ou não aprovar</em></span><input value={motivoAdesao} onChange={(event) => setMotivoAdesao(event.target.value)} /></label>
+            <div className="adm-submit">
+              <button type="button" className="wf-primary" onClick={() => void decidir('aprovada')}>Aprovar</button>
+              <button type="button" className="wf-secondary" onClick={() => void decidir('ajustes')}>Pedir ajustes</button>
+              <button type="button" className="wf-secondary" onClick={() => void decidir('nao_aprovada')}>Não aprovar</button>
+              {adesao.status !== 'em_analise' && <button type="button" className="wf-secondary" onClick={() => void decidir('em_analise')}>Marcar em análise</button>}
+            </div>
+          </div>
+        )}
+        {!!logAdesao.length && <div className="adm-list">{logAdesao.map((item) => <div className="adm-row adm-row--static" key={item.id}><strong>{ADESAO[item.para] || item.para}</strong><span>{item.motivo || 'Sem motivo'}{item.por ? ` · ${item.por}` : ''}</span><em>{new Date(item.em).toLocaleString('pt-BR')}</em></div>)}</div>}
+      </section>
+      <section className="v2-forms-card">
         <header><small>NO ESPAÇO DO MEMBRO</small><h2>Perfil</h2></header>
         <div className="adm-perfil">
           <div><strong>Código</strong><p>{member.codigo || 'Ainda não gerado'}</p></div>
@@ -113,13 +170,15 @@ function MemberEditor({ member, onBack, alternar, excluir }: { member: Member; o
 }
 
 export function MembersPanel() {
-  const [list, setList] = useState<Member[]>([]);
+  const [list, setList] = useState<Array<Member & Extra>>([]);
   const [points, setPoints] = useState<Record<string, number>>({});
   const [encontros, setEncontros] = useState<Record<string, { total: number }>>({});
   const [query, setQuery] = useState('');
-  const [open, setOpen] = useState<Member | null>(null);
+  const [open, setOpen] = useState<(Member & Extra) | null>(null);
+  const [fichas, setFichas] = useState<Record<string, Ficha>>({});
   const load = () => {
-    supabase.from('members').select('*').order('created_at', { ascending: false }).then(({ data }) => setList((data || []) as Member[]));
+    supabase.from('members_ficha').select('*').then(({ data }) => setFichas(Object.fromEntries(((data || []) as Ficha[]).map((item) => [item.member_id, item]))));
+    supabase.from('members').select('*').order('created_at', { ascending: false }).then(({ data }) => setList((data || []) as Array<Member & Extra>));
     supabase.from('checkins').select('member_id').then(({ data }) => { const totais: Record<string, { total: number }> = {}; for (const row of data || []) totais[row.member_id] = { total: (totais[row.member_id]?.total || 0) + 1 }; setEncontros(totais); });
     supabase.from('point_events').select('member_id,pontos').then(({ data }) => {
       const totals: Record<string, number> = {};
@@ -151,13 +210,16 @@ export function MembersPanel() {
     load();
   }
 
-  if (open) return <MemberEditor key={open.id} member={open} onBack={() => { setOpen(null); load(); }} alternar={() => void toggleStatus(open).then(() => setOpen(null))} excluir={() => void remove(open).then(() => setOpen(null))} />;
+  if (open) return <MemberEditor key={open.id} member={open} ficha={fichas[open.id]} onBack={() => { setOpen(null); load(); }} alternar={() => void toggleStatus(open).then(() => setOpen(null))} excluir={() => void remove(open).then(() => setOpen(null))} />;
   const categoriaDe = (item: Member) => (item.status === 'suspenso' ? 'Suspenso' : CATEGORIAS[item.categoria] || item.categoria);
   const dias = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
   const tempo = (iso: string) => { const total = dias(iso); return total < 30 ? `${total} dias` : total < 365 ? `${Math.floor(total / 30)} meses` : `${Math.floor(total / 365)} anos`; };
-  const colunas: Array<Coluna<Member>> = [
+  const colunas: Array<Coluna<Member & Extra>> = [
     { id: 'nome', titulo: 'Nome', valor: (item) => item.nome, render: (item) => <button type="button" className="adm-nome" onClick={() => setOpen(item)}>{item.foto_url ? <img src={item.foto_url} alt="" /> : <span>{item.nome.charAt(0)}</span>}{item.nome}</button> },
     { id: 'categoria', titulo: 'Categoria', valor: categoriaDe, render: (item) => <Categoria id={item.status === 'suspenso' ? 'suspenso' : item.categoria} nome={categoriaDe(item)} /> },
+    { id: 'estagio', titulo: 'Estágio', valor: (item) => ESTAGIO[fichas[item.id]?.estagio || 'visitante'], render: (item) => <Categoria id={fichas[item.id]?.estagio || 'visitante'} nome={ESTAGIO[fichas[item.id]?.estagio || 'visitante']} /> },
+    { id: 'adesao', titulo: 'Adesão', valor: (item) => (item.adesao_origem === 'legado' ? 'Membro anterior' : item.adesao_status ? ADESAO[item.adesao_status] : 'Sem pedido') },
+    { id: 'pre', titulo: 'Pré-Membro', valor: (item) => (item.adesao_origem === 'legado' ? '' : `${fichas[item.id]?.presencas_pre_membro ?? 0} de 2`) },
     { id: 'pontos', titulo: 'Milhas', valor: (item) => points[item.id] || 0 },
     { id: 'encontros', titulo: 'Encontros', valor: (item) => encontros[item.id]?.total || 0 },
     { id: 'desde', titulo: 'Desde', valor: (item) => item.created_at, render: (item) => dataBr(item.created_at) },
@@ -172,7 +234,7 @@ export function MembersPanel() {
   return (
     <>
       <div className="wf-head"><div><small>MEMBROS</small><h1>Quem faz parte da comunidade</h1><p>Clique no título da coluna para ordenar e no nome para abrir a ficha. Toda alteração fica registrada.</p></div><div className="v2-head-actions"><button type="button" className="wf-secondary" disabled={!visible.length} onClick={exportAll}>Exportar Excel</button></div></div>
-      <Tabela colunas={colunas} linhas={list} chave={(item) => item.id} vazio="Nenhum membro encontrado." filtros={[{ id: 'categoria', titulo: 'Categoria', valor: categoriaDe }, { id: 'segmento', titulo: 'Segmento', valor: (item) => item.segmento || '' }, { id: 'regiao', titulo: 'Região', valor: (item) => item.regiao || '' }, { id: 'mercado', titulo: 'Mercado', valor: (item) => (item.aberto_trabalho ? 'Open to work' : item.recrutador ? 'Recruta' : '') }]} />
+      <Tabela colunas={colunas} linhas={list} chave={(item) => item.id} vazio="Nenhum membro encontrado." filtros={[{ id: 'categoria', titulo: 'Categoria', valor: categoriaDe }, { id: 'adesao', titulo: 'Adesão', valor: (item) => (item.adesao_origem === 'legado' ? 'Membro anterior' : item.adesao_status ? ADESAO[item.adesao_status] : 'Sem pedido') }, { id: 'segmento', titulo: 'Segmento', valor: (item) => item.segmento || '' }, { id: 'regiao', titulo: 'Região', valor: (item) => item.regiao || '' }, { id: 'mercado', titulo: 'Mercado', valor: (item) => (item.aberto_trabalho ? 'Open to work' : item.recrutador ? 'Recruta' : '') }]} />
     </>
   );
 }

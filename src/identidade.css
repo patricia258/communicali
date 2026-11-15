@@ -214,3 +214,10 @@ html:has(.adm),body:has(.adm){background:#fff}
 .passe__programa-atual h2,.passe__programa-atual h3,.passe__programa-atual strong{color:#1B0A10!important}
 .passe__bilhete-acoes::before,.passe__bilhete-acoes::after,.passe__bilhete>*::before,.passe__bilhete>*::after{display:none!important}
 html[data-workspace-ui='v2'] .adm .v2-forms-card,html[data-workspace-ui='v2'] .adm .adm-row{border:0!important;border-top:1px solid #D9D2CB!important;border-radius:0!important;box-shadow:none!important;background:none!important;padding-left:0!important;padding-right:0!important}
+
+/* Ficha da pessoa: checklist de entrada e adesão */
+.adm-checklist{list-style:none;margin:14px 0;padding:0;border-top:1px solid var(--ink)}
+.adm-checklist li{padding:9px 0;border-bottom:1px solid var(--rule);font-size:13px}
+.adm-checklist li b{display:inline-block;width:18px;color:var(--bordo)}
+.adm-checklist label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.adm-checklist em{color:var(--gray);font-style:normal}

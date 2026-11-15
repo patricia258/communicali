@@ -397,6 +397,11 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 15/11/2026, Claude Code — parte 3: ficha da pessoa com estágio, limite e adesão (publicado)
+- Migração 20261115140000_adesao_pre_membro aplicada em produção: colunas de adesão e comunidade WhatsApp em members, editions.elegivel_pre_membro, tabela adesao_log, view members_ficha (estágio, presenças pré-Membro, limite 2) e RPC communicali_decidir_adesao (só admin). Os 29 membros atuais ficaram como adesao_status=aprovada, origem=legado.
+- Painel > Membros: colunas Estágio, Adesão e Pré-Membro, filtro por adesão e, na ficha, seção Entrada e adesão (checklist, marcador da comunidade do WhatsApp, aprovar/pedir ajustes/não aprovar com motivo, histórico).
+- AINDA NÃO FEITO (parte 4): check-in ainda cria membro com acesso ao passaporte; falta pedido pelo app, bloqueio após 2 presenças, janela de Membros e e-mails ligados aos eventos.
+
 ### 15/11/2026, Claude Code — regras v23 e reorganização do painel (em partes, nada publicado)
 - Ver docs/regras-v23/LEIA.md. Parte 1 (regras e políticas) entregue como minuta; partes 2 a 4 aguardam aprovação. Painel: mapa e estrutura nova aguardam decisões.
 
