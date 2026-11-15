@@ -121,7 +121,7 @@ export function ProgramPanel() {
 }
 
 // Quem clicou em "Parar de receber estes e-mails" nos avisos do espaço do membro.
-function Descadastros() {
+export function Descadastros() {
   const [linhas, setLinhas] = useState<Array<{ email: string; criado_em: string; nome: string }>>([]);
   useEffect(() => {
     void Promise.all([supabase.from('email_descadastro').select('email,criado_em'), supabase.from('members').select('email,nome')]).then(([saidas, membros]) => {

@@ -1,5 +1,6 @@
 /* Painéis do Programa de Membros: Membros, Votações e Textos. Tudo o que muda dado fica em audit_log pelo banco. */
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
@@ -176,9 +177,10 @@ export function MembersPanel() {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState<(Member & Extra) | null>(null);
   const [fichas, setFichas] = useState<Record<string, Ficha>>({});
+  const [params] = useSearchParams();
   const load = () => {
     supabase.from('members_ficha').select('*').then(({ data }) => setFichas(Object.fromEntries(((data || []) as Ficha[]).map((item) => [item.member_id, item]))));
-    supabase.from('members').select('*').order('created_at', { ascending: false }).then(({ data }) => setList((data || []) as Array<Member & Extra>));
+    supabase.from('members').select('*').order('created_at', { ascending: false }).then(({ data }) => { const itens = (data || []) as Array<Member & Extra>; setList(itens); const pedido = params.get('abrir'); if (pedido) setOpen((atual) => atual || itens.find((item) => item.id === pedido) || null); });
     supabase.from('checkins').select('member_id').then(({ data }) => { const totais: Record<string, { total: number }> = {}; for (const row of data || []) totais[row.member_id] = { total: (totais[row.member_id]?.total || 0) + 1 }; setEncontros(totais); });
     supabase.from('point_events').select('member_id,pontos').then(({ data }) => {
       const totals: Record<string, number> = {};
@@ -211,12 +213,12 @@ export function MembersPanel() {
   }
 
   if (open) return <MemberEditor key={open.id} member={open} ficha={fichas[open.id]} onBack={() => { setOpen(null); load(); }} alternar={() => void toggleStatus(open).then(() => setOpen(null))} excluir={() => void remove(open).then(() => setOpen(null))} />;
-  const categoriaDe = (item: Member) => (item.status === 'suspenso' ? 'Suspenso' : CATEGORIAS[item.categoria] || item.categoria);
+  const categoriaDe = (item: Member) => (item.status === 'suspenso' ? 'Suspenso' : fichas[item.id] && fichas[item.id].estagio !== 'membro' ? 'Ainda não é Membro' : CATEGORIAS[item.categoria] || item.categoria);
   const dias = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
   const tempo = (iso: string) => { const total = dias(iso); return total < 30 ? `${total} dias` : total < 365 ? `${Math.floor(total / 30)} meses` : `${Math.floor(total / 365)} anos`; };
   const colunas: Array<Coluna<Member & Extra>> = [
     { id: 'nome', titulo: 'Nome', valor: (item) => item.nome, render: (item) => <button type="button" className="adm-nome" onClick={() => setOpen(item)}>{item.foto_url ? <img src={item.foto_url} alt="" /> : <span>{item.nome.charAt(0)}</span>}{item.nome}</button> },
-    { id: 'categoria', titulo: 'Categoria', valor: categoriaDe, render: (item) => <Categoria id={item.status === 'suspenso' ? 'suspenso' : item.categoria} nome={categoriaDe(item)} /> },
+    { id: 'categoria', titulo: 'Categoria', valor: categoriaDe, render: (item) => <Categoria id={item.status === 'suspenso' ? 'suspenso' : fichas[item.id] && fichas[item.id].estagio !== 'membro' ? 'visitante' : item.categoria} nome={categoriaDe(item)} /> },
     { id: 'estagio', titulo: 'Estágio', valor: (item) => ESTAGIO[fichas[item.id]?.estagio || 'visitante'], render: (item) => <Categoria id={fichas[item.id]?.estagio || 'visitante'} nome={ESTAGIO[fichas[item.id]?.estagio || 'visitante']} /> },
     { id: 'adesao', titulo: 'Adesão', valor: (item) => (item.adesao_origem === 'legado' ? 'Membro anterior' : item.adesao_status ? ADESAO[item.adesao_status] : 'Sem pedido') },
     { id: 'pre', titulo: 'Pré-Membro', valor: (item) => (item.adesao_origem === 'legado' ? '' : `${fichas[item.id]?.presencas_pre_membro ?? 0} de 2`) },

@@ -1,7 +1,6 @@
 /* Área administrativa: login por link no e-mail. Quem não está em public.admins não entra; o banco repete essa regra. */
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { ComentariosPanel } from './AdminComentarios';
+import { Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
@@ -9,13 +8,9 @@ import { PessoasDaEdicao } from './AdminPessoasEdicao';
 import { DiaDoEncontro } from './DiaDoEncontro';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
-import { MembersPanel, PollsPanel, TextsPanel, VotacoesDaEdicao, exportPresencasCsv } from './AdminPrograma';
-import { GuestsPanel } from './Convidados';
-import { HomePanel, ProgramPanel } from './AdminInicio';
-import { StaffPanel } from './Staff';
-import { FornecedorPanel } from './Fornecedor';
+import { PollsPanel, VotacoesDaEdicao, exportPresencasCsv } from './AdminPrograma';
 import { CardEMimos, EmailsCard, chamar } from './AdminEmails';
-import { ImpactosPanel, IndicacoesPanel, MatchesPanel, RecommendationsPanel } from './AdminRecomendacoes';
+import { AppPage, Abas, AprovacoesPage, ConfigPage, EmailsPage, InicioPage, MenuLateral, PessoasPage, ProgramaPage, SitePage, useAba } from './AdminPainel';
 import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 import { AdminRedeExtras } from './AdminRedeExtras';
 import './admin.css';
@@ -126,11 +121,24 @@ function Login() {
   );
 }
 
+function EdicoesPage() {
+  const [aba, mudar] = useAba('encontros', ['encontros', 'votacoes'], 'topo');
+  const [params] = useSearchParams();
+  const dentro = params.get('abrir') || params.get('secao');
+  return (
+    <>
+      {!dentro && <Abas atual={aba} onChange={mudar} abas={[['encontros', 'Encontros'], ['votacoes', 'Perguntas para o telão']]} />}
+      {aba === 'votacoes' && !dentro ? <PollsPanel /> : <EditionsPanel />}
+    </>
+  );
+}
+
 function EditionsPanel() {
   const [list, setList] = useState<Edition[]>([]);
   const [open, setOpen] = useState<Edition | null>(null);
   const [error, setError] = useState('');
-  const load = () => supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data, error: failure }) => { if (failure) setError(failure.message); else setList((data || []) as Edition[]); });
+  const [params] = useSearchParams();
+  const load = () => supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data, error: failure }) => { if (failure) setError(failure.message); else { const itens = (data || []) as Edition[]; setList(itens); const pedida = params.get('abrir'); if (pedida) setOpen((atual) => atual || itens.find((item) => item.slug === pedida) || null); } });
   const [contagens, setContagens] = useState<Record<string, Record<string, number>>>({});
   useEffect(() => {
     void Promise.all([supabase.from('registrations').select('edition_id,status'), supabase.from('checkins').select('edition_id')]).then(([inscricoes, presencas]) => {
@@ -175,6 +183,7 @@ function EditionsPanel() {
 
 
 function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => void }) {
+  const [aba, mudarAba] = useAba('dados', ['dia', 'dados', 'pessoas', 'emails', 'site'], 'secao');
   const [draft, setDraft] = useState(edition);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [people, setPeople] = useState<Attendee[]>([]);
@@ -272,12 +281,9 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       <button type="button" className="v2-forms-back" onClick={onBack}>Voltar para edições</button>
       <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
-      <nav className="adm-indice" aria-label="Seções da edição">
-        {[['secao-dia', 'Dia do encontro'], ['secao-dados', 'Dados'], ['secao-imagens', 'Imagens'], ['secao-pessoas', 'Pessoas'], ['secao-emails', 'E-mails'], ['secao-card', 'Card e mimos'], ['secao-votacao', 'Votação'], ['secao-presencas', 'Presenças']].map(([id, nome]) => (
-          <a key={id} href={`#${id}`} onClick={(event) => { event.preventDefault(); document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>{nome}</a>
-        ))}
-      </nav>
-      <DiaDoEncontro edition={draft} />
+      <Abas atual={aba} onChange={mudarAba} abas={[['dados', 'Dados e vagas'], ['pessoas', 'Pessoas'], ['emails', 'E-mails'], ['dia', 'Dia do encontro'], ['site', 'Site e fotos']]} />
+      {aba === 'dia' && <DiaDoEncontro edition={draft} />}
+      {aba === 'dados' && (<>
       <section className="v2-forms-card" id="secao-dados">
         <header><small>DADOS DO ENCONTRO</small><h2>Data, local, check-in e o que aparece no site</h2></header>
         <div className="v2-forms-grid">
@@ -299,6 +305,8 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           <label className="wide"><span>Resumo do encontro</span><textarea rows={5} value={draft.resumo || ''} onChange={(event) => set({ resumo: event.target.value })} /></label>
         </div>
       </section>
+      </>)}
+      {aba === 'site' && (<>
       <section className="v2-forms-card" id="secao-imagens">
         <header><small>IMAGENS</small><h2>Capa e fotos do carrossel</h2></header>
         <div className="adm-cover">
@@ -317,9 +325,13 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           ))}
         </div>
       </section>
-      <PessoasDaEdicao edition={draft} />
+      </>)}
+      {aba === 'pessoas' && <PessoasDaEdicao edition={draft} />}
+      {aba === 'emails' && (<>
       <div id="secao-emails"><EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} /></div>
       <CardEMimos edition={edition} />
+      </>)}
+      {aba === 'dia' && (<>
       <div id="secao-votacao"><VotacoesDaEdicao editionId={edition.id} editionSlug={edition.slug} /></div>
       <section className="v2-forms-card" id="secao-presencas">
         <header className="adm-secao__topo"><div><small>PRESENÇAS</small><h2>{people.length} {people.length === 1 ? 'check-in' : 'check-ins'}</h2></div>
@@ -339,6 +351,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           linhas={people} chave={(item) => item.id} inicial={{ id: 'hora' }} vazio="Nenhum check-in ainda."
           acoes={<><button type="button" className="wf-secondary" disabled={!people.length} onClick={exportCsv}>Exportar CSV</button><button type="button" className="wf-secondary" disabled={!people.length} onClick={exportPeople}>Exportar Excel</button></>} />
       </section>
+      </>)}
       </div>
     </>
   );
@@ -397,64 +410,16 @@ function PartnersPanel() {
   );
 }
 
-function CounterPanel() {
-  const [value, setValue] = useState('');
-  const [checkins, setCheckins] = useState(0);
-  const [note, setNote] = useState('');
-  useEffect(() => {
-    supabase.from('site_settings').select('membros_contador').single().then(({ data }) => setValue(data?.membros_contador == null ? '' : String(data.membros_contador)));
-    supabase.from('members').select('id', { count: 'exact', head: true }).then(({ count }) => setCheckins(count || 0));
-  }, []);
-
-  async function save() {
-    const number = value.trim() === '' ? null : Number(value);
-    if (number !== null && (!Number.isInteger(number) || number < 0)) { setNote('Digite um número inteiro.'); return; }
-    const { error } = await supabase.from('site_settings').update({ membros_contador: number, updated_at: new Date().toISOString() }).eq('id', true);
-    setNote(error ? 'Não foi possível salvar.' : 'Contador salvo.');
-  }
-
-  return (
-    <>
-      <div className="wf-head"><div><small>CONTADOR</small><h1>Contador de membros</h1><p>Com o campo vazio, o site conta quem fez check-in em edições públicas. Com um número, mostra esse número. Em zero, o contador some.</p></div></div>
-      <section className="v2-forms-card">
-        <div className="v2-forms-grid">
-          <label><span>Número no site</span><input inputMode="numeric" value={value} onChange={(event) => { setValue(event.target.value); setNote(''); }} /></label>
-          <div className="adm-submit"><button type="button" className="wf-primary" onClick={() => void save()}>Salvar</button></div>
-        </div>
-        <p className="adm-hint">Cadastros registrados no banco: {checkins}.</p>
-        {note && <p className="v2-forms-ok" role="status">{note}</p>}
-      </section>
-    </>
-  );
-}
-
-// Menu do painel em poucos grupos; cada grupo mostra as suas abas logo abaixo.
-const GRUPOS: Array<{ nome: string; itens: Array<[string, string]> }> = [
-  { nome: 'Início', itens: [['/admin', 'Início']] },
-  { nome: 'Pessoas', itens: [['/admin/membros', 'Membros'], ['/admin/indicacoes', 'Indicações'], ['/admin/matches', 'Matches']] },
-  { nome: 'Edições', itens: [['/admin/edicoes', 'Edições'], ['/admin/comentarios', 'Comentários']] },
-  { nome: 'Programa', itens: [['/admin/programa', 'Como funciona'], ['/admin/missoes', 'Missões'], ['/admin/impacto', 'Impacto']] },
-  { nome: 'Formulários', itens: [['/admin/formularios', 'Formulários'], ['/admin/staff', 'Staff'], ['/admin/fornecedores', 'Fornecedores']] },
-  { nome: 'Parceiros', itens: [['/admin/parceiros', 'Parceiros']] },
-];
-
 function Frame({ session, children }: { session: Session; children: ReactNode }) {
-  const { pathname } = useLocation();
-  const caminho = pathname.replace(/\/$/, '') || '/admin';
+  const [aberto, setAberto] = useState(false);
   // Ao navegar no painel, os avisos de nível e missão que você acabou de liberar saem por e-mail.
-  useEffect(() => { void fetch('/api/avisos', { method: 'POST' }).catch(() => null); }, [pathname]);
-  const grupoAtual = GRUPOS.find((grupo) => grupo.itens.some(([to]) => to === caminho)) || (caminho === '/admin/convidados' ? GRUPOS[1] : undefined);
+  const { pathname } = useLocation();
+  useEffect(() => { void fetch('/api/avisos', { method: 'POST' }).catch(() => null); setAberto(false); }, [pathname]);
   return (
-    <div className="adm">
-      <header className="adm__top">
-        <NavLink to="/admin" className="adm__logo"><img src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /></NavLink>
-        <nav>
-          {GRUPOS.map((grupo) => <NavLink key={grupo.nome} to={grupo.itens[0][0]} end={grupo.itens[0][0] === '/admin'} className={() => (grupoAtual === grupo ? 'active' : '')}>{grupo.nome}</NavLink>)}
-        </nav>
-        <div className="adm__user"><a href="/" target="_blank" rel="noopener noreferrer">Ver o site</a><NavLink to="/admin/textos" title="Regras, privacidade e textos do site" className="adm__config">⚙ Configurações</NavLink><button type="button" onClick={() => void supabase.auth.signOut()}>Sair</button></div>
-      </header>
-      {grupoAtual && grupoAtual.itens.length > 1 && <nav className="adm__sub" aria-label={grupoAtual.nome}>{grupoAtual.itens.map(([to, nome]) => <NavLink key={to} to={to} end>{nome}</NavLink>)}</nav>}
-      <main className="adm__main ap-app v2-admin-page v2-forms v2-client-module"><div className="ap-content"><div className="wf">{children}</div></div></main>
+    <div className={`adm adm--lateral${aberto ? ' adm--aberto' : ''}`}>
+      <button type="button" className="adm__menu" aria-label="Abrir o menu" aria-expanded={aberto} onClick={() => setAberto(!aberto)}>Menu</button>
+      <MenuLateral email={session.user.email || ''} onSair={() => void supabase.auth.signOut()} fechar={() => setAberto(false)} />
+      <main className="adm__corpo adm__main ap-app v2-admin-page v2-forms v2-client-module"><div className="ap-content"><div className="wf">{children}</div></div></main>
     </div>
   );
 }
@@ -488,23 +453,31 @@ export function Admin() {
   return (
     <Frame session={session}>
       <Routes>
-        <Route index element={<HomePanel />} />
-        <Route path="programa" element={<ProgramPanel />} />
-        <Route path="missoes" element={<RecommendationsPanel />} />
-        <Route path="matches" element={<MatchesPanel />} />
-        <Route path="indicacoes" element={<IndicacoesPanel />} />
-        <Route path="impacto" element={<ImpactosPanel />} />
-        <Route path="staff" element={<StaffPanel />} />
-        <Route path="fornecedores" element={<FornecedorPanel />} />
+        <Route index element={<InicioPage />} />
+        <Route path="edicoes" element={<EdicoesPage />} />
+        <Route path="pessoas" element={<PessoasPage />} />
+        <Route path="aprovacoes" element={<AprovacoesPage />} />
+        <Route path="programa" element={<ProgramaPage />} />
+        <Route path="rede" element={<PartnersPanel />} />
+        <Route path="emails" element={<EmailsPage />} />
         <Route path="formularios" element={<AdminFormsPage />} />
-        <Route path="edicoes" element={<EditionsPanel />} />
-        <Route path="comentarios" element={<ComentariosPanel />} />
-        <Route path="parceiros" element={<PartnersPanel />} />
-        <Route path="contador" element={<CounterPanel />} />
-        <Route path="membros" element={<MembersPanel />} />
-        <Route path="convidados" element={<GuestsPanel />} />
-        <Route path="votacoes" element={<PollsPanel />} />
-        <Route path="textos" element={<TextsPanel />} />
+        <Route path="site" element={<SitePage />} />
+        <Route path="app" element={<AppPage />} />
+        <Route path="configuracoes" element={<ConfigPage />} />
+        {/* Endereços antigos continuam funcionando */}
+        <Route path="membros" element={<Navigate to="/admin/pessoas?aba=membros" replace />} />
+        <Route path="convidados" element={<Navigate to="/admin/pessoas?aba=convidados" replace />} />
+        <Route path="staff" element={<Navigate to="/admin/pessoas?aba=staff" replace />} />
+        <Route path="fornecedores" element={<Navigate to="/admin/pessoas?aba=fornecedores" replace />} />
+        <Route path="indicacoes" element={<Navigate to="/admin/pessoas?aba=indicacoes" replace />} />
+        <Route path="matches" element={<Navigate to="/admin/pessoas?aba=matches" replace />} />
+        <Route path="missoes" element={<Navigate to="/admin/aprovacoes?aba=missoes" replace />} />
+        <Route path="comentarios" element={<Navigate to="/admin/aprovacoes?aba=comentarios" replace />} />
+        <Route path="impacto" element={<Navigate to="/admin/programa?aba=impacto" replace />} />
+        <Route path="parceiros" element={<Navigate to="/admin/rede" replace />} />
+        <Route path="votacoes" element={<Navigate to="/admin/edicoes?topo=votacoes" replace />} />
+        <Route path="contador" element={<Navigate to="/admin/site?aba=contador" replace />} />
+        <Route path="textos" element={<Navigate to="/admin/site?aba=textos" replace />} />
       </Routes>
     </Frame>
   );

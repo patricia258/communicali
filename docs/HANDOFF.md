@@ -397,6 +397,13 @@ Painel `/admin`: Início, Membros, Programa, Missões, Matches, Edições, Indic
 
 Acrescente entradas no topo.
 
+### 15/11/2026, Claude Code — painel refeito: menu lateral, páginas em abas (publicado)
+- Nova moldura (AdminPainel.tsx + Admin.tsx): menu lateral Início / Operação (Edições, Pessoas, Aprovações) / Programa (Programa de membros, Rede e parceiros) / Comunicação (E-mails, Formulários) / Conteúdo (Site, App do membro) / Sistema (Configurações). Endereços antigos redirecionam.
+- Edição em abas (Dados e vagas, Pessoas, E-mails, Dia do encontro, Site e fotos) via ?secao=. Pessoas e Aprovações em abas via ?aba=. Aprovações unifica adesões, missões/recomendações e comentários, com contador no menu.
+- Telas EmBreve (E-mails, App do membro, Site > Home, Equipe do painel) e a lista consolidada em Configurações > O que falta construir (constante FALTA em AdminPainel.tsx): manter atualizada, remover o item quando entregue.
+- Dados: quem foi à 1ª edição como 'membro' virou Visitante; 3 convidados do PDF de recepção marcados como Convidado; Conector, Embaixador e Fundadora seguem Membro (legado).
+- PENDENTE (parte 4): check-in ainda dá acesso total ao passaporte, falta o pedido de adesão no app, bloqueio após 2 presenças, janela de Membros, e-mails do fluxo ligados.
+
 ### 15/11/2026, Claude Code — parte 3: ficha da pessoa com estágio, limite e adesão (publicado)
 - Migração 20261115140000_adesao_pre_membro aplicada em produção: colunas de adesão e comunidade WhatsApp em members, editions.elegivel_pre_membro, tabela adesao_log, view members_ficha (estágio, presenças pré-Membro, limite 2) e RPC communicali_decidir_adesao (só admin). Os 29 membros atuais ficaram como adesao_status=aprovada, origem=legado.
 - Painel > Membros: colunas Estágio, Adesão e Pré-Membro, filtro por adesão e, na ficha, seção Entrada e adesão (checklist, marcador da comunidade do WhatsApp, aprovar/pedir ajustes/não aprovar com motivo, histórico).
