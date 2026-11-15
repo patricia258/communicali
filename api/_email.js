@@ -80,13 +80,24 @@ function linkGoogle(edition) {
 const absoluta = (url) => (url ? new URL(url, SITE).href : '');
 
 function detalhe(rotulo, valor) {
-  return `<tr><td style="padding:0 0 12px;font-family:${TEXTO};font-size:13px;font-weight:600;color:${COR.vivo}">${rotulo}<div style="padding-top:3px;font-size:16px;font-weight:400;line-height:23px;color:${COR.tinta}">${escape(valor)}</div></td></tr>`;
+  return `<tr><td width="92" valign="top" style="padding:12px 0;border-bottom:1px solid #D9D2CB;font-family:${TEXTO};font-size:13px;line-height:21px;color:#6F6770">${rotulo}</td><td valign="top" style="padding:12px 0;border-bottom:1px solid #D9D2CB;font-family:${TEXTO};font-size:15px;line-height:21px;font-weight:600;color:${COR.tinta}">${escape(valor)}</td></tr>`;
 }
+
+// Palavra-chave do título em bordô (a última palavra).
+function destacar(html) {
+  const m = /^([\s\S]*\s)(\S+)$/.exec(String(html));
+  return m ? `${m[1]}<span style="color:${COR.bordo}">${m[2]}</span>` : `<span style="color:${COR.bordo}">${html}</span>`;
+}
+const ROTULO = (titulo, cor) => `<tr><td align="left" style="padding:0 0 16px"><span style="display:inline-block;padding:6px 14px;border-radius:999px;border:1px solid ${cor.etiqueta === '#6F6770' ? '#6F6770' : COR.bordo};background:#FFFFFF;font-family:${TEXTO};font-size:12px;font-weight:700;letter-spacing:.02em;color:${cor.etiqueta === '#6F6770' ? '#6F6770' : COR.bordo}">${escape(titulo)}</span></td></tr>`;
+const TITULO_LINHA = (saudacao) => `<tr><td align="left" style="padding:0 0 16px;font-family:${TITULO};font-size:40px;line-height:44px;font-weight:700;letter-spacing:-.03em;color:${COR.tinta}">${destacar(saudacao)}</td></tr>`;
+const TOPO = (rest = '') => `<tr><td style="padding:0;border-bottom:4px solid ${COR.bordo}"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0"></td></tr>
+<tr><td style="padding:30px 32px 6px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rest}`;
+const BOTAO = (b, cor) => `<tr><td align="left" style="padding:22px 0 6px"><a href="${escape(b.href)}" style="display:inline-block;padding:14px 26px;border-radius:999px;background:${COR.tinta};font-family:${TITULO};font-size:15px;font-weight:700;color:#FFFFFF;text-decoration:none">${escape(b.texto)}</a></td></tr>`;
 
 // A foto entra como fundo da célula para qualquer formato virar uma faixa recortada; sem capa, o espaço some.
 function foto(edition) {
   const capa = absoluta(edition.capa_url);
-  return capa ? `<tr><td style="padding:0 0 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td height="220" bgcolor="${COR.rose}" background="${escape(capa)}" style="height:220px;border-radius:20px;background-color:${COR.rose};background-image:url('${escape(capa)}');background-position:center 18%;background-size:cover;background-repeat:no-repeat;font-size:1px;line-height:1px">&nbsp;</td></tr></table></td></tr>` : '';
+  return capa ? `<tr><td style="padding:0 0 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td height="220" bgcolor="${COR.rose}" background="${escape(capa)}" style="height:220px;border-radius:6px;background-color:${COR.rose};background-image:url('${escape(capa)}');background-position:center 18%;background-size:cover;background-repeat:no-repeat;font-size:1px;line-height:1px">&nbsp;</td></tr></table></td></tr>` : '';
 }
 
 // Junta as duas últimas palavras para nenhuma linha terminar com uma palavra sozinha.
@@ -98,50 +109,50 @@ function semViuva(html) {
   return html;
 }
 
-function rodape() {
-  return `<tr><td align="center" style="padding:32px 0 0;font-family:${TEXTO};font-size:15px;line-height:22px;font-style:italic;color:${COR.vivo}">Falar de pessoas pode mudar o mundo.</td></tr>
-<tr><td align="center" style="padding:4px 0 0;font-family:${TEXTO};font-size:14px;line-height:22px;color:${COR.tinta}"><strong>Toda honra a Deus! 🙏</strong><br><a href="${SITE}" style="color:${COR.vivo}">comuni.calirh.com</a> · <a href="https://www.instagram.com/calirh_/" style="color:${COR.vivo}">@calirh_</a></td></tr>
-<tr><td align="center" style="padding:18px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#6F6770">${NAO_RESPONDA}</td></tr>`;
+function rodape(extra = '') {
+  return `<tr><td align="left" style="padding:26px 0 18px;font-family:${TEXTO};font-size:14px;line-height:22px;color:${COR.tinta}"><span style="font-style:italic;color:${COR.bordo}">Falar de pessoas pode mudar o mundo.</span><br><strong>Toda honra a Deus! 🙏</strong> · <a href="${SITE}" style="color:${COR.bordo}">comuni.calirh.com</a> · <a href="https://www.instagram.com/calirh_/" style="color:${COR.bordo}">@calirh_</a></td></tr>
+</table></td></tr>
+<tr><td bgcolor="#1B0A10" style="background:#1B0A10;padding:26px 32px 28px"><img src="${SITE}/email/logo-branco.png" width="120" alt="ComuniCALI" style="display:block;width:120px;height:auto;border:0"><div style="padding-top:12px;font-family:${TEXTO};font-size:12px;line-height:18px;color:#C9D1D9">${NAO_RESPONDA}<br>© ${new Date().getFullYear()} ComuniCALI, uma iniciativa da CALI RH. Todos os direitos reservados.${extra ? `<br>${extra}` : ''}</div></td></tr>`;
 }
 
 function layout({ previa, titulo, saudacao, paragrafos, edition, botao, depois, cor, destaque, detalhes = true, comFoto = true }) {
-  const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${semViuva(item)}</p>`).join('');
+  const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:15px;line-height:24px;text-align:left;color:${COR.tinta}">${semViuva(item)}</p>`).join('');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">${FONTES}<title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escape(previa)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="background:#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
-<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:14px"></td></tr>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;border:1px solid #D9D2CB">
+${TOPO()}
 ${comFoto ? foto(edition) : ''}
-<tr><td align="center" style="padding:0 0 14px"><span style="display:inline-block;padding:8px 18px;border-radius:999px;background-color:${cor.etiqueta};background-image:${cor.fundo};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
-<tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.tinta}">${saudacao}</td></tr>
+${ROTULO(titulo, cor)}
+${TITULO_LINHA(saudacao)}
 <tr><td style="padding:0 0 8px">${texto}</td></tr>
-${detalhes ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:22px 24px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+${detalhes ? `<tr><td style="padding:8px 0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${COR.tinta}">
 ${detalhe('Quando', `${longDate(edition.data_evento)}, ${edition.horario}`)}${detalhe('Onde', endereco(edition))}
 </table></td></tr>` : ''}
-${destaque ? `<tr><td style="padding:10px 0 6px"><div style="padding:22px 24px;border-radius:20px;background:${COR.rose};border:2px dashed ${COR.mostarda};font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${destaque}</div></td></tr>` : ''}
-${botao ? `<tr><td align="center" style="padding:24px 0 4px"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${cor.botao};font-family:${TITULO};font-size:16px;font-weight:600;color:${cor.botaoTexto};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
-${depois ? `<tr><td align="center" style="padding:16px 0 0;font-family:${TEXTO};font-size:14px;line-height:22px;color:${COR.bordo}">${depois}</td></tr>` : ''}
+${destaque ? `<tr><td style="padding:10px 0 6px"><div style="padding:16px 0 0;border-top:1px solid ${COR.tinta};font-family:${TEXTO};font-size:15px;line-height:24px;text-align:left;color:${COR.tinta}">${destaque}</div></td></tr>` : ''}
+${botao ? BOTAO(botao) : ''}
+${depois ? `<tr><td align="left" style="padding:14px 0 0;font-family:${TEXTO};font-size:14px;line-height:22px;color:#5D4F55">${depois}</td></tr>` : ''}
 ${rodape()}
 </table></td></tr></table></body></html>`;
 }
 
 // Cartão de STAFF: etiqueta colorida, saudação, texto e um bloco com os dados combinados. Sem foto de encontro.
 function layoutCartao({ previa, titulo, cor, saudacao, paragrafos, itens = [], aviso, botao, depois }) {
-  const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${semViuva(item)}</p>`).join('');
+  const texto = paragrafos.map((item) => `<p style="margin:0 0 14px;font-family:${TEXTO};font-size:15px;line-height:24px;text-align:left;color:${COR.tinta}">${semViuva(item)}</p>`).join('');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">${FONTES}<title>${escape(titulo)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escape(previa)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="background:#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
-<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:14px"></td></tr>
-<tr><td align="center" style="padding:0 0 14px"><span style="display:inline-block;padding:8px 18px;border-radius:999px;background-color:${cor.etiqueta};background-image:${cor.fundo};font-family:${TEXTO};font-size:14px;font-weight:600;color:${cor.etiquetaTexto}">${escape(titulo)}</span></td></tr>
-<tr><td align="center" style="padding:0 0 16px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.015em;color:${COR.tinta}">${saudacao}</td></tr>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;border:1px solid #D9D2CB">
+${TOPO()}
+${ROTULO(titulo, cor)}
+${TITULO_LINHA(saudacao)}
 <tr><td style="padding:0 0 8px">${texto}</td></tr>
 ${aviso ? `<tr><td style="padding:0 0 16px"><div style="padding:14px 18px;border-radius:14px;background:#F4F8FB;border-left:4px solid ${COR.bordo};font-family:${TEXTO};font-size:15px;line-height:23px;font-weight:600;color:${COR.bordo}">${semViuva(escape(aviso))}</div></td></tr>` : ''}
-${itens.length ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:22px 24px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${itens.filter(([, valor]) => valor).map(([rotulo, valor]) => detalhe(rotulo, valor)).join('')}</table></td></tr>` : ''}
-${botao ? `<tr><td align="center" style="padding:24px 0 4px"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.tinta};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
-${depois ? `<tr><td style="padding:22px 0 0"><div style="padding:18px 22px;border-radius:20px;border:1px dashed ${COR.mostarda};font-family:${TEXTO};font-size:15px;line-height:24px;text-align:center;color:${COR.tinta}">${depois}</div></td></tr>` : ''}
+${itens.length ? `<tr><td style="padding:8px 0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${COR.tinta}">${itens.filter(([, valor]) => valor).map(([rotulo, valor]) => detalhe(rotulo, valor)).join('')}</table></td></tr>` : ''}
+${botao ? BOTAO(botao) : ''}
+${depois ? `<tr><td style="padding:20px 0 0"><div style="padding:16px 0 0;border-top:1px solid ${COR.tinta};font-family:${TEXTO};font-size:15px;line-height:24px;text-align:left;color:${COR.tinta}">${depois}</div></td></tr>` : ''}
 ${rodape()}
 </table></td></tr></table></body></html>`;
 }
@@ -202,16 +213,15 @@ export function emailFornecedorOrganizacao(item, painel) {
 
 export function layoutSimples({ titulo, saudacao, texto, destaque, linhas, botao, itens = [], semSair = false, imagem }) {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only">${FONTES}<title>${escape(titulo)}</title></head>
-<body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px">
-<tr><td align="center" style="padding:0 0 28px"><img src="${SITE}/email/topo.png" width="560" alt="ComuniCALI" style="display:block;width:100%;max-width:560px;height:auto;border:0;border-radius:14px"></td></tr>
+<body style="margin:0;padding:0;background:#FFFFFF" bgcolor="#FFFFFF"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:32px 20px 36px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;border:1px solid #D9D2CB">
+${TOPO()}
 ${imagem ? `<tr><td align="center" style="padding:0 0 18px"><img src="${escape(imagem)}" width="200" alt="" style="display:block;width:200px;max-width:70%;height:auto;border:0"></td></tr>` : ''}
-<tr><td align="center" style="padding:0 0 12px"><span style="display:inline-block;padding:7px 16px;border-radius:999px;background:${COR.mostarda};font-family:${TEXTO};font-size:14px;font-weight:600;color:${COR.tinta}">${escape(titulo)}</span></td></tr>
-<tr><td align="center" style="padding:0 0 12px;font-family:${TITULO};font-size:36px;line-height:42px;font-weight:700;color:${COR.tinta}">${escape(saudacao)}</td></tr>
-<tr><td align="center" style="padding:0 0 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${linhas ? linhas.map((item) => `<div style="margin:0 0 8px">${semViuva(item)}</div>`).join('') : `${semViuva(escape(texto))}${destaque ? `<br><strong>${semViuva(escape(destaque))}</strong>` : ''}`}</td></tr>
-${itens.length ? `<tr><td bgcolor="${COR.rose}" style="background:${COR.rose};border-radius:20px;padding:18px 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${itens.map((item) => `✓ ${escape(item)}`).join('<br>')}</td></tr><tr><td height="20"></td></tr>` : ''}
-${botao ? `<tr><td align="center"><a href="${escape(botao.href)}" style="display:inline-block;padding:16px 32px;border-radius:999px;background:${COR.tinta};font-family:${TITULO};font-size:16px;font-weight:600;color:${COR.marfim};text-decoration:none">${escape(botao.texto)}</a></td></tr>` : ''}
-${rodape()}
-${semSair ? '' : `<tr><td align="center" style="padding:8px 0 0;font-family:${TEXTO};font-size:12px;line-height:18px;color:#6F6770"><a href="${DESCADASTRO}" style="color:#6F6770">Parar de receber estes e-mails</a></td></tr>`}
+${ROTULO(titulo, FAIXA.recebido)}
+${TITULO_LINHA(escape(saudacao))}
+<tr><td align="left" style="padding:0 0 22px;font-family:${TEXTO};font-size:15px;line-height:24px;color:${COR.tinta}">${linhas ? linhas.map((item) => `<div style="margin:0 0 8px">${semViuva(item)}</div>`).join('') : `${semViuva(escape(texto))}${destaque ? `<br><strong>${semViuva(escape(destaque))}</strong>` : ''}`}</td></tr>
+${itens.length ? `<tr><td style="padding:0 0 18px"><div style="border-top:1px solid ${COR.tinta};padding:14px 0 0;font-family:${TEXTO};font-size:15px;line-height:26px;color:${COR.tinta}">${itens.map((item) => `✓ ${escape(item)}`).join('<br>')}</div></td></tr>` : ''}
+${botao ? BOTAO(botao) : ''}
+${rodape(semSair ? '' : `<a href="${DESCADASTRO}" style="color:#C9D1D9">Parar de receber estes e-mails</a>`)}
 </table></td></tr></table></body></html>`;
 }
 

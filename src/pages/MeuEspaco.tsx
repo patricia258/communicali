@@ -35,7 +35,7 @@ type Pessoa = { aberto_trabalho: boolean; recrutador: boolean; id: string; nome:
 type Extra = { extrato: Array<{ acao: string; pontos: number; motivo: string | null; titulo: string | null; data: string }>; avisos: Array<{ id: string; tipo: string; texto: string; de: string | null; foto_url: string | null; pode_voltar: boolean }>; conexoes: number; nivel_novo: string | null; sugestoes: Array<{ id: string; nome: string; foto_url: string | null; segmento: string | null; motivo: string }>; indicados: Array<{ nome: string; cargo: string | null; empresa: string | null; edicao: string; data: string; status: string; compareceu: boolean }> };
 type Parceiro = { id: string; nome: string; logo_url: string | null; site_url: string | null };
 
-const ABAS: Array<[Aba, string]> = [['inicio', 'Início'], ['edicoes', 'Edições'], ['missoes', 'Missões'], ['rede', 'Rede'], ['indicar', 'Indicar'], ['programa', 'Programa']];
+const ABAS: Array<[Aba, string]> = [['inicio', 'Passaporte'], ['edicoes', 'Edições'], ['missoes', 'Missões'], ['rede', 'Rede'], ['indicar', 'Indicar'], ['programa', 'Programa']];
 const NIVEIS: Record<string, string> = { fundadora: 'Fundadora', membro: 'Membro', conector: 'Conector', embaixador: 'Embaixador', convidado: 'Convidado', organizador: 'Organização', kids: 'Kids' };
 const META: Record<string, { nome: string; pontos: number; encontros: number; nivel: string }> = {
   membro: { nome: 'Conector', pontos: 60, encontros: 4, nivel: 'conector' },

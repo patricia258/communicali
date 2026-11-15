@@ -447,7 +447,7 @@ function Frame({ session, children }: { session: Session; children: ReactNode })
   return (
     <div className="adm">
       <header className="adm__top">
-        <NavLink to="/admin" className="adm__logo"><img src="/brand/novo/comunicali-b-fundo-escuro.svg" alt="ComuniCALI" /></NavLink>
+        <NavLink to="/admin" className="adm__logo"><img src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /></NavLink>
         <nav>
           {GRUPOS.map((grupo) => <NavLink key={grupo.nome} to={grupo.itens[0][0]} end={grupo.itens[0][0] === '/admin'} className={() => (grupoAtual === grupo ? 'active' : '')}>{grupo.nome}</NavLink>)}
         </nav>
