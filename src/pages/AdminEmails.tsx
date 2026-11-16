@@ -7,7 +7,7 @@ import { esc, imprimirFolhas } from './listaImpressa';
 type Resumo = { todos: number; acionados: number; confirmacoes: number; lembretes: number; convites: number; cards?: number; agradecimentos: number; erros: number };
 type Linha = { email: string; nome: string; tipo: string; situacao: string; created_at: string; aberto_em: string | null; clicado_em: string | null; entrega?: string | null };
 const ENTREGA: Record<string, string> = { delivered: 'Entregue', bounced: 'Voltou', failed: 'Falhou', suppressed: 'Bloqueado', complained: 'Marcou como spam', delivery_delayed: 'Atrasado', sent: 'Saiu, sem retorno', opened: 'Entregue', clicked: 'Entregue' };
-const NOMES: Record<string, string> = { recebido: 'Inscrição recebida', confirmacao: 'Reserva confirmada', espera: 'Lista de espera', lembrete: 'Lembrete', convite: 'Convite de agenda', boasvindas: 'Boas-vindas', agradecimento: 'Agradecimento', card: 'Card Eu vou', pesquisa: 'Pesquisa de satisfação' };
+const NOMES: Record<string, string> = { recebido: 'Inscrição recebida', confirmacao: 'Reserva confirmada', espera: 'Lista de espera', lembrete: 'Lembrete', convite: 'Convite de agenda', boasvindas: 'Boas-vindas', agradecimento: 'Agradecimento', card: 'Card Eu vou', pesquisa: 'Pesquisa de satisfação', posevento: 'Pós-evento (material e pesquisa)' };
 
 export async function chamar(body: Record<string, string>) {
   const { data } = await supabase.auth.getSession();
