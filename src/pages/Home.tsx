@@ -47,45 +47,32 @@ const diaMes = (iso: string) => iso.slice(8, 10) + '.' + iso.slice(5, 7);
 
 const reduzido = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-/** "A comunidade": uma rota tracejada na lateral, com quatro paradas que acendem conforme os formatos aparecem na tela. */
-const ROTA = 'M44 540 C44 430 250 470 214 330 S350 150 356 24';
+/** "A comunidade": quatro círculos finos que se sobrepõem no meio, um por formato, na mesma posição dos quatro blocos. Não aumenta a altura da seção. */
+const CIRCULOS: Array<[number, number, string]> = [[148, 148, '#5A1E2D'], [252, 148, '#8DB1D1'], [148, 252, '#8DB1D1'], [252, 252, '#5A1E2D']];
 function Formatos() {
-  const [alcance, setAlcance] = useState(reduzido() ? FORMATOS.length : 0);
   const [foco, setFoco] = useState<number | null>(null);
-  const [pontos, setPontos] = useState<Array<{ x: number; y: number }>>([]);
-  const caminho = useRef<SVGPathElement>(null);
-  const itens = useRef<Array<HTMLDivElement | null>>([]);
+  const [visto, setVisto] = useState(reduzido());
+  const secao = useRef<HTMLElement>(null);
   useEffect(() => {
-    const path = caminho.current;
-    if (!path) return;
-    const total = path.getTotalLength();
-    setPontos([0.1, 0.38, 0.66, 0.92].map((f) => { const ponto = path.getPointAtLength(total * f); return { x: ponto.x, y: ponto.y }; }));
-  }, []);
-  useEffect(() => {
-    if (reduzido() || !('IntersectionObserver' in window)) { setAlcance(FORMATOS.length); return; }
-    const obs = new IntersectionObserver((entradas) => {
-      for (const entrada of entradas) if (entrada.isIntersecting) setAlcance((atual) => Math.max(atual, Number((entrada.target as HTMLElement).dataset.i) + 1));
-    }, { threshold: 0.55 });
-    itens.current.forEach((el) => el && obs.observe(el));
+    if (reduzido() || !secao.current || !('IntersectionObserver' in window)) { setVisto(true); return; }
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisto(true); obs.disconnect(); } }, { threshold: 0.25 });
+    obs.observe(secao.current);
     return () => obs.disconnect();
   }, []);
   return (
-    <section className="hn-exp" id="comunidade">
+    <section className="hn-exp" id="comunidade" ref={secao}>
       <p className="hn-eyebrow">A COMUNIDADE</p>
       <h2>Quatro jeitos de se encontrar, <em>um só propósito: conectar pessoas.</em></h2>
-      <svg className="hn-exp__rota" viewBox="0 0 400 560" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-        <defs><mask id="hn-exp-mask"><path d={ROTA} stroke="#fff" strokeWidth="8" fill="none" pathLength="1" strokeDasharray="1" strokeDashoffset={1 - alcance / FORMATOS.length} className="hn-exp__mask" /></mask></defs>
-        <path ref={caminho} d={ROTA} className="hn-exp__base" fill="none" />
-        <g mask="url(#hn-exp-mask)"><path d={ROTA} className="hn-exp__ativa" fill="none" /></g>
-        {pontos.map((ponto, i) => (
-          <g key={i} className={`hn-exp__parada${i < alcance ? ' is-on' : ''}${foco === i ? ' is-foco' : ''}`} transform={`translate(${ponto.x} ${ponto.y})`}>
-            <circle r="15" /><text textAnchor="middle" dy="4">0{i + 1}</text>
-            <text className="hn-exp__nome" x="24" dy="4">{FORMATOS[i][0]}</text>
-          </g>
-        ))}
-      </svg>
+      <div className={`hn-exp__orbitas${visto ? ' is-in' : ''}`} aria-hidden="true">
+        <svg viewBox="0 0 400 400" preserveAspectRatio="xMinYMid meet">
+          {CIRCULOS.map(([cx, cy, cor], i) => (
+            <circle key={i} cx={cx} cy={cy} r="98" className={`hn-exp__orbita hn-exp__orbita--${i + 1}${foco === i ? ' is-foco' : ''}`} style={{ stroke: cor, transitionDelay: `${i * 160}ms` }} />
+          ))}
+          <circle cx="200" cy="200" r="5" className="hn-exp__miolo" />
+        </svg>
+      </div>
       <div className="hn-exp__grid">
-        {FORMATOS.map(([titulo, texto], i) => <div key={titulo} data-i={i} ref={(el) => { itens.current[i] = el; }} className={i < alcance ? 'is-on' : ''} onMouseEnter={() => setFoco(i)} onMouseLeave={() => setFoco(null)}><h3>{titulo}</h3><p>{texto}</p></div>)}
+        {FORMATOS.map(([titulo, texto], i) => <div key={titulo} className={foco === i ? 'is-foco' : ''} onMouseEnter={() => setFoco(i)} onMouseLeave={() => setFoco(null)}><h3>{titulo}</h3><p>{texto}</p></div>)}
       </div>
     </section>
   );

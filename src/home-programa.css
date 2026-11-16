@@ -13,19 +13,22 @@
 @media (max-width:900px){.hn-prog__passos{grid-template-columns:1fr 1fr}.hn-selos__lista li small{font-size:12px}}
 @media (max-width:560px){.hn-prog__passos{grid-template-columns:1fr}}
 
-.hn-exp__rota{grid-column:1;grid-row:2;align-self:start;width:100%;max-width:440px;height:auto;margin-top:clamp(20px,4vw,60px);overflow:visible}
-.hn-exp__base{stroke:#CFC7BF;stroke-width:1.6;stroke-dasharray:6 8;stroke-linecap:round}
-.hn-exp__ativa{stroke:#5A1E2D;stroke-width:1.8;stroke-dasharray:6 8;stroke-linecap:round}
-.hn-exp__mask{transition:stroke-dashoffset 1.6s cubic-bezier(.2,.7,.2,1)}
-.hn-exp__parada circle{fill:#fff;stroke:#CFC7BF;stroke-width:1.4;transition:fill .5s ease,stroke .5s ease}
-.hn-exp__parada text{font:600 11px Inter,system-ui,sans-serif;fill:#6F6770;transition:fill .5s ease}
-.hn-exp__parada .hn-exp__nome{font:500 14px Inter,system-ui,sans-serif;fill:#6F6770;opacity:0;transform:translateX(-6px);transition:opacity .6s ease,transform .6s ease}
-.hn-exp__parada.is-on circle{fill:#5A1E2D;stroke:#5A1E2D}
-.hn-exp__parada.is-on text{fill:#fff}
-.hn-exp__parada.is-on .hn-exp__nome{fill:#1B0A10;opacity:1;transform:none}
-.hn-exp__parada.is-foco circle{stroke:#5A1E2D;stroke-width:3}
+.hn-exp__orbitas{grid-column:1;grid-row:1 / span 2;position:relative;min-height:0;margin-top:44px}
+.hn-exp .hn-eyebrow{position:relative;z-index:1}
+.hn-exp__orbitas svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.hn-exp__orbita{fill:none;stroke-width:1.4;opacity:0;transform-origin:200px 200px;transform:scale(.94);transition:opacity 1.2s ease,transform 1.6s cubic-bezier(.2,.7,.2,1),stroke-width .4s ease,fill .4s ease}
+.hn-exp__orbitas.is-in .hn-exp__orbita{opacity:.9;transform:none}
+.hn-exp__orbitas.is-in .hn-exp__orbita--1{animation:hn-orb-a 16s ease-in-out 1.8s infinite alternate}
+.hn-exp__orbitas.is-in .hn-exp__orbita--2{animation:hn-orb-b 19s ease-in-out 2s infinite alternate}
+.hn-exp__orbitas.is-in .hn-exp__orbita--3{animation:hn-orb-b 17s ease-in-out 2.2s infinite alternate-reverse}
+.hn-exp__orbitas.is-in .hn-exp__orbita--4{animation:hn-orb-a 20s ease-in-out 2.4s infinite alternate-reverse}
+.hn-exp__orbita.is-foco{stroke-width:2.6;fill:rgba(141,177,209,.12)}
+.hn-exp__miolo{fill:#5A1E2D;opacity:0;transition:opacity 1.2s ease .9s}
+.hn-exp__orbitas.is-in .hn-exp__miolo{opacity:1}
+@keyframes hn-orb-a{from{transform:translate(0,0)}to{transform:translate(7px,5px)}}
+@keyframes hn-orb-b{from{transform:translate(0,0)}to{transform:translate(-6px,6px)}}
 .hn-exp__grid div{transition:border-color .5s ease}
-.hn-exp__grid div.is-on{border-top-color:#5A1E2D}
-.hn-exp__grid div.is-on h3{color:#5A1E2D}
-@media (max-width:900px){.hn-exp__rota{display:none}}
-@media (prefers-reduced-motion:reduce){.hn-exp__mask,.hn-exp__parada circle,.hn-exp__parada .hn-exp__nome{transition:none}}
+.hn-exp__grid div.is-foco{border-top-color:#5A1E2D}
+.hn-exp__grid div.is-foco h3{color:#5A1E2D}
+@media (max-width:900px){.hn-exp__orbitas{display:none}}
+@media (prefers-reduced-motion:reduce){.hn-exp__orbita,.hn-exp__miolo{transition:none;animation:none!important}.hn-exp__orbitas .hn-exp__orbita{opacity:.9;transform:none}}
