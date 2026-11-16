@@ -226,7 +226,7 @@ export function emailFluxo(tipo, d = {}) {
     adesao_nao_aprovada: {
       assunto: 'Retorno sobre o seu pedido de adesão', previa: 'Veja o retorno da organização.', titulo: 'Retorno do pedido', cor: etiqueta('#6F6770'),
       paragrafos: ['Agradecemos o seu interesse em fazer parte da ComuniCALI. Neste momento, o seu pedido <strong>não foi aprovado</strong>.'],
-      aviso: d.motivo || 'Motivo informado pela organização.', depois: `Se quiser conversar sobre o retorno, escreva para <a href="mailto:contato@calirh.com" style="color:${COR.vivo}">contato@calirh.com</a>.`,
+      aviso: d.motivo || 'Motivo informado pela organização.', depois: `Se quiser conversar sobre o retorno, escreva para <a href="mailto:comuni@calirh.com" style="color:${COR.vivo}">comuni@calirh.com</a>.`,
     },
     janela_membros: {
       assunto: `Inscrições abertas para Membros: ${d.edicao || ''}`.trim(), previa: 'Você tem acesso antecipado.', titulo: 'Acesso antecipado', cor: etiqueta(COR.bordo),

@@ -16,7 +16,7 @@ import { SiteFooter, Instagram } from '../components/SiteFooter';
 import { useSiteTexts } from './MemberFields';
 
 export type EditionRow = { id: string; slug: string; numero: number | null; titulo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; inscricoes_abertas: boolean; form_inscricao?: string | null ; valor_texto?: string | null};
-export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,resumo,fotos_url,inscricao_url,inscricoes_abertas,form_inscricao,valor_texto';
+export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,resumo,inscricao_url,inscricoes_abertas,form_inscricao,valor_texto';
 
 export const longDate = (iso: string) => new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`));
 // Um link só por edição: o formulário de inscrição dela. A página /inscricao fica para quem chega pelo convite de um membro.
@@ -206,9 +206,7 @@ export function EdicaoPage() {
               <section className="hn-ed__bloco">
                 <h2>Fotos do encontro</h2>
                 {fotos.length > 0 && <div className="hn-ed__galeria">{fotos.map((foto) => <img key={foto.id} src={foto.url} alt={foto.legenda || `Foto do encontro ${edition.titulo}`} loading="lazy" />)}</div>}
-                {edition.fotos_url
-                  ? <><p className="hn-ed__lead">Acesse o álbum para ver todas as fotos e baixar as suas.</p><a className="hn-pill" href={edition.fotos_url} target="_blank" rel="noopener noreferrer">Ver e baixar as fotos</a></>
-                  : fotos.length === 0 && <p className="hn-ed__lead">As fotos desta edição serão publicadas aqui.</p>}
+                {fotos.length === 0 && <p className="hn-ed__lead">As fotos desta edição serão publicadas aqui.</p>}
               </section>
             )}
             {past && <Comentarios slug={edition.slug} />}

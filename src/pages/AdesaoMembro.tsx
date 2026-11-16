@@ -41,7 +41,7 @@ export function AdesaoMembro({ dados, recarregar }: { dados: Adesao; recarregar:
         <h2>Retorno sobre o seu pedido</h2>
         <p>Neste momento, o pedido não foi aprovado.</p>
         {dados.motivo && <p><strong>Motivo:</strong> {dados.motivo}</p>}
-        <p>Se quiser conversar, escreva para <a href="mailto:contato@calirh.com">contato@calirh.com</a>.</p>
+        <p>Se quiser conversar, escreva para <a href="mailto:comuni@calirh.com">comuni@calirh.com</a>.</p>
       </section>
     );
     if (presencas < 1) return (
@@ -53,7 +53,7 @@ export function AdesaoMembro({ dados, recarregar }: { dados: Adesao; recarregar:
     return (
       <section className="visita__bloco">
         <h2>{status === 'ajustes' ? 'Falta pouco para fazer parte' : 'Quer continuar com a gente?'}</h2>
-        {status === 'ajustes' && <p><strong>Ajuste pedido pela organização:</strong> {dados.motivo || 'veja o e-mail que enviamos.'} Se precisar corrigir seus dados, escreva para <a href="mailto:contato@calirh.com">contato@calirh.com</a> e depois envie o pedido de novo.</p>}
+        {status === 'ajustes' && <p><strong>Ajuste pedido pela organização:</strong> {dados.motivo || 'veja o e-mail que enviamos.'} Se precisar corrigir seus dados, escreva para <a href="mailto:comuni@calirh.com">comuni@calirh.com</a> e depois envie o pedido de novo.</p>}
         <p>Fazer parte da comunidade é gratuito. Ir ao encontro não vira adesão automática: a organização analisa o seu pedido. Você não precisa usar as duas visitas para pedir.</p>
         <div className="visita__aceites">
           <label className="passe__aceite"><input type="checkbox" checked={termos} onChange={(event) => setTermos(event.target.checked)} /><span>Li e aceito os <a href="/termos" target="_blank" rel="noopener noreferrer">Termos de participação</a> e as <a href="/regras" target="_blank" rel="noopener noreferrer">Regras</a>.</span></label>
