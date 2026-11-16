@@ -758,3 +758,10 @@ Acrescente entradas no topo.
 - Mudou: painel em tabelas, auditoria de recusas, Indicações, Impacto, open to work, currículo, logos brancos, Rede bloqueada, matches, convite com aceite e aprovação de inscrições. Último commit antes deste repasse: `88395bd`.
 - Testado: Membros, Missões, Edições, Indicações, Matches, Impacto e a faixa de logos no site publicado.
 - Pendente: ver a lista acima.
+
+### 16/11/2026 — Site novo publicado (branch site-revisao)
+- Regras v23 no banco, app, site e e-mails; home nova com círculos, manifesto, selos e jornada; álbum visual (moldura, `ALBUM_REAL=false`); formulários enxutos; contato comuni@calirh.com; DGTZ removida dos parceiros.
+- Teste E2E da adesão feito no banco real e dados de teste apagados. Backup em ~/CALI/backup-dados-de-teste-2026-11-15.json.
+- Código no GitHub: patricia258/communicali (nada no Lovable).
+- Fora desta publicação: painel novo, custos e álbum real (trabalho da outra IA em home-nova). Passaporte segue trancado.
+- Rollback: deploy 9qsosbp9u.
