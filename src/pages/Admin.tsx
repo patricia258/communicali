@@ -348,7 +348,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           <label className="v2-forms-check"><input type="checkbox" checked={draft.inscricoes_abertas} onChange={(event) => set({ inscricoes_abertas: event.target.checked })} /><span><strong>Inscrições abertas</strong><small>O site mostra "Quero me inscrever". Não precisa criar formulário.</small></span></label>
           {text('inscricao_url', 'Link externo de inscrição', 'opcional, só se quiser usar outro formulário')}
           <label className="v2-forms-check"><input type="checkbox" checked={draft.publica} onChange={(event) => set({ publica: event.target.checked })} /><span><strong>Mostrar no site</strong></span></label>
-          <label className="wide"><span>Resumo do encontro</span><textarea rows={5} value={draft.resumo || ''} onChange={(event) => set({ resumo: event.target.value })} /></label>
+          <label className="wide"><span>Resumo do encontro</span><textarea rows={8} maxLength={1200} value={draft.resumo || ''} onChange={(event) => set({ resumo: event.target.value })} /><small className="adm-hint">{(draft.resumo || '').length} de 1200 caracteres. Pule uma linha para começar um novo parágrafo. Use **assim** para negrito, "- " no começo da linha para lista e "## " para um subtítulo.</small></label>
         </div>
       </section>
       </>)}

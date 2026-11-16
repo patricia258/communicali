@@ -1,4 +1,5 @@
 import { HnFooter } from '../components/HnFooter';
+import { TextoEdicao } from '../components/TextoEdicao';
 import { GaleriaDoEncontro } from '../components/GaleriaDoEncontro';
 import { AlbumAcessoVisual, type EstadoAlbum } from '../components/AlbumAcessoVisual';
 import { AlbumDoEncontro } from '../components/AlbumDoEncontro';
@@ -186,8 +187,9 @@ export function EdicaoPage() {
                 {(edition.valor_texto || !past) && <div><dt>Valor</dt><dd>{edition.valor_texto || 'Informado com a edição'}</dd></div>}
               </dl>
               <div className="hn-ed__texto">
-                <h2>{past ? 'Como foi' : 'Sobre este encontro'}</h2>
-                <p>{edition.resumo || (past ? 'O resumo desta edição será publicado aqui.' : 'Os detalhes desta edição saem em breve.')}</p>
+                <small className="hn-ed__rotulo">{past ? 'Resumo da edição' : 'Sobre a edição'}</small>
+                <h2>{past ? 'Como foi o nosso encontro' : 'Sobre este encontro'}</h2>
+                <TextoEdicao texto={edition.resumo || (past ? 'O resumo desta edição será publicado aqui.' : 'Os detalhes desta edição saem em breve.')} />
                 {!past && (inscricao ? <a className="hn-pill" href={inscricao}>Garantir minha vaga</a> : <a className="hn-pill" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>)}
               </div>
             </section>

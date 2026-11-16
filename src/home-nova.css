@@ -334,7 +334,8 @@ a.hn-idx:hover{transform:translateY(-4px)}
 .hn-ed__hero h1{font-size:clamp(38px,6vw,84px);line-height:.98;letter-spacing:-.03em;max-width:980px}
 .hn-ed__lead{color:var(--gray);font-size:clamp(16px,1.4vw,19px)}
 .hn-ed__foto{position:relative;width:100%;height:clamp(240px,34vw,480px);margin-top:20px;border-radius:6px 6px 0 120px;background:center/cover;overflow:hidden}
-.hn-ed__grid{padding:70px var(--gutter);display:grid;grid-template-columns:1fr 1.2fr;gap:60px;align-items:start}
+.hn-ed__grid{padding:70px var(--gutter);display:grid;grid-template-columns:minmax(300px,460px) minmax(0,600px);justify-content:start;gap:clamp(36px,6vw,96px);align-items:start}
+.hn-ed__dl{position:sticky;top:24px}
 .hn-ed__dl{margin:0;display:grid}
 .hn-ed__dl div{display:grid;grid-template-columns:110px 1fr;gap:16px;border-top:1px solid var(--ink);padding:16px 0}
 .hn-ed__dl div:last-child{border-bottom:1px solid var(--ink)}
@@ -342,7 +343,14 @@ a.hn-idx:hover{transform:translateY(-4px)}
 .hn-ed__dl dd{margin:0;font-size:17px}
 .hn-ed__texto{display:grid;gap:18px;justify-items:start}
 .hn-ed__texto h2,.hn-ed__bloco h2{font-size:clamp(28px,3vw,44px);line-height:1.02}
-.hn-ed__texto p{font-size:18px;max-width:620px}
+.hn-ed__texto h2{font-size:clamp(26px,2.5vw,36px)}
+.hn-ed__rotulo{font:600 12px Inter,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gray)}
+.hn-ed__corpo{display:grid;gap:14px;max-width:560px;font:400 16px/1.7 Inter,system-ui,sans-serif;color:#3a2f35}
+.hn-ed__corpo p,.hn-ed__corpo ul{margin:0;font-size:16px;max-width:none}
+.hn-ed__corpo ul{padding-left:20px;display:grid;gap:6px}
+.hn-ed__corpo strong{font-weight:600;color:var(--ink)}
+.hn-ed__corpo h3{margin:6px 0 0;font:700 18px/1.3 var(--display);color:var(--ink)}
+@media (max-width:620px){.hn-ed__corpo,.hn-ed__corpo p,.hn-ed__corpo ul{font-size:15px;line-height:1.65}.hn-ed__texto h2{font-size:26px}}
 .hn-ed__bloco{padding:60px var(--gutter);display:grid;gap:22px;justify-items:start;border-top:1px solid var(--rule)}
 .hn-ed__galeria{width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
 .hn-ed__galeria img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
