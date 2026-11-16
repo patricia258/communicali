@@ -51,11 +51,13 @@ export function AlbumDoEncontro({ slug, titulo, rotulo }: { slug: string; titulo
 
   async function abrir(ciente: boolean) {
     setOcupado(true); setMensagem('');
+    // O álbum abre em outra aba e o site continua aberto. A aba é criada já no clique, para o navegador não bloquear.
+    const aba = window.open('', '_blank');
     try {
       const dados = await api<{ url: string }>('album_abrir', { slug, email: limpo(), request_id: crypto.randomUUID(), ciente });
       if (ciente) guardarCiencia(slug);
-      window.location.assign(dados.url);
-    } catch (erro) { setMensagem(erro instanceof Error ? erro.message : 'Não foi possível abrir o álbum agora.'); }
+      if (aba) { aba.opener = null; aba.location.href = dados.url; } else window.location.assign(dados.url);
+    } catch (erro) { aba?.close(); setMensagem(erro instanceof Error ? erro.message : 'Não foi possível abrir o álbum agora.'); }
     finally { setOcupado(false); }
   }
 
