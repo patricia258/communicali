@@ -335,7 +335,7 @@ a.hn-idx:hover{transform:translateY(-4px)}
 .hn-ed__lead{color:var(--gray);font-size:clamp(16px,1.4vw,19px)}
 .hn-ed__foto{position:relative;width:100%;height:clamp(240px,34vw,480px);margin-top:20px;border-radius:6px 6px 0 120px;background:center/cover;overflow:hidden}
 .hn-ed__grid{padding:70px var(--gutter);display:grid;grid-template-columns:minmax(300px,460px) minmax(0,600px);justify-content:start;gap:clamp(36px,6vw,96px);align-items:start}
-.hn-ed__dl{position:sticky;top:24px}
+@media (min-width:981px){.hn-ed__dl{position:sticky;top:24px}}
 .hn-ed__dl{margin:0;display:grid}
 .hn-ed__dl div{display:grid;grid-template-columns:110px 1fr;gap:16px;border-top:1px solid var(--ink);padding:16px 0}
 .hn-ed__dl div:last-child{border-bottom:1px solid var(--ink)}
