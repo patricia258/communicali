@@ -8,11 +8,11 @@ export type Filtro<T> = { id: string; titulo: string; valor: (linha: T) => strin
 /** `acoes` (imprimir, exportar...) ficam na mesma linha da busca e dos filtros, encostadas à direita. */
 export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio, acoes, colunasIniciais }: { colunas: Array<Coluna<T>>; linhas: T[]; chave: (linha: T) => string; filtros?: Array<Filtro<T>>; inicial?: { id: string; desc?: boolean }; vazio: string; acoes?: ReactNode; colunasIniciais?: string[] }) {
   const idTabela = useId();
-  const [selecionadas, setSelecionadas] = useState(() => colunasIniciais || colunas.slice(0, colunas.length > 5 ? 4 : 5).map((coluna) => coluna.id));
+  const [selecionadas, setSelecionadas] = useState(() => colunasIniciais || colunas.map((coluna) => coluna.id));
   const [abertas, setAbertas] = useState<Set<string>>(() => new Set());
   const exibidas = colunas.filter((coluna) => selecionadas.includes(coluna.id));
   const extras = colunas.filter((coluna) => !selecionadas.includes(coluna.id));
-  const limite = colunas.length > 5 ? 4 : 5;
+  const limite = colunas.length;
   const alternarColuna = (id: string) => setSelecionadas((atuais) => {
     if (atuais.includes(id)) return atuais.length > 1 ? atuais.filter((item) => item !== id) : atuais;
     return [...(atuais.length >= limite ? atuais.slice(0, -1) : atuais), id];
@@ -49,7 +49,7 @@ export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio
             </select>
           </label>
         ))}</div></details>}
-        <div className="adm-filtros__fim"><p className="adm-contagem">{visiveis.length} de {linhas.length}</p>{colunas.length > 5 && <details className="adm-colunas"><summary><Columns3 size={15} aria-hidden="true" />Colunas</summary><div><strong>Colunas da lista</strong><p>Até {limite} colunas. Ao escolher outra, a última é substituída. Os demais dados ficam nos detalhes.</p>{colunas.map((coluna) => <label key={coluna.id}><input type="checkbox" checked={selecionadas.includes(coluna.id)} disabled={selecionadas.includes(coluna.id) && selecionadas.length === 1} onChange={() => alternarColuna(coluna.id)} />{coluna.titulo || 'Seleção'}</label>)}</div></details>}{acoes}</div>
+        <div className="adm-filtros__fim"><p className="adm-contagem">{visiveis.length} de {linhas.length}</p>{colunas.length > 5 && <details className="adm-colunas"><summary><Columns3 size={15} aria-hidden="true" />Colunas</summary><div><strong>Colunas da lista</strong><p>Marque as colunas que quer ver na lista. As que ficarem de fora aparecem em Detalhes, no botão de três pontinhos.</p>{colunas.map((coluna) => <label key={coluna.id}><input type="checkbox" checked={selecionadas.includes(coluna.id)} disabled={selecionadas.includes(coluna.id) && selecionadas.length === 1} onChange={() => alternarColuna(coluna.id)} />{coluna.titulo || 'Seleção'}</label>)}</div></details>}{acoes}</div>
       </div>
       <div className="adm-ordenacao"><label>Ordenar por<select value={ordem.id} onChange={(event) => setOrdem({ ...ordem, id: event.target.value })}>{colunas.filter((coluna) => coluna.cabecalho === undefined).map((coluna) => <option key={coluna.id} value={coluna.id}>{coluna.titulo}</option>)}</select></label><button type="button" className="wf-secondary" onClick={() => setOrdem({ ...ordem, desc: !ordem.desc })}>{ordem.desc ? 'Decrescente ↓' : 'Crescente ↑'}</button></div>
       <div className="adm-tabela">

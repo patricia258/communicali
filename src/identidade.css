@@ -299,8 +299,7 @@ html[data-workspace-ui='v2'] .adm.adm--lateral .v2-forms-card{padding:22px!impor
 .adm.adm--lateral .adm-nome{max-width:100%;white-space:normal;line-height:1.45;font-size:12px;justify-content:flex-start;text-align:left;overflow-wrap:anywhere}
 .adm.adm--lateral .adm-nome>img,.adm.adm--lateral .adm-nome>span{flex-shrink:0}
 .adm.adm--lateral .adm-contato{display:inline-flex;max-width:100%;flex-wrap:wrap;align-items:center;gap:4px}
-.adm.adm--lateral .adm-pill{border:1px solid #DDD5D9;background:transparent;color:#51464C;padding:3px 8px;font-size:10px;white-space:normal}
-.adm.adm--lateral .adm-pill--suspenso,.adm.adm--lateral .adm-pill--recusada{border-color:#ECCEC9;color:#A53629}
+.adm.adm--lateral .adm-pill{padding:3px 10px;font-size:11px;white-space:nowrap}
 .adm.adm--lateral .adm-tabela th.adm-tabela__mais,.adm.adm--lateral .adm-tabela td.adm-tabela__mais{width:44px;padding:4px}
 .adm-mais{display:grid;place-items:center;width:34px;height:34px;background:none;border:0;border-radius:7px;color:#756B70;cursor:pointer}
 .adm-mais:hover{background:#F1ECEE;color:#5A1E2D}
@@ -473,3 +472,21 @@ html[data-workspace-ui='v2'] .adm.adm--lateral .v2-forms-card>header{padding-bot
 @media(max-width:600px){html[data-workspace-ui='v2'] .adm.adm--lateral .v2-forms-card{padding:20px!important}.adm.adm--lateral .v2-forms-grid{gap:20px}}
 
 .adm-album-molduras{margin:24px 0 28px!important;grid-template-rows:repeat(2,minmax(0,1fr));aspect-ratio:8/3}.adm-album-molduras .gal__item{border:1px solid #e2dce0}.adm-album-moldura-acoes{position:absolute;inset:auto 10px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;border-radius:10px;background:#fffffff0}.adm-album-moldura-acoes strong{font:600 12px Inter,sans-serif;color:#5a1e2d}.adm-album-molduras img{object-fit:cover}@media(max-width:720px){.adm-album-molduras{aspect-ratio:auto;grid-template-rows:none;grid-auto-rows:180px}.adm-album-molduras .gal__item--1{height:260px}.adm-album-moldura-acoes{flex-wrap:wrap}}
+
+/* Tabelas do painel: todas as colunas à vista, com cor nos estados (revisão 16/11) */
+@media (min-width:601px){
+ .adm.adm--lateral .adm-tabela{overflow-x:auto;overflow-y:visible}
+ .adm.adm--lateral .adm-tabela table{table-layout:auto;min-width:0;width:100%}
+ .adm.adm--lateral .adm-tabela th button{white-space:nowrap}
+ .adm.adm--lateral .adm-tabela td{overflow-wrap:normal;white-space:nowrap}
+ .adm.adm--lateral .adm-tabela td.longo{white-space:normal;min-width:240px}
+ .adm.adm--lateral .adm-tabela th.estreita,.adm.adm--lateral .adm-tabela td.estreita{width:1%;white-space:nowrap}
+ .adm.adm--lateral .v2-forms-row-actions{display:inline-flex;gap:6px;flex-wrap:nowrap}
+}
+.adm-tipo--boasvindas,.adm-tipo--convite{background:#D3E3F2;color:#1B0A10}
+.adm-tipo--lembrete{background:#FBEFD5;color:#6B4A0B}
+.adm-tipo--agradecimento,.adm-tipo--posevento,.adm-tipo--pos_evento{background:#EADDE0;color:#5A1E2D}
+.adm-tipo--pesquisa,.adm-tipo--feedback{background:#E3EEDC;color:#3D5A2A}
+.adm-tipo--teste{background:#EEEAE6;color:#5D4F55}
+.adm.adm--lateral .adm-status--sim{background:#E3EEDC;color:#3D5A2A}
+.adm.adm--lateral .adm-status--erro{background:#F6DADA;color:#8A1F1F}
