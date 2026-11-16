@@ -47,6 +47,32 @@ const diaMes = (iso: string) => iso.slice(8, 10) + '.' + iso.slice(5, 7);
 
 const reduzido = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
+/** "A comunidade": a foto ao lado muda com o formato em destaque (passa o mouse ou espera), sem texto extra. */
+const FOTOS_FORMATO = ['/fotos/home/presencial.jpg', '/fotos/home/virtual.jpg', '/fotos/home/experiencia.jpg', '/fotos/home/jantar.jpg'];
+function Formatos() {
+  const [ativo, setAtivo] = useState(0);
+  const pausa = useRef(0);
+  useEffect(() => {
+    if (reduzido()) return;
+    const id = window.setInterval(() => { if (Date.now() - pausa.current > 6000) setAtivo((i) => (i + 1) % FORMATOS.length); }, 4500);
+    return () => window.clearInterval(id);
+  }, []);
+  const escolher = (i: number) => { pausa.current = Date.now(); setAtivo(i); };
+  return (
+    <section className="hn-exp" id="comunidade">
+      <p className="hn-eyebrow">A COMUNIDADE</p>
+      <h2>Quatro jeitos de se encontrar, <em>um só propósito: conectar pessoas.</em></h2>
+      <figure className="hn-exp__foto" aria-hidden="true">
+        {FOTOS_FORMATO.map((url, i) => <img key={url} src={url} alt="" loading="lazy" className={i === ativo ? 'is-on' : ''} />)}
+        <figcaption><b>0{ativo + 1}</b>{FORMATOS[ativo][0]}</figcaption>
+      </figure>
+      <div className="hn-exp__grid">
+        {FORMATOS.map(([titulo, texto], i) => <div key={titulo} className={i === ativo ? 'is-on' : ''} onMouseEnter={() => escolher(i)} onFocus={() => escolher(i)} tabIndex={0}><h3>{titulo}</h3><p>{texto}</p></div>)}
+      </div>
+    </section>
+  );
+}
+
 /** Conta de 0 ao valor em 1,4 s quando entra na tela (sem animação se a pessoa pediu menos movimento). */
 function Contador({ ate }: { ate: number }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -249,13 +275,7 @@ export function Home() {
         </div>
       </header>
 
-      <section className="hn-exp" id="comunidade">
-        <p className="hn-eyebrow">A COMUNIDADE</p>
-        <h2>Quatro jeitos de se encontrar, <em>um só propósito: conectar pessoas.</em></h2>
-        <div className="hn-exp__grid">
-          {FORMATOS.map(([titulo, texto]) => <div key={titulo}><h3>{titulo}</h3><p>{texto}</p></div>)}
-        </div>
-      </section>
+      <Formatos />
 
       <section className="hn-band" aria-label="Passaporte, encontros e jornada">
         <div className="hn-band__passaporte">

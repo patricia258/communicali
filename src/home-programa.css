@@ -12,3 +12,15 @@
 .hn-prog__nota a{color:#5A1E2D}
 @media (max-width:900px){.hn-prog__passos{grid-template-columns:1fr 1fr}.hn-selos__lista li small{font-size:12px}}
 @media (max-width:560px){.hn-prog__passos{grid-template-columns:1fr}}
+
+.hn-exp__foto{grid-column:1;grid-row:2;position:relative;margin:clamp(40px,7vw,100px) 0 0;max-width:460px;aspect-ratio:4/5;overflow:hidden;border-radius:6px 6px 26px 6px;background:#D3E3F2;align-self:start}
+.hn-exp__foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.04);transition:opacity .9s ease,transform 1.8s cubic-bezier(.2,.7,.2,1)}
+.hn-exp__foto img.is-on{opacity:1;transform:scale(1)}
+.hn-exp__foto figcaption{position:absolute;left:16px;bottom:16px;display:flex;align-items:center;gap:10px;padding:7px 14px 7px 8px;border-radius:999px;background:#fff;color:#1B0A10;font:600 13px Inter,system-ui,sans-serif}
+.hn-exp__foto figcaption b{display:grid;place-items:center;min-width:26px;height:26px;border-radius:999px;background:#1B0A10;color:#fff;font:600 11px Inter,system-ui,sans-serif}
+.hn-exp__grid div{transition:border-color .4s ease}
+.hn-exp__grid div.is-on{border-top-color:#5A1E2D}
+.hn-exp__grid div.is-on h3{color:#5A1E2D}
+.hn-exp__grid div{cursor:default;outline:none}
+@media (max-width:900px){.hn-exp__foto{grid-column:1;grid-row:auto;max-width:none;aspect-ratio:16/10;margin-top:28px}}
+@media (prefers-reduced-motion:reduce){.hn-exp__foto img{transition:none}}
