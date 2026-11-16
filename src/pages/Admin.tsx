@@ -144,13 +144,19 @@ function EditionsPanel() {
   const [params, setParams] = useSearchParams();
   const load = () => supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data, error: failure }) => { if (failure) setError(erroAmigavel(failure)); else { const itens = (data || []) as Edition[]; setList(itens); const pedida = params.get('abrir'); if (pedida) setOpen((atual) => atual || itens.find((item) => item.slug === pedida) || null); } });
   const [contagens, setContagens] = useState<Record<string, Record<string, number>>>({});
+  const [albuns, setAlbuns] = useState<Record<string, string>>({});
   useEffect(() => {
-    void Promise.all([supabase.from('registrations').select('edition_id,status'), supabase.from('checkins').select('edition_id')]).then(([inscricoes, presencas]) => {
+    void Promise.all([supabase.from('registrations').select('edition_id,status'), supabase.from('checkins').select('edition_id'), supabase.from('edition_comments').select('edition_id').eq('status', 'pendente'), supabase.from('event_costs').select('edition_id,conhecido_centavos'), supabase.from('edition_albums').select('edition_id,publicado,album_url')]).then(([inscricoes, presencas, recados, custos, albumRows]) => {
       const totais: Record<string, Record<string, number>> = {};
-      const somar = (id: string, chave: string) => { totais[id] = { ...totais[id], [chave]: (totais[id]?.[chave] || 0) + 1 }; };
+      const somar = (id: string, chave: string, valor = 1) => { totais[id] = { ...totais[id], [chave]: (totais[id]?.[chave] || 0) + valor }; };
       for (const row of inscricoes.data || []) somar(row.edition_id, row.status);
       for (const row of presencas.data || []) somar(row.edition_id, 'checkins');
+      for (const row of recados.data || []) somar(row.edition_id, 'recados');
+      for (const row of custos.data || []) somar(row.edition_id, 'custo', Number(row.conhecido_centavos) || 0);
       setContagens(totais);
+      const situacao: Record<string, string> = {};
+      for (const row of albumRows.data || []) situacao[row.edition_id] = row.publicado ? (row.album_url ? 'Publicado' : 'Sem link do álbum') : 'Não publicado';
+      setAlbuns(situacao);
     });
   }, []);
   useEffect(() => { void load(); }, []);
@@ -173,6 +179,9 @@ function EditionsPanel() {
     { id: 'aprovados', titulo: 'Aprovados', valor: (item) => contagens[item.id]?.inscrito || 0 },
     { id: 'checkins', titulo: 'Check-ins', valor: (item) => contagens[item.id]?.checkins || 0 },
     { id: 'inscricoes', titulo: 'Inscrições', valor: (item) => (item.inscricoes_abertas ? 'Abertas' : 'Fechadas') },
+    { id: 'album', titulo: 'Álbum', valor: (item) => albuns[item.id] || 'Sem álbum', render: (item) => { const texto = albuns[item.id] || 'Sem álbum'; return <span className={`adm-status${texto === 'Publicado' ? ' adm-status--sim' : ''}`}>{texto}</span>; } },
+    { id: 'recados', titulo: 'Recados novos', valor: (item) => contagens[item.id]?.recados || 0, render: (item) => (contagens[item.id]?.recados ? <span className="adm-pill adm-pill--pendente">{contagens[item.id].recados} para aprovar</span> : <span className="adm-status">Nenhum</span>) },
+    { id: 'custo', titulo: 'Custo informado', valor: (item) => contagens[item.id]?.custo || 0, render: (item) => (contagens[item.id]?.custo ? (contagens[item.id].custo / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-') },
     { id: 'site', titulo: 'No site', valor: (item) => (item.publica ? 'Sim' : 'Não') },
   ];
   if (open) return <EditionEditor key={open.id} edition={open} onBack={() => { setOpen(null); const proximo = new URLSearchParams(params); proximo.delete('abrir'); proximo.delete('secao'); setParams(proximo, { replace: true }); void supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data }) => { if (data) setList(data as Edition[]); }); }} />;
@@ -180,7 +189,7 @@ function EditionsPanel() {
     <>
       <div className="wf-head"><div><small>OPERAÇÃO · EDIÇÕES</small><h1>Encontros</h1><p>Abra uma edição para ajustar data e local, enviar capa e fotos, abrir os telões e ver quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void create()}>Nova edição</button></div></div>
       {error && <p className="inline-notice">{error}</p>}
-      <Tabela colunas={colunasEdicoes} colunasIniciais={['titulo', 'data', 'local', 'inscricoes']} linhas={list} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhuma edição cadastrada." filtros={[{ id: 'site', titulo: 'No site', valor: (item) => (item.publica ? 'No site' : 'Fora do site') }, { id: 'inscricoes', titulo: 'Inscrições', valor: (item) => (item.inscricoes_abertas ? 'Abertas' : 'Fechadas') }]} />
+      <Tabela colunas={colunasEdicoes} colunasIniciais={['titulo', 'data', 'local', 'capacidade', 'checkins', 'inscricoes', 'album', 'recados']} linhas={list} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhuma edição cadastrada." filtros={[{ id: 'site', titulo: 'No site', valor: (item) => (item.publica ? 'No site' : 'Fora do site') }, { id: 'inscricoes', titulo: 'Inscrições', valor: (item) => (item.inscricoes_abertas ? 'Abertas' : 'Fechadas') }]} />
     </>
   );
 }

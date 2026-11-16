@@ -14,6 +14,7 @@ import { StaffPanel } from './Staff';
 import { FornecedorPanel } from './Fornecedor';
 import { ImpactosPanel, IndicacoesPanel, MatchesPanel, RecommendationsPanel } from './AdminRecomendacoes';
 import { ComentariosPanel } from './AdminComentarios';
+import { InicioResumo } from './AdminInicioResumo';
 import { ProgramPanel, Descadastros } from './AdminInicio';
 
 /** Aba atual guardada no endereço (?aba=), para atualizar a página sem perder o lugar. */
@@ -209,7 +210,7 @@ export function InicioPage() {
     ['Pedidos de adesão para decidir', espera.adesoes, '/admin/aprovacoes?aba=adesoes'],
     ['Missões para analisar', espera.missoes, '/admin/aprovacoes?aba=missoes'],
     ['Recomendações para validar', espera.recomendacoes, '/admin/aprovacoes?aba=missoes'],
-    ['Comentários para aprovar', espera.comentarios, '/admin/aprovacoes?aba=comentarios'],
+    ['Recados para aprovar', espera.comentarios, '/admin/aprovacoes?aba=comentarios'],
   ] as Array<[string, number, string]>).filter(([, total]) => total > 0);
   return (
     <>
@@ -224,12 +225,7 @@ export function InicioPage() {
         <div><b>{numeros.convidados}</b><span>Convidados</span></div>
         <div><b>{numeros.parceiros}</b><span>Parceiros</span></div>
       </div>
-      {edicao && (
-        <section className="adm-proximo">
-          <div><small>PRÓXIMO ENCONTRO</small><h2>{edicao.titulo}</h2><p>{dataBr(edicao.data_evento)} · {edicao.horario} · {edicao.local}, {edicao.cidade}</p></div>
-          <div className="adm-links"><Link className="wf-primary" to={`/admin/edicoes?abrir=${edicao.slug}`}>Abrir a edição</Link><a className="wf-secondary" href={`/telao/checkin?edicao=${edicao.slug}`} target="_blank" rel="noopener noreferrer">Telão do check-in</a></div>
-        </section>
-      )}
+      <InicioResumo />
     </>
   );
 }
