@@ -354,25 +354,15 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       </>)}
       {aba === 'site' && (<>
       <section className="v2-forms-card" id="secao-imagens">
-        <header><small>IMAGENS PÚBLICAS</small><h2>Capa e fotos do carrossel</h2></header>
-        <p className="adm-hint">Para o álbum completo, acesse <a href={`/admin/site?aba=encontros&encontro=${edition.slug}`}>Site, Encontros e fotos</a>.</p>
+        <header><small>IMAGENS PÚBLICAS</small><h2>Capa da edição</h2></header>
+        <p className="adm-hint">Aqui fica só a capa. As fotos da galeria e o link do álbum completo ficam em um lugar só: <a href={`/admin/site?aba=encontros&encontro=${edition.slug}`}>Site, Encontros e fotos</a>.</p>
         <div className="adm-cover">
           {draft.capa_url && <img src={draft.capa_url} alt="Capa da edição" />}
           <label className="wf-secondary" aria-disabled={busy}>{draft.capa_url ? 'Trocar a capa' : 'Enviar a capa'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} hidden onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ''; void cover(file); }} /></label>
           {draft.capa_url && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void reenquadrar(draft.capa_url!)}>Enquadrar capa</button>}
-          <label className="wf-secondary">Adicionar fotos<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} multiple hidden onChange={(event) => { const files = Array.from(event.target.files || []); event.target.value = ''; void addPhotos(files); }} /></label>
         </div>
-        <p className="adm-hint">Até 50 MB por foto. Use Enquadrar para ajustar o recorte.</p>{progressoFotos && <p role="status" aria-live="polite">{progressoFotos}</p>}
-        <p className="adm-hint">Publique só fotos de quem autorizou o uso de imagem. A lista de presença abaixo mostra quem autorizou.</p>
-        <div className="adm-photos">
-          {photos.map((photo) => (
-            <figure key={photo.id}>
-              <img src={photo.url} alt="" />
-              <label><input type="checkbox" checked={photo.no_carrossel} onChange={() => void togglePhoto(photo)} /> No carrossel</label>
-              <button type="button" className="wf-secondary" disabled={busy} onClick={() => void reenquadrar(photo.url,photo)}>Enquadrar foto</button><button type="button" disabled={busy} onClick={() => void removePhoto(photo)}>Tirar do site</button>
-            </figure>
-          ))}
-        </div>
+        <p className="adm-hint">Até 50 MB. Use Enquadrar para ajustar o recorte.</p>{progressoFotos && <p role="status" aria-live="polite">{progressoFotos}</p>}
+        <a className="wf-primary" href={`/admin/site?aba=encontros&encontro=${edition.slug}`}>Gerenciar as fotos da galeria</a>
       </section>
       </>)}
       {aba === 'custos' && <AdminCustos edicaoId={edition.id} />}
