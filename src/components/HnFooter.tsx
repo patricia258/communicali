@@ -15,8 +15,7 @@ export function HnFooter() {
       </div>
       <div className="hn-foot__legal">
         <FooterLinks />
-        <p>© {new Date().getFullYear()} ComuniCALI, uma iniciativa da CALI RH.</p>
-        <p>AKAYKO AZUMI RH LTDA · CNPJ 56.660.675/0001-11 · <a href="mailto:comuni@calirh.com">comuni@calirh.com</a></p>
+        <p>© {new Date().getFullYear()} ComuniCALI, uma iniciativa da CALI RH · AKAYKO AZUMI RH LTDA · CNPJ 56.660.675/0001-11 · <a href="mailto:comuni@calirh.com">comuni@calirh.com</a></p>
       </div>
     </footer>
   );
