@@ -311,7 +311,6 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
         {form.aviso && <p className="cf-aviso" role="note" dangerouslySetInnerHTML={{ __html: richTextHtml(form.aviso) }} />}
         {!preset && form.description && <p className="cf-desc" dangerouslySetInnerHTML={{ __html: richTextHtml(form.description) }} />}
         <div className="cf-actions"><button type="button" className="cf-primary" onClick={() => setPhase('questions')}>Começar <ArrowRight size={18} /></button><span className="cf-enter-hint">ou pressione <b>Enter <CornerDownLeft size={13} /></b></span></div>
-        <p className="cf-meta">{basicas} {basicas === 1 ? 'pergunta' : 'perguntas'} · cerca de {Math.max(1, Math.round(basicas * 0.4))} min</p>
       </div>}
       {(phase === 'questions' || phase === 'sending') && question && <div className={`cf-screen cf-q cf-${direction}${question.kind === 'statement' ? ' cf-statement' : ''}`} key={question.id}>
         {question.imagem && <img className="cf-foto" src={question.imagem} alt="" />}
