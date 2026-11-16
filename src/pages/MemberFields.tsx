@@ -6,12 +6,12 @@ export const INTERESSES = ['RH', 'Liderança', 'Gestão de pessoas', 'Desenvolvi
 const ACEITE = 'Li e aceito';
 const SITE = 'https://comuni.calirh.com';
 
-export type SiteTexts = { cadastro_aberto: boolean; regras_texto: string; privacidade_texto: string; termos_texto?: string; como_conheceu_opcoes: string[] };
+export type SiteTexts = { cadastro_aberto: boolean; regras_texto: string; privacidade_texto: string; termos_texto?: string; termo_album_texto?: string; como_conheceu_opcoes: string[] };
 
 export function useSiteTexts() {
   const [texts, setTexts] = useState<SiteTexts | null>(null);
   useEffect(() => {
-    supabase.from('site_settings').select('cadastro_aberto,regras_texto,privacidade_texto,termos_texto,como_conheceu_opcoes').single().then(({ data }) => setTexts(data as SiteTexts | null));
+    supabase.from('site_settings').select('cadastro_aberto,regras_texto,privacidade_texto,termos_texto,termo_album_texto,como_conheceu_opcoes').single().then(({ data }) => setTexts(data as SiteTexts | null));
   }, []);
   return texts;
 }

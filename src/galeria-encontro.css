@@ -49,3 +49,9 @@
 .gal__aceite input{flex:none;width:20px;height:20px;margin-top:2px;accent-color:#5A1E2D}
 .gal__acoes .hn-pill:disabled{opacity:.4;cursor:not-allowed}
 .gal__acesso .gal__aceite{display:flex;align-items:flex-start;gap:10px}
+
+/* Caixa de ciência alinhada ao texto (vence o estilo genérico dos campos do bloco) */
+.gal__acesso .gal__aceite{display:flex;align-items:center;gap:12px;margin:2px 0 0}
+.gal__acesso .gal__aceite input{flex:none;width:20px;min-width:20px;height:20px;min-height:0;padding:0;margin:0;border:0;border-radius:4px;accent-color:#5A1E2D}
+.gal__acesso .gal__aceite span{line-height:1.45}
+.gal__acesso .gal__aceite a{color:#5A1E2D;font-weight:600}

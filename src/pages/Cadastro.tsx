@@ -31,13 +31,13 @@ export function Cadastro() {
   );
 }
 
-export function TextoPagina({ tipo }: { tipo: 'regras' | 'privacidade' | 'termos' }) {
+export function TextoPagina({ tipo }: { tipo: 'regras' | 'privacidade' | 'termos' | 'album' }) {
   const texts = useSiteTexts();
-  const body = tipo === 'regras' ? texts?.regras_texto : tipo === 'termos' ? texts?.termos_texto : texts?.privacidade_texto;
+  const body = tipo === 'regras' ? texts?.regras_texto : tipo === 'termos' ? texts?.termos_texto : tipo === 'album' ? texts?.termo_album_texto : texts?.privacidade_texto;
   return (
     <main className="wrap legal">
       <a href="/"><img src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /></a>
-      <h1>{tipo === 'regras' ? 'Regras de participação' : tipo === 'termos' ? 'Termos de participação' : 'Política de privacidade'}</h1>
+      <h1>{tipo === 'regras' ? 'Regras de participação' : tipo === 'termos' ? 'Termos de participação' : tipo === 'album' ? 'Termo de ciência do álbum' : 'Política de privacidade'}</h1>
       {texts && !body && <p>Este texto será publicado em breve.</p>}
       {body?.split(/\n{2,}/).map((paragraph, index) => paragraph.startsWith('## ') ? <h2 key={index}>{paragraph.slice(3)}</h2> : <p key={index}>{paragraph}</p>)}
     </main>
