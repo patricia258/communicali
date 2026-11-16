@@ -115,6 +115,21 @@ function tique() {
   } catch { /* sem som neste aparelho */ }
 }
 
+function AvisoPassaporte({ etiqueta, titulo, children, sair }: { etiqueta: string; titulo: ReactNode; children: ReactNode; sair?: boolean }) {
+  return (
+    <section className="passe__aviso">
+      <img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
+      <span className="passe__aviso-etiqueta">{etiqueta}</span>
+      <h1>{titulo}</h1>
+      <div className="passe__aviso-texto">{children}</div>
+      <div className="passe__aviso-acoes">
+        <a className="passe__botao" href="/#agenda">Ver os próximos encontros</a>
+        {sair && <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>}
+      </div>
+    </section>
+  );
+}
+
 function Pagina({ children, aba, setAba }: { children: ReactNode; aba?: Aba; setAba?: (aba: Aba) => void }) {
   useEffect(() => {
     const ouvir = (event: PointerEvent) => { if ((event.target as HTMLElement).closest('.passe button:not(:disabled), .passe summary')) tique(); };
@@ -1040,20 +1055,19 @@ export function MeuEspaco() {
   if (!espaco) return <div className="passe" aria-busy="true" />;
   if (!espaco.membro && espaco.em_breve) return (
     <Pagina>
-      <img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
-      <h1>O passaporte ainda não está disponível</h1>
-      <p>Estamos preparando este espaço. Em breve teremos novidades.</p>
-      <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
+      <AvisoPassaporte etiqueta="Em breve" titulo={<>Seu passaporte <em>abre em breve</em></>} sair>
+        <p>Estamos terminando de preparar este espaço. Seu cadastro está guardado, e a gente avisa por e-mail quando abrir.</p>
+        <p>Até lá, acompanhe os próximos encontros.</p>
+      </AvisoPassaporte>
     </Pagina>
   );
   if (!espaco.membro && espaco.adesao) return <Pagina><AdesaoMembro dados={espaco.adesao} recarregar={carregar} /></Pagina>;
   if (!espaco.membro) return (
     <Pagina>
-      <img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
-      <h1>O passaporte é de quem faz parte da comunidade</h1>
-      <p>Não encontramos um cadastro com este e-mail. Você pode conhecer a ComuniCALI em até 2 visitas abertas e gratuitas. Depois da primeira visita, já dá para pedir para fazer parte da comunidade, e é gratuito.</p>
-      <a className="passe__botao" href="/#agenda">Ver os próximos encontros</a>
-      <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
+      <AvisoPassaporte etiqueta="Só para quem faz parte" titulo={<>O passaporte é de quem <em>faz parte</em></>} sair>
+        <p>Não encontramos um cadastro com este e-mail.</p>
+        <p>Você pode conhecer a ComuniCALI em até 2 visitas abertas e gratuitas. Depois da primeira visita, já dá para pedir para fazer parte da comunidade, e é gratuito.</p>
+      </AvisoPassaporte>
     </Pagina>
   );
 

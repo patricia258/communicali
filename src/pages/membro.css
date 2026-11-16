@@ -734,3 +734,14 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .visita__aceites .passe__aceite{margin:0}
 .visita__bloco .passe__botao{margin-top:6px}
 .visita__rodape{padding-top:8px}
+
+/* Avisos do passaporte (em breve / sem cadastro) */
+.passe .passe__aviso{display:flex;flex-direction:column;align-items:flex-start;gap:0;max-width:560px;margin:0 auto;padding:clamp(28px,8vh,72px) 4px 40px}
+.passe__aviso .passe__logo{width:176px;margin-bottom:clamp(36px,9vh,72px)}
+.passe__aviso-etiqueta{display:inline-block;margin-bottom:18px;padding:6px 14px;border:1px solid #5A1E2D;border-radius:999px;background:#fff;color:#5A1E2D;font:700 12px/1 Inter,system-ui,sans-serif;letter-spacing:.02em}
+.passe .passe__aviso h1{margin:0 0 22px;font:700 clamp(34px,8vw,52px)/1.04 'Funnel Display',Helvetica,Arial,sans-serif;letter-spacing:-.03em;color:#1B0A10}
+.passe__aviso h1 em{font-style:normal;color:#5A1E2D}
+.passe__aviso-texto{display:grid;gap:14px;margin-bottom:32px}
+.passe__aviso-texto p{margin:0;font:400 17px/1.55 Inter,system-ui,sans-serif;color:#1B0A10;max-width:46ch}
+.passe__aviso-acoes{display:grid;gap:18px;width:100%;max-width:360px;justify-items:start}
+.passe__aviso-acoes .passe__botao{width:100%}
