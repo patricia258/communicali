@@ -187,7 +187,15 @@ a.hn-idx:hover{border-color:var(--ink)}
   .hn-nav__links{font-size:15px;gap:12px}
   .hn-exp__grid{grid-template-columns:1fr}
   .hn-prev__grid{grid-template-columns:1fr}
-  .hn-foot__cols{grid-template-columns:1fr 1fr;gap:24px}
+  .hn-foot__cols{grid-template-columns:1fr 1fr;gap:20px;font-size:14px;line-height:1.6;min-width:0;width:100%}
+  .hn-foot{padding:24px var(--gutter) 16px}
+  .hn-foot__top{gap:16px}
+  .hn-foot__marca{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%}
+  .hn-foot__logo img{height:24px}
+  .hn-foot__cali{font-size:12px;gap:8px}
+  .hn-foot__cali img{height:20px}
+  .hn-foot__cols b{font-size:15px}
+  .hn-foot__legal{margin-top:16px;padding-top:10px;font-size:11px;line-height:1.5}
 }
 @media (max-width:520px){.hn-nav__membro{display:none!important}}
 @media (prefers-reduced-motion:reduce){.hn *{transition:none!important}}
