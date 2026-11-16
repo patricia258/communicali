@@ -6,9 +6,9 @@ import { LOGO_NOVO_LETRAS, LOGO_NOVO_VIEWBOX } from './logoNovoLetras';
  * A data de publicação fica aqui, num lugar só. Se for null, a abertura NÃO aparece para ninguém.
  * Para ver na prévia: acrescente ?abertura=1 ao endereço (não grava que já foi vista).
  */
-const LANCAMENTO: string | null = '2026-11-16T00:30:00-03:00';
+const LANCAMENTO: string | null = '2026-11-16T00:20:00-03:00';
 const JANELA_HORAS = 48;
-const CHAVE = 'cali_abertura_v1';
+const CHAVE = 'cali_abertura_v2';
 
 const lembrou = () => { try { return !!localStorage.getItem(CHAVE); } catch { return false; } };
 const gravar = () => { try { localStorage.setItem(CHAVE, '1'); } catch { /* sem armazenamento: mostra normalmente */ } };
