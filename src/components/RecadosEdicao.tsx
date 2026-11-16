@@ -33,7 +33,7 @@ export function RecadosEdicao({ slug }: { slug: string }) {
     <section className="hn-ed__bloco rec" aria-label="Recados">
       <header className="rec__topo">
         <h2>O que o pessoal disse</h2>
-        <p className="rec__conta">{lista.length === 0 ? 'Seja a primeira pessoa a deixar um recado.' : lista.length === 1 ? '1 recado de quem esteve no encontro.' : `${lista.length} recados de quem esteve no encontro.`}</p>
+        {lista.length === 0 && <p className="rec__conta">Seja a primeira pessoa a deixar um recado.</p>}
       </header>
       {lista.length > 0 && <ul className="rec__lista">{lista.map((c) => (
         <li key={c.id}><AvatarRecado tipo={c.avatar} /><div><p>{c.texto}</p><small>{c.nome || 'Anônimo'} · {dia(c.created_at)}</small></div></li>
@@ -56,17 +56,20 @@ export function RecadosEdicao({ slug }: { slug: string }) {
                 <button type="button" className="rec__todos" onClick={() => setTodos(!todos)}>{todos ? 'Ver menos' : 'Ver todos'}</button>
               </div>
             </fieldset>
-            <fieldset className="rec__aparecer">
-              <legend>Como quer aparecer?</legend>
-              <div>
-                <button type="button" aria-pressed={anonimo} className={`rec__pilula${anonimo ? ' is-on' : ''}`} onClick={() => setAnonimo(true)}>Anônimo</button>
-                <button type="button" aria-pressed={!anonimo} className={`rec__pilula${!anonimo ? ' is-on' : ''}`} onClick={() => setAnonimo(false)}>Mostrar meu nome</button>
-              </div>
-            </fieldset>
             {!anonimo && <label className="rec__nome">Seu nome<input required maxLength={80} value={nome} onChange={(e) => setNome(e.target.value)} autoComplete="name" /></label>}
             <input className="hn-coment__armadilha" tabIndex={-1} autoComplete="off" aria-hidden="true" value={armadilha} onChange={(e) => setArmadilha(e.target.value)} name="site" />
+            <fieldset className="rec__aparecer">
+              <legend>Como quer aparecer?</legend>
+              <div className="rec__linha">
+                <div className="rec__pilulas">
+                  <button type="button" aria-pressed={anonimo} className={`rec__pilula${anonimo ? ' is-on' : ''}`} onClick={() => setAnonimo(true)}>Anônimo</button>
+                  <button type="button" aria-pressed={!anonimo} className={`rec__pilula${!anonimo ? ' is-on' : ''}`} onClick={() => setAnonimo(false)}>Mostrar meu nome</button>
+                </div>
+                <button className="hn-pill rec__enviar" type="submit" disabled={estado === 'enviando'}>{estado === 'enviando' ? 'Enviando…' : 'Enviar recado'}</button>
+              </div>
+            </fieldset>
             {erro && <p className="rec__erro" role="alert">{erro}</p>}
-            <div className="rec__envio"><button className="hn-pill" type="submit" disabled={estado === 'enviando'}>{estado === 'enviando' ? 'Enviando…' : 'Enviar recado'}</button><small>A equipe lê antes de publicar.</small></div>
+            <small className="rec__aviso">A equipe lê antes de publicar.</small>
           </form>
         )}
     </section>
