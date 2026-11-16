@@ -1,5 +1,6 @@
 import { HnFooter } from '../components/HnFooter';
 import { GaleriaDoEncontro } from '../components/GaleriaDoEncontro';
+import { AlbumAcessoVisual, type EstadoAlbum } from '../components/AlbumAcessoVisual';
 import { Compartilhar } from '../components/Compartilhar';
 import '../home-nova.css';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
@@ -147,6 +148,8 @@ export function EdicaoPage() {
   const { slug = '' } = useParams();
   const edition = useEdition(slug);
   const [fotosBanco, setFotos] = useState<FotoEdicao[]>([]);
+  const [demoAlbum, setDemoAlbum] = useState<EstadoAlbum>('entrar');
+  const [demoEmail, setDemoEmail] = useState('');
   const fotos = fotosBanco;
   useEffect(() => {
     if (!edition?.id) return;
@@ -185,14 +188,11 @@ export function EdicaoPage() {
               </div>
             </section>
             {past && new URLSearchParams(window.location.search).has('moldura') && (
-              <GaleriaDoEncontro fotos={fotos} titulo={edition.titulo} rotulo={edition.numero ? `${edition.numero}ª Edição` : edition.titulo} acesso={<>
-                <h3>Você esteve nessa edição?</h3>
-                <p>Acesse o álbum completo e baixe os seus registros. Não deixe de marcar o nosso <a href="https://www.instagram.com/calirh_/" target="_blank" rel="noopener noreferrer">@calirh_</a>, hein!</p>
-                <p>Informe o e-mail que você usou no check-in e pronto.</p>
-                <form onSubmit={(event) => event.preventDefault()}>
-                  <label>E-mail do check-in<input type="email" autoComplete="email" placeholder="seu@email.com" /></label>
-                  <div><button className="hn-pill" type="submit">Ver o álbum</button></div>
-                </form>
+              <GaleriaDoEncontro fotos={fotos} titulo={edition.titulo} rotulo={edition.numero ? `${edition.numero}ª Edição` : edition.titulo} completa={demoAlbum === 'confirmado'} acesso={<>
+                <AlbumAcessoVisual estado={demoAlbum} email={demoEmail} setEmail={setDemoEmail} aoEntrar={() => setDemoAlbum(demoEmail.toLowerCase().includes('erro') ? 'nao-encontrado' : 'confirmado')} aoTrocar={() => { setDemoAlbum('entrar'); setDemoEmail(''); }} aoAbrir={() => undefined} />
+                <div className="gal__demo">Ver como fica:
+                  {([['entrar', 'Antes de entrar'], ['confirmado', 'Check-in confirmado'], ['nao-encontrado', 'E-mail não encontrado'], ['preparando', 'Álbum em preparo']] as const).map(([id, nome]) => <button key={id} type="button" aria-pressed={demoAlbum === id} onClick={() => setDemoAlbum(id)}>{nome}</button>)}
+                </div>
               </>} />
             )}
             {past && !new URLSearchParams(window.location.search).has('moldura') && (
