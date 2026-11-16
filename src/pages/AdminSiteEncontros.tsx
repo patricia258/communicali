@@ -128,6 +128,32 @@ function EditorAlbum({ encontro, stats, voltar, atualizar }: { encontro: Encontr
     } catch { setAviso('Não foi possível retirar a foto.'); }
     finally { setBusy(false); }
   }
+  // Deixa leves as cópias de exibição já enviadas (até 2200 px, JPEG). O original nunca é alterado nem apagado.
+  async function otimizarEnviadas() {
+    setBusy(true); setAviso('');
+    let feitas = 0;
+    try {
+      for (const foto of fotos) {
+        const origemPath = foto.storage_path;
+        const { data, error } = await supabase.storage.from('edition-albums').download(origemPath); if (error || !data) continue;
+        if (data.size <= 1_500_000) continue;
+        const bitmap = await createImageBitmap(data);
+        const reducao = Math.min(1, 2200 / Math.max(bitmap.width, bitmap.height));
+        const tela = document.createElement('canvas'); tela.width = Math.round(bitmap.width * reducao); tela.height = Math.round(bitmap.height * reducao);
+        const ctx = tela.getContext('2d'); if (!ctx) throw new Error('canvas'); ctx.imageSmoothingQuality = 'high'; ctx.drawImage(bitmap, 0, 0, tela.width, tela.height);
+        const blob = await new Promise<Blob | null>((r) => tela.toBlob(r, 'image/jpeg', 0.86)); if (!blob) continue;
+        const novo = `${encontro.id}/${crypto.randomUUID()}.jpg`;
+        const { error: up } = await supabase.storage.from('edition-albums').upload(novo, blob, { contentType: 'image/jpeg' }); if (up) throw up;
+        const original = foto.original_storage_path || origemPath;
+        const { error: db } = await supabase.from('edition_album_photos').update({ storage_path: novo, original_storage_path: original }).eq('id', foto.id).eq('edition_id', encontro.id);
+        if (db) { await supabase.storage.from('edition-albums').remove([novo]); throw db; }
+        feitas++;
+      }
+      await carregarFotos();
+      setAviso(feitas ? `${feitas} foto(s) otimizadas. Os originais continuam guardados.` : 'As fotos já estão leves.');
+    } catch { setAviso('Não foi possível otimizar todas as fotos. Tente novamente.'); }
+    finally { setBusy(false); }
+  }
   async function reenquadrar(foto: Foto) {
     setBusy(true);setAviso('');
     try {
@@ -162,7 +188,7 @@ function EditorAlbum({ encontro, stats, voltar, atualizar }: { encontro: Encontr
       <div className="adm-links"><a className="wf-secondary" href={`/e/${encontro.slug}#fotos`} target="_blank" rel="noopener noreferrer"><ExternalLink size={14} />Ver página do encontro</a><a className="wf-secondary" href={`/admin/edicoes?abrir=${encontro.slug}&secao=site`}>Editar capa e imagens públicas</a></div>
     </section>
     <section className="v2-forms-card"><header><h2>Fotos do encontro</h2></header>
-      <button type="button" className="wf-secondary" disabled={busy || !pronto} onClick={() => arquivo.current?.click()}><ImagePlus size={15} />Enviar fotos</button><input ref={arquivo} type="file" accept="image/jpeg,image/png,image/webp" multiple hidden disabled={busy || !pronto} onChange={(event) => void enviarFotos(event)} />
+      <button type="button" className="wf-secondary" disabled={busy || !pronto} onClick={() => arquivo.current?.click()}><ImagePlus size={15} />Enviar fotos</button><button type="button" className="wf-secondary" disabled={busy || !pronto || !fotos.length} onClick={() => void otimizarEnviadas()} title="Deixa as fotos já enviadas mais leves para carregarem rápido. Os originais não mudam.">Deixar as fotos leves</button><input ref={arquivo} type="file" accept="image/jpeg,image/png,image/webp" multiple hidden disabled={busy || !pronto} onChange={(event) => void enviarFotos(event)} />
       <p className="adm-hint">{previas.length} de 4 posições preenchidas.</p><div className="gal__grade adm-album-molduras">{Array.from({length:4},(_,i)=><figure key={i} className={`gal__item gal__item--${i+1}`}>{previas[i]?.url && <img src={previas[i].url} alt={`Prévia ${i+1}`} />}<div className="adm-album-moldura-acoes"><strong>Moldura {i+1}</strong>{previas[i] ? <button type="button" className="wf-secondary" disabled={busy} onClick={()=>void reenquadrar(previas[i])}>Enquadrar</button> : <button type="button" className="wf-secondary" disabled={busy || !pronto} onClick={()=>arquivo.current?.click()}>Escolher foto</button>}</div></figure>)}</div><details className="adm-ajuda"><summary>Como organizar as fotos</summary><p>As quatro primeiras fotos marcadas como públicas formam a prévia. Use as setas para ordenar e Enquadrar para ajustar cada moldura. Depois clique em Publicar fotos. As demais ficam disponíveis após conferir o e-mail do check-in.</p><p>JPG, PNG ou WebP, até 50 MB. O original é preservado. Publique imagens autorizadas.</p></details>
       <div className="adm-album-fotos">{fotos.map((foto, indice) => <figure key={foto.id}><small className="adm-album-posicao">{!foto.public_preview ? 'Após o check-in' : previas.indexOf(foto)<4 ? `Prévia ${previas.indexOf(foto)+1} · ${previas.indexOf(foto)===0?'imagem principal':'imagem de apoio'}` : 'Além das quatro prévias visíveis'}</small>{foto.url && <img src={foto.url} alt={foto.legenda || 'Foto do encontro'} />}<label><span>Descrição da foto</span><input disabled={busy} value={foto.legenda} onChange={(event) => setFotos((rows) => rows.map((row) => row.id === foto.id ? { ...row, legenda: event.target.value } : row))} /></label><label className="adm-foto-publica"><input type="checkbox" disabled={busy || (!foto.public_preview && previas.length >= 4)} checked={foto.public_preview} onChange={(e) => { if(e.target.checked && previas.length>=4){setAviso('Use no máximo quatro prévias.');return;}setPublicacaoPendente(true);setFotos((rows) => rows.map((row) => row.id === foto.id ? { ...row, public_preview: e.target.checked } : row)); }} /><span>Usar na prévia do site</span></label><div className="adm-album-foto-acoes"><button type="button" className="wf-secondary" disabled={busy} onClick={() => void reenquadrar(foto)}>Enquadrar</button><button className="wf-secondary" type="button" aria-label={`Mover foto ${indice+1} para cima`} disabled={busy||indice===0} onClick={()=>moverFoto(indice,-1)}><ArrowUp size={14}/></button><button className="wf-secondary" type="button" aria-label={`Mover foto ${indice+1} para baixo`} disabled={busy||indice===fotos.length-1} onClick={()=>moverFoto(indice,1)}><ArrowDown size={14}/></button><button className="wf-secondary" type="button" disabled={busy} onClick={() => void remover(foto)}><Trash2 size={14} />Retirar foto</button></div></figure>)}</div>
       {pronto && !fotos.length && <p className="adm-hint">Nenhuma foto enviada para este álbum.</p>}

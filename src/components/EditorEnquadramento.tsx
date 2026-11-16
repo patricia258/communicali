@@ -52,18 +52,20 @@ function EditorEnquadramento({ file, moldura, concluir }: { file: File; moldura?
   }
   async function salvar() {
     if (!foto) return;
-    if (formato === 'inteira' && zoom === 1) { concluir({ original: file, exibicao: file }); return; }
+    if (formato === 'inteira' && zoom === 1 && file.size <= 1_500_000 && file.type === 'image/jpeg' && foto.naturalWidth <= 2400) { concluir({ original: file, exibicao: file }); return; }
     setOcupado(true); setErro('');
     try {
       const sx = Math.max(0, Math.round(-esquerda / escala)), sy = Math.max(0, Math.round(-topo / escala));
       const w = Math.min(foto.naturalWidth-sx, Math.round(tamanho.w/escala)), h = Math.min(foto.naturalHeight-sy, Math.round(tamanho.h/escala));
-      const tela = document.createElement('canvas'); tela.width = w; tela.height = h;
+      // Cópia de exibição leve (até 2200 px no lado maior, JPEG): carrega rápido no site. O original fica intacto no armazenamento.
+      const reducao = Math.min(1, 2200 / Math.max(w, h));
+      const tela = document.createElement('canvas'); tela.width = Math.round(w * reducao); tela.height = Math.round(h * reducao);
       const ctx = tela.getContext('2d'); if (!ctx) throw new Error('Não foi possível preparar o recorte.');
-      ctx.drawImage(foto, sx, sy, w, h, 0, 0, w, h);
-      // PNG conserva os pixels do recorte sem compressão com perda ou ampliação.
-      const blob = await new Promise<Blob | null>(r => tela.toBlob(r, 'image/png'));
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(foto, sx, sy, w, h, 0, 0, tela.width, tela.height);
+      const blob = await new Promise<Blob | null>(r => tela.toBlob(r, 'image/jpeg', 0.86));
       if (!blob) throw new Error('Não foi possível preparar o recorte.');
-      const exibicao = new File([blob], file.name.replace(/\.[^.]+$/, '')+'-enquadrada.png', { type:'image/png' });
+      const exibicao = new File([blob], file.name.replace(/\.[^.]+$/, '')+'-enquadrada.jpg', { type:'image/jpeg' });
       await prepararImagem(exibicao); concluir({ original:file, exibicao });
     } catch (e) { setErro(e instanceof Error ? e.message : 'Não foi possível salvar o recorte.'); }
     finally { setOcupado(false); }
