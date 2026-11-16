@@ -9,6 +9,7 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
 import { PessoasDaEdicao } from './AdminPessoasEdicao';
+import { ComentariosPanel } from './AdminComentarios';
 import { DiaDoEncontro } from './DiaDoEncontro';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
@@ -185,7 +186,9 @@ function EditionsPanel() {
 
 
 function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => void }) {
-  const [aba, mudarAba] = useAba('dados', ['dia', 'dados', 'pessoas', 'emails', 'site', 'custos'], 'secao');
+  const [pendentesComentarios, setPendentesComentarios] = useState(0);
+  useEffect(() => { void supabase.from('edition_comments').select('id', { count: 'exact', head: true }).eq('edition_id', edition.id).eq('status', 'pendente').then(({ count }) => setPendentesComentarios(count || 0)); }, [edition.id]);
+  const [aba, mudarAba] = useAba('dados', ['dia', 'dados', 'pessoas', 'emails', 'site', 'comentarios', 'custos'], 'secao');
   const [draft, setDraft] = useState(edition);
   const { enquadrar, editor } = useEnquadramento();
   const [confirmados, setConfirmados] = useState<number | null>(null);
@@ -328,7 +331,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         <div><dt>Confirmados</dt><dd>{confirmados ?? 'Indisponível'}</dd></div>
         <div><dt>Inscrições</dt><dd>{draft.inscricoes_abertas ? 'Abertas' : 'Fechadas'}<small>{draft.publica ? 'No site' : 'Fora do site'}</small></dd></div>
       </dl>
-      <Secoes atual={aba} onChange={mudarAba} abas={[['dados', 'Dados e vagas'], ['pessoas', 'Pessoas'], ['emails', 'E-mails'], ['dia', 'Dia do encontro'], ['site', 'Site e fotos'], ['custos', 'Custos']]}><div>
+      <Secoes atual={aba} onChange={mudarAba} abas={[['dados', 'Dados e vagas'], ['pessoas', 'Pessoas'], ['emails', 'E-mails'], ['dia', 'Dia do encontro'], ['site', 'Site e fotos'], ['comentarios', pendentesComentarios ? `Comentários · ${pendentesComentarios} novo${pendentesComentarios > 1 ? 's' : ''}` : 'Comentários'], ['custos', 'Custos']]}><div>
       {aba === 'dia' && <DiaDoEncontro edition={draft} />}
       {aba === 'dados' && (<>
       <section className="v2-forms-card" id="secao-dados">
@@ -365,6 +368,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
         <a className="wf-primary" href={`/admin/site?aba=encontros&encontro=${edition.slug}`}>Gerenciar as fotos da galeria</a>
       </section>
       </>)}
+      {aba === 'comentarios' && <ComentariosPanel edicaoId={edition.id} />}
       {aba === 'custos' && <AdminCustos edicaoId={edition.id} />}
       {aba === 'pessoas' && <PessoasDaEdicao edition={draft} />}
       {aba === 'emails' && (<>

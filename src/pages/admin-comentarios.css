@@ -1,0 +1,16 @@
+.cm__abas{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+.cm__aba{border:1px solid #1B0A10;background:#fff;color:#1B0A10;border-radius:999px;padding:7px 14px;font:500 13px Inter,system-ui,sans-serif;cursor:pointer}
+.cm__aba b{font-weight:600;margin-left:4px;color:#5A1E2D}
+.cm__aba.is-on{background:#1B0A10;color:#fff}.cm__aba.is-on b{color:#fff}
+.cm__vazio{margin:18px 0;color:#5D4F55;font-size:14px}
+.cm__lista{list-style:none;margin:0;padding:0}
+.cm__lista li{display:flex;gap:14px;align-items:flex-start;border-top:1px solid #D9D2CB;padding:14px 0}
+.cm__texto{flex:1;min-width:0}
+.cm__texto p{margin:0 0 4px;font-size:14px;line-height:1.55;color:#1B0A10;overflow-wrap:anywhere}
+.cm__texto small{font-size:12px;color:#6F6770}
+.cm__acoes{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.cm__acoes button{border:1px solid #D9D2CB;background:#fff;color:#5D4F55;border-radius:999px;padding:5px 12px;font:500 12px Inter,system-ui,sans-serif;cursor:pointer}
+.cm__acoes .cm__ok{border-color:#5A1E2D;color:#5A1E2D}
+.cm__acoes .cm__ok:hover{background:#5A1E2D;color:#fff}
+.cm__acoes .cm__lixo{color:#A32D2D;border-color:#EFC7C7}
+@media (max-width:600px){.cm__lista li{flex-wrap:wrap}.cm__acoes{width:100%;justify-content:flex-start}}

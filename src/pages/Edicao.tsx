@@ -1,4 +1,5 @@
 import { HnFooter } from '../components/HnFooter';
+import { RecadosEdicao } from '../components/RecadosEdicao';
 import { TextoEdicao } from '../components/TextoEdicao';
 import { GaleriaDoEncontro } from '../components/GaleriaDoEncontro';
 import { AlbumAcessoVisual, type EstadoAlbum } from '../components/AlbumAcessoVisual';
@@ -101,54 +102,6 @@ export function Nps({ nota, respostas, promotores, neutros, detratores, exemplo 
   );
 }
 
-type ComentarioPublico = { id: string; nome: string | null; texto: string; created_at: string };
-
-/** Comentários da edição encerrada: qualquer pessoa comenta, com nome ou anônimo; só aparece depois de aprovado. */
-function Comentarios({ slug }: { slug: string }) {
-  const [lista, setLista] = useState<ComentarioPublico[]>([]);
-  const [texto, setTexto] = useState('');
-  const [nome, setNome] = useState('');
-  const [anonimo, setAnonimo] = useState(true);
-  const [armadilha, setArmadilha] = useState('');
-  const [estado, setEstado] = useState<'' | 'enviando' | 'enviado'>('');
-  const [erro, setErro] = useState('');
-  useEffect(() => {
-    supabase.rpc('communicali_comentarios', { p_slug: slug }).then(({ data, error }) => { if (!error) setLista((data || []) as ComentarioPublico[]); });
-  }, [slug]);
-  async function enviar(evento: FormEvent) {
-    evento.preventDefault();
-    setErro(''); setEstado('enviando');
-    const { error } = await supabase.rpc('communicali_comentar', { p_slug: slug, p_texto: texto, p_nome: nome, p_anonimo: anonimo, p_site: armadilha });
-    if (error) { setEstado(''); setErro(/não recebe|precisa ter|muitos/i.test(error.message) ? error.message : 'Não foi possível enviar agora. Tente de novo em instantes.'); return; }
-    setEstado('enviado'); setTexto(''); setNome('');
-  }
-  return (
-    <section className="hn-ed__bloco hn-coment" aria-label="Comentários">
-      <h2>Comentários</h2>
-      {lista.length > 0
-        ? <ul className="hn-coment__lista">{lista.map((c) => <li key={c.id}><p>{c.texto}</p><small>{c.nome || 'Anônimo'} · {new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(c.created_at))}</small></li>)}</ul>
-        : <p className="hn-ed__lead">Seja a primeira pessoa a comentar sobre este encontro.</p>}
-      {estado === 'enviado'
-        ? <p className="hn-coment__ok" role="status">Obrigada! Seu comentário aparece aqui depois de aprovado.</p>
-        : (
-          <form className="hn-coment__form" onSubmit={(e) => void enviar(e)}>
-            <label>Seu comentário<textarea required minLength={3} maxLength={600} rows={4} value={texto} onChange={(e) => setTexto(e.target.value)} /></label>
-            <fieldset>
-              <legend>Como quer aparecer?</legend>
-              <label className="hn-coment__op"><input type="radio" name="aparecer" checked={anonimo} onChange={() => setAnonimo(true)} /> Anônimo</label>
-              <label className="hn-coment__op"><input type="radio" name="aparecer" checked={!anonimo} onChange={() => setAnonimo(false)} /> Mostrar meu nome</label>
-            </fieldset>
-            {!anonimo && <label>Seu nome<input required maxLength={80} value={nome} onChange={(e) => setNome(e.target.value)} autoComplete="name" /></label>}
-            <input className="hn-coment__armadilha" tabIndex={-1} autoComplete="off" aria-hidden="true" value={armadilha} onChange={(e) => setArmadilha(e.target.value)} name="site" />
-            {erro && <p className="hn-coment__erro" role="alert">{erro}</p>}
-            <button className="hn-pill" type="submit" disabled={estado === 'enviando'}>{estado === 'enviando' ? 'Enviando...' : 'Enviar comentário'}</button>
-            <small className="hn-coment__aviso">Todo comentário passa por aprovação antes de aparecer.</small>
-          </form>
-        )}
-    </section>
-  );
-}
-
 export function EdicaoPage() {
   const { slug = '' } = useParams();
   const edition = useEdition(slug);
@@ -211,7 +164,7 @@ export function EdicaoPage() {
                 {fotos.length === 0 && <p className="hn-ed__lead">As fotos desta edição serão publicadas aqui.</p>}
               </section>
             )}
-            {past && <Comentarios slug={edition.slug} />}
+            {past && <RecadosEdicao slug={edition.slug} />}
             <section className="hn-ed__bloco hn-ed__acoes">
               <a className="hn-pill hn-pill--line-ink" href="/#agenda">Voltar à agenda</a>
               <Compartilhar slug={edition.slug} titulo={edition.titulo} />
