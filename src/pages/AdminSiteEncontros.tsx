@@ -2,7 +2,7 @@ import '../galeria-encontro.css';
 import { enviarLoteFotos } from '../lib/imagensUpload';
 import { useEnquadramento } from '../components/EditorEnquadramento';
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { ArrowUp, ArrowDown, ExternalLink, ImagePlus, Save, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { dataBr, Tabela } from './AdminTabela';
@@ -17,7 +17,7 @@ export function AdminSiteEncontros() {
   const [stats, setStats] = useState<Stats[]>([]);
   const [statsProntos, setStatsProntos] = useState(false);
   const [refresh, setRefresh] = useState(0);
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(true);
   useEffect(() => {
@@ -30,11 +30,12 @@ export function AdminSiteEncontros() {
     });
     return () => { ativo = false; };
   }, [refresh]);
-  const encontro = lista.find((item) => item.slug === params.get('encontro'));
-  const abrir = (slug?: string) => { const proximo = new URLSearchParams(params); if (slug) proximo.set('encontro', slug); else proximo.delete('encontro'); setParams(proximo); };
-  if (encontro) return <EditorAlbum key={encontro.id} encontro={encontro} stats={statsProntos ? stats.find((item) => item.edition_id === encontro.id) || { edition_id: encontro.id, cliques: 0, pessoas: 0 } : undefined} atualizar={() => setRefresh((value) => value + 1)} voltar={() => abrir()} />;
+  const pedido = params.get('encontro');
+  // Tudo de uma edição fica dentro da edição: o antigo endereço leva direto para a aba Site e fotos dela.
+  if (pedido) return <Navigate to={`/admin/edicoes?abrir=${encodeURIComponent(pedido)}&secao=site`} replace />;
+  const abrir = (slug: string) => { window.location.assign(`/admin/edicoes?abrir=${encodeURIComponent(slug)}&secao=site`); };
   return <>
-    <div className="wf-head"><div><small>CONTEÚDO · SITE</small><h1>Encontros e fotos</h1><p>Alimente a página de cada encontro com fotos e o link do álbum. O acesso ao álbum completo confere o e-mail informado na lista de check-in da edição, sem código.</p></div></div>
+    <div className="wf-head"><div><small>CONTEÚDO · SITE</small><h1>Álbuns e acessos</h1><p>Visão geral dos álbuns de todos os encontros. Para trocar fotos, link ou ver quem acessou, abra o encontro: tudo fica dentro da edição, na aba Site e fotos.</p></div></div>
     {erro && <p className="inline-notice" role="status">{erro}</p>}
     <Tabela colunas={[
       { id: 'titulo', titulo: 'Encontro', valor: (item: Encontro) => item.titulo, render: (item) => <button className="adm-nome" type="button" onClick={() => abrir(item.slug)}>{item.titulo}</button> },
@@ -45,7 +46,12 @@ export function AdminSiteEncontros() {
   </>;
 }
 
-function EditorAlbum({ encontro, stats, voltar, atualizar }: { encontro: Encontro; stats?: Stats; voltar: () => void; atualizar: () => void }) {
+export function AlbumDaEdicao({ encontro, stats: statsFora, voltar, atualizar: atualizarFora, embutido = false }: { encontro: Encontro; stats?: Stats; voltar?: () => void; atualizar?: () => void; embutido?: boolean }) {
+  const [statsProprios, setStatsProprios] = useState<Stats | undefined>(undefined);
+  const [contar, setContar] = useState(0);
+  useEffect(() => { if (!embutido) return; void Promise.resolve(supabase.from('edition_album_stats').select('*').eq('edition_id', encontro.id).maybeSingle()).then(({ data }) => setStatsProprios((data as Stats | null) || { edition_id: encontro.id, cliques: 0, pessoas: 0 })).catch(() => undefined); }, [embutido, encontro.id, contar]);
+  const stats = embutido ? statsProprios : statsFora;
+  const atualizar = () => { if (embutido) setContar((n) => n + 1); else atualizarFora?.(); };
   const arquivo = useRef<HTMLInputElement>(null);
   const { enquadrar, editor } = useEnquadramento();
   const [albumUrl, setAlbumUrl] = useState('');
@@ -177,20 +183,20 @@ function EditorAlbum({ encontro, stats, voltar, atualizar }: { encontro: Encontr
   const previas = fotos.filter(foto=>foto.public_preview);
   return <>
     {editor}
-    <button type="button" className="v2-forms-back" onClick={voltar}>Voltar para encontros</button>
-    <div className="wf-head"><div><small>CONTEÚDO · SITE</small><h1>{encontro.titulo}</h1><p>{dataBr(encontro.data_evento)} · Escolha as prévias públicas e organize o álbum de quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" disabled={busy || !pronto} onClick={() => void salvar()}><Save size={15} />{busy ? 'Aguarde…' : 'Publicar fotos'}</button></div></div>
+    {!embutido && voltar && <button type="button" className="v2-forms-back" onClick={voltar}>Voltar para encontros</button>}
+    {!embutido && <div className="wf-head"><div><small>CONTEÚDO · SITE</small><h1>{encontro.titulo}</h1><p>{dataBr(encontro.data_evento)} · Escolha as prévias públicas e organize o álbum de quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" disabled={busy || !pronto} onClick={() => void salvar()}><Save size={15} />{busy ? 'Aguarde…' : 'Publicar fotos'}</button></div></div>}
     <div className="adm-album-numeros"><div><strong>{stats?.cliques ?? '—'}</strong><span>Cliques em abrir álbum</span></div><div><strong>{stats?.pessoas ?? '—'}</strong><span>E-mails que abriram</span></div><div><strong>{fotos.length}</strong><span>Fotos na página</span></div></div>
     <button className="wf-secondary adm-album-atualizar" type="button" onClick={atualizar}>Atualizar contagem</button>
     <section className="v2-forms-card"><header><small>ÁLBUM DO ENCONTRO</small><h2>Fotos e link para baixar</h2></header>
       <div className="v2-forms-grid"><label className="wide"><span>Link do álbum completo</span><input type="url" placeholder="https://…" disabled={!pronto || busy} value={albumUrl} onChange={(event) => setAlbumUrl(event.target.value)} /></label>
       </div>
       <p className="adm-hint">{publicacaoPendente ? 'Há alterações para publicar.' : publicado ? 'Prévia publicada no site.' : 'Prévia ainda não publicada.'} O álbum completo abre pelo e-mail do check-in.</p>{publicado && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void salvar(false)}>Ocultar fotos do site</button>}
-      <div className="adm-links"><a className="wf-secondary" href={`/e/${encontro.slug}#fotos`} target="_blank" rel="noopener noreferrer"><ExternalLink size={14} />Ver página do encontro</a><a className="wf-secondary" href={`/admin/edicoes?abrir=${encontro.slug}&secao=site`}>Editar capa e imagens públicas</a></div>
+      <div className="adm-links"><a className="wf-secondary" href={`/e/${encontro.slug}#fotos`} target="_blank" rel="noopener noreferrer"><ExternalLink size={14} />Ver página do encontro</a>{!embutido && <a className="wf-secondary" href={`/admin/edicoes?abrir=${encontro.slug}&secao=site`}>Editar capa e imagens públicas</a>}</div>
     </section>
     <section className="v2-forms-card"><header><h2>Fotos do encontro</h2></header>
       <button type="button" className="wf-secondary" disabled={busy || !pronto} onClick={() => arquivo.current?.click()}><ImagePlus size={15} />Enviar fotos</button><button type="button" className="wf-secondary" disabled={busy || !pronto || !fotos.length} onClick={() => void otimizarEnviadas()} title="Deixa as fotos já enviadas mais leves para carregarem rápido. Os originais não mudam.">Deixar as fotos leves</button><input ref={arquivo} type="file" accept="image/jpeg,image/png,image/webp" multiple hidden disabled={busy || !pronto} onChange={(event) => void enviarFotos(event)} />
       <p className="adm-hint">{previas.length} de 4 posições preenchidas.</p><div className="gal__grade adm-album-molduras">{Array.from({length:4},(_,i)=><figure key={i} className={`gal__item gal__item--${i+1}`}>{previas[i]?.url && <img src={previas[i].url} alt={`Prévia ${i+1}`} />}<div className="adm-album-moldura-acoes"><strong>Moldura {i+1}</strong>{previas[i] ? <button type="button" className="wf-secondary" disabled={busy} onClick={()=>void reenquadrar(previas[i])}>Enquadrar</button> : <button type="button" className="wf-secondary" disabled={busy || !pronto} onClick={()=>arquivo.current?.click()}>Escolher foto</button>}</div></figure>)}</div><details className="adm-ajuda"><summary>Como organizar as fotos</summary><p>As quatro primeiras fotos marcadas como públicas formam a prévia. Use as setas para ordenar e Enquadrar para ajustar cada moldura. Depois clique em Publicar fotos. As demais ficam disponíveis após conferir o e-mail do check-in.</p><p>JPG, PNG ou WebP, até 50 MB. O original é preservado. Publique imagens autorizadas.</p></details>
-      <div className="adm-album-fotos">{fotos.map((foto, indice) => <figure key={foto.id}><small className="adm-album-posicao">{!foto.public_preview ? 'Após o check-in' : previas.indexOf(foto)<4 ? `Prévia ${previas.indexOf(foto)+1} · ${previas.indexOf(foto)===0?'imagem principal':'imagem de apoio'}` : 'Além das quatro prévias visíveis'}</small>{foto.url && <img src={foto.url} alt={foto.legenda || 'Foto do encontro'} />}<label><span>Descrição da foto</span><input disabled={busy} value={foto.legenda} onChange={(event) => setFotos((rows) => rows.map((row) => row.id === foto.id ? { ...row, legenda: event.target.value } : row))} /></label><label className="adm-foto-publica"><input type="checkbox" disabled={busy || (!foto.public_preview && previas.length >= 4)} checked={foto.public_preview} onChange={(e) => { if(e.target.checked && previas.length>=4){setAviso('Use no máximo quatro prévias.');return;}setPublicacaoPendente(true);setFotos((rows) => rows.map((row) => row.id === foto.id ? { ...row, public_preview: e.target.checked } : row)); }} /><span>Usar na prévia do site</span></label><div className="adm-album-foto-acoes"><button type="button" className="wf-secondary" disabled={busy} onClick={() => void reenquadrar(foto)}>Enquadrar</button><button className="wf-secondary" type="button" aria-label={`Mover foto ${indice+1} para cima`} disabled={busy||indice===0} onClick={()=>moverFoto(indice,-1)}><ArrowUp size={14}/></button><button className="wf-secondary" type="button" aria-label={`Mover foto ${indice+1} para baixo`} disabled={busy||indice===fotos.length-1} onClick={()=>moverFoto(indice,1)}><ArrowDown size={14}/></button><button className="wf-secondary" type="button" disabled={busy} onClick={() => void remover(foto)}><Trash2 size={14} />Retirar foto</button></div></figure>)}</div>
+      <details className="adm-suspensa"><summary>Todas as fotos ({fotos.length})</summary><div className="adm-album-fotos">{fotos.map((foto, indice) => <figure key={foto.id}><small className="adm-album-posicao">{!foto.public_preview ? 'Após o check-in' : previas.indexOf(foto)<4 ? `Prévia ${previas.indexOf(foto)+1} · ${previas.indexOf(foto)===0?'imagem principal':'imagem de apoio'}` : 'Além das quatro prévias visíveis'}</small>{foto.url && <img src={foto.url} alt={foto.legenda || 'Foto do encontro'} />}<label><span>Descrição da foto</span><input disabled={busy} value={foto.legenda} onChange={(event) => setFotos((rows) => rows.map((row) => row.id === foto.id ? { ...row, legenda: event.target.value } : row))} /></label><label className="adm-foto-publica"><input type="checkbox" disabled={busy || (!foto.public_preview && previas.length >= 4)} checked={foto.public_preview} onChange={(e) => { if(e.target.checked && previas.length>=4){setAviso('Use no máximo quatro prévias.');return;}setPublicacaoPendente(true);setFotos((rows) => rows.map((row) => row.id === foto.id ? { ...row, public_preview: e.target.checked } : row)); }} /><span>Usar na prévia do site</span></label><div className="adm-album-foto-acoes"><button type="button" className="wf-secondary" disabled={busy} onClick={() => void reenquadrar(foto)}>Enquadrar</button><button className="wf-secondary" type="button" aria-label={`Mover foto ${indice+1} para cima`} disabled={busy||indice===0} onClick={()=>moverFoto(indice,-1)}><ArrowUp size={14}/></button><button className="wf-secondary" type="button" aria-label={`Mover foto ${indice+1} para baixo`} disabled={busy||indice===fotos.length-1} onClick={()=>moverFoto(indice,1)}><ArrowDown size={14}/></button><button className="wf-secondary" type="button" disabled={busy} onClick={() => void remover(foto)}><Trash2 size={14} />Retirar foto</button></div></figure>)}</div></details>
       {pronto && !fotos.length && <p className="adm-hint">Nenhuma foto enviada para este álbum.</p>}
     </section>
     <HistoricoAlbum edicaoId={encontro.id} />
@@ -208,5 +214,5 @@ function HistoricoAlbum({ edicaoId }: { edicaoId: string }) {
   useEffect(carregar, [edicaoId]);
   return <section className="v2-forms-card"><header><h2>Histórico de acessos ao álbum</h2></header><p className="adm-hint">{liberados === null ? 'A liberação é automática pelo check-in do evento.' : `${liberados} participante(s) com acesso liberado automaticamente pelo check-in.`}</p><button type="button" className="wf-secondary" onClick={carregar}>Atualizar acessos</button>{erro && <p role="status">{erro}</p>}<Tabela colunas={[
     {id:'email',titulo:'E-mail',valor:(r)=>r.email_informado,render:(r)=><>{r.email_informado}<small className="adm-custo-pendente">{r.ciente_em?`Confirmou o termo em ${new Date(r.ciente_em).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})} · Brasília`:'Ciência do termo não registrada'}</small></>}, {id:'galeria',titulo:'Aberturas da galeria',valor:(r)=>r.galeria}, {id:'album',titulo:'Cliques no álbum',valor:(r)=>r.album}, {id:'ultimo',titulo:'Último acesso',valor:(r)=>r.ultimo_acesso,render:(r)=>new Date(r.ultimo_acesso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})},
-  ]} linhas={dados} chave={(r)=>r.email_informado} vazio="Ninguém acessou o álbum ainda." /></section>;
+  ]} linhas={dados} chave={(r)=>r.email_informado} vazio="Ninguém acessou o álbum ainda." suspensa="Quem acessou o álbum" /></section>;
 }

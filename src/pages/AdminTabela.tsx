@@ -6,7 +6,7 @@ export type Coluna<T> = { id: string; titulo: string; valor: (linha: T) => strin
 export type Filtro<T> = { id: string; titulo: string; valor: (linha: T) => string };
 
 /** `acoes` (imprimir, exportar...) ficam na mesma linha da busca e dos filtros, encostadas à direita. */
-export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio, acoes, colunasIniciais }: { colunas: Array<Coluna<T>>; linhas: T[]; chave: (linha: T) => string; filtros?: Array<Filtro<T>>; inicial?: { id: string; desc?: boolean }; vazio: string; acoes?: ReactNode; colunasIniciais?: string[] }) {
+export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio, acoes, colunasIniciais, suspensa }: { colunas: Array<Coluna<T>>; linhas: T[]; chave: (linha: T) => string; filtros?: Array<Filtro<T>>; inicial?: { id: string; desc?: boolean }; vazio: string; acoes?: ReactNode; colunasIniciais?: string[]; /** Título da lista suspensa: a lista fica recolhida até a pessoa abrir. */ suspensa?: string }) {
   const idTabela = useId();
   // Nos primeiros instantes uma lista vazia ainda pode estar carregando: mostra esqueleto em vez de "nenhum registro".
   const [aguardando, setAguardando] = useState(true);
@@ -40,7 +40,7 @@ export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio
 
   const conteudo = (coluna: Coluna<T>, linha: T) => coluna.render ? coluna.render(linha) : ['status', 'situacao', 'adesao', 'inscricoes', 'site'].includes(coluna.id) ? <span className="adm-pill">{coluna.valor(linha)}</span> : coluna.valor(linha);
 
-  return (
+  const miolo = (
     <>
       <div className="adm-filtros">
         <label className="adm-busca"><span>Buscar</span><div><Search size={15} aria-hidden="true" /><input placeholder="Buscar nesta lista" value={busca} onChange={(event) => setBusca(event.target.value)} /></div></label>
@@ -75,6 +75,7 @@ export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio
       </div>
     </>
   );
+  return suspensa ? <details className="adm-suspensa"><summary>{suspensa} ({linhas.length})</summary>{miolo}</details> : miolo;
 }
 
 export function Copiar({ texto }: { texto: string }) {

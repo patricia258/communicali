@@ -50,7 +50,7 @@ function ResumoEdicao({ edicao, futura }: { edicao: Edicao; futura: boolean }) {
           <Bloco rotulo="Check-ins" valor={d.checkins} apoio="no dia do encontro" para={`${base}&secao=pessoas`} />
         </> : <>
           <Bloco rotulo="Presentes" valor={d.checkins} apoio="check-ins feitos" para={`${base}&secao=pessoas`} />
-          <Bloco rotulo="Álbum" valor={d.album || '-'} apoio={`${d.albumPessoas} ${d.albumPessoas === 1 ? 'pessoa abriu' : 'pessoas abriram'}`} para={`/admin/site?aba=encontros&encontro=${edicao.slug}`} />
+          <Bloco rotulo="Álbum" valor={d.album || '-'} apoio={`${d.albumPessoas} ${d.albumPessoas === 1 ? 'pessoa abriu' : 'pessoas abriram'}`} para={`${base}&secao=site`} />
           <Bloco rotulo="Recados" valor={d.recados} apoio={d.recados ? 'para aprovar' : 'nada para aprovar'} para={`${base}&secao=comentarios`} aviso={d.recados > 0} />
           <Bloco rotulo="E-mails" valor={d.enviados} apoio={`${d.entregues} entregues · ${d.abriram} abriram`} para={`${base}&secao=emails`} />
         </>}

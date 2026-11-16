@@ -11,6 +11,7 @@ import { erroAmigavel } from '../lib/erros';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
 import { PessoasDaEdicao } from './AdminPessoasEdicao';
 import { ComentariosPanel } from './AdminComentarios';
+import { AlbumDaEdicao } from './AdminSiteEncontros';
 import { DiaDoEncontro } from './DiaDoEncontro';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
@@ -368,15 +369,15 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       {aba === 'site' && (<>
       <section className="v2-forms-card" id="secao-imagens">
         <header><small>IMAGENS PÚBLICAS</small><h2>Capa da edição</h2></header>
-        <p className="adm-hint">Aqui fica só a capa. As fotos da galeria e o link do álbum completo ficam em um lugar só: <a href={`/admin/site?aba=encontros&encontro=${edition.slug}`}>Site, Encontros e fotos</a>.</p>
+        <p className="adm-hint">Capa da página do encontro. As fotos da galeria, o link do álbum e os acessos ficam logo abaixo, nesta mesma aba.</p>
         <div className="adm-cover">
           {draft.capa_url && <img src={draft.capa_url} alt="Capa da edição" />}
           <label className="wf-secondary" aria-disabled={busy}>{draft.capa_url ? 'Trocar a capa' : 'Enviar a capa'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} hidden onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ''; void cover(file); }} /></label>
           {draft.capa_url && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void reenquadrar(draft.capa_url!)}>Enquadrar capa</button>}
         </div>
         <p className="adm-hint">Até 50 MB. Use Enquadrar para ajustar o recorte.</p>{progressoFotos && <p role="status" aria-live="polite">{progressoFotos}</p>}
-        <a className="wf-primary" href={`/admin/site?aba=encontros&encontro=${edition.slug}`}>Gerenciar as fotos da galeria</a>
       </section>
+      <AlbumDaEdicao encontro={{ id: edition.id, slug: edition.slug, titulo: edition.titulo, data_evento: edition.data_evento, publica: edition.publica }} embutido />
       </>)}
       {aba === 'comentarios' && <ComentariosPanel edicaoId={edition.id} />}
       {aba === 'custos' && <AdminCustos edicaoId={edition.id} />}
@@ -402,7 +403,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           { id: 'imagem', titulo: 'Uso de imagem', valor: (item) => (item.members.autoriza_imagem ? 'Autoriza' : 'Não autoriza') },
           { id: 'tirar', titulo: '', valor: () => '', render: (item) => <span className="adm-acoes"><button type="button" onClick={() => void removeCheckin(item)}>Tirar presença</button></span> },
         ]} filtros={[{ id: 'imagem', titulo: 'Uso de imagem', valor: (item) => (item.members.autoriza_imagem ? 'Autoriza' : 'Não autoriza') }]}
-          linhas={people} chave={(item) => item.id} inicial={{ id: 'hora' }} vazio="Nenhum check-in ainda."
+          linhas={people} chave={(item) => item.id} inicial={{ id: 'hora' }} vazio="Nenhum check-in ainda." suspensa="Lista de check-ins"
           acoes={<><button type="button" className="wf-secondary" disabled={!people.length} onClick={exportCsv}>Exportar CSV</button><button type="button" className="wf-secondary" disabled={!people.length} onClick={exportPeople}>Exportar Excel</button></>} />
       </section>
       </>)}
