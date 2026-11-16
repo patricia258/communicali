@@ -1,3 +1,4 @@
+import { comModelo, personalizarMensagem } from './_email-modelos.js';
 // E-mails da ComuniCALI: layout próprio, convite de agenda e registro de envio. Cada pessoa recebe cada tipo uma vez por edição.
 export const SUPABASE = 'https://cyyrrtekbkltdiatixhp.supabase.co';
 export const PUBLIC_KEY = 'sb_publishable_57ZoSr7YGi1KqVdKmXMUxw_wGS-H19P';
@@ -255,7 +256,7 @@ export function emailFluxo(tipo, d = {}) {
     },
   }[tipo];
   if (!m) throw new Error(`Tipo de e-mail desconhecido: ${tipo}`);
-  return { assunto: m.assunto, html: layoutCartao({ ...m, saudacao }) };
+  return comModelo(`fluxo:${tipo}`, { assunto: m.assunto, html: layoutCartao({ ...m, saudacao }) }, {nome:primeiroNome(d.nome),encontro:d.edicao||'',data:d.quando||'',horario:'',local:d.onde||'',motivo:d.motivo||'',prazo:d.prazo||'',visitas:String(d.n||1)}, paragrafos=>layoutCartao({...m,saudacao,paragrafos}));
 }
 
 /** Aviso para a organização a cada cadastro de STAFF. Sem CPF, endereço nem Pix: os dados completos ficam no painel. */
@@ -329,7 +330,7 @@ export function montar(tipo, edition, pessoa) {
     convite: { assunto: `Convite para a sua agenda: ${edition.titulo}`, previa: 'Aceite o convite e o encontro entra na sua agenda.', titulo: 'Convite de agenda', saudacao, paragrafos: [`Aceite o convite do encontro <strong>${titulo}</strong> neste e-mail para ele entrar na sua agenda, ou use o botão abaixo.`], botao: agenda, depois: `Para Outlook ou celular, abra o arquivo anexo. ${responder}`, anexo: true },
   }[tipo];
   // Boas-vindas, card e agradecimento são envios em lote: levam o descadastro no cabeçalho e respeitam quem saiu.
-  return { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null, lote: ['boasvindas', 'card', 'agradecimento'].includes(tipo) };
+  return comModelo(`edicao:${tipo}`, { assunto: textos.assunto, html: layout({ ...textos, edition, cor: FAIXA[tipo] }), ics: textos.anexo ? convite(edition, pessoa) : null, lote: ['boasvindas', 'card', 'agradecimento'].includes(tipo),modelo_edicao:edition.id }, {nome:primeiroNome(pessoa.nome),encontro:edition.titulo,data:longDate(edition.data_evento),horario:edition.horario||'',local:endereco(edition),motivo:'',prazo:'',visitas:''}, paragrafos=>layout({...textos,edition,cor:FAIXA[tipo],paragrafos}));
 }
 
 export const banco = (path, options = {}) => fetch(`${SUPABASE}/rest/v1/${path}`, { ...options, headers: { apikey: process.env.SUPABASE_SERVICE_KEY, Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`, 'Content-Type': 'application/json', ...options.headers } });
@@ -351,6 +352,7 @@ export function textoSimples(html) {
 }
 
 export async function enviar(para, mensagem) {
+  mensagem = await personalizarMensagem(mensagem, banco);
   // E-mails do espaço do membro levam o link de parar de receber e respeitam quem já saiu.
   const membro = mensagem.html.includes(DESCADASTRO);
   if (membro || mensagem.lote) {
@@ -363,6 +365,8 @@ export async function enviar(para, mensagem) {
   const attachments = anexos.length ? anexos : undefined;
   const sent = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: FROM, to: [para], reply_to: REPLY_TO, subject: mensagem.assunto, html, text: textoSimples(html), attachments, headers }) });
   const body = await sent.json().catch(() => ({}));
+  // Auditoria administrativa complementar; uma falha de registro não interrompe o fluxo de e-mail.
+  await banco('email_activity', {method:'POST',body:JSON.stringify({email:para,modelo:mensagem.modelo_id||'sistema',edition_id:mensagem.modelo_edicao||null,assunto:mensagem.assunto,situacao:sent.ok?'enviado':'erro',resend_id:body.id||null,erro:sent.ok?null:String(body.message||sent.status).slice(0,300)})}).catch(()=>{});
   return sent.ok ? { id: body.id } : { erro: `${sent.status} ${body.message || ''}`.trim() };
 }
 

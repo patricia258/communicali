@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {prepararImagem,enviarLoteFotos}from'../src/lib/imagensUpload.ts';
+test('original de 19 MB é aceito sem recompressão nem troca do arquivo',async()=>{const file=new File([new Uint8Array(19934091)],'_DSC3720.jpg',{type:'image/jpeg'});assert.equal(await prepararImagem(file),file);assert.equal(file.size,19934091);});
+test('limite e formatos são validados antes do upload',async()=>{await assert.rejects(prepararImagem(new File(['x'],'arquivo.pdf',{type:'application/pdf'})));await assert.rejects(prepararImagem(new File([new Uint8Array(52428801)],'grande.jpg',{type:'image/jpeg'})));await assert.rejects(prepararImagem(new File([],'vazio.jpg',{type:'image/jpeg'})));});
+test('um erro não interrompe as demais fotos nem é contado como sucesso',async()=>{const enviados=[];const r=await enviarLoteFotos([{name:'a.jpg'},{name:'b.jpg'},{name:'c.jpg'}],async(f)=>{if(f.name==='b.jpg')throw new Error('Arquivo inválido');enviados.push(f.name)});assert.deepEqual(enviados,['a.jpg','c.jpg']);assert.equal(r.enviados,2);assert.deepEqual(r.falhas,['b.jpg: Arquivo inválido']);});

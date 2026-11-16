@@ -1,6 +1,10 @@
+import { useEnquadramento, type ImagemEnquadrada } from '../components/EditorEnquadramento';
+import { prepararImagem, enviarLoteFotos, erroUpload } from '../lib/imagensUpload';
+import { AdminCustos } from './AdminCustos';
 /* Área administrativa: login por link no e-mail. Quem não está em public.admins não entra; o banco repete essa regra. */
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { Menu, X } from 'lucide-react';
+import { Link, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
@@ -10,13 +14,13 @@ import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
 import { PollsPanel, VotacoesDaEdicao, exportPresencasCsv } from './AdminPrograma';
 import { CardEMimos, EmailsCard, chamar } from './AdminEmails';
-import { AppPage, Abas, AprovacoesPage, ConfigPage, EmailsPage, InicioPage, MenuLateral, PessoasPage, ProgramaPage, SitePage, useAba } from './AdminPainel';
+import { AppPage, Secoes, AprovacoesPage, ConfigPage, EmailsPage, InicioPage, MenuLateral, PessoasPage, ProgramaPage, SitePage, useAba } from './AdminPainel';
 import { Email, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 import { AdminRedeExtras } from './AdminRedeExtras';
 import './admin.css';
 
-type Edition = { limite_convidados?: number; inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean; form_inscricao?: string | null; inscricao_modo?: 'aberta' | 'espera' | 'fechada'; form_pesquisa?: string | null; pesquisa_auto?: boolean };
-type Photo = { id: string; url: string; legenda: string | null; no_carrossel: boolean };
+type Edition = { capa_original_url?: string | null; limite_convidados?: number; inscricoes_abertas: boolean; lembrete_ativo: boolean; id: string; capacidade: number | null; checkin_abre: string; checkin_fecha: string; slug: string; numero: number | null; titulo: string; selo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; publica: boolean; form_inscricao?: string | null; inscricao_modo?: 'aberta' | 'espera' | 'fechada'; form_pesquisa?: string | null; pesquisa_auto?: boolean };
+type Photo = { original_url?: string | null; id: string; url: string; legenda: string | null; no_carrossel: boolean };
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null; ativo: boolean; ordem: number };
 type Attendee = { id: string; checked_in_at: string; codigo: string; origem: string; members: { nome: string; email: string; whatsapp: string | null; empresa: string | null; cargo: string | null; categoria: string; autoriza_imagem: boolean } };
 
@@ -50,7 +54,8 @@ async function logoBranco(file: File) {
   return new File([blob], `${file.name.replace(/\.[^.]+$/, '')}.png`, { type: 'image/png' });
 }
 
-async function uploadImage(file: File, folder: string) {
+async function uploadImage(original: File, folder: string) {
+  const file = await prepararImagem(original, true);
   const name = file.name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '-').slice(-60);
   const path = `${folder}/${crypto.randomUUID()}-${name}`;
   const { error } = await supabase.storage.from('site').upload(path, file, { contentType: file.type });
@@ -124,20 +129,17 @@ function Login() {
 function EdicoesPage() {
   const [aba, mudar] = useAba('encontros', ['encontros', 'votacoes'], 'topo');
   const [params] = useSearchParams();
-  const dentro = params.get('abrir') || params.get('secao');
-  return (
-    <>
-      {!dentro && <Abas atual={aba} onChange={mudar} abas={[['encontros', 'Encontros'], ['votacoes', 'Perguntas para o telão']]} />}
-      {aba === 'votacoes' && !dentro ? <PollsPanel /> : <EditionsPanel />}
-    </>
-  );
+  if (params.get('abrir') || params.get('secao')) return <EditionsPanel />;
+  return <Secoes atual={aba} onChange={mudar} abas={[['encontros', 'Encontros'], ['votacoes', 'Perguntas para o telão']]}>
+    {aba === 'votacoes' ? <PollsPanel /> : <EditionsPanel />}
+  </Secoes>;
 }
 
 function EditionsPanel() {
   const [list, setList] = useState<Edition[]>([]);
   const [open, setOpen] = useState<Edition | null>(null);
   const [error, setError] = useState('');
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const load = () => supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data, error: failure }) => { if (failure) setError(failure.message); else { const itens = (data || []) as Edition[]; setList(itens); const pedida = params.get('abrir'); if (pedida) setOpen((atual) => atual || itens.find((item) => item.slug === pedida) || null); } });
   const [contagens, setContagens] = useState<Record<string, Record<string, number>>>({});
   useEffect(() => {
@@ -156,11 +158,11 @@ function EditionsPanel() {
     const numero = Math.max(0, ...list.map((item) => item.numero || 0)) + 1;
     const titulo = `${numero}ª edição`;
     const { data, error: failure } = await supabase.from('editions').insert({ slug: slugify(`edicao-${numero}`), numero, titulo, selo: titulo, data_evento: date, horario: '9h às 12h', local: 'A definir', cidade: 'Curitiba', checkin_abre: `${date} 07:00-03`, checkin_fecha: `${date} 13:00-03`, publica: false }).select('*').single();
-    if (failure) setError(failure.message); else { await load(); setOpen(data as Edition); }
+    if (failure) setError(failure.message); else { await load(); const proximo = new URLSearchParams(params); proximo.set('abrir', data.slug); setParams(proximo); }
   }
 
   const colunasEdicoes: Array<Coluna<Edition>> = [
-    { id: 'titulo', titulo: 'Edição', valor: (item) => item.titulo, render: (item) => <button type="button" className="adm-nome" onClick={() => setOpen(item)}>{item.titulo}</button> },
+    { id: 'titulo', titulo: 'Edição', valor: (item) => item.titulo, render: (item) => <button type="button" className="adm-nome" onClick={() => { const proximo = new URLSearchParams(params); proximo.set('abrir', item.slug); setParams(proximo); }}>{item.titulo}</button> },
     { id: 'data', titulo: 'Data', valor: (item) => item.data_evento, render: (item) => dataBr(item.data_evento) },
     { id: 'horario', titulo: 'Horário', valor: (item) => item.horario },
     { id: 'local', titulo: 'Local', valor: (item) => `${item.local}, ${item.cidade}` },
@@ -171,60 +173,97 @@ function EditionsPanel() {
     { id: 'inscricoes', titulo: 'Inscrições', valor: (item) => (item.inscricoes_abertas ? 'Abertas' : 'Fechadas') },
     { id: 'site', titulo: 'No site', valor: (item) => (item.publica ? 'Sim' : 'Não') },
   ];
-  if (open) return <EditionEditor key={open.id} edition={open} onBack={() => { setOpen(null); void load(); }} />;
+  if (open) return <EditionEditor key={open.id} edition={open} onBack={() => { setOpen(null); const proximo = new URLSearchParams(params); proximo.delete('abrir'); proximo.delete('secao'); setParams(proximo, { replace: true }); void supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data }) => { if (data) setList(data as Edition[]); }); }} />;
   return (
     <>
       <div className="wf-head"><div><small>EDIÇÕES</small><h1>Encontros</h1><p>Abra uma edição para ajustar data e local, enviar capa e fotos, abrir os telões e ver quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void create()}>Nova edição</button></div></div>
       {error && <p className="inline-notice">{error}</p>}
-      <Tabela colunas={colunasEdicoes} linhas={list} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhuma edição cadastrada." filtros={[{ id: 'site', titulo: 'No site', valor: (item) => (item.publica ? 'No site' : 'Fora do site') }, { id: 'inscricoes', titulo: 'Inscrições', valor: (item) => (item.inscricoes_abertas ? 'Abertas' : 'Fechadas') }]} />
+      <Tabela colunas={colunasEdicoes} colunasIniciais={['titulo', 'data', 'local', 'inscricoes']} linhas={list} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhuma edição cadastrada." filtros={[{ id: 'site', titulo: 'No site', valor: (item) => (item.publica ? 'No site' : 'Fora do site') }, { id: 'inscricoes', titulo: 'Inscrições', valor: (item) => (item.inscricoes_abertas ? 'Abertas' : 'Fechadas') }]} />
     </>
   );
 }
 
 
 function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => void }) {
-  const [aba, mudarAba] = useAba('dados', ['dia', 'dados', 'pessoas', 'emails', 'site'], 'secao');
+  const [aba, mudarAba] = useAba('dados', ['dia', 'dados', 'pessoas', 'emails', 'site', 'custos'], 'secao');
   const [draft, setDraft] = useState(edition);
+  const { enquadrar, editor } = useEnquadramento();
+  const [confirmados, setConfirmados] = useState<number | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [people, setPeople] = useState<Attendee[]>([]);
   const [note, setNote] = useState('');
+  const [noteErro, setNoteErro] = useState(false);
+  const [progressoFotos, setProgressoFotos] = useState('');
   const [busy, setBusy] = useState(false);
   const set = (next: Partial<Edition>) => { setDraft({ ...draft, ...next }); setNote(''); };
   const text = (key: keyof Edition, label: string, hint?: string) => (
     <label><span>{label}{hint && <em> {hint}</em>}</span><input value={String(draft[key] ?? '')} onChange={(event) => set({ [key]: event.target.value } as Partial<Edition>)} /></label>
   );
 
-  const loadPhotos = () => supabase.from('edition_photos').select('id,url,legenda,no_carrossel').eq('edition_id', edition.id).order('ordem').then(({ data }) => setPhotos((data || []) as Photo[]));
+  const loadPhotos = () => supabase.from('edition_photos').select('id,url,original_url,legenda,no_carrossel').eq('edition_id', edition.id).order('ordem').then(({ data }) => setPhotos((data || []) as Photo[]));
   const loadPeople = () => supabase.from('checkins').select('id,checked_in_at,codigo,origem,members(nome,email,whatsapp,empresa,cargo,categoria,autoriza_imagem)').eq('edition_id', edition.id).order('checked_in_at').then(({ data }) => setPeople((data || []) as unknown as Attendee[]));
-  useEffect(() => { void loadPhotos(); void loadPeople(); }, []);
+  useEffect(() => {
+    void loadPhotos(); void loadPeople();
+    void supabase.rpc('communicali_pessoas_edicao', { p_edition: edition.id }).then(({ data, error }) => {
+      if (!error && Array.isArray(data)) setConfirmados(data.filter((item: { situacao: string }) => item.situacao === 'confirmado').length);
+    });
+  }, [edition.id]);
 
   async function save() {
     setBusy(true);
-    const { id, slug, ...fields } = draft;
-    const clean = { ...fields, endereco: fields.endereco || null, resumo: fields.resumo || null, fotos_url: fields.fotos_url || null, inscricao_url: fields.inscricao_url || null };
+    const { id, slug, fotos_url: _legacyAlbum, ...fields } = draft;
+    const clean = { ...fields, endereco: fields.endereco || null, resumo: fields.resumo || null, inscricao_url: fields.inscricao_url || null };
     const { error } = await supabase.from('editions').update(clean).eq('id', id);
     setBusy(false);
+    setNoteErro(Boolean(error));
     setNote(error ? `Não foi possível salvar: ${error.message}` : `Alterações salvas em ${slug}.`);
   }
 
   async function cover(file?: File) {
     if (!file) return;
-    setBusy(true);
-    try { set({ capa_url: await uploadImage(file, `edicoes/${edition.slug}`) }); } catch { setNote('Não foi possível enviar a imagem.'); }
-    setBusy(false);
+    setBusy(true); setNote(''); setNoteErro(false);
+    try { const imagem = await enquadrar(file, {proporcao:16/7,rotulo:'Moldura da capa',fixa:true}); if (!imagem) return; const urls = await enviarImagemOriginal(imagem); set({ capa_url: urls.url, capa_original_url: urls.original_url }); setNote('Capa enviada. Clique em Salvar alterações para publicá-la.'); }
+    catch (erro) { setNoteErro(true); setNote(`Não foi possível enviar a capa: ${erroUpload(erro)}`); }
+    finally { setBusy(false); }
   }
 
-  async function addPhotos(files: FileList | null) {
-    if (!files?.length) return;
-    setBusy(true); setNote('');
+  async function addPhotos(arquivos: File[]) {
+    if (!arquivos.length) return;
+    setBusy(true); setNote(''); setNoteErro(false);
     try {
-      for (const [index, file] of [...files].entries()) {
-        const url = await uploadImage(file, `edicoes/${edition.slug}`);
-        await supabase.from('edition_photos').insert({ edition_id: edition.id, url, ordem: photos.length + index });
-      }
+      const resultado = await enviarLoteFotos(arquivos, async (file, index) => {
+        const imagem = await enquadrar(file); if (!imagem) throw new Error('Envio cancelado.');
+        const { url, original_url } = await enviarImagemOriginal(imagem);
+        const { error } = await supabase.from('edition_photos').insert({ edition_id: edition.id, url, original_url, ordem: photos.length + index });
+        if (error) throw error;
+      }, indice => setProgressoFotos(`Preparando e enviando foto ${indice} de ${arquivos.length}…`));
       await loadPhotos();
-    } catch { setNote('Não foi possível enviar todas as fotos.'); }
-    setBusy(false);
+      setNoteErro(resultado.falhas.length > 0);
+      setNote(`${resultado.enviados} de ${arquivos.length} foto(s) enviada(s).${resultado.falhas.length ? ' '+resultado.falhas.join(' · ') : ' As fotos já estão disponíveis no carrossel público.'}`);
+    } finally { setBusy(false); setProgressoFotos(''); }
+  }
+
+  async function enviarImagemOriginal(imagem: ImagemEnquadrada) {
+    const original_url = await uploadImage(imagem.original, `edicoes/${edition.slug}/originais`);
+    const url = imagem.exibicao === imagem.original ? original_url : await uploadImage(imagem.exibicao, `edicoes/${edition.slug}/enquadradas`);
+    return { url, original_url };
+  }
+
+  async function reenquadrar(url: string, photo?: Photo) {
+    setBusy(true); setNote(''); setNoteErro(false);
+    try {
+      const resposta = await fetch(photo ? (photo.original_url || url) : (draft.capa_original_url || url));
+      if (!resposta.ok) throw new Error('Não foi possível carregar o original.');
+      const blob = await resposta.blob();
+      const imagem = await enquadrar(new File([blob], 'foto-original.'+(blob.type==='image/png'?'png':'jpg'), {type:blob.type}), photo ? {proporcao:4/3,rotulo:'Moldura da foto'} : {proporcao:16/7,rotulo:'Moldura da capa',fixa:true});
+      if (!imagem) return;
+      const novaUrl = imagem.exibicao === imagem.original ? (photo ? (photo.original_url || url) : (draft.capa_original_url || url)) : await uploadImage(imagem.exibicao, `edicoes/${edition.slug}/enquadradas`);
+      if (photo) {
+        const { error } = await supabase.from('edition_photos').update({url:novaUrl,original_url:photo.original_url || photo.url}).eq('id',photo.id); if (error) throw error;
+        await loadPhotos(); setNote('Enquadramento salvo.');
+      } else { set({capa_url:novaUrl,capa_original_url:draft.capa_original_url || url});setNote('Enquadramento ajustado. Clique em Salvar alterações para publicar a capa.'); }
+    } catch(e) { setNoteErro(true);setNote(erroUpload(e)); }
+    finally {setBusy(false);}
   }
 
   async function togglePhoto(photo: Photo) {
@@ -277,11 +316,19 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
   const origin = window.location.origin;
   return (
     <>
+      {editor}
       <div className="adm-edicao">
       <button type="button" className="v2-forms-back" onClick={onBack}>Voltar para edições</button>
       <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
-      {note && <p className="v2-forms-ok" role="status">{note}</p>}
-      <Abas atual={aba} onChange={mudarAba} abas={[['dados', 'Dados e vagas'], ['pessoas', 'Pessoas'], ['emails', 'E-mails'], ['dia', 'Dia do encontro'], ['site', 'Site e fotos']]} />
+      {note && <p className={noteErro ? "v2-forms-error" : "v2-forms-ok"} role={noteErro ? "alert" : "status"}>{note}</p>}
+      <dl className="adm-edicao-resumo" aria-label="Resumo da edição">
+        <div><dt>Data e horário</dt><dd>{dataBr(draft.data_evento)}<small>{draft.horario}</small></dd></div>
+        <div><dt>Local</dt><dd>{draft.local}<small>{draft.cidade}</small></dd></div>
+        <div><dt>Vagas</dt><dd>{draft.capacidade ?? 'Não definida'}</dd></div>
+        <div><dt>Confirmados</dt><dd>{confirmados ?? 'Indisponível'}</dd></div>
+        <div><dt>Inscrições</dt><dd>{draft.inscricoes_abertas ? 'Abertas' : 'Fechadas'}<small>{draft.publica ? 'No site' : 'Fora do site'}</small></dd></div>
+      </dl>
+      <Secoes atual={aba} onChange={mudarAba} abas={[['dados', 'Dados e vagas'], ['pessoas', 'Pessoas'], ['emails', 'E-mails'], ['dia', 'Dia do encontro'], ['site', 'Site e fotos'], ['custos', 'Custos']]}><div>
       {aba === 'dia' && <DiaDoEncontro edition={draft} />}
       {aba === 'dados' && (<>
       <section className="v2-forms-card" id="secao-dados">
@@ -300,7 +347,6 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           <label><span>Check-in fecha</span><input type="datetime-local" value={localTime(draft.checkin_fecha)} onChange={(event) => set({ checkin_fecha: new Date(event.target.value).toISOString() })} /></label>
           <label className="v2-forms-check"><input type="checkbox" checked={draft.inscricoes_abertas} onChange={(event) => set({ inscricoes_abertas: event.target.checked })} /><span><strong>Inscrições abertas</strong><small>O site mostra "Quero me inscrever". Não precisa criar formulário.</small></span></label>
           {text('inscricao_url', 'Link externo de inscrição', 'opcional, só se quiser usar outro formulário')}
-          {text('fotos_url', 'Link para baixar as fotos', 'por exemplo, a pasta do Drive')}
           <label className="v2-forms-check"><input type="checkbox" checked={draft.publica} onChange={(event) => set({ publica: event.target.checked })} /><span><strong>Mostrar no site</strong></span></label>
           <label className="wide"><span>Resumo do encontro</span><textarea rows={5} value={draft.resumo || ''} onChange={(event) => set({ resumo: event.target.value })} /></label>
         </div>
@@ -308,24 +354,28 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       </>)}
       {aba === 'site' && (<>
       <section className="v2-forms-card" id="secao-imagens">
-        <header><small>IMAGENS</small><h2>Capa e fotos do carrossel</h2></header>
+        <header><small>IMAGENS PÚBLICAS</small><h2>Capa e fotos do carrossel</h2></header>
+        <p className="adm-hint">Para o álbum completo, acesse <a href={`/admin/site?aba=encontros&encontro=${edition.slug}`}>Site, Encontros e fotos</a>.</p>
         <div className="adm-cover">
           {draft.capa_url && <img src={draft.capa_url} alt="Capa da edição" />}
-          <label className="wf-secondary">{draft.capa_url ? 'Trocar a capa' : 'Enviar a capa'}<input type="file" accept="image/*" hidden onChange={(event) => void cover(event.target.files?.[0])} /></label>
-          <label className="wf-secondary">Adicionar fotos<input type="file" accept="image/*" multiple hidden onChange={(event) => void addPhotos(event.target.files)} /></label>
+          <label className="wf-secondary" aria-disabled={busy}>{draft.capa_url ? 'Trocar a capa' : 'Enviar a capa'}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} hidden onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ''; void cover(file); }} /></label>
+          {draft.capa_url && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void reenquadrar(draft.capa_url!)}>Enquadrar capa</button>}
+          <label className="wf-secondary">Adicionar fotos<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} multiple hidden onChange={(event) => { const files = Array.from(event.target.files || []); event.target.value = ''; void addPhotos(files); }} /></label>
         </div>
+        <p className="adm-hint">Até 50 MB por foto. Use Enquadrar para ajustar o recorte.</p>{progressoFotos && <p role="status" aria-live="polite">{progressoFotos}</p>}
         <p className="adm-hint">Publique só fotos de quem autorizou o uso de imagem. A lista de presença abaixo mostra quem autorizou.</p>
         <div className="adm-photos">
           {photos.map((photo) => (
             <figure key={photo.id}>
               <img src={photo.url} alt="" />
               <label><input type="checkbox" checked={photo.no_carrossel} onChange={() => void togglePhoto(photo)} /> No carrossel</label>
-              <button type="button" onClick={() => void removePhoto(photo)}>Tirar do site</button>
+              <button type="button" className="wf-secondary" disabled={busy} onClick={() => void reenquadrar(photo.url,photo)}>Enquadrar foto</button><button type="button" disabled={busy} onClick={() => void removePhoto(photo)}>Tirar do site</button>
             </figure>
           ))}
         </div>
       </section>
       </>)}
+      {aba === 'custos' && <AdminCustos edicaoId={edition.id} />}
       {aba === 'pessoas' && <PessoasDaEdicao edition={draft} />}
       {aba === 'emails' && (<>
       <div id="secao-emails"><EmailsCard edition={edition} lembrete={draft.lembrete_ativo} onLembrete={(value) => set({ lembrete_ativo: value })} /></div>
@@ -352,6 +402,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
           acoes={<><button type="button" className="wf-secondary" disabled={!people.length} onClick={exportCsv}>Exportar CSV</button><button type="button" className="wf-secondary" disabled={!people.length} onClick={exportPeople}>Exportar Excel</button></>} />
       </section>
       </>)}
+      </div></Secoes>
       </div>
     </>
   );
@@ -412,14 +463,33 @@ function PartnersPanel() {
 
 function Frame({ session, children }: { session: Session; children: ReactNode }) {
   const [aberto, setAberto] = useState(false);
-  // Ao navegar no painel, os avisos de nível e missão que você acabou de liberar saem por e-mail.
+  const menu = useRef<HTMLDialogElement>(null);
   const { pathname } = useLocation();
+  // Mantém o envio já existente ao navegar. A moldura só controla a apresentação.
   useEffect(() => { void fetch('/api/avisos', { method: 'POST' }).catch(() => null); setAberto(false); }, [pathname]);
+  useEffect(() => {
+    const dialogo = menu.current;
+    if (!dialogo) return;
+    if (aberto && !dialogo.open) dialogo.showModal();
+    if (!aberto && dialogo.open) dialogo.close();
+    if (!aberto) return;
+    const anterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = anterior; };
+  }, [aberto]);
   return (
-    <div className={`adm adm--lateral${aberto ? ' adm--aberto' : ''}`}>
-      <button type="button" className="adm__menu" aria-label="Abrir o menu" aria-expanded={aberto} onClick={() => setAberto(!aberto)}>Menu</button>
-      <MenuLateral email={session.user.email || ''} onSair={() => void supabase.auth.signOut()} fechar={() => setAberto(false)} />
-      <main className="adm__corpo adm__main ap-app v2-admin-page v2-forms v2-client-module"><div className="ap-content"><div className="wf">{children}</div></div></main>
+    <div className="adm adm--lateral">
+      <header className="adm__bar">
+        <a className="adm__skip" href="#conteudo-painel">Ir para o conteúdo</a>
+        <button type="button" className="adm__menu" aria-label="Abrir menu do painel" aria-controls="menu-painel" aria-expanded={aberto} onClick={() => setAberto(true)}><Menu size={18} aria-hidden="true" /><span>Menu</span></button>
+        <Link className="adm__bar-marca" to="/admin" aria-label="ComuniCALI, início do painel"><img src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /></Link>
+        <span className="adm__bar-rotulo">Painel da organização</span>
+      </header>
+      <dialog ref={menu} id="menu-painel" className="adm__drawer" aria-label="Navegação da organização" onCancel={() => setAberto(false)} onClose={() => setAberto(false)} onClick={(event) => { if (event.target === event.currentTarget) setAberto(false); }}>
+        <div className="adm__drawer-topo"><span>Navegação</span><button type="button" aria-label="Fechar menu do painel" onClick={() => setAberto(false)}><X size={18} aria-hidden="true" /><span>Fechar</span></button></div>
+        <MenuLateral email={session.user.email || ''} onSair={() => void supabase.auth.signOut()} fechar={() => setAberto(false)} />
+      </dialog>
+      <main id="conteudo-painel" tabIndex={-1} className="adm__corpo adm__main ap-app v2-admin-page v2-forms v2-client-module"><div className="ap-content"><div className="wf">{children}</div></div></main>
     </div>
   );
 }
@@ -456,6 +526,7 @@ export function Admin() {
         <Route index element={<InicioPage />} />
         <Route path="edicoes" element={<EdicoesPage />} />
         <Route path="pessoas" element={<PessoasPage />} />
+        <Route path="custos" element={<AdminCustos />} />
         <Route path="aprovacoes" element={<AprovacoesPage />} />
         <Route path="programa" element={<ProgramaPage />} />
         <Route path="rede" element={<PartnersPanel />} />

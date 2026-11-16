@@ -4,7 +4,7 @@ import { AlbumAcessoVisual, type EstadoAlbum } from '../components/AlbumAcessoVi
 import { AlbumDoEncontro } from '../components/AlbumDoEncontro';
 
 /** Trocar para true quando a migração do álbum, o painel e o backend (/api/edicao?acao=album_*) estiverem no ar. Antes disso, ?album=1 testa o fluxo real e ?moldura=1 mostra a demonstração visual. */
-const ALBUM_REAL = false;
+const ALBUM_REAL = true;
 import { Compartilhar } from '../components/Compartilhar';
 import '../home-nova.css';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
@@ -176,7 +176,7 @@ export function EdicaoPage() {
               <p className="hn-eyebrow">{past ? 'EDIÇÃO ENCERRADA' : 'PRÓXIMO ENCONTRO'}</p>
               <h1>{edition.titulo}</h1>
               <p className="hn-ed__lead">{longDate(edition.data_evento)} · {edition.horario} · {edition.cidade}</p>
-              <div className="hn-ed__foto" role="img" aria-label={`Local do encontro: ${edition.local}`} style={{ backgroundImage: `url(${edition.capa_url || '/fotos/legacy-coffee.jpg'})` }}><span className="hn-detail__tag">{past ? 'Realizado' : 'Encontro aberto'}</span></div>
+              <div className="hn-ed__foto"><img src={edition.capa_url || '/fotos/legacy-coffee.jpg'} alt={`Foto do encontro ${edition.titulo}`} /><span className="hn-detail__tag">{past ? 'Realizado' : 'Encontro aberto'}</span></div>
             </header>
             <section className="hn-ed__grid">
               <dl className="hn-ed__dl">
@@ -191,10 +191,10 @@ export function EdicaoPage() {
                 {!past && (inscricao ? <a className="hn-pill" href={inscricao}>Garantir minha vaga</a> : <a className="hn-pill" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>)}
               </div>
             </section>
-            {past && (ALBUM_REAL || new URLSearchParams(window.location.search).has('album')) && !new URLSearchParams(window.location.search).has('moldura') && (
+            {past && (ALBUM_REAL || new URLSearchParams(window.location.search).has('album')) && (ALBUM_REAL || !new URLSearchParams(window.location.search).has('moldura')) && (
               <AlbumDoEncontro slug={edition.slug} titulo={edition.titulo} rotulo={edition.numero ? `${edition.numero}ª Edição` : edition.titulo} />
             )}
-            {past && new URLSearchParams(window.location.search).has('moldura') && (
+            {past && !ALBUM_REAL && new URLSearchParams(window.location.search).has('moldura') && (
               <GaleriaDoEncontro fotos={fotos} titulo={edition.titulo} rotulo={edition.numero ? `${edition.numero}ª Edição` : edition.titulo} completa={demoAlbum === 'confirmado'} acesso={<>
                 <AlbumAcessoVisual estado={demoAlbum} email={demoEmail} setEmail={setDemoEmail} aoEntrar={() => setDemoAlbum(demoEmail.toLowerCase().includes('erro') ? 'nao-encontrado' : 'termo')} aoTrocar={() => { setDemoAlbum('entrar'); setDemoEmail(''); }} aoAbrir={() => undefined} aoAceitar={() => setDemoAlbum('confirmado')} />
                 <div className="gal__demo">Ver como fica:

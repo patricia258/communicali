@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import { decimalInteiro,totalCusto,distribuirParcelas,resumoCusto,consolidarCustos } from '../src/lib/custos.ts';
+const item=(unitario,quantidade=1000)=>({id:'i',descricao:'Item',quantidade_mil:quantidade,unitario_centavos:unitario});
+const p=(bp,pago=0,data=null)=>({id:String(bp),descricao:'Parcela',percentual_bp:bp,pago_centavos:pago,pago_em:data,vencimento:null,regra:'A combinar',forma:'Pix'});
+const custo=(itens,parcelas=[p(10000)])=>({id:'c',edition_id:'e',categoria:'staff',titulo:'Teste',recebedor:{nome:'Exemplo',pessoa:'PF'},itens,parcelas});
+test('moeda brasileira é convertida em centavos sem inferir valor vazio',()=>{assert.equal(decimalInteiro('R$ 1.234,56'),123456);assert.equal(decimalInteiro('160'),16000);assert.equal(decimalInteiro(''),null);assert.equal(decimalInteiro('0'),0);assert.throws(()=>decimalInteiro('-10'));assert.throws(()=>decimalInteiro('1,234'));assert.throws(()=>decimalInteiro('30 reais'));});
+test('local 100 + 20 pessoas x 30 custa exatamente 700',()=>assert.deepEqual(totalCusto([item(10000),item(3000,20000)]),{conhecido:70000,total:70000,pendentes:0}));
+test('VT desconhecido não vira zero nem custo completo',()=>assert.deepEqual(totalCusto([item(16000),item(null)]),{conhecido:16000,total:null,pendentes:1}));
+test('50/50 de total ímpar preserva todos os centavos',()=>assert.deepEqual(distribuirParcelas(101,[p(5000),p(5000)]),[51,50]));
+test('quatro parcelas de valor pequeno não geram parcela negativa',()=>assert.deepEqual(distribuirParcelas(2,[p(2500),p(2500),p(2500),p(2500)]),[1,1,0,0]));
+test('parcelas exigem 100%, sem percentual negativo ou fracionário',()=>{assert.throws(()=>distribuirParcelas(100,[p(5000)]));assert.throws(()=>distribuirParcelas(100,[p(-1),p(10001)]));assert.throws(()=>distribuirParcelas(100,[p(5000.5),p(4999.5)]));});
+test('pagamento integral exige data e impede pagar acima da parcela',()=>{assert.throws(()=>resumoCusto(custo([item(16000)],[p(10000,16000)]),'2026-11-15'));assert.throws(()=>resumoCusto(custo([item(16000)],[p(10000,17000,'2026-11-15')]),'2026-11-15'));assert.equal(resumoCusto(custo([item(16000)],[p(10000,16000,'2026-11-15')]),'2026-11-15').saldo,0);});
+test('é possível registrar o pagamento da parte conhecida com VT pendente',()=>{const r=resumoCusto(custo([item(16000),item(null)],[p(10000,16000,'2026-11-15')]),'2026-11-15');assert.equal(r.total,null);assert.equal(r.pago,16000);assert.equal(r.saldoConhecido,0);assert.equal(r.pendentes,1);});
+test('marcos sem data não são classificados como atraso',()=>{const c=custo([item(10000)],[{...p(10000),vencimento:null}]);assert.equal(resumoCusto(c,'2026-11-15').vencido,0);c.parcelas[0].vencimento='2026-11-14';assert.equal(resumoCusto(c,'2026-11-15').vencido,10000);});
+test('visão geral mantém soma paga e parcial separadas',()=>{const r=consolidarCustos([custo([item(16000),item(null)],[p(10000,16000,'2026-11-15')]),custo([item(70000)])],'2026-11-15');assert.deepEqual(r,{informado:86000,pago:16000,saldo:70000,vencido:0,pendentes:1});});
+test('valores negativos, NaN e quantidades zero são recusados',()=>{for(const itens of [[item(-1)],[item(Number.NaN)],[item(100,0)]])assert.throws(()=>totalCusto(itens));});

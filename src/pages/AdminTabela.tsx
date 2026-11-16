@@ -1,11 +1,23 @@
 /* Tabela do painel: ordena pelas colunas, filtra e busca. Contatos viram links com botão de copiar. */
-import { useMemo, useState, type ReactNode } from 'react';
+import { Columns3, MoreHorizontal, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Fragment, useId, useMemo, useState, type ReactNode } from 'react';
 
 export type Coluna<T> = { id: string; titulo: string; valor: (linha: T) => string | number; render?: (linha: T) => ReactNode; longo?: boolean; /** Cabeçalho próprio (ex.: caixa de selecionar todos), sem ordenação. */ cabecalho?: ReactNode; estreita?: boolean };
 export type Filtro<T> = { id: string; titulo: string; valor: (linha: T) => string };
 
 /** `acoes` (imprimir, exportar...) ficam na mesma linha da busca e dos filtros, encostadas à direita. */
-export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio, acoes }: { colunas: Array<Coluna<T>>; linhas: T[]; chave: (linha: T) => string; filtros?: Array<Filtro<T>>; inicial?: { id: string; desc?: boolean }; vazio: string; acoes?: ReactNode }) {
+export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio, acoes, colunasIniciais }: { colunas: Array<Coluna<T>>; linhas: T[]; chave: (linha: T) => string; filtros?: Array<Filtro<T>>; inicial?: { id: string; desc?: boolean }; vazio: string; acoes?: ReactNode; colunasIniciais?: string[] }) {
+  const idTabela = useId();
+  const [selecionadas, setSelecionadas] = useState(() => colunasIniciais || colunas.slice(0, colunas.length > 5 ? 4 : 5).map((coluna) => coluna.id));
+  const [abertas, setAbertas] = useState<Set<string>>(() => new Set());
+  const exibidas = colunas.filter((coluna) => selecionadas.includes(coluna.id));
+  const extras = colunas.filter((coluna) => !selecionadas.includes(coluna.id));
+  const limite = colunas.length > 5 ? 4 : 5;
+  const alternarColuna = (id: string) => setSelecionadas((atuais) => {
+    if (atuais.includes(id)) return atuais.length > 1 ? atuais.filter((item) => item !== id) : atuais;
+    return [...(atuais.length >= limite ? atuais.slice(0, -1) : atuais), id];
+  });
+  const alternarLinha = (id: string) => setAbertas((atuais) => { const proximo = new Set(atuais); if (proximo.has(id)) proximo.delete(id); else proximo.add(id); return proximo; });
   const [busca, setBusca] = useState('');
   const [ordem, setOrdem] = useState(inicial || { id: colunas[0].id, desc: false });
   const [escolha, setEscolha] = useState<Record<string, string>>({});
@@ -23,30 +35,38 @@ export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio
       });
   }, [linhas, busca, ordem, escolha, colunas, filtros]);
 
+  const conteudo = (coluna: Coluna<T>, linha: T) => coluna.render ? coluna.render(linha) : ['status', 'situacao', 'adesao', 'inscricoes', 'site'].includes(coluna.id) ? <span className="adm-pill">{coluna.valor(linha)}</span> : coluna.valor(linha);
+
   return (
     <>
       <div className="adm-filtros">
-        <label><span>Buscar</span><input value={busca} onChange={(event) => setBusca(event.target.value)} /></label>
-        {filtros.map((filtro) => (
+        <label className="adm-busca"><span>Buscar</span><div><Search size={15} aria-hidden="true" /><input placeholder="Buscar nesta lista" value={busca} onChange={(event) => setBusca(event.target.value)} /></div></label>
+        {filtros.length > 0 && <details className="adm-filtros-avancados"><summary><SlidersHorizontal size={15} aria-hidden="true" />Filtros{Object.values(escolha).filter(Boolean).length ? ` (${Object.values(escolha).filter(Boolean).length})` : ''}</summary><div>{filtros.map((filtro) => (
           <label key={filtro.id}><span>{filtro.titulo}</span>
             <select value={escolha[filtro.id] || ''} onChange={(event) => setEscolha({ ...escolha, [filtro.id]: event.target.value })}>
               <option value="">Todos</option>
               {[...new Set(linhas.map(filtro.valor).filter(Boolean))].sort().map((item) => <option key={item}>{item}</option>)}
             </select>
           </label>
-        ))}
-        <div className="adm-filtros__fim"><p className="adm-contagem">{visiveis.length} de {linhas.length}</p>{acoes}</div>
+        ))}</div></details>}
+        <div className="adm-filtros__fim"><p className="adm-contagem">{visiveis.length} de {linhas.length}</p>{colunas.length > 5 && <details className="adm-colunas"><summary><Columns3 size={15} aria-hidden="true" />Colunas</summary><div><strong>Colunas da lista</strong><p>Até {limite} colunas. Ao escolher outra, a última é substituída. Os demais dados ficam nos detalhes.</p>{colunas.map((coluna) => <label key={coluna.id}><input type="checkbox" checked={selecionadas.includes(coluna.id)} disabled={selecionadas.includes(coluna.id) && selecionadas.length === 1} onChange={() => alternarColuna(coluna.id)} />{coluna.titulo || 'Seleção'}</label>)}</div></details>}{acoes}</div>
       </div>
+      <div className="adm-ordenacao"><label>Ordenar por<select value={ordem.id} onChange={(event) => setOrdem({ ...ordem, id: event.target.value })}>{colunas.filter((coluna) => coluna.cabecalho === undefined).map((coluna) => <option key={coluna.id} value={coluna.id}>{coluna.titulo}</option>)}</select></label><button type="button" className="wf-secondary" onClick={() => setOrdem({ ...ordem, desc: !ordem.desc })}>{ordem.desc ? 'Decrescente ↓' : 'Crescente ↑'}</button></div>
       <div className="adm-tabela">
-        <table>
-          <thead><tr>{colunas.map((coluna) => (
-            <th key={coluna.id} className={coluna.estreita ? 'estreita' : undefined} aria-sort={ordem.id === coluna.id ? (ordem.desc ? 'descending' : 'ascending') : 'none'}>
+        <table aria-label="Lista de registros">
+          <thead><tr>{exibidas.map((coluna) => (
+            <th scope="col" key={coluna.id} className={coluna.estreita ? 'estreita' : undefined} aria-sort={ordem.id === coluna.id ? (ordem.desc ? 'descending' : 'ascending') : 'none'}>
               {coluna.cabecalho !== undefined ? coluna.cabecalho : <button type="button" onClick={() => setOrdem({ id: coluna.id, desc: ordem.id === coluna.id ? !ordem.desc : false })}>{coluna.titulo}{ordem.id === coluna.id ? (ordem.desc ? ' ↓' : ' ↑') : ''}</button>}
             </th>
-          ))}</tr></thead>
+          ))}{extras.length > 0 && <th scope="col" className="adm-tabela__mais"><span className="adm-sr">Detalhes</span></th>}</tr></thead>
           <tbody>
-            {visiveis.map((linha) => <tr key={chave(linha)}>{colunas.map((coluna) => <td key={coluna.id} className={coluna.longo ? 'longo' : coluna.estreita ? 'estreita' : undefined}>{coluna.render ? coluna.render(linha) : coluna.valor(linha)}</td>)}</tr>)}
-            {!visiveis.length && <tr><td colSpan={colunas.length} className="adm-vazio">{vazio}</td></tr>}
+            {visiveis.map((linha) => { const id = chave(linha); const aberta = abertas.has(id); const nome = String(colunas[0].valor(linha)); return <Fragment key={id}>
+              <tr>{exibidas.map((coluna) => <td data-label={coluna.titulo} key={coluna.id} className={coluna.longo ? 'longo' : coluna.estreita ? 'estreita' : undefined}>{conteudo(coluna, linha)}</td>)}
+                {extras.length > 0 && <td className="adm-tabela__mais"><button type="button" className="adm-mais" aria-label={`${aberta ? 'Fechar' : 'Ver'} detalhes de ${nome}`} aria-expanded={aberta} aria-controls={`${idTabela}-${id}`} onClick={() => alternarLinha(id)}>{aberta ? <X size={17} /> : <MoreHorizontal size={19} />}</button></td>}
+              </tr>
+              {extras.length > 0 && <tr id={`${idTabela}-${id}`} className="adm-detalhes" hidden={!aberta}><td colSpan={exibidas.length + 1}><dl>{extras.map((coluna) => <div key={coluna.id}><dt>{coluna.titulo || 'Seleção'}</dt><dd>{conteudo(coluna, linha)}</dd></div>)}</dl></td></tr>}
+            </Fragment>; })}
+            {!visiveis.length && <tr><td colSpan={exibidas.length + (extras.length ? 1 : 0)} className="adm-vazio">{vazio}</td></tr>}
           </tbody>
         </table>
       </div>

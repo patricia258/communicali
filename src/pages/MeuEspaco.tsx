@@ -504,7 +504,7 @@ function CartaoMissao({ missao, recarregar, liberada, comoMembro, abrirPrograma 
   const bloqueada = !liberada && !feita;
   const status = feita ? 'Concluída' : bloqueada ? 'Bloqueada' : missao.modo === 'convite' ? 'Por convite' : situacao === 'aberta' ? 'Disponível' : SITUACAO[situacao] || situacao;
   const podeEnviar = !comoMembro && liberada && missao.modo === 'analise' && (situacao === 'aberta' || situacao === 'recusada');
-  const formulario = FORMULARIOS[missao.slug] || [];
+  const formulario = FORMULARIOS[missao.slug] || [{ id: 'relato', rotulo: 'Conte como você cumpriu esta missão', obrigatorio: true }];
 
   async function enviar(event: FormEvent) {
     event.preventDefault();

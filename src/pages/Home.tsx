@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { ConteudoSiteProvider, TextoSite, useConteudoSite } from '../components/ConteudoSite';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 import { EDITION_FIELDS, longDate, signupHref, type EditionRow } from './Edicao';
@@ -51,6 +52,7 @@ const reduzido = () => typeof window !== 'undefined' && window.matchMedia?.('(pr
 /** "A comunidade": quatro círculos finos que se sobrepõem no meio, um por formato, na mesma posição dos quatro blocos. São elementos HTML (animados só com transform e opacity, no compositor) e não mudam a altura da seção. */
 const CIRCULOS: Array<[number, number, string]> = [[12.5, 12.5, '#5A1E2D'], [38.5, 12.5, '#8DB1D1'], [12.5, 38.5, '#8DB1D1'], [38.5, 38.5, '#5A1E2D']];
 function Formatos() {
+  const conteudo = useConteudoSite();
   const [foco, setFoco] = useState<number | null>(null);
   const [visto, setVisto] = useState(reduzido());
   const secao = useRef<HTMLElement>(null);
@@ -62,8 +64,8 @@ function Formatos() {
   }, []);
   return (
     <section className="hn-exp" id="comunidade" ref={secao}>
-      <p className="hn-eyebrow">A COMUNIDADE</p>
-      <h2>Quatro jeitos de se encontrar, <em>um só propósito: conectar pessoas.</em></h2>
+      <p className="hn-eyebrow"><TextoSite id="texto_001">A COMUNIDADE</TextoSite></p>
+      <h2><TextoSite id="texto_002">Quatro jeitos de se encontrar, </TextoSite><em><TextoSite id="texto_003">um só propósito: conectar pessoas.</TextoSite></em></h2>
       <div className={`hn-exp__orbitas${visto ? ' is-in' : ''}`} aria-hidden="true">
         <div className="hn-exp__quadro">
           {CIRCULOS.map(([x, y, cor], i) => <span key={i} className={`hn-exp__orbita hn-exp__orbita--${i + 1}${foco === i ? ' is-foco' : ''}`} style={{ left: `${x}%`, top: `${y}%`, borderColor: cor, transitionDelay: `${i * 180}ms` }} />)}
@@ -71,7 +73,7 @@ function Formatos() {
         </div>
       </div>
       <div className="hn-exp__grid">
-        {FORMATOS.map(([titulo, texto], i) => <div key={titulo} className={foco === i ? 'is-foco' : ''} onMouseEnter={() => setFoco(i)} onMouseLeave={() => setFoco(null)}><h3>{titulo}</h3><p>{texto}</p></div>)}
+        {FORMATOS.map((item, i) => [conteudo['formatos_'+i+'_0'] || item[0], conteudo['formatos_'+i+'_1'] || item[1]]).map(([titulo, texto], i) => <div key={titulo} className={foco === i ? 'is-foco' : ''} onMouseEnter={() => setFoco(i)} onMouseLeave={() => setFoco(null)}><h3>{titulo}</h3><p>{texto}</p></div>)}
       </div>
     </section>
   );
@@ -93,7 +95,7 @@ function Contador({ ate }: { ate: number }) {
     obs.observe(ref.current);
     return () => obs.disconnect();
   }, [ate]);
-  return <span ref={ref}>+{n}</span>;
+  return <span ref={ref}><TextoSite id="texto_004">+</TextoSite>{n}</span>;
 }
 
 const MAPA = (e: { local: string; endereco?: string | null; cidade: string }) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([e.local, e.endereco, e.cidade].filter(Boolean).join(', '))}`;
@@ -104,27 +106,27 @@ function Linha({ edition, encerrada, aberto, alternar }: { edition: EditionRow; 
     <article className={`hn-item${aberto ? ' is-open' : ''}`} id={edition.slug}>
       <div className={`hn-row${encerrada ? ' is-past' : ''}`}>
         <div className="hn-row__date">{diaMes(edition.data_evento)}<small>{edition.data_evento.slice(0, 4)}{encerrada ? ' · ENCERRADA' : ''}</small></div>
-        <div className="hn-row__info"><h3>{edition.titulo}</h3><p>{edition.cidade} · {edition.horario}</p></div>
+        <div className="hn-row__info"><h3>{edition.titulo}</h3><p>{edition.cidade}<TextoSite id="texto_005"> · </TextoSite>{edition.horario}</p></div>
         <div className="hn-row__value">{encerrada ? (edition.valor_texto || 'Encerrada') : 'A definir'}<small>{encerrada ? 'Resumo e fotos na edição' : 'Valor divulgado com a edição'}</small></div>
         <button type="button" className="hn-circ" aria-expanded={aberto} aria-controls={`det-${edition.slug}`} aria-label={`${aberto ? 'Fechar' : 'Ver'} detalhes de ${edition.titulo}`} onClick={alternar}><span className="hn-plus" aria-hidden="true" /></button>
       </div>
       <div className="hn-detail" id={`det-${edition.slug}`} role="region" aria-label={`Detalhes de ${edition.titulo}`}>
         <div className="hn-detail__in">
           <div className="hn-detail__foto" role="img" aria-label={`Local do encontro: ${edition.local}`} style={{ backgroundImage: `url(${edition.capa_url || '/fotos/legacy-coffee.jpg'})` }}>
-            <span className="hn-detail__tag">Encontro aberto</span>
+            <span className="hn-detail__tag"><TextoSite id="texto_006">Encontro aberto</TextoSite></span>
           </div>
           <div className="hn-detail__corpo">
             <dl>
-              <div><dt>Quando</dt><dd>{longDate(edition.data_evento)}, {edition.horario}</dd></div>
-              <div><dt>Onde</dt><dd><a className="hn-detail__local" href={MAPA(edition)} target="_blank" rel="noopener noreferrer">{edition.local}, {edition.cidade}</a></dd></div>
-              {edition.endereco && <div><dt>Endereço</dt><dd><a className="hn-detail__local" href={MAPA(edition)} target="_blank" rel="noopener noreferrer">{edition.endereco}</a></dd></div>}
-              {(!encerrada || edition.valor_texto) && <div><dt>Valor</dt><dd>{edition.valor_texto || 'A definir, divulgado com a edição'}</dd></div>}
+              <div><dt><TextoSite id="texto_007">Quando</TextoSite></dt><dd>{longDate(edition.data_evento)}<TextoSite id="texto_008">, </TextoSite>{edition.horario}</dd></div>
+              <div><dt><TextoSite id="texto_009">Onde</TextoSite></dt><dd><a className="hn-detail__local" href={MAPA(edition)} target="_blank" rel="noopener noreferrer">{edition.local}<TextoSite id="texto_010">, </TextoSite>{edition.cidade}</a></dd></div>
+              {edition.endereco && <div><dt><TextoSite id="texto_011">Endereço</TextoSite></dt><dd><a className="hn-detail__local" href={MAPA(edition)} target="_blank" rel="noopener noreferrer">{edition.endereco}</a></dd></div>}
+              {(!encerrada || edition.valor_texto) && <div><dt><TextoSite id="texto_012">Valor</TextoSite></dt><dd>{edition.valor_texto || 'A definir, divulgado com a edição'}</dd></div>}
             </dl>
             <div className="hn-detail__acoes">
               {encerrada
-                ? <a className="hn-pill" href={`/e/${edition.slug}`}>Ver como foi</a>
-                : inscricao ? <a className="hn-pill" href={inscricao}>Garantir minha vaga</a> : <a className="hn-pill" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>}
-              <a className="hn-pill hn-pill--line-ink" href={MAPA(edition)} target="_blank" rel="noopener noreferrer">Como chegar</a>
+                ? <a className="hn-pill" href={`/e/${edition.slug}`}><TextoSite id="texto_013">Ver como foi</TextoSite></a>
+                : inscricao ? <a className="hn-pill" href={inscricao}><TextoSite id="texto_014">Garantir minha vaga</TextoSite></a> : <a className="hn-pill" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer"><TextoSite id="texto_015">Entrar no grupo</TextoSite></a>}
+              <a className="hn-pill hn-pill--line-ink" href={MAPA(edition)} target="_blank" rel="noopener noreferrer"><TextoSite id="texto_016">Como chegar</TextoSite></a>
               <Compartilhar slug={edition.slug} titulo={edition.titulo} />
             </div>
           </div>
@@ -138,9 +140,9 @@ function LinhaEmBreve() {
   return (
     <article className="hn-item">
       <div className="hn-row">
-        <div className="hn-row__date">Em breve<small>DATA A DEFINIR</small></div>
-        <div className="hn-row__info"><h3>Próximo encontro</h3><p>Curitiba e região</p></div>
-        <div className="hn-row__value">A definir<small>Valor divulgado com a edição</small></div>
+        <div className="hn-row__date"><TextoSite id="texto_017">Em breve</TextoSite><small><TextoSite id="texto_018">DATA A DEFINIR</TextoSite></small></div>
+        <div className="hn-row__info"><h3><TextoSite id="texto_019">Próximo encontro</TextoSite></h3><p><TextoSite id="texto_020">Curitiba e região</TextoSite></p></div>
+        <div className="hn-row__value"><TextoSite id="texto_021">A definir</TextoSite><small><TextoSite id="texto_022">Valor divulgado com a edição</TextoSite></small></div>
         <button type="button" className="hn-circ" disabled aria-label="Detalhes disponíveis quando a data e o local forem definidos"><span className="hn-plus" aria-hidden="true" /></button>
       </div>
     </article>
@@ -173,8 +175,8 @@ function Embaixadores({ lista }: { lista: Embaixador[] }) {
   return (
     <section className="hn-emb" aria-label="Embaixadores">
       <div className="hn-emb__cab">
-        <div><p className="hn-eyebrow">EMBAIXADORES</p><h2>Faça parte desse ecossistema.</h2></div>
-        <span className="hn-emb__dica" aria-hidden="true"><i />Arraste <b>→</b></span>
+        <div><p className="hn-eyebrow"><TextoSite id="texto_023">EMBAIXADORES</TextoSite></p><h2><TextoSite id="texto_024">Faça parte desse ecossistema.</TextoSite></h2></div>
+        <span className="hn-emb__dica" aria-hidden="true"><i /><TextoSite id="texto_025">Arraste </TextoSite><b><TextoSite id="texto_026">→</TextoSite></b></span>
       </div>
       <div
         className="hn-emb__trilho" ref={trilho} onScroll={aoRolar}
@@ -191,12 +193,12 @@ function Embaixadores({ lista }: { lista: Embaixador[] }) {
         ))}
       </div>
       <div className="hn-emb__linha" aria-hidden="true"><span style={{ width: `${Math.max(12, prog * 100)}%`, marginLeft: `${prog * (100 - Math.max(12, prog * 100))}%` }} /></div>
-      {cursor && <span className="hn-emb__bolha" style={{ left: cursor.x, top: cursor.y }} aria-hidden="true">Arraste</span>}
+      {cursor && <span className="hn-emb__bolha" style={{ left: cursor.x, top: cursor.y }} aria-hidden="true"><TextoSite id="texto_027">Arraste</TextoSite></span>}
     </section>
   );
 }
 
-const Destaque = ({ children }: { children: string }) => <mark className="hn-hl">{children}</mark>;
+const Destaque = ({ children }: { children: ReactNode }) => <mark className="hn-hl">{children}</mark>;
 
 function Manifesto() {
   return (
@@ -206,20 +208,21 @@ function Manifesto() {
           <a className="hn-manifesto__in" href="https://www.linkedin.com/in/patriciaazumi/" target="_blank" rel="noopener noreferrer" aria-label="Patrícia Lima no LinkedIn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.5 8.5H3V21h3.5V8.5ZM4.75 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM21 13.6c0-3.3-1.8-5.4-4.6-5.4-1.5 0-2.7.7-3.4 1.8V8.5H9.7V21h3.5v-6.6c0-1.9.9-3 2.4-3 1.4 0 2 .9 2 2.8V21H21v-7.4Z" /></svg>
           </a>
-          <div className="hn-manifesto__legenda"><strong>Patrícia Lima</strong><span>Fundadora da CALI RH e idealizadora da ComuniCALI.</span></div>
+          <div className="hn-manifesto__legenda"><strong><TextoSite id="texto_028">Patrícia Lima</TextoSite></strong><span><TextoSite id="texto_029">Fundadora da CALI RH e idealizadora da ComuniCALI.</TextoSite></span></div>
         </div>
       </figure>
       <div className="hn-manifesto__texto">
-        <p className="hn-eyebrow">A COMUNIDADE</p>
-        <h2>Gente que se encontra e segue junta.</h2>
-        <p className="hn-manifesto__p">A ComuniCALI reúne quem se interessa por <Destaque>gente</Destaque>. Cada pessoa chega com a sua <Destaque>bagagem</Destaque>, e quando escutamos alguém, descobrimos <Destaque>caminhos</Destaque> que nunca percorreríamos sozinhos. Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com <Destaque>fé e integridade</Destaque>, e damos <Destaque>toda honra a Deus</Destaque> por cada caminho que se cruza aqui.</p>
-        <blockquote className="hn-manifesto__citacao"><p>“Assim como tudo na minha vida, a ideia da ComuniCALI nasceu de uma oportunidade de fazer algo bom acontecer, juntar gente boa e falar de temas relevantes.”</p><cite>Patrícia Lima</cite></blockquote>
+        <p className="hn-eyebrow"><TextoSite id="texto_030">A COMUNIDADE</TextoSite></p>
+        <h2><TextoSite id="texto_031">Gente que se encontra e segue junta.</TextoSite></h2>
+        <p className="hn-manifesto__p"><TextoSite id="texto_032">A ComuniCALI reúne quem se interessa por </TextoSite><Destaque><TextoSite id="texto_033">gente</TextoSite></Destaque><TextoSite id="texto_034">. Cada pessoa chega com a sua </TextoSite><Destaque><TextoSite id="texto_035">bagagem</TextoSite></Destaque><TextoSite id="texto_036">, e quando escutamos alguém, descobrimos </TextoSite><Destaque><TextoSite id="texto_037">caminhos</TextoSite></Destaque><TextoSite id="texto_038"> que nunca percorreríamos sozinhos. Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com </TextoSite><Destaque><TextoSite id="texto_039">fé e integridade</TextoSite></Destaque><TextoSite id="texto_040">, e damos </TextoSite><Destaque><TextoSite id="texto_041">toda honra a Deus</TextoSite></Destaque><TextoSite id="texto_042"> por cada caminho que se cruza aqui.</TextoSite></p>
+        <blockquote className="hn-manifesto__citacao"><p><TextoSite id="texto_043">“Assim como tudo na minha vida, a ideia da ComuniCALI nasceu de uma oportunidade de fazer algo bom acontecer, juntar gente boa e falar de temas relevantes.”</TextoSite></p><cite><TextoSite id="texto_044">Patrícia Lima</TextoSite></cite></blockquote>
       </div>
     </section>
   );
 }
 
-export function Home() {
+function HomeConteudo() {
+  const conteudo = useConteudoSite();
   const [editions, setEditions] = useState<EditionRow[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [aberta, setAberta] = useState<string | null>(null);
@@ -263,27 +266,27 @@ export function Home() {
         <nav className="hn-nav" aria-label="Principal">
           <a href="/" className="hn-nav__logo"><img src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /></a>
           <div className="hn-nav__links">
-            <a href="#comunidade">Comunidade</a>
-            <a href="#agenda">Agenda</a>
-            <a href="#parceiros">Parceiros</a>
-            <a className="hn-nav__membro" href="/meu-passaporte">Minha área</a>
-            <a className="hn-pill" href={joinHref}>Registrar interesse</a>
+            <a href="#comunidade"><TextoSite id="texto_045">Comunidade</TextoSite></a>
+            <a href="#agenda"><TextoSite id="texto_046">Agenda</TextoSite></a>
+            <a href="#parceiros"><TextoSite id="texto_047">Parceiros</TextoSite></a>
+            <a className="hn-nav__membro" href="/meu-passaporte"><TextoSite id="texto_048">Minha área</TextoSite></a>
+            <a className="hn-pill" href={joinHref}><TextoSite id="texto_049">Registrar interesse</TextoSite></a>
           </div>
         </nav>
-        <h1 aria-label="Falar de pessoas pode mudar o mundo.">
-          {['Falar', 'de', 'pessoas', 'pode'].map((p, i) => <span className="hn-w" style={{ ['--i' as string]: i }} aria-hidden="true" key={p + i}>{p} </span>)}
-          <em aria-hidden="true">{['mudar', 'o', 'mundo.'].map((p, i) => <span className="hn-w" style={{ ['--i' as string]: i + 4 }} key={p}>{p} </span>)}</em>
+        <h1 aria-label={`${conteudo.hero_titulo || 'Falar de pessoas pode'} ${conteudo.hero_destaque || 'mudar o mundo.'}`}>
+          {(conteudo.hero_titulo || 'Falar de pessoas pode').split(' ').map((p, i) => <span className="hn-w" style={{ ['--i' as string]: i }} aria-hidden="true" key={p + i}>{p} </span>)}
+          <em aria-hidden="true">{(conteudo.hero_destaque || 'mudar o mundo.').split(' ').map((p, i) => <span className="hn-w" style={{ ['--i' as string]: i + 4 }} key={p}>{p} </span>)}</em>
         </h1>
         <div className="hn-hero__stage">
-          <div className="hn-hero__photo" role="img" aria-label="Pessoas conversando em um encontro presencial da ComuniCALI" />
-          <p className="hn-hero__tag">Uma comunidade para unir.</p>
+          <div className="hn-hero__photo" style={conteudo.foto_abertura ? { backgroundImage: `url("${conteudo.foto_abertura}")` } : undefined} role="img" aria-label="Pessoas conversando em um encontro presencial da ComuniCALI" />
+          <p className="hn-hero__tag"><TextoSite id="texto_050">Uma comunidade para unir.</TextoSite></p>
           <div className="hn-hero__card">
-            <strong>Cada pessoa chega com a sua bagagem.</strong>
-            <span>Quando histórias diferentes se encontram, novos caminhos aparecem.</span>
+            <strong><TextoSite id="texto_051">Cada pessoa chega com a sua bagagem.</TextoSite></strong>
+            <span><TextoSite id="texto_052">Quando histórias diferentes se encontram, novos caminhos aparecem.</TextoSite></span>
           </div>
           <div className="hn-hero__acts">
-            <a className="hn-pill hn-pill--white" href="#agenda">Ver a agenda</a>
-            <a className="hn-pill hn-pill--bordo" href={joinHref}>Registrar interesse</a>
+            <a className="hn-pill hn-pill--white" href="#agenda"><TextoSite id="texto_053">Ver a agenda</TextoSite></a>
+            <a className="hn-pill hn-pill--bordo" href={joinHref}><TextoSite id="texto_054">Registrar interesse</TextoSite></a>
           </div>
         </div>
       </header>
@@ -292,16 +295,16 @@ export function Home() {
 
       <section className="hn-band" aria-label="Passaporte, encontros e jornada">
         <div className="hn-band__passaporte">
-          <h3>Seu passaporte</h3>
-          <p>Carimbos, selos e milhas de quem faz parte da comunidade. Cada encontro é uma parada na sua jornada!</p>
-          <a className="hn-pill hn-pill--line" href="#selos">Conhecer</a>
+          <h3><TextoSite id="texto_055">Seu passaporte</TextoSite></h3>
+          <p><TextoSite id="texto_056">Carimbos, selos e milhas de quem faz parte da comunidade. Cada encontro é uma parada na sua jornada!</TextoSite></p>
+          <a className="hn-pill hn-pill--line" href="#selos"><TextoSite id="texto_057">Conhecer</TextoSite></a>
         </div>
         <div className="hn-band__foto">
           <div className="hn-band__foto-img" aria-hidden="true" />
           <div className="hn-band__foto-txt">
-            <h3>Encontros</h3>
-            <p>Presenciais, online, experiências e jantares. Veja o que vem por aí e relembre os anteriores!</p>
-            <a className="hn-pill hn-pill--line" href="#agenda">Ver agenda</a>
+            <h3><TextoSite id="texto_058">Encontros</TextoSite></h3>
+            <p><TextoSite id="texto_059">Presenciais, online, experiências e jantares. Veja o que vem por aí e relembre os anteriores!</TextoSite></p>
+            <a className="hn-pill hn-pill--line" href="#agenda"><TextoSite id="texto_060">Ver agenda</TextoSite></a>
           </div>
         </div>
         <div className="hn-band__rota">
@@ -310,11 +313,11 @@ export function Home() {
             <g mask="url(#hn-rota-mask)"><path d="M40 580 C 40 450, 240 490, 240 350 S 400 210, 450 30" stroke="#F5F1EB" strokeWidth="1.4" strokeDasharray="6 7" opacity=".5" /></g>
           </svg>
           <div className="hn-grupo">
-            <h3>Grupo da comunidade</h3>
+            <h3><TextoSite id="texto_061">Grupo da comunidade</TextoSite></h3>
             <strong className="hn-grupo__num"><Contador ate={300} /></strong>
-            <p className="hn-grupo__lead">pessoas do Brasil inteiro, no grupo e nos encontros.</p>
-            <p className="hn-grupo__txt">É onde o papo continua entre um encontro e outro: vagas, contatos, dúvidas e muita troca!</p>
-            <a className="hn-pill hn-pill--white" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>
+            <p className="hn-grupo__lead"><TextoSite id="texto_062">pessoas do Brasil inteiro, no grupo e nos encontros.</TextoSite></p>
+            <p className="hn-grupo__txt"><TextoSite id="texto_063">É onde o papo continua entre um encontro e outro: vagas, contatos, dúvidas e muita troca!</TextoSite></p>
+            <a className="hn-pill hn-pill--white" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer"><TextoSite id="texto_064">Entrar no grupo</TextoSite></a>
           </div>
         </div>
       </section>
@@ -323,28 +326,28 @@ export function Home() {
 
       <section className="hn-selos" id="selos">
         <div className="hn-selos__topo">
-          <h2>Os selos contam o seu caminho.</h2>
-          <p>Como convidado ou visitante, você dá o primeiro passo dentro da comunidade. Já membros, conectores e embaixadores vivem a evolução da sua jornada.</p>
+          <h2><TextoSite id="texto_065">Os selos contam o seu caminho.</TextoSite></h2>
+          <p><TextoSite id="texto_066">Como convidado ou visitante, você dá o primeiro passo dentro da comunidade. Já membros, conectores e embaixadores vivem a evolução da sua jornada.</TextoSite></p>
         </div>
         <ul className="hn-selos__lista">
-          {SELOS.map(([id, nome, frase], i) => <li key={id} style={{ ['--s' as string]: `${i * 220}ms` }}><img src={`/selos/novo/${id}.svg`} alt={`Selo ${nome}: ${frase.toLowerCase()}`} /><small>{frase}</small></li>)}
+          {SELOS.map((item, i) => [item[0], item[1], conteudo['selos_'+i+'_2'] || item[2]]).map(([id, nome, frase], i) => <li key={id} style={{ ['--s' as string]: `${i * 220}ms` }}><img src={`/selos/novo/${id}.svg`} alt={`Selo ${nome}: ${frase.toLowerCase()}`} /><small>{frase}</small></li>)}
         </ul>
       </section>
 
       <section className="hn-prog" id="programa" aria-label="Sua jornada">
-        <h2>Sua jornada.</h2>
+        <h2><TextoSite id="texto_067">Sua jornada.</TextoSite></h2>
         <ol className="hn-prog__passos">
-          <li><div className="hn-prog__topo"><b>1</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Visite</h3><p><strong>Venha até 2 vezes</strong> como Visitante ou Convidado, em encontros abertos e gratuitos. Só conta a visita com check-in.</p></li>
-          <li><div className="hn-prog__topo"><b>2</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Faça parte</h3><p>Gostou? Depois da primeira visita, é só solicitar para fazer parte da comunidade. <strong>É gratuito</strong>, e a gente vai analisar e entrar em contato.</p></li>
-          <li><div className="hn-prog__topo"><b>3</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Acumule milhas</h3><p>As milhas começam quando você entra, ou seja, como membro. Contam presença, convites e comparecimentos, experiências e conteúdos aprovados, parceiros indicados, entre outros.</p></li>
-          <li><div className="hn-prog__topo"><b>4</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Evolua</h3><p>Conectores e Embaixadores são membros, profissionais que mais contribuem. A evolução vem de vários indicadores.</p></li>
+          <li><div className="hn-prog__topo"><b><TextoSite id="texto_068">1</TextoSite></b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3><TextoSite id="texto_069">Visite</TextoSite></h3><p><strong><TextoSite id="texto_070">Venha até 2 vezes</TextoSite></strong><TextoSite id="texto_071"> como Visitante ou Convidado, em encontros abertos e gratuitos. Só conta a visita com check-in.</TextoSite></p></li>
+          <li><div className="hn-prog__topo"><b><TextoSite id="texto_072">2</TextoSite></b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3><TextoSite id="texto_073">Faça parte</TextoSite></h3><p><TextoSite id="texto_074">Gostou? Depois da primeira visita, é só solicitar para fazer parte da comunidade. </TextoSite><strong><TextoSite id="texto_075">É gratuito</TextoSite></strong><TextoSite id="texto_076">, e a gente vai analisar e entrar em contato.</TextoSite></p></li>
+          <li><div className="hn-prog__topo"><b><TextoSite id="texto_077">3</TextoSite></b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3><TextoSite id="texto_078">Acumule milhas</TextoSite></h3><p><TextoSite id="texto_079">As milhas começam quando você entra, ou seja, como membro. Contam presença, convites e comparecimentos, experiências e conteúdos aprovados, parceiros indicados, entre outros.</TextoSite></p></li>
+          <li><div className="hn-prog__topo"><b><TextoSite id="texto_080">4</TextoSite></b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3><TextoSite id="texto_081">Evolua</TextoSite></h3><p><TextoSite id="texto_082">Conectores e Embaixadores são membros, profissionais que mais contribuem. A evolução vem de vários indicadores.</TextoSite></p></li>
         </ol>
       </section>
 
       <section className="hn-agenda" id="agenda">
         <div className="hn-agenda__head">
-          <h2>Próximos encontros.</h2>
-          <p>Pode chegar! As inscrições e os avisos saem primeiro no grupo da comunidade.</p>
+          <h2><TextoSite id="texto_083">Próximos encontros.</TextoSite></h2>
+          <p><TextoSite id="texto_084">Pode chegar! As inscrições e os avisos saem primeiro no grupo da comunidade.</TextoSite></p>
         </div>
         <div className="hn-rows">
           {upcoming.length ? upcoming.map((e) => <Linha key={e.id} edition={e} encerrada={false} aberto={aberta === e.id} alternar={() => setAberta(aberta === e.id ? null : e.id)} />) : <LinhaEmBreve />}
@@ -355,46 +358,46 @@ export function Home() {
 
       <section className="hn-entrar" id="como-entrar" aria-label="Como entrar">
         <div className="hn-entrar__a">
-          <span>ANTES DE FAZER PARTE</span><h3>Conheça a comunidade</h3>
-          <p>Venha conhecer! Você tem até 2 visitas abertas e gratuitas antes de fazer parte da comunidade.</p>
-          <ul><li>Visitante: você chega por vontade própria</li><li>Convidado: alguém da comunidade chamou você</li><li>As duas visitas somam no mesmo contador</li><li>Só conta a visita com check-in</li><li>O valor de cada encontro está na agenda</li></ul>
-          <a className="hn-pill" href={joinHref}>Registrar interesse</a>
+          <span><TextoSite id="texto_085">ANTES DE FAZER PARTE</TextoSite></span><h3><TextoSite id="texto_086">Conheça a comunidade</TextoSite></h3>
+          <p><TextoSite id="texto_087">Venha conhecer! Você tem até 2 visitas abertas e gratuitas antes de fazer parte da comunidade.</TextoSite></p>
+          <ul><li><TextoSite id="texto_088">Visitante: você chega por vontade própria</TextoSite></li><li><TextoSite id="texto_089">Convidado: alguém da comunidade chamou você</TextoSite></li><li><TextoSite id="texto_090">As duas visitas somam no mesmo contador</TextoSite></li><li><TextoSite id="texto_091">Só conta a visita com check-in</TextoSite></li><li><TextoSite id="texto_092">O valor de cada encontro está na agenda</TextoSite></li></ul>
+          <a className="hn-pill" href={joinHref}><TextoSite id="texto_093">Registrar interesse</TextoSite></a>
         </div>
         <div className="hn-entrar__b">
-          <span>DEPOIS DA VISITA</span><h3>Faça parte</h3>
-          <p>Gostou? Depois da primeira visita, é só pedir para fazer parte da comunidade. É gratuito, e a gente analisa cada pedido com carinho.</p>
-          <ul><li>Meu passaporte: carimbos, selos e milhas</li><li>A Rede da comunidade</li><li>Convidar gente para os encontros</li><li>Sempre gratuito</li></ul>
-          <a className="hn-pill hn-pill--white" href="/meu-passaporte">Entrar na minha área</a>
+          <span><TextoSite id="texto_094">DEPOIS DA VISITA</TextoSite></span><h3><TextoSite id="texto_095">Faça parte</TextoSite></h3>
+          <p><TextoSite id="texto_096">Gostou? Depois da primeira visita, é só pedir para fazer parte da comunidade. É gratuito, e a gente analisa cada pedido com carinho.</TextoSite></p>
+          <ul><li><TextoSite id="texto_097">Meu passaporte: carimbos, selos e milhas</TextoSite></li><li><TextoSite id="texto_098">A Rede da comunidade</TextoSite></li><li><TextoSite id="texto_099">Convidar gente para os encontros</TextoSite></li><li><TextoSite id="texto_100">Sempre gratuito</TextoSite></li></ul>
+          <a className="hn-pill hn-pill--white" href="/meu-passaporte"><TextoSite id="texto_101">Entrar na minha área</TextoSite></a>
         </div>
         <div className="hn-entrar__c">
-          <span>CONVITE</span><h3>Por convite</h3>
-          <p>Alguém da comunidade chama você e você chega como Convidado. Essa visita conta nas suas 2.</p>
-          <ul><li>O convite não garante vaga</li><li>A vaga depende de inscrição e confirmação</li></ul>
-          <a className="hn-pill hn-pill--white" href="#programa">Como funciona</a>
+          <span><TextoSite id="texto_102">CONVITE</TextoSite></span><h3><TextoSite id="texto_103">Por convite</TextoSite></h3>
+          <p><TextoSite id="texto_104">Alguém da comunidade chama você e você chega como Convidado. Essa visita conta nas suas 2.</TextoSite></p>
+          <ul><li><TextoSite id="texto_105">O convite não garante vaga</TextoSite></li><li><TextoSite id="texto_106">A vaga depende de inscrição e confirmação</TextoSite></li></ul>
+          <a className="hn-pill hn-pill--white" href="#programa"><TextoSite id="texto_107">Como funciona</TextoSite></a>
         </div>
       </section>
 
       <section className="hn-prev" id="edicoes">
-        <h2>Edições passadas.</h2>
-        <p>Aqui você encontra um resumo de como foram os nossos encontros, vê uma prévia das fotos e conhece um pouquinho de cada edição.</p>
+        <h2><TextoSite id="texto_108">Edições passadas.</TextoSite></h2>
+        <p><TextoSite id="texto_109">Aqui você encontra um resumo de como foram os nossos encontros, vê uma prévia das fotos e conhece um pouquinho de cada edição.</TextoSite></p>
         <div className="hn-prev__body">
-          <div className="hn-prev__foto" role="img" aria-label="Pessoas reunidas em uma mesa de trabalho" />
+          <div className="hn-prev__foto" style={conteudo.foto_edicoes ? { backgroundImage: `url("${conteudo.foto_edicoes}")` } : undefined} role="img" aria-label="Pessoas reunidas em uma mesa de trabalho" />
           <div className="hn-prev__grid">
             {past.length ? past.map((e) => (
-              <a className="hn-idx" href={`/e/${e.slug}`} key={e.id}><b>{e.numero ? `${e.numero}ª Edição` : e.titulo}</b><small>{formatDate(e.data_evento)} · {e.cidade}<br />Resumo e fotos</small></a>
-            )) : <div className="hn-idx is-empty"><b>Em breve</b><small>As edições encerradas aparecem aqui</small></div>}
+              <a className="hn-idx" href={`/e/${e.slug}`} key={e.id}><b>{e.numero ? `${e.numero}ª Edição` : e.titulo}</b><small>{formatDate(e.data_evento)}<TextoSite id="texto_110"> · </TextoSite>{e.cidade}<br /><TextoSite id="texto_111">Resumo e fotos</TextoSite></small></a>
+            )) : <div className="hn-idx is-empty"><b><TextoSite id="texto_112">Em breve</TextoSite></b><small><TextoSite id="texto_113">As edições encerradas aparecem aqui</TextoSite></small></div>}
           </div>
         </div>
       </section>
 
       <section className="hn-par" id="parceiros">
         <div className="hn-par__texto">
-          <h2>Apoie este encontro. Seja um parceiro.</h2>
-          <p>Nem toda contribuição é financeira: cada parceiro oferece o que faz de melhor, e a gente combina tudo junto, um a um.</p>
-          <a className="hn-pill" href={PARTNER_FORM_URL}>Quero ser parceiro</a>
+          <h2><TextoSite id="texto_114">Apoie este encontro. Seja um parceiro.</TextoSite></h2>
+          <p><TextoSite id="texto_115">Nem toda contribuição é financeira: cada parceiro oferece o que faz de melhor, e a gente combina tudo junto, um a um.</TextoSite></p>
+          <a className="hn-pill" href={PARTNER_FORM_URL}><TextoSite id="texto_116">Quero ser parceiro</TextoSite></a>
         </div>
         <div className="hn-par__itens">
-          {PARCERIAS.map(([titulo, texto], i) => <div key={titulo}><span className="hn-fr" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><p><b>{titulo}</b><span>{texto}</span></p></div>)}
+          {PARCERIAS.map((item, i) => [conteudo['parcerias_'+i+'_0'] || item[0], conteudo['parcerias_'+i+'_1'] || item[1]]).map(([titulo, texto], i) => <div key={titulo}><span className="hn-fr" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span><p><b>{titulo}</b><span>{texto}</span></p></div>)}
         </div>
         {partners.length > 0 && (
           <div className="hn-logos" aria-label="Quem apoia a ComuniCALI">
@@ -414,16 +417,18 @@ export function Home() {
       </section>
 
       <section className="hn-faq" aria-label="Perguntas frequentes">
-        <h2>Perguntas frequentes.</h2>
-        {FAQ.map(([q, a]) => <details key={q}><summary>{q}<i aria-hidden="true">+</i></summary><p>{a}</p></details>)}
+        <h2><TextoSite id="texto_117">Perguntas frequentes.</TextoSite></h2>
+        {FAQ.map((item, i) => [conteudo['faq_'+i+'_0'] || item[0], conteudo['faq_'+i+'_1'] || item[1]]).map(([q, a]) => <details key={q}><summary>{q}<i aria-hidden="true"><TextoSite id="texto_118">+</TextoSite></i></summary><p>{a}</p></details>)}
       </section>
 
       <section className="hn-inv" aria-label="Convite">
-        <p>Primeira vez por aqui? Bora começar a sua jornada!</p>
-        <a href={joinHref}>Registrar interesse</a>
+        <p><TextoSite id="texto_119">Primeira vez por aqui? Bora começar a sua jornada!</TextoSite></p>
+        <a href={joinHref}><TextoSite id="texto_120">Registrar interesse</TextoSite></a>
       </section>
 
       <HnFooter />
     </div>
   );
 }
+
+export function Home() { return <ConteudoSiteProvider><HomeConteudo /></ConteudoSiteProvider>; }

@@ -1,5 +1,6 @@
+import { painelEmails } from './_painel-emails.js';
 // Ações do painel: resumo dos envios, boas-vindas em lotes e teste para quem está logado. Exige sessão de administrador.
-import { EDITION_FIELDS, PUBLIC_KEY, SUPABASE, banco, destinatarios, enviar, presentes, enviarUmaVez, layoutSimples, montar, pausa, escape } from './_email.js';
+import { EDITION_FIELDS, PUBLIC_KEY, SUPABASE, banco, destinatarios, enviar, presentes, enviarUmaVez, layoutSimples, montar, pausa, escape, emailFluxo } from './_email.js';
 
 const LOTE = 25;
 
@@ -15,6 +16,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
   const email = await administrador(req);
   if (!email) return res.status(401).json({ error: 'Entre novamente no painel.' });
+  if (await painelEmails(req,res,{email,db:banco,enviar,montar,emailFluxo})) return;
   const { acao, edicao, publico, tipo, registro, status, match } = req.body || {};
 
   // Todos os e-mails recentes que não chegaram (staff, avisos, edição): lista da própria Resend.

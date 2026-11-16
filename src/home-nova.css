@@ -436,3 +436,8 @@ a.hn-idx:hover{transform:translateY(-4px)}
 .hn-ab--simples .hn-ab__nova{animation:hn-ab-simples-nova 4s linear both}
 @keyframes hn-ab-simples-nova{0%,40%{opacity:0}60%,85%{opacity:1}100%{opacity:0}}
 .hn-ab--simples .hn-ab__letra{animation:none;opacity:1;filter:none;transform:none}
+
+/* A capa preenche a moldura; o recorte é definido no painel. */
+.hn-ed .hn-ed__foto{height:auto;aspect-ratio:16/7;min-height:0;background:#f5f1eb;border-radius:6px 6px 0 120px}
+.hn-ed .hn-ed__foto>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+@media(max-width:600px){.hn-ed .hn-ed__foto{border-bottom-left-radius:48px}}

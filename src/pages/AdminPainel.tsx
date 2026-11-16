@@ -1,5 +1,10 @@
-/* Painel administrativo: moldura lateral, páginas em abas e o que ainda não existe. Cada tela segue o mesmo desenho: título, abas e uma lista ou ficha. */
+import { AdminConteudoSite } from './AdminConteudoSite';
+import { AdminComunicacao } from './AdminComunicacao';
+import { AdminAppGestao } from './AdminAppGestao';
+/* Painel administrativo: moldura lateral, navegação por seções e o que ainda não existe. Cada tela segue o mesmo desenho: título, seções e uma lista ou ficha. */
+import { AdminSiteEncontros } from './AdminSiteEncontros';
 import { useEffect, useState, type ReactNode } from 'react';
+import { Wallet, CalendarDays, Users, CircleCheck, House, Route, Network, Mail, FileText, Globe, Smartphone, Settings, ArrowUpRight, LogOut, ChevronRight, type LucideIcon } from 'lucide-react';
 import { Link, NavLink, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Tabela, dataBr } from './AdminTabela';
@@ -22,12 +27,16 @@ export function useAba(padrao: string, validas: string[], chave = 'aba') {
 
 export function Abas({ abas, atual, onChange }: { abas: Array<[string, string, number?]>; atual: string; onChange: (id: string) => void }) {
   return (
-    <div className="adm-abas" role="tablist">
+    <nav className="adm-abas" aria-label="Seções desta página">
       {abas.map(([id, nome, total]) => (
-        <button key={id} type="button" role="tab" aria-selected={atual === id} className={atual === id ? 'on' : ''} onClick={() => onChange(id)}>{nome}{total ? <i>{total}</i> : null}</button>
+        <button key={id} type="button" aria-current={atual === id ? 'page' : undefined} className={atual === id ? 'on' : ''} onClick={() => onChange(id)}>{nome}{total ? <i>{total}</i> : null}<ChevronRight size={14} aria-hidden="true" /></button>
       ))}
-    </div>
+    </nav>
   );
+}
+
+export function Secoes({ children, ...props }: Parameters<typeof Abas>[0] & { children: ReactNode }) {
+  return <div className="adm-secoes"><Abas {...props} /><div className="adm-secoes__conteudo">{children}</div></div>;
 }
 
 export function Cabecalho({ rotulo, titulo, texto }: { rotulo: string; titulo: string; texto?: string }) {
@@ -86,15 +95,14 @@ function Adesoes() {
 export function PessoasPage() {
   const [aba, mudar] = useAba('membros', ['membros', 'convidados', 'staff', 'fornecedores', 'indicacoes', 'matches']);
   return (
-    <>
-      <Abas atual={aba} onChange={mudar} abas={[['membros', 'Membros e visitantes'], ['convidados', 'Convidados'], ['staff', 'Staff'], ['fornecedores', 'Fornecedores'], ['indicacoes', 'Indicações'], ['matches', 'Matches']]} />
+    <Secoes atual={aba} onChange={mudar} abas={[['membros', 'Membros e visitantes'], ['convidados', 'Convidados'], ['staff', 'Staff'], ['fornecedores', 'Fornecedores'], ['indicacoes', 'Indicações'], ['matches', 'Matches']]}>
       {aba === 'membros' && <MembersPanel />}
       {aba === 'convidados' && <GuestsPanel />}
       {aba === 'staff' && <StaffPanel />}
       {aba === 'fornecedores' && <FornecedorPanel />}
       {aba === 'indicacoes' && <IndicacoesPanel />}
       {aba === 'matches' && <MatchesPanel />}
-    </>
+    </Secoes>
   );
 }
 
@@ -102,63 +110,39 @@ export function AprovacoesPage() {
   const espera = useEspera();
   const [aba, mudar] = useAba('adesoes', ['adesoes', 'missoes', 'comentarios']);
   return (
-    <>
-      <Abas atual={aba} onChange={mudar} abas={[['adesoes', 'Pedidos de adesão', espera.adesoes], ['missoes', 'Missões e recomendações', espera.missoes + espera.recomendacoes], ['comentarios', 'Comentários', espera.comentarios]]} />
+    <Secoes atual={aba} onChange={mudar} abas={[['adesoes', 'Pedidos de adesão', espera.adesoes], ['missoes', 'Missões e recomendações', espera.missoes + espera.recomendacoes], ['comentarios', 'Comentários', espera.comentarios]]}>
       {aba === 'adesoes' && <Adesoes />}
       {aba === 'missoes' && <RecommendationsPanel />}
       {aba === 'comentarios' && <ComentariosPanel />}
-    </>
+    </Secoes>
   );
 }
 
 export function ProgramaPage() {
   const [aba, mudar] = useAba('como', ['como', 'impacto']);
   return (
-    <>
-      <Abas atual={aba} onChange={mudar} abas={[['como', 'Como funciona'], ['impacto', 'Impacto da comunidade']]} />
+    <Secoes atual={aba} onChange={mudar} abas={[['como', 'Como funciona'], ['impacto', 'Impacto da comunidade']]}>
       {aba === 'como' && <ProgramPanel />}
       {aba === 'impacto' && <ImpactosPanel />}
-    </>
+    </Secoes>
   );
 }
 
-export function EmailsPage() {
-  return <EmBreve rotulo="E-MAILS" titulo="E-mails da comunidade" hoje="Hoje os textos dos e-mails ficam no código e só mudam quando você me pede. Aqui eles passam a ser seus." itens={[
-    ['Modelos editáveis', 'Assunto e texto de cada e-mail (inscrição, confirmação, lembrete, boas-vindas, adesão, vagas, ausência), com envio de teste para você.'],
-    ['Envios automáticos do fluxo', 'Os 12 e-mails novos saindo sozinhos: confirmação como Convidado ou Visitante, pedido de adesão, aprovado, ajustes, não aprovado, janela de Membros, lista de espera, pendências.'],
-    ['Histórico geral', 'Tudo o que foi enviado, entregue, aberto e com erro, de todas as edições, em uma lista só. Hoje isso só aparece dentro de cada edição, na aba E-mails.'],
-    ['Quem parou de receber', 'Está em Configurações, aba Quem saiu.'],
-  ]} />;
-}
+export function EmailsPage() { return <AdminComunicacao />; }
 
 export function SitePage() {
-  const [aba, mudar] = useAba('contador', ['contador', 'textos', 'home']);
+  const [aba, mudar] = useAba('encontros', ['encontros', 'contador', 'textos', 'home']);
   return (
-    <>
-      <Abas atual={aba} onChange={mudar} abas={[['contador', 'Contador de membros'], ['textos', 'Regras e privacidade'], ['home', 'Home e páginas']]} />
+    <Secoes atual={aba} onChange={mudar} abas={[['encontros', 'Encontros e fotos'], ['contador', 'Contador de membros'], ['textos', 'Regras e privacidade'], ['home', 'Home e páginas']]}>
+      {aba === 'encontros' && <AdminSiteEncontros />}
       {aba === 'contador' && <CounterPanel />}
       {aba === 'textos' && <TextsPanel />}
-      {aba === 'home' && <EmBreve rotulo="SITE" titulo="Home e páginas" hoje="O texto das 11 seções da home e das páginas está no código. Para mudar uma frase, hoje você precisa me pedir." itens={[
-        ['Home por seção', 'Embaixadores, manifesto, passaporte e jornada, selos, agenda, como entrar, edições, parceiros, perguntas frequentes e convite: texto, imagem e ordem de cada uma, com botão Publicar.'],
-        ['Como entrar (regras v23)', 'O texto oficial da trilha Convidado ou Visitante, Membro, Conector e Embaixador, com o limite de 2 experiências.'],
-        ['Termos de participação', 'Página nova /termos com a minuta aprovada, e Política de Privacidade atualizada.'],
-        ['Perguntas frequentes', 'Lista que você edita sozinha.'],
-        ['Biblioteca de imagens', 'Enviar e trocar selos, fotos e logos sem pedir.'],
-      ]} />}
-    </>
+      {aba === 'home' && <AdminConteudoSite />}
+    </Secoes>
   );
 }
 
-export function AppPage() {
-  return <EmBreve rotulo="APP DO MEMBRO" titulo="Meu Passaporte" hoje="Hoje as missões, os níveis e os textos do app estão no código." itens={[
-    ['Pedido de adesão no app', 'Botão “Quero ser Membro” depois da primeira presença, cadastro mínimo, aceites separados e acompanhamento do status.'],
-    ['Passaporte só para Membros', 'Convidado e Visitante usam só inscrição, check-in, votação e dinâmica. O passaporte completo abre após a aprovação.'],
-    ['Limite de 2 presenças', 'Bloqueio automático da nova inscrição em atividade aberta e gratuita após 2 presenças sem adesão aprovada.'],
-    ['Missões', 'Criar e editar missões, pontos e regras, em vez de depender do código.'],
-    ['Níveis e selos', 'Critérios de Conector e Embaixador e as imagens dos selos.'],
-    ['Textos e avisos', 'Textos do passaporte, do onboarding e das notificações.'],
-  ]} />;
-}
+export function AppPage() { return <AdminAppGestao />; }
 
 const FALTA: Array<[string, Array<[string, string]>]> = [
   ['Fluxo de entrada e adesão (parte 4)', [
@@ -167,25 +151,26 @@ const FALTA: Array<[string, Array<[string, string]>]> = [
     ['Bloqueio após 2 presenças', 'Automático na inscrição, usando o contador que já aparece na ficha.'],
     ['Janela de Membros por edição', 'Início e fim, abertura geral, cota de convidados e prazo da lista de espera, configuráveis em cada edição.'],
     ['Lista de espera automática', 'Oferta de vaga com prazo e expiração.'],
+    ['Rede só para Membros aprovados', 'Adequar o acesso e o padrão do cadastro às regras publicadas, na parte 4.'],
     ['Milhas só após a adesão', 'Decidir o que fazer com as milhas já lançadas dos visitantes da 1ª edição.'],
   ]],
   ['E-mails', [
-    ['Ligar os 12 e-mails novos', 'Hoje estão escritos mas não saem sozinhos.'],
-    ['Modelos editáveis no painel', 'Assunto, texto e envio de teste.'],
+    ['Conferir os disparos do fluxo', 'Validar com Claude os gatilhos já automáticos e os que dependem de janelas e pendências.'],
+    ['Ativar modelos e histórico de e-mails', 'Telas prontas; migração e publicação coordenada pendentes.'],
     ['Lembrete de pendências', 'Foto, aceite e comunidade, automático.'],
   ]],
   ['Site', [
-    ['Home editável por seção', 'Texto, imagem e ordem sem pedir ao Claude.'],
-    ['Termos de participação e privacidade nova', 'Aguardam sua leitura e a revisão final.'],
-    ['Como entrar (v23) na home', 'Trilha de entrada e pertencimento separadas.'],
+    ['Home editável por seção', 'Texto, imagem e ordem pelo painel.'],
+    ['Álbuns dos encontros na versão oficial', 'Prévia pronta. Falta liberar o acesso real, validar os e-mails e configurar as permissões da pasta externa.'],
+    ['Revisão final dos textos v23', 'Textos já publicados. Falta a leitura final da administração e a revisão jurídica.'],
   ]],
   ['Painel', [
     ['Equipe do painel', 'Acesso específico e limitado para uma parceira.'],
     ['Registro de alterações', 'Ver quem mudou o quê, hoje só no banco.'],
+    ['Conferência com conta real', 'Validar as telas com a sessão da organização e no celular, após a revisão visual local.'],
     ['Aprovações com e-mail automático', 'Ao aprovar ou pedir ajustes, o e-mail correspondente sai sozinho.'],
   ]],
   ['Programa', [
-    ['Criar e editar missões', 'Hoje só se vê o que foi enviado.'],
     ['Níveis e selos', 'Arte nova da Fundadora, das missões e dos carimbos das edições.'],
   ]],
 ];
@@ -193,8 +178,7 @@ const FALTA: Array<[string, Array<[string, string]>]> = [
 export function ConfigPage() {
   const [aba, mudar] = useAba('falta', ['falta', 'testar', 'saiu', 'equipe']);
   return (
-    <>
-      <Abas atual={aba} onChange={mudar} abas={[['falta', 'O que falta construir'], ['testar', 'Testar como participante'], ['saiu', 'Quem saiu dos e-mails'], ['equipe', 'Equipe do painel']]} />
+    <Secoes atual={aba} onChange={mudar} abas={[['falta', 'O que falta construir'], ['testar', 'Testar como participante'], ['saiu', 'Quem saiu dos e-mails'], ['equipe', 'Equipe do painel']]}>
       {aba === 'falta' && (
         <>
           <Cabecalho rotulo="CONFIGURAÇÕES" titulo="O que o painel ainda não faz" texto="A lista de tudo o que foi combinado e ainda não está pronto. Cada item sai daqui quando for entregue." />
@@ -215,7 +199,7 @@ export function ConfigPage() {
       )}
       {aba === 'saiu' && <Descadastros />}
       {aba === 'equipe' && <EmBreve rotulo="EQUIPE DO PAINEL" titulo="Quem acessa o painel" hoje="Por enquanto só você entra e decide tudo." itens={[['Acesso para uma parceira', 'Um acesso específico, com visão limitada ao que ela precisa.'], ['Quem aprova adesões', 'Hoje só você.']]} />}
-    </>
+    </Secoes>
   );
 }
 
@@ -237,7 +221,7 @@ export function InicioPage() {
   ] as Array<[string, number, string]>).filter(([, total]) => total > 0);
   return (
     <>
-      <Cabecalho rotulo="INÍCIO" titulo="O que pede você hoje" texto={edicao ? `Próximo encontro: ${edicao.titulo}, ${dataBr(edicao.data_evento)}.` : 'Nenhum encontro marcado no site.'} />
+      <Cabecalho rotulo="INÍCIO" titulo="Visão geral" texto={edicao ? `Próximo encontro: ${edicao.titulo}, ${dataBr(edicao.data_evento)}.` : 'Nenhum encontro marcado no site.'} />
       <section className="adm-fazer">
         <header><small>FAZER AGORA</small></header>
         {fazer.length ? <ul>{fazer.map(([nome, total, para]) => <li key={nome}><Link to={para}><strong>{total}</strong><span>{nome}</span><em>Abrir</em></Link></li>)}</ul> : <p className="adm-hint">Nada esperando uma decisão sua.</p>}
@@ -260,12 +244,19 @@ export function InicioPage() {
 
 const GRUPOS_MENU: Array<{ nome?: string; itens: Array<[string, string, (keyof Espera | 'aprovacoes')?]> }> = [
   { itens: [['/admin', 'Início']] },
-  { nome: 'Operação', itens: [['/admin/edicoes', 'Edições'], ['/admin/pessoas', 'Pessoas'], ['/admin/aprovacoes', 'Aprovações', 'aprovacoes']] },
-  { nome: 'Programa', itens: [['/admin/programa', 'Programa de membros'], ['/admin/rede', 'Rede e parceiros']] },
+  { nome: 'Operação', itens: [['/admin/edicoes', 'Edições'], ['/admin/custos', 'Custos'], ['/admin/pessoas', 'Pessoas'], ['/admin/aprovacoes', 'Aprovações', 'aprovacoes']] },
+  { nome: 'Programa', itens: [['/admin/programa', 'Trilha e regras'], ['/admin/rede', 'Rede e parceiros']] },
   { nome: 'Comunicação', itens: [['/admin/emails', 'E-mails'], ['/admin/formularios', 'Formulários']] },
   { nome: 'Conteúdo', itens: [['/admin/site', 'Site'], ['/admin/app', 'App do membro']] },
   { nome: 'Sistema', itens: [['/admin/configuracoes', 'Configurações']] },
 ];
+
+const ICONES_MENU: Record<string, LucideIcon> = {
+  '/admin/custos': Wallet, '/admin': House, '/admin/edicoes': CalendarDays, '/admin/pessoas': Users,
+  '/admin/aprovacoes': CircleCheck, '/admin/programa': Route, '/admin/rede': Network,
+  '/admin/emails': Mail, '/admin/formularios': FileText, '/admin/site': Globe,
+  '/admin/app': Smartphone, '/admin/configuracoes': Settings,
+};
 
 export function MenuLateral({ email, onSair, fechar }: { email: string; onSair: () => void; fechar: () => void }) {
   const espera = useEspera();
@@ -273,18 +264,19 @@ export function MenuLateral({ email, onSair, fechar }: { email: string; onSair: 
   return (
     <nav className="adm__side" aria-label="Menu do painel">
       <NavLink to="/admin" className="adm__logo" onClick={fechar}><img src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" /></NavLink>
+      <Link className="adm__acao" to="/admin/aprovacoes?aba=adesoes" onClick={fechar}><CircleCheck size={16} aria-hidden="true" />Revisar aprovações<ChevronRight size={14} aria-hidden="true" /></Link>
       {GRUPOS_MENU.map((grupo) => (
         <div key={grupo.nome || 'topo'} className="adm__grupo">
           {grupo.nome && <div className="grp">{grupo.nome}</div>}
-          {grupo.itens.map(([to, nome, selo]) => (
-            <NavLink key={to} to={to} end={to === '/admin'} className={({ isActive }) => `item${isActive ? ' active' : ''}`} onClick={fechar}>{nome}{selo && aguardando > 0 ? <i className="badge">{aguardando}</i> : null}</NavLink>
-          ))}
+          {grupo.itens.map(([to, nome, selo]) => { const Icone = ICONES_MENU[to]; return (
+            <NavLink key={to} to={to} end={to === '/admin'} className={({ isActive }) => `item${isActive ? ' active' : ''}`} onClick={fechar}><Icone size={16} strokeWidth={1.6} aria-hidden="true" /><span>{nome}</span>{selo && aguardando > 0 ? <i className="badge">{aguardando}</i> : null}</NavLink>
+          ); })}
         </div>
       ))}
       <div className="adm__rodape">
-        <a href="/" target="_blank" rel="noopener noreferrer">Ver o site</a>
-        <span title={email}>{email}</span>
-        <button type="button" onClick={onSair}>Sair</button>
+        <a href="/" target="_blank" rel="noopener noreferrer"><ArrowUpRight size={15} aria-hidden="true" />Ver o site</a>
+        <div className="adm__conta"><span className="adm__avatar" aria-hidden="true">{email.charAt(0).toUpperCase()}</span><div><strong>Organização</strong><span title={email}>{email}</span></div></div>
+        <button type="button" onClick={onSair}><LogOut size={14} aria-hidden="true" />Sair</button>
       </div>
     </nav>
   );

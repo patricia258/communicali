@@ -1,4 +1,5 @@
 // Roda todo dia pelo agendador da Vercel e lembra quem está inscrito nas edições que acontecem no dia seguinte (sexta-feira, para encontros de sábado).
+import { avisarCustos } from './_custos-avisos.js';
 import { EDITION_FIELDS, banco, destinatarios, enviarUmaVez, pausa } from './_email.js';
 
 export default async function handler(req, res) {
@@ -27,6 +28,7 @@ export default async function handler(req, res) {
       if (situacao !== 'ja_enviado') await pausa();
     }
   }
+  const custos = await avisarCustos().catch(() => ({ erro: 1 }));
   const avisos = await fetch('https://comuni.calirh.com/api/avisos', { method: 'POST' }).then((r) => r.json()).catch(() => null);
-  res.status(200).json({ alvo, edicoes: editions.length, ...total, consumo, avisos });
+  res.status(200).json({ alvo, edicoes: editions.length, ...total, consumo, avisos, custos });
 }

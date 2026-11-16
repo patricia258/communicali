@@ -177,10 +177,10 @@ export function MembersPanel() {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState<(Member & Extra) | null>(null);
   const [fichas, setFichas] = useState<Record<string, Ficha>>({});
-  const [params] = useSearchParams();
-  const load = () => {
+  const [params, setParams] = useSearchParams();
+  const load = (abrirPedida = true) => {
     supabase.from('members_ficha').select('*').then(({ data }) => setFichas(Object.fromEntries(((data || []) as Ficha[]).map((item) => [item.member_id, item]))));
-    supabase.from('members').select('*').order('created_at', { ascending: false }).then(({ data }) => { const itens = (data || []) as Array<Member & Extra>; setList(itens); const pedido = params.get('abrir'); if (pedido) setOpen((atual) => atual || itens.find((item) => item.id === pedido) || null); });
+    supabase.from('members').select('*').order('created_at', { ascending: false }).then(({ data }) => { const itens = (data || []) as Array<Member & Extra>; setList(itens); const pedido = params.get('abrir'); if (abrirPedida && pedido) setOpen((atual) => atual || itens.find((item) => item.id === pedido) || null); });
     supabase.from('checkins').select('member_id').then(({ data }) => { const totais: Record<string, { total: number }> = {}; for (const row of data || []) totais[row.member_id] = { total: (totais[row.member_id]?.total || 0) + 1 }; setEncontros(totais); });
     supabase.from('point_events').select('member_id,pontos').then(({ data }) => {
       const totals: Record<string, number> = {};
@@ -212,7 +212,7 @@ export function MembersPanel() {
     load();
   }
 
-  if (open) return <MemberEditor key={open.id} member={open} ficha={fichas[open.id]} onBack={() => { setOpen(null); load(); }} alternar={() => void toggleStatus(open).then(() => setOpen(null))} excluir={() => void remove(open).then(() => setOpen(null))} />;
+  if (open) return <MemberEditor key={open.id} member={open} ficha={fichas[open.id]} onBack={() => { setOpen(null); const proximo = new URLSearchParams(params); proximo.delete('abrir'); setParams(proximo, { replace: true }); load(false); }} alternar={() => void toggleStatus(open).then(() => setOpen(null))} excluir={() => void remove(open).then(() => setOpen(null))} />;
   const categoriaDe = (item: Member) => (item.status === 'suspenso' ? 'Suspenso' : fichas[item.id] && fichas[item.id].estagio !== 'membro' ? 'Ainda não é Membro' : CATEGORIAS[item.categoria] || item.categoria);
   const dias = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
   const tempo = (iso: string) => { const total = dias(iso); return total < 30 ? `${total} dias` : total < 365 ? `${Math.floor(total / 30)} meses` : `${Math.floor(total / 365)} anos`; };
@@ -235,8 +235,8 @@ export function MembersPanel() {
   ];
   return (
     <>
-      <div className="wf-head"><div><small>MEMBROS</small><h1>Quem faz parte da comunidade</h1><p>Clique no título da coluna para ordenar e no nome para abrir a ficha. Toda alteração fica registrada.</p></div><div className="v2-head-actions"><button type="button" className="wf-secondary" disabled={!visible.length} onClick={exportAll}>Exportar Excel</button></div></div>
-      <Tabela colunas={colunas} linhas={list} chave={(item) => item.id} vazio="Nenhum membro encontrado." filtros={[{ id: 'categoria', titulo: 'Categoria', valor: categoriaDe }, { id: 'adesao', titulo: 'Adesão', valor: (item) => (item.adesao_origem === 'legado' ? 'Membro anterior' : item.adesao_status ? ADESAO[item.adesao_status] : 'Sem pedido') }, { id: 'segmento', titulo: 'Segmento', valor: (item) => item.segmento || '' }, { id: 'regiao', titulo: 'Região', valor: (item) => item.regiao || '' }, { id: 'mercado', titulo: 'Mercado', valor: (item) => (item.aberto_trabalho ? 'Open to work' : item.recrutador ? 'Recruta' : '') }]} />
+      <div className="wf-head"><div><small>PESSOAS</small><h1>Membros e visitantes</h1><p>Veja o estágio e a adesão de cada pessoa. Abra o nome para consultar ou editar a ficha.</p></div><div className="v2-head-actions"><button type="button" className="wf-secondary" disabled={!visible.length} onClick={exportAll}>Exportar Excel</button></div></div>
+      <Tabela colunas={colunas} colunasIniciais={['nome', 'estagio', 'adesao', 'pre']} linhas={list} chave={(item) => item.id} vazio="Nenhum membro encontrado." filtros={[{ id: 'categoria', titulo: 'Categoria', valor: categoriaDe }, { id: 'adesao', titulo: 'Adesão', valor: (item) => (item.adesao_origem === 'legado' ? 'Membro anterior' : item.adesao_status ? ADESAO[item.adesao_status] : 'Sem pedido') }, { id: 'segmento', titulo: 'Segmento', valor: (item) => item.segmento || '' }, { id: 'regiao', titulo: 'Região', valor: (item) => item.regiao || '' }, { id: 'mercado', titulo: 'Mercado', valor: (item) => (item.aberto_trabalho ? 'Open to work' : item.recrutador ? 'Recruta' : '') }]} />
     </>
   );
 }

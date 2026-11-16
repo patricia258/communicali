@@ -1,3 +1,4 @@
+import { albumHandler } from './_album.js';
 // Página de uma edição com prévia própria no WhatsApp, LinkedIn e redes: quem lê o link recebe título, data e foto daquela edição.
 const SUPABASE = 'https://cyyrrtekbkltdiatixhp.supabase.co';
 const KEY = 'sb_publishable_57ZoSr7YGi1KqVdKmXMUxw_wGS-H19P';
@@ -6,6 +7,7 @@ const escape = (value) => String(value ?? '').replace(/[&<>"]/g, (char) => ({ '&
 const longDate = (iso) => new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`));
 
 export default async function handler(req, res) {
+  if (String(req.query?.acao || '').startsWith('album_')) return albumHandler(req, res);
   const origin = `https://${req.headers.host}`;
   const slug = String(req.query.slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
   const page = await (await fetch(`${origin}/index.html`)).text();

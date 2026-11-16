@@ -1,0 +1,970 @@
+[
+  {
+    "id": "hero_titulo",
+    "secao": "abertura",
+    "padrao": "Falar de pessoas pode",
+    "tipo": "texto"
+  },
+  {
+    "id": "hero_destaque",
+    "secao": "abertura",
+    "padrao": "mudar o mundo.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_001",
+    "secao": "comunidade",
+    "padrao": "A COMUNIDADE",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_002",
+    "secao": "comunidade",
+    "padrao": "Quatro jeitos de se encontrar,",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_003",
+    "secao": "comunidade",
+    "padrao": "um só propósito: conectar pessoas.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_004",
+    "secao": "outros",
+    "padrao": "+",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_005",
+    "secao": "agenda",
+    "padrao": "·",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_006",
+    "secao": "agenda",
+    "padrao": "Encontro aberto",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_007",
+    "secao": "agenda",
+    "padrao": "Quando",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_008",
+    "secao": "agenda",
+    "padrao": ",",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_009",
+    "secao": "agenda",
+    "padrao": "Onde",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_010",
+    "secao": "agenda",
+    "padrao": ",",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_011",
+    "secao": "agenda",
+    "padrao": "Endereço",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_012",
+    "secao": "agenda",
+    "padrao": "Valor",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_013",
+    "secao": "agenda",
+    "padrao": "Ver como foi",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_014",
+    "secao": "agenda",
+    "padrao": "Garantir minha vaga",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_015",
+    "secao": "agenda",
+    "padrao": "Entrar no grupo",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_016",
+    "secao": "agenda",
+    "padrao": "Como chegar",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_017",
+    "secao": "agenda",
+    "padrao": "Em breve",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_018",
+    "secao": "agenda",
+    "padrao": "DATA A DEFINIR",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_019",
+    "secao": "agenda",
+    "padrao": "Próximo encontro",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_020",
+    "secao": "agenda",
+    "padrao": "Curitiba e região",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_021",
+    "secao": "agenda",
+    "padrao": "A definir",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_022",
+    "secao": "agenda",
+    "padrao": "Valor divulgado com a edição",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_023",
+    "secao": "embaixadores",
+    "padrao": "EMBAIXADORES",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_024",
+    "secao": "embaixadores",
+    "padrao": "Faça parte desse ecossistema.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_025",
+    "secao": "embaixadores",
+    "padrao": "Arraste",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_026",
+    "secao": "embaixadores",
+    "padrao": "→",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_027",
+    "secao": "embaixadores",
+    "padrao": "Arraste",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_028",
+    "secao": "manifesto",
+    "padrao": "Patrícia Lima",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_029",
+    "secao": "manifesto",
+    "padrao": "Fundadora da CALI RH e idealizadora da ComuniCALI.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_030",
+    "secao": "manifesto",
+    "padrao": "A COMUNIDADE",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_031",
+    "secao": "manifesto",
+    "padrao": "Gente que se encontra e segue junta.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_032",
+    "secao": "manifesto",
+    "padrao": "A ComuniCALI reúne quem se interessa por",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_033",
+    "secao": "manifesto",
+    "padrao": "gente",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_034",
+    "secao": "manifesto",
+    "padrao": ". Cada pessoa chega com a sua",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_035",
+    "secao": "manifesto",
+    "padrao": "bagagem",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_036",
+    "secao": "manifesto",
+    "padrao": ", e quando escutamos alguém, descobrimos",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_037",
+    "secao": "manifesto",
+    "padrao": "caminhos",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_038",
+    "secao": "manifesto",
+    "padrao": "que nunca percorreríamos sozinhos. Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_039",
+    "secao": "manifesto",
+    "padrao": "fé e integridade",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_040",
+    "secao": "manifesto",
+    "padrao": ", e damos",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_041",
+    "secao": "manifesto",
+    "padrao": "toda honra a Deus",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_042",
+    "secao": "manifesto",
+    "padrao": "por cada caminho que se cruza aqui.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_043",
+    "secao": "manifesto",
+    "padrao": "“Assim como tudo na minha vida, a ideia da ComuniCALI nasceu de uma oportunidade de fazer algo bom acontecer, juntar gente boa e falar de temas relevantes.”",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_044",
+    "secao": "manifesto",
+    "padrao": "Patrícia Lima",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_045",
+    "secao": "abertura",
+    "padrao": "Comunidade",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_046",
+    "secao": "abertura",
+    "padrao": "Agenda",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_047",
+    "secao": "abertura",
+    "padrao": "Parceiros",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_048",
+    "secao": "abertura",
+    "padrao": "Minha área",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_049",
+    "secao": "abertura",
+    "padrao": "Registrar interesse",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_050",
+    "secao": "abertura",
+    "padrao": "Uma comunidade para unir.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_051",
+    "secao": "abertura",
+    "padrao": "Cada pessoa chega com a sua bagagem.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_052",
+    "secao": "abertura",
+    "padrao": "Quando histórias diferentes se encontram, novos caminhos aparecem.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_053",
+    "secao": "abertura",
+    "padrao": "Ver a agenda",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_054",
+    "secao": "abertura",
+    "padrao": "Registrar interesse",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_055",
+    "secao": "abertura",
+    "padrao": "Seu passaporte",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_056",
+    "secao": "abertura",
+    "padrao": "Carimbos, selos e milhas de quem faz parte da comunidade. Cada encontro é uma parada na sua jornada!",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_057",
+    "secao": "abertura",
+    "padrao": "Conhecer",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_058",
+    "secao": "abertura",
+    "padrao": "Encontros",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_059",
+    "secao": "abertura",
+    "padrao": "Presenciais, online, experiências e jantares. Veja o que vem por aí e relembre os anteriores!",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_060",
+    "secao": "abertura",
+    "padrao": "Ver agenda",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_061",
+    "secao": "abertura",
+    "padrao": "Grupo da comunidade",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_062",
+    "secao": "abertura",
+    "padrao": "pessoas do Brasil inteiro, no grupo e nos encontros.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_063",
+    "secao": "abertura",
+    "padrao": "É onde o papo continua entre um encontro e outro: vagas, contatos, dúvidas e muita troca!",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_064",
+    "secao": "abertura",
+    "padrao": "Entrar no grupo",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_065",
+    "secao": "selos",
+    "padrao": "Os selos contam o seu caminho.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_066",
+    "secao": "selos",
+    "padrao": "Como convidado ou visitante, você dá o primeiro passo dentro da comunidade. Já membros, conectores e embaixadores vivem a evolução da sua jornada.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_067",
+    "secao": "programa",
+    "padrao": "Sua jornada.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_068",
+    "secao": "programa",
+    "padrao": "1",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_069",
+    "secao": "programa",
+    "padrao": "Visite",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_070",
+    "secao": "programa",
+    "padrao": "Venha até 2 vezes",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_071",
+    "secao": "programa",
+    "padrao": "como Visitante ou Convidado, em encontros abertos e gratuitos. Só conta a visita com check-in.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_072",
+    "secao": "programa",
+    "padrao": "2",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_073",
+    "secao": "programa",
+    "padrao": "Faça parte",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_074",
+    "secao": "programa",
+    "padrao": "Gostou? Depois da primeira visita, é só solicitar para fazer parte da comunidade.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_075",
+    "secao": "programa",
+    "padrao": "É gratuito",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_076",
+    "secao": "programa",
+    "padrao": ", e a gente vai analisar e entrar em contato.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_077",
+    "secao": "programa",
+    "padrao": "3",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_078",
+    "secao": "programa",
+    "padrao": "Acumule milhas",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_079",
+    "secao": "programa",
+    "padrao": "As milhas começam quando você entra, ou seja, como membro. Contam presença, convites e comparecimentos, experiências e conteúdos aprovados, parceiros indicados, entre outros.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_080",
+    "secao": "programa",
+    "padrao": "4",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_081",
+    "secao": "programa",
+    "padrao": "Evolua",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_082",
+    "secao": "programa",
+    "padrao": "Conectores e Embaixadores são membros, profissionais que mais contribuem. A evolução vem de vários indicadores.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_083",
+    "secao": "agenda",
+    "padrao": "Próximos encontros.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_084",
+    "secao": "agenda",
+    "padrao": "Pode chegar! As inscrições e os avisos saem primeiro no grupo da comunidade.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_085",
+    "secao": "como-entrar",
+    "padrao": "ANTES DE FAZER PARTE",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_086",
+    "secao": "como-entrar",
+    "padrao": "Conheça a comunidade",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_087",
+    "secao": "como-entrar",
+    "padrao": "Venha conhecer! Você tem até 2 visitas abertas e gratuitas antes de fazer parte da comunidade.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_088",
+    "secao": "como-entrar",
+    "padrao": "Visitante: você chega por vontade própria",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_089",
+    "secao": "como-entrar",
+    "padrao": "Convidado: alguém da comunidade chamou você",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_090",
+    "secao": "como-entrar",
+    "padrao": "As duas visitas somam no mesmo contador",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_091",
+    "secao": "como-entrar",
+    "padrao": "Só conta a visita com check-in",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_092",
+    "secao": "como-entrar",
+    "padrao": "O valor de cada encontro está na agenda",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_093",
+    "secao": "como-entrar",
+    "padrao": "Registrar interesse",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_094",
+    "secao": "como-entrar",
+    "padrao": "DEPOIS DA VISITA",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_095",
+    "secao": "como-entrar",
+    "padrao": "Faça parte",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_096",
+    "secao": "como-entrar",
+    "padrao": "Gostou? Depois da primeira visita, é só pedir para fazer parte da comunidade. É gratuito, e a gente analisa cada pedido com carinho.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_097",
+    "secao": "como-entrar",
+    "padrao": "Meu passaporte: carimbos, selos e milhas",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_098",
+    "secao": "como-entrar",
+    "padrao": "A Rede da comunidade",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_099",
+    "secao": "como-entrar",
+    "padrao": "Convidar gente para os encontros",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_100",
+    "secao": "como-entrar",
+    "padrao": "Sempre gratuito",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_101",
+    "secao": "como-entrar",
+    "padrao": "Entrar na minha área",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_102",
+    "secao": "como-entrar",
+    "padrao": "CONVITE",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_103",
+    "secao": "como-entrar",
+    "padrao": "Por convite",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_104",
+    "secao": "como-entrar",
+    "padrao": "Alguém da comunidade chama você e você chega como Convidado. Essa visita conta nas suas 2.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_105",
+    "secao": "como-entrar",
+    "padrao": "O convite não garante vaga",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_106",
+    "secao": "como-entrar",
+    "padrao": "A vaga depende de inscrição e confirmação",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_107",
+    "secao": "como-entrar",
+    "padrao": "Como funciona",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_108",
+    "secao": "edicoes",
+    "padrao": "Edições passadas.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_109",
+    "secao": "edicoes",
+    "padrao": "Aqui você encontra um resumo de como foram os nossos encontros, vê uma prévia das fotos e conhece um pouquinho de cada edição.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_110",
+    "secao": "edicoes",
+    "padrao": "·",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_111",
+    "secao": "edicoes",
+    "padrao": "Resumo e fotos",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_112",
+    "secao": "edicoes",
+    "padrao": "Em breve",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_113",
+    "secao": "edicoes",
+    "padrao": "As edições encerradas aparecem aqui",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_114",
+    "secao": "parceiros",
+    "padrao": "Apoie este encontro. Seja um parceiro.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_115",
+    "secao": "parceiros",
+    "padrao": "Nem toda contribuição é financeira: cada parceiro oferece o que faz de melhor, e a gente combina tudo junto, um a um.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_116",
+    "secao": "parceiros",
+    "padrao": "Quero ser parceiro",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_117",
+    "secao": "abertura",
+    "padrao": "Perguntas frequentes.",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_118",
+    "secao": "abertura",
+    "padrao": "+",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_119",
+    "secao": "abertura",
+    "padrao": "Primeira vez por aqui? Bora começar a sua jornada!",
+    "tipo": "texto"
+  },
+  {
+    "id": "texto_120",
+    "secao": "abertura",
+    "padrao": "Registrar interesse",
+    "tipo": "texto"
+  },
+  {
+    "id": "formatos_0_0",
+    "secao": "comunidade",
+    "padrao": "Presenciais",
+    "tipo": "texto"
+  },
+  {
+    "id": "formatos_0_1",
+    "secao": "comunidade",
+    "padrao": "Cafés e conversas olho no olho, em Curitiba e região.",
+    "tipo": "texto"
+  },
+  {
+    "id": "formatos_1_0",
+    "secao": "comunidade",
+    "padrao": "Virtuais",
+    "tipo": "texto"
+  },
+  {
+    "id": "formatos_1_1",
+    "secao": "comunidade",
+    "padrao": "Online, para quem está em qualquer lugar do Brasil. Tem lugar para todo mundo!",
+    "tipo": "texto"
+  },
+  {
+    "id": "formatos_2_0",
+    "secao": "comunidade",
+    "padrao": "Experiências",
+    "tipo": "texto"
+  },
+  {
+    "id": "formatos_2_1",
+    "secao": "comunidade",
+    "padrao": "Vivências, visitas e palestras que mudam a forma de enxergar.",
+    "tipo": "texto"
+  },
+  {
+    "id": "formatos_3_0",
+    "secao": "comunidade",
+    "padrao": "Almoços e jantares",
+    "tipo": "texto"
+  },
+  {
+    "id": "formatos_3_1",
+    "secao": "comunidade",
+    "padrao": "Papo bom à mesa, em grupos pequenos.",
+    "tipo": "texto"
+  },
+  {
+    "id": "selos_0_2",
+    "secao": "selos",
+    "padrao": "Chega por convite de alguém da comunidade",
+    "tipo": "texto"
+  },
+  {
+    "id": "selos_1_2",
+    "secao": "selos",
+    "padrao": "Chega por interesse próprio",
+    "tipo": "texto"
+  },
+  {
+    "id": "selos_2_2",
+    "secao": "selos",
+    "padrao": "Faz parte da comunidade",
+    "tipo": "texto"
+  },
+  {
+    "id": "selos_3_2",
+    "secao": "selos",
+    "padrao": "Faz as pontes entre as pessoas",
+    "tipo": "texto"
+  },
+  {
+    "id": "selos_4_2",
+    "secao": "selos",
+    "padrao": "Leva a comunidade mais longe",
+    "tipo": "texto"
+  },
+  {
+    "id": "parcerias_0_0",
+    "secao": "parceiros",
+    "padrao": "Experiência",
+    "tipo": "texto"
+  },
+  {
+    "id": "parcerias_0_1",
+    "secao": "parceiros",
+    "padrao": "Vivências e momentos que ficam na memória.",
+    "tipo": "texto"
+  },
+  {
+    "id": "parcerias_1_0",
+    "secao": "parceiros",
+    "padrao": "Produção",
+    "tipo": "texto"
+  },
+  {
+    "id": "parcerias_1_1",
+    "secao": "parceiros",
+    "padrao": "Estrutura e cuidado para o encontro acontecer.",
+    "tipo": "texto"
+  },
+  {
+    "id": "parcerias_2_0",
+    "secao": "parceiros",
+    "padrao": "Conhecimento",
+    "tipo": "texto"
+  },
+  {
+    "id": "parcerias_2_1",
+    "secao": "parceiros",
+    "padrao": "Conteúdo e troca que abrem a cabeça.",
+    "tipo": "texto"
+  },
+  {
+    "id": "parcerias_3_0",
+    "secao": "parceiros",
+    "padrao": "Rede e comunidade",
+    "tipo": "texto"
+  },
+  {
+    "id": "parcerias_3_1",
+    "secao": "parceiros",
+    "padrao": "Conexões que continuam depois do encontro.",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_0_0",
+    "secao": "perguntas",
+    "padrao": "Fazer parte da comunidade é gratuito?",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_0_1",
+    "secao": "perguntas",
+    "padrao": "É sim, e continua sendo!",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_1_0",
+    "secao": "perguntas",
+    "padrao": "Todos os eventos são gratuitos?",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_1_1",
+    "secao": "perguntas",
+    "padrao": "Nem todos. Alguns são, outros não. O valor de cada edição fica sempre na página dela, para você se programar.",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_2_0",
+    "secao": "perguntas",
+    "padrao": "Preciso ser de RH para participar?",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_2_1",
+    "secao": "perguntas",
+    "padrao": "Não! A base da comunidade é de gente de RH e da área administrativa, mas líderes, empreendedores e especialistas de qualquer área são muito bem-vindos, do estágio à transição de carreira.",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_3_0",
+    "secao": "perguntas",
+    "padrao": "A comunidade é só de Curitiba?",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_3_1",
+    "secao": "perguntas",
+    "padrao": "Não. O grupo reúne gente do Brasil inteiro. Os encontros presenciais é que começam por Curitiba.",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_4_0",
+    "secao": "perguntas",
+    "padrao": "Posso divulgar vagas e meus serviços?",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_4_1",
+    "secao": "perguntas",
+    "padrao": "Pode! O grupo também existe para isso, com respeito às regras de participação.",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_5_0",
+    "secao": "perguntas",
+    "padrao": "Como participo de um encontro?",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_5_1",
+    "secao": "perguntas",
+    "padrao": "Entre no grupo da comunidade e se inscreva. Cada edição é divulgada lá, com data, local e link de inscrição.",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_6_0",
+    "secao": "perguntas",
+    "padrao": "Quantas vezes posso ir a um encontro sem fazer parte da comunidade?",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_6_1",
+    "secao": "perguntas",
+    "padrao": "Até 2 vezes, em encontros abertos e gratuitos. Só conta a visita em que você fez o check-in. Se alguém da comunidade chamou você, entra como Convidado. Se veio por vontade própria, entra como Visitante, e as duas somam no mesmo contador. Depois da primeira visita você já pode pedir para fazer parte. Depois da segunda, para continuar nos encontros abertos e gratuitos, é preciso fazer parte.",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_7_0",
+    "secao": "perguntas",
+    "padrao": "Ir a um encontro me faz parte da comunidade?",
+    "tipo": "texto"
+  },
+  {
+    "id": "faq_7_1",
+    "secao": "perguntas",
+    "padrao": "Não automaticamente. Depois da primeira visita você já pode pedir para fazer parte, e o pedido passa pelo cadastro, pelo aceite das regras e pela análise da organização.",
+    "tipo": "texto"
+  },
+  {
+    "id": "foto_abertura",
+    "secao": "abertura",
+    "padrao": "",
+    "tipo": "imagem",
+    "rotulo": "Foto da abertura"
+  },
+  {
+    "id": "foto_edicoes",
+    "secao": "edicoes",
+    "padrao": "",
+    "tipo": "imagem",
+    "rotulo": "Foto das edições passadas"
+  }
+]
