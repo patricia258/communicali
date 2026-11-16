@@ -54,7 +54,9 @@ export function AlbumDaEdicao({ encontro, stats: statsFora, voltar, atualizar: a
   const atualizar = () => { if (embutido) setContar((n) => n + 1); else atualizarFora?.(); };
   const arquivo = useRef<HTMLInputElement>(null);
   const { enquadrar, editor } = useEnquadramento();
-  const [albumUrl, setAlbumUrl] = useState('');
+  type LinkEdit = { id: string; rotulo: string; url: string };
+  const [links, setLinks] = useState<LinkEdit[]>([]);
+  const [porLink, setPorLink] = useState<Record<string, { cliques: number; pessoas: number }>>({});
   const [publicado, setPublicado] = useState(false);
   const [fotos, setFotos] = useState<Foto[]>([]);
   const [aviso, setAviso] = useState('');
@@ -72,15 +74,21 @@ export function AlbumDaEdicao({ encontro, stats: statsFora, voltar, atualizar: a
   useEffect(() => {
     void (async () => {
       try {
-        const { data, error } = await supabase.from('edition_albums').select('album_url,publicado').eq('edition_id', encontro.id).maybeSingle();
+        const { data, error } = await supabase.from('edition_albums').select('album_url,links,publicado').eq('edition_id', encontro.id).maybeSingle();
         if (error) throw error;
-        setAlbumUrl(data?.album_url || ''); setPublicado(data?.publicado || false);
+        const salvos = (Array.isArray(data?.links) ? data.links : []) as LinkEdit[];
+        setLinks(salvos.length ? salvos : data?.album_url ? [{ id: 'fotos', rotulo: 'Acesse aqui as suas fotos', url: data.album_url }] : []);
+        setPublicado(data?.publicado || false);
+        const { data: contagens } = await supabase.from('edition_album_link_stats').select('link_id,cliques,pessoas').eq('edition_id', encontro.id);
+        setPorLink(Object.fromEntries((contagens || []).map((c: { link_id: string; cliques: number; pessoas: number }) => [c.link_id, { cliques: c.cliques, pessoas: c.pessoas }])));
         await carregarFotos(); setPronto(true);
       } catch { setAviso('Não foi possível carregar o álbum. Confira se a configuração do banco já foi ativada.'); }
     })();
   }, [encontro.id]);
   async function salvar(exibir = true) {
-    if (albumUrl.trim() && !urlValida(albumUrl.trim())) { setAviso('Use um link HTTPS válido para o álbum.'); return; }
+    const limpos = links.map((l) => ({ ...l, rotulo: l.rotulo.trim(), url: l.url.trim() })).filter((l) => l.rotulo || l.url);
+    if (limpos.some((l) => !l.rotulo || l.rotulo.length > 60)) { setAviso('Dê um nome para cada botão, de 1 a 60 letras.'); return; }
+    if (limpos.some((l) => !urlValida(l.url))) { setAviso('Use links HTTPS válidos, começando com https://.'); return; }
     const selecionadas = fotos.filter(f => f.public_preview);
     if (selecionadas.length > 4) { setAviso('Use no máximo quatro fotos na prévia.'); return; }
     if (exibir && !selecionadas.length) { setAviso('Escolha ao menos uma foto para publicar a prévia.'); return; }
@@ -88,7 +96,7 @@ export function AlbumDaEdicao({ encontro, stats: statsFora, voltar, atualizar: a
     try {
       const resultados = await Promise.all(fotos.map((foto) => supabase.from('edition_album_photos').update({ legenda: foto.legenda, ordem: foto.ordem, public_preview: foto.public_preview }).eq('id', foto.id).eq('edition_id', encontro.id)));
       if (resultados.some((item) => item.error)) throw new Error('fotos');
-      const {error} = await supabase.from('edition_albums').upsert({edition_id:encontro.id,album_url:albumUrl.trim()||null,publicado:exibir,updated_at:new Date().toISOString()}); if(error)throw error;
+      const {error} = await supabase.from('edition_albums').upsert({edition_id:encontro.id,album_url:limpos[0]?.url||null,links:limpos,publicado:exibir,updated_at:new Date().toISOString()}); if(error)throw error;
       setPublicado(exibir);
       const resposta = await fetch('/api/edicao?acao=album_previa',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug:encontro.slug})});
       const previa = await resposta.json();
@@ -188,7 +196,21 @@ export function AlbumDaEdicao({ encontro, stats: statsFora, voltar, atualizar: a
     <div className="adm-album-numeros"><div><strong>{stats?.cliques ?? '—'}</strong><span>Cliques em abrir álbum</span></div><div><strong>{stats?.pessoas ?? '—'}</strong><span>E-mails que abriram</span></div><div><strong>{fotos.length}</strong><span>Fotos na página</span></div></div>
     <button className="wf-secondary adm-album-atualizar" type="button" onClick={atualizar}>Atualizar contagem</button>
     <section className="v2-forms-card"><header><small>ÁLBUM DO ENCONTRO</small><h2>Fotos e link para baixar</h2></header>
-      <div className="v2-forms-grid"><label className="wide"><span>Link do álbum completo</span><input type="url" placeholder="https://…" disabled={!pronto || busy} value={albumUrl} onChange={(event) => setAlbumUrl(event.target.value)} /></label>
+      <div className="alb-links">
+        <p className="adm-hint">Cada link vira um botão para quem fez check-in, com o nome que você escolher. Todos abrem pelo mesmo caminho: e-mail do check-in e termo de ciência.</p>
+        {links.map((l, i) => (
+          <div className="alb-links__linha" key={l.id}>
+            <label><span>Nome do botão</span><input maxLength={60} placeholder="Acesse aqui as suas fotos" disabled={!pronto || busy} value={l.rotulo} onChange={(e) => setLinks((atual) => atual.map((x, n) => n === i ? { ...x, rotulo: e.target.value } : x))} /></label>
+            <label><span>Link</span><input type="url" placeholder="https://…" disabled={!pronto || busy} value={l.url} onChange={(e) => setLinks((atual) => atual.map((x, n) => n === i ? { ...x, url: e.target.value } : x))} /></label>
+            <div className="alb-links__acoes">
+              <button type="button" className="wf-secondary" aria-label="Subir" disabled={busy || i === 0} onClick={() => setLinks((a) => { const c = [...a]; [c[i - 1], c[i]] = [c[i], c[i - 1]]; return c; })}><ArrowUp size={14} /></button>
+              <button type="button" className="wf-secondary" aria-label="Descer" disabled={busy || i === links.length - 1} onClick={() => setLinks((a) => { const c = [...a]; [c[i + 1], c[i]] = [c[i], c[i + 1]]; return c; })}><ArrowDown size={14} /></button>
+              <button type="button" className="wf-secondary" aria-label={`Remover ${l.rotulo || 'link'}`} disabled={busy} onClick={() => setLinks((a) => a.filter((_, n) => n !== i))}><Trash2 size={14} /></button>
+            </div>
+            <small className="alb-links__conta">{porLink[l.id] ? `${porLink[l.id].cliques} ${porLink[l.id].cliques === 1 ? 'clique' : 'cliques'} · ${porLink[l.id].pessoas} ${porLink[l.id].pessoas === 1 ? 'e-mail' : 'e-mails'}` : 'Nenhum acesso ainda'}</small>
+          </div>
+        ))}
+        {links.length < 6 && <button type="button" className="wf-secondary" disabled={!pronto || busy} onClick={() => setLinks((a) => [...a, { id: `l${Date.now().toString(36)}`, rotulo: a.length ? 'Acesse aqui os seus vídeos' : 'Acesse aqui as suas fotos', url: '' }])}>Adicionar link</button>}
       </div>
       <p className="adm-hint">{publicacaoPendente ? 'Há alterações para publicar.' : publicado ? 'Prévia publicada no site.' : 'Prévia ainda não publicada.'} O álbum completo abre pelo e-mail do check-in.</p>{publicado && <button type="button" className="wf-secondary" disabled={busy} onClick={() => void salvar(false)}>Ocultar fotos do site</button>}
       <div className="adm-links"><a className="wf-secondary" href={`/e/${encontro.slug}#fotos`} target="_blank" rel="noopener noreferrer"><ExternalLink size={14} />Ver página do encontro</a>{!embutido && <a className="wf-secondary" href={`/admin/edicoes?abrir=${encontro.slug}&secao=site`}>Editar capa e imagens públicas</a>}</div>
@@ -199,13 +221,15 @@ export function AlbumDaEdicao({ encontro, stats: statsFora, voltar, atualizar: a
       <details className="adm-suspensa"><summary>Todas as fotos ({fotos.length})</summary><div className="adm-album-fotos">{fotos.map((foto, indice) => <figure key={foto.id}><small className="adm-album-posicao">{!foto.public_preview ? 'Após o check-in' : previas.indexOf(foto)<4 ? `Prévia ${previas.indexOf(foto)+1} · ${previas.indexOf(foto)===0?'imagem principal':'imagem de apoio'}` : 'Além das quatro prévias visíveis'}</small>{foto.url && <img src={foto.url} alt={foto.legenda || 'Foto do encontro'} />}<label><span>Descrição da foto</span><input disabled={busy} value={foto.legenda} onChange={(event) => setFotos((rows) => rows.map((row) => row.id === foto.id ? { ...row, legenda: event.target.value } : row))} /></label><label className="adm-foto-publica"><input type="checkbox" disabled={busy || (!foto.public_preview && previas.length >= 4)} checked={foto.public_preview} onChange={(e) => { if(e.target.checked && previas.length>=4){setAviso('Use no máximo quatro prévias.');return;}setPublicacaoPendente(true);setFotos((rows) => rows.map((row) => row.id === foto.id ? { ...row, public_preview: e.target.checked } : row)); }} /><span>Usar na prévia do site</span></label><div className="adm-album-foto-acoes"><button type="button" className="wf-secondary" disabled={busy} onClick={() => void reenquadrar(foto)}>Enquadrar</button><button className="wf-secondary" type="button" aria-label={`Mover foto ${indice+1} para cima`} disabled={busy||indice===0} onClick={()=>moverFoto(indice,-1)}><ArrowUp size={14}/></button><button className="wf-secondary" type="button" aria-label={`Mover foto ${indice+1} para baixo`} disabled={busy||indice===fotos.length-1} onClick={()=>moverFoto(indice,1)}><ArrowDown size={14}/></button><button className="wf-secondary" type="button" disabled={busy} onClick={() => void remover(foto)}><Trash2 size={14} />Retirar foto</button></div></figure>)}</div></details>
       {pronto && !fotos.length && <p className="adm-hint">Nenhuma foto enviada para este álbum.</p>}
     </section>
-    <HistoricoAlbum edicaoId={encontro.id} />
+    <HistoricoAlbum edicaoId={encontro.id} nomes={Object.fromEntries(links.map((l) => [l.id, l.rotulo]))} />
     <details className="adm-ajuda"><summary>Sobre a contagem de acessos</summary><p>Os números registram o e-mail informado e a abertura do link, sem comprovar identidade ou download. As permissões da pasta externa continuam valendo.</p></details>
     {aviso && <p className={/^(Não|Use |Envie |Escolha |A prévia)/.test(aviso) ? "v2-forms-error" : "v2-forms-ok"} role="status">{aviso}</p>}
   </>;
 }
 
-function HistoricoAlbum({ edicaoId }: { edicaoId: string }) {
+function HistoricoAlbum({ edicaoId, nomes }: { edicaoId: string; nomes: Record<string, string> }) {
+  const [porEmail, setPorEmail] = useState<Record<string, Array<{ link_id: string; cliques: number }>>>({});
+  useEffect(() => { void Promise.resolve(supabase.from('edition_album_email_link_stats').select('email_informado,link_id,cliques').eq('edition_id', edicaoId)).then(({ data }) => { const m: Record<string, Array<{ link_id: string; cliques: number }>> = {}; for (const r of (data || []) as Array<{ email_informado: string; link_id: string; cliques: number }>) (m[r.email_informado] ||= []).push({ link_id: r.link_id, cliques: r.cliques }); setPorEmail(m); }).catch(() => undefined); }, [edicaoId]);
   const [dados, setDados] = useState<Array<{ email_informado: string; galeria: number; album: number; ultimo_acesso: string; ciente_em: string | null }>>([]);
   const [erro, setErro] = useState('');
   const [liberados, setLiberados] = useState<number | null>(null);
@@ -213,6 +237,6 @@ function HistoricoAlbum({ edicaoId }: { edicaoId: string }) {
   const carregar = () => { void supabase.from('edition_album_email_stats').select('email_informado,galeria,album,ultimo_acesso,ciente_em').eq('edition_id', edicaoId).order('ultimo_acesso', { ascending: false }).then(({ data, error }) => { if (error) setErro('Não foi possível carregar os acessos.'); else { setDados(data || []); setErro(''); } }); };
   useEffect(carregar, [edicaoId]);
   return <section className="v2-forms-card"><header><h2>Histórico de acessos ao álbum</h2></header><p className="adm-hint">{liberados === null ? 'A liberação é automática pelo check-in do evento.' : `${liberados} participante(s) com acesso liberado automaticamente pelo check-in.`}</p><button type="button" className="wf-secondary" onClick={carregar}>Atualizar acessos</button>{erro && <p role="status">{erro}</p>}<Tabela colunas={[
-    {id:'email',titulo:'E-mail',valor:(r)=>r.email_informado,render:(r)=><>{r.email_informado}<small className="adm-custo-pendente">{r.ciente_em?`Confirmou o termo em ${new Date(r.ciente_em).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})} · Brasília`:'Ciência do termo não registrada'}</small></>}, {id:'galeria',titulo:'Aberturas da galeria',valor:(r)=>r.galeria}, {id:'album',titulo:'Cliques no álbum',valor:(r)=>r.album}, {id:'ultimo',titulo:'Último acesso',valor:(r)=>r.ultimo_acesso,render:(r)=>new Date(r.ultimo_acesso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})},
+    {id:'email',titulo:'E-mail',valor:(r)=>r.email_informado,render:(r)=><>{r.email_informado}<small className="adm-custo-pendente">{r.ciente_em?`Confirmou o termo em ${new Date(r.ciente_em).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})} · Brasília`:'Ciência do termo não registrada'}</small></>}, {id:'galeria',titulo:'Aberturas da galeria',valor:(r)=>r.galeria}, {id:'album',titulo:'Cliques no álbum',valor:(r)=>r.album,render:(r)=><>{r.album}{(porEmail[r.email_informado]||[]).length>1&&<small className="adm-custo-pendente">{(porEmail[r.email_informado]||[]).map((x)=>`${nomes[x.link_id]||x.link_id}: ${x.cliques}`).join(' · ')}</small>}</>}, {id:'ultimo',titulo:'Último acesso',valor:(r)=>r.ultimo_acesso,render:(r)=>new Date(r.ultimo_acesso).toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})},
   ]} linhas={dados} chave={(r)=>r.email_informado} vazio="Ninguém acessou o álbum ainda." suspensa="Quem acessou o álbum" /></section>;
 }

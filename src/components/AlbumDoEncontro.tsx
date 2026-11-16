@@ -3,7 +3,7 @@
    A ciência do termo é lembrada neste aparelho; o servidor também recebe `ciente: true` ao abrir, para guardar a confirmação. */
 import { useEffect, useRef, useState } from 'react';
 import { GaleriaDoEncontro, type FotoPrevia } from './GaleriaDoEncontro';
-import { AlbumAcessoVisual, type EstadoAlbum } from './AlbumAcessoVisual';
+import { AlbumAcessoVisual, type EstadoAlbum, type LinkAlbum } from './AlbumAcessoVisual';
 
 async function api<T>(acao: string, corpo: Record<string, unknown>): Promise<T> {
   const resposta = await fetch(`/api/edicao?acao=${acao}`, { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
@@ -23,6 +23,7 @@ export function AlbumDoEncontro({ slug, titulo, rotulo }: { slug: string; titulo
   const [email, setEmail] = useState('');
   const [ocupado, setOcupado] = useState(false);
   const [mensagem, setMensagem] = useState('');
+  const [links, setLinks] = useState<LinkAlbum[]>([]);
   const tentativa = useRef('');
 
   useEffect(() => {
@@ -37,8 +38,8 @@ export function AlbumDoEncontro({ slug, titulo, rotulo }: { slug: string; titulo
     setOcupado(true); setMensagem('');
     tentativa.current = crypto.randomUUID();
     try {
-      const dados = await api<{ fotos: FotoPrevia[]; album_disponivel: boolean }>('album_fotos', { slug, email: limpo(), request_id: tentativa.current });
-      setFotos(dados.fotos || []);
+      const dados = await api<{ fotos: FotoPrevia[]; album_disponivel: boolean; links?: LinkAlbum[] }>('album_fotos', { slug, email: limpo(), request_id: tentativa.current });
+      setFotos(dados.fotos || []); setLinks(dados.links && dados.links.length ? dados.links : [{ id: 'fotos', rotulo: 'Acesse aqui as suas fotos' }]);
       if (!dados.album_disponivel) setEstado('preparando');
       else setEstado(lerCiencia(slug) ? 'confirmado' : 'termo');
     } catch (erro) {
@@ -49,12 +50,12 @@ export function AlbumDoEncontro({ slug, titulo, rotulo }: { slug: string; titulo
     } finally { setOcupado(false); }
   }
 
-  async function abrir(ciente: boolean) {
+  async function abrir(ciente: boolean, linkId?: string) {
     setOcupado(true); setMensagem('');
     // O álbum abre em outra aba e o site continua aberto. A aba é criada já no clique, para o navegador não bloquear.
     const aba = window.open('', '_blank');
     try {
-      const dados = await api<{ url: string }>('album_abrir', { slug, email: limpo(), request_id: crypto.randomUUID(), ciente });
+      const dados = await api<{ url: string }>('album_abrir', { slug, email: limpo(), request_id: crypto.randomUUID(), ciente, link_id: linkId });
       if (ciente) guardarCiencia(slug);
       if (aba) { aba.opener = null; aba.location.href = dados.url; } else window.location.assign(dados.url);
     } catch (erro) { aba?.close(); setMensagem(erro instanceof Error ? erro.message : 'Não foi possível abrir o álbum agora.'); }
@@ -66,7 +67,7 @@ export function AlbumDoEncontro({ slug, titulo, rotulo }: { slug: string; titulo
 
   return (
     <GaleriaDoEncontro fotos={liberado ? fotos : previa} titulo={titulo} rotulo={rotulo} completa={liberado} acesso={
-      <AlbumAcessoVisual estado={estado} email={email} setEmail={setEmail} ocupado={ocupado} mensagem={mensagem} aoEntrar={() => void entrar()} aoTrocar={trocar} aoAbrir={() => void abrir(true)} aoAceitar={() => void abrir(true)} />
+      <AlbumAcessoVisual estado={estado} email={email} setEmail={setEmail} ocupado={ocupado} mensagem={mensagem} aoEntrar={() => void entrar()} aoTrocar={trocar} links={links.length ? links : undefined} aoAbrir={(id) => void abrir(true, id)} aoAceitar={(id) => void abrir(true, id)} />
     } />
   );
 }

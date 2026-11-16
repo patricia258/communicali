@@ -38,18 +38,22 @@ export function criarAlbumHandler({ db = banco, signPhotos = async (paths) => {
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId || '')) return res.status(400).json({ error: 'Tente abrir o álbum novamente.' });
       const presence = await json(await db('rpc/communicali_album_presenca', { method: 'POST', body: JSON.stringify({ p_slug: slug, p_email: email }) }));
       if (!presence?.edition_id || !presence.member_id) return res.status(403).json({ error: 'Não encontramos acesso às fotos para este e-mail neste encontro.' });
-      const albums = await json(await db(`edition_albums?edition_id=eq.${encodeURIComponent(presence.edition_id)}&publicado=eq.true&select=album_url`));
+      const albums = await json(await db(`edition_albums?edition_id=eq.${encodeURIComponent(presence.edition_id)}&publicado=eq.true&select=album_url,links`));
       if (!albums.length) return res.status(404).json({ error: 'As fotos ainda não estão disponíveis.' });
+      // Vários botões por álbum (fotos, vídeos...). Álbuns antigos só têm album_url: viram um botão "Acesse aqui as suas fotos".
+      const links = (Array.isArray(albums[0].links) && albums[0].links.length ? albums[0].links : (albums[0].album_url ? [{ id: 'fotos', rotulo: 'Acesse aqui as suas fotos', url: albums[0].album_url }] : []));
+      const pedido = String(req.body?.link_id || '');
+      const escolhido = links.find((item) => item.id === pedido) || (pedido ? null : links[0]);
       const registrar = async () => json(await dbResponse());
-      async function dbResponse() { return db('edition_album_clicks?on_conflict=request_id', { method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=representation' }, body: JSON.stringify({ request_id: requestId, edition_id: presence.edition_id, member_id: presence.member_id, email_informado: email, tipo: action === 'album_fotos' ? 'galeria' : 'album', ciente_em: action === 'album_abrir' && req.body?.ciente === true ? new Date().toISOString() : null }) }); }
+      async function dbResponse() { return db('edition_album_clicks?on_conflict=request_id', { method: 'POST', headers: { Prefer: 'resolution=ignore-duplicates,return=representation' }, body: JSON.stringify({ request_id: requestId, edition_id: presence.edition_id, member_id: presence.member_id, email_informado: email, tipo: action === 'album_fotos' ? 'galeria' : 'album', link_id: action === 'album_abrir' && escolhido ? escolhido.id : null, ciente_em: action === 'album_abrir' && req.body?.ciente === true ? new Date().toISOString() : null }) }); }
       if (action === 'album_fotos') {
         const photos = await json(await db(`edition_album_photos?edition_id=eq.${encodeURIComponent(presence.edition_id)}&select=id,storage_path,legenda&order=ordem,created_at`));
         const signed = photos.length ? await signPhotos(photos.map((photo) => photo.storage_path)) : [];
         if (signed.some((photo) => photo.error || !photo.signedUrl)) throw new Error('foto');
         await registrar();
-        return res.status(200).json({ fotos: photos.map((photo, i) => ({ id: photo.id, legenda: photo.legenda, url: signed[i].signedUrl })), album_disponivel: Boolean(albums[0].album_url) });
+        return res.status(200).json({ fotos: photos.map((photo, i) => ({ id: photo.id, legenda: photo.legenda, url: signed[i].signedUrl })), album_disponivel: links.length > 0, links: links.map((item) => ({ id: item.id, rotulo: item.rotulo })) });
       }
-      const url = albums[0].album_url;
+      const url = escolhido?.url;
       if (!albumUrlValida(url)) return res.status(404).json({ error: 'O álbum completo ainda não está disponível.' });
       await registrar();
       return res.status(200).json({ url });

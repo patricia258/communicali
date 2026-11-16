@@ -14,3 +14,9 @@
 .cm__acoes .cm__ok:hover{background:#5A1E2D;color:#fff}
 .cm__acoes .cm__lixo{color:#A32D2D;border-color:#EFC7C7}
 @media (max-width:600px){.cm__lista li{flex-wrap:wrap}.cm__acoes{width:100%;justify-content:flex-start}}
+.alb-links{display:grid;gap:18px;margin-bottom:8px}
+.alb-links__linha{display:grid;grid-template-columns:minmax(180px,1fr) minmax(220px,2fr) auto;gap:12px 16px;align-items:end;padding:16px 0;border-top:1px solid #D9D2CB}
+.alb-links__linha label{display:grid;gap:6px;font:600 13px Inter,system-ui,sans-serif}
+.alb-links__acoes{display:flex;gap:6px}
+.alb-links__conta{grid-column:1/-1;font-size:13px;color:#5D4F55}
+@media (max-width:760px){.alb-links__linha{grid-template-columns:1fr}}
