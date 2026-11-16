@@ -12,7 +12,7 @@ const CATEGORIAS = ['Alimentos e bebidas', 'Brindes e materiais gráficos', 'Dec
 
 const PRESET: FormPreset = {
   title: 'Cadastro de fornecedor',
-  description: `Olá! Obrigada pelo interesse em fornecer para a ComuniCALI.
+  description: `Olá! Obrigada pelo interesse em ser fornecedor dos nossos encontros.
 
 Este cadastro é simples e serve para a gente acionar você sempre que um encontro precisar do que você oferece.
 
@@ -20,7 +20,7 @@ Seus dados ficam restritos à organização.`,
   submitLabel: 'Enviar cadastro',
   successText: 'Cadastro recebido! Obrigada. A organização vai entrar em contato quando um encontro precisar do que você fornece.',
   questions: [
-    { id: 'primeira_vez', kind: 'yes_no', label: 'É a primeira vez que você fornece para a ComuniCALI?', required: true },
+    { id: 'primeira_vez', kind: 'yes_no', label: 'É a primeira vez que você fornece para nós?', required: true },
     { id: 'tipo', kind: 'single_choice', label: 'Você fornece como empresa ou como pessoa física?', options: [EMPRESA, PESSOA], required: true, logic: [{ when: PESSOA, goTo: 'cpf' }] },
     { id: 'cnpj', kind: 'short_text', label: 'Qual é o número do CNPJ registrado da empresa?', help: 'Os 14 números do cartão do CNPJ.', mask: 'cnpj', required: true },
     { id: 'razao', kind: 'short_text', label: 'Qual é a razão social ou o nome da empresa?', required: true },

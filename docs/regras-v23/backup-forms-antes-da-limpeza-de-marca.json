@@ -1,0 +1,662 @@
+{
+ "coffee-rh-cwb": {
+  "title": "ComuniCali | Coffee RH CWB",
+  "description": "Vem aí o **1º Encontro Presencial da Comunidade Cali** em Curitiba. ☕\nUm café para trocar experiências, fazer networking e conversar sobre os temas que movem o RH.\n\nPreencha sua inscrição: leva cerca de 3 minutos.",
+  "success_text": null,
+  "questions": [
+   {
+    "id": "nome",
+    "kind": "name",
+    "label": "Qual é o seu nome?",
+    "required": true
+   },
+   {
+    "id": "sobrenome",
+    "kind": "short_text",
+    "label": "E o seu sobrenome?",
+    "required": true
+   },
+   {
+    "id": "whatsapp",
+    "kind": "phone",
+    "label": "Seu WhatsApp com DDD",
+    "required": true
+   },
+   {
+    "id": "email",
+    "kind": "email",
+    "label": "Qual é o seu e-mail?",
+    "required": true
+   },
+   {
+    "id": "empresa",
+    "kind": "short_text",
+    "label": "Empresa onde atua",
+    "required": false
+   },
+   {
+    "id": "cargo",
+    "kind": "short_text",
+    "label": "Qual é o seu cargo?",
+    "required": true
+   },
+   {
+    "id": "jornada",
+    "kind": "single_choice",
+    "label": "Qual é o seu tipo de jornada?",
+    "options": [
+     "Presencial",
+     "Remota",
+     "Híbrida"
+    ],
+    "required": true
+   },
+   {
+    "id": "comunidade",
+    "help": "Para participar do encontro é preciso fazer parte da comunidade.",
+    "kind": "single_choice",
+    "label": "Você já faz parte da comunidade Cali?",
+    "logic": [
+     {
+      "goTo": "cidade",
+      "when": "Sim, já faço parte"
+     }
+    ],
+    "options": [
+     "Sim, já faço parte",
+     "Ainda não, mas quero entrar"
+    ],
+    "required": true
+   },
+   {
+    "id": "grupo_convite",
+    "help": "Toque no link para entrar: https://chat.whatsapp.com/Lu9uzReUxAlJZcQaU1is01\nDepois volte aqui para concluir sua inscrição.",
+    "kind": "statement",
+    "label": "Que bom! Agora é só entrar no grupo da Comunidade Cali 💬",
+    "required": false
+   },
+   {
+    "id": "grupo",
+    "kind": "single_choice",
+    "label": "Você conseguiu entrar no grupo?",
+    "options": [
+     "Sim, acabei de entrar",
+     "Não, faço depois"
+    ],
+    "required": true
+   },
+   {
+    "id": "cidade",
+    "kind": "single_choice",
+    "label": "Em qual cidade você mora?",
+    "options": [
+     "Curitiba",
+     "Região Metropolitana de Curitiba",
+     "Outra cidade"
+    ],
+    "required": true
+   },
+   {
+    "id": "horario",
+    "help": "O 1º encontro já tem horário definido: **sábado, das 9h ao meio-dia**. Para as próximas edições, conte o que funciona melhor para você.",
+    "kind": "single_choice",
+    "label": "Para os próximos encontros, qual horário você prefere?",
+    "options": [
+     "Manhã – das 8h às 10h30",
+     "Fim de tarde – das 15h30 às 17h",
+     "Tanto faz, consigo nos dois",
+     "Outro"
+    ],
+    "required": true
+   },
+   {
+    "id": "dias",
+    "help": "Nesta primeira edição escolhemos o **sábado**. Suas sugestões ajudam a definir as próximas.",
+    "kind": "multi_choice",
+    "label": "Quais dias da semana funcionam melhor para você?",
+    "options": [
+     "Segunda-feira",
+     "Terça-feira",
+     "Quarta-feira",
+     "Quinta-feira",
+     "Sexta-feira",
+     "Sábado"
+    ],
+    "required": true
+   },
+   {
+    "id": "sugestao",
+    "kind": "long_text",
+    "label": "Quer deixar alguma sugestão ou tema que gostaria de conversar no encontro?",
+    "required": false
+   },
+   {
+    "id": "foto",
+    "kind": "file",
+    "label": "Insira sua melhor foto! ❤️",
+    "required": false
+   },
+   {
+    "id": "pitch",
+    "help": "Seu nome, cargo ou função, empresa, sua área de expertise e seus objetivos.",
+    "kind": "long_text",
+    "label": "Insira aqui o seu Mini Pitch",
+    "required": false
+   },
+   {
+    "id": "ciente",
+    "help": "Consumo mínimo de R$ 30 por pessoa no local.",
+    "kind": "single_choice",
+    "label": "Estou ciente de que a Cali reserva o local e que o consumo é 100% por minha conta.",
+    "options": [
+     "Estou ciente e de acordo"
+    ],
+    "required": true
+   }
+  ]
+ },
+ "parceiros-communicali": {
+  "title": "Seja um Parceiro ComuniCALI 🚀",
+  "description": "**Falar de pessoas pode mudar o mundo.**\n\nA **ComuniCALI**, tem como propósito conectar pessoas interessadas em RH, liderança, gestão de pessoas e desenvolvimento humano por meio de relacionamentos genuínos e colaboração.\n\nQueremos conhecer empresas, profissionais e instituições que possam contribuir com encontros, experiências, conteúdo, estrutura e conexões.\nConte um pouco sobre você e o que imagina construir conosco.\n\nCada proposta será avaliada individualmente, sem compromisso automático de contratação ou patrocínio.",
+  "success_text": "Recebemos sua proposta! Obrigada por querer fazer parte dessa construção. Nossa equipe vai conhecer sua ideia e entrar em contato para avaliarmos juntos as possibilidades de parceria.",
+  "questions": [
+   {
+    "id": "etapa1",
+    "help": "Comece contando quem é você ou a sua empresa.",
+    "kind": "statement",
+    "label": "Etapa 1 de 4 · Sobre o Parceiro",
+    "attachment": {
+     "url": "/communicali/seja-parceiro.pdf",
+     "text": "Modalidades, o que construímos juntos, a vantagem para os Membros e os próximos passos.",
+     "cover": "/communicali/seja-parceiro-capa.jpg",
+     "title": "Como ser parceiro da ComuniCALI"
+    }
+   },
+   {
+    "id": "parceiro_nome",
+    "kind": "short_text",
+    "label": "Nome da empresa ou nome profissional",
+    "required": true
+   },
+   {
+    "id": "tipo",
+    "kind": "single_choice",
+    "label": "Tipo de atuação",
+    "options": [
+     "Empresa",
+     "Profissional autônomo",
+     "Instituição",
+     "Outro"
+    ],
+    "required": false
+   },
+   {
+    "id": "cnpj",
+    "kind": "short_text",
+    "label": "CNPJ",
+    "required": false
+   },
+   {
+    "id": "site",
+    "kind": "short_text",
+    "label": "Site",
+    "required": false
+   },
+   {
+    "id": "instagram",
+    "kind": "short_text",
+    "label": "Instagram",
+    "required": false
+   },
+   {
+    "id": "linkedin",
+    "kind": "short_text",
+    "label": "LinkedIn",
+    "required": false
+   },
+   {
+    "id": "cidade",
+    "help": "Ex.: Curitiba/PR",
+    "kind": "short_text",
+    "label": "Cidade e estado",
+    "required": true
+   },
+   {
+    "id": "segmento",
+    "kind": "single_choice",
+    "label": "Segmento principal",
+    "options": [
+     "Gráfica e impressos",
+     "Brindes e papelaria",
+     "Fotografia e vídeo",
+     "Café, gastronomia e presentes",
+     "Espaços e infraestrutura",
+     "Tecnologia e ferramentas para RH",
+     "Educação e conteúdo",
+     "Comunicação e mídia",
+     "Serviços B2B",
+     "Outros"
+    ],
+    "required": false
+   },
+   {
+    "id": "servicos",
+    "kind": "long_text",
+    "label": "Descreva seus serviços ou produtos",
+    "required": true
+   },
+   {
+    "id": "etapa2",
+    "help": "Quem vai conversar com a gente.",
+    "kind": "statement",
+    "label": "Etapa 2 de 4 · Pessoa de contato"
+   },
+   {
+    "id": "contato_nome",
+    "kind": "name",
+    "label": "Nome completo",
+    "required": true
+   },
+   {
+    "id": "contato_cargo",
+    "kind": "short_text",
+    "label": "Cargo ou função",
+    "required": false
+   },
+   {
+    "id": "contato_email",
+    "kind": "email",
+    "label": "E-mail profissional",
+    "required": true
+   },
+   {
+    "id": "contato_whatsapp",
+    "help": "Ex.: (41) 99999-9999",
+    "kind": "phone",
+    "label": "WhatsApp com DDD",
+    "required": true
+   },
+   {
+    "id": "preferencia",
+    "kind": "single_choice",
+    "label": "Preferência de contato",
+    "options": [
+     "WhatsApp",
+     "E-mail",
+     "Ambos"
+    ],
+    "required": false
+   },
+   {
+    "id": "etapa3",
+    "help": "O que você imagina construir conosco.\n\n[Seja nosso parceiro: veja a apresentação completa](https://comuni.calirh.com/communicali/seja-parceiro.pdf)\nAbre em outra aba, e suas respostas continuam aqui.",
+    "kind": "statement",
+    "label": "Etapa 3 de 4 · Proposta de parceria"
+   },
+   {
+    "id": "modalidades",
+    "help": "Pode escolher mais de uma.",
+    "kind": "multi_choice",
+    "label": "Em quais modalidades de parceria você tem interesse?",
+    "options": [
+     "Parceiro de Experiência",
+     "Parceiro de Produção",
+     "Parceiro de Conhecimento",
+     "Parceiro de Rede e Comunidade",
+     "Outra modalidade"
+    ],
+    "required": false
+   },
+   {
+    "id": "contribuicao",
+    "help": "Conte sua ideia livremente. Pode envolver produtos, serviços, experiências, conhecimento, infraestrutura, apoio financeiro, condições especiais, divulgação, contatos ou outras formas de colaboração.",
+    "kind": "long_text",
+    "label": "Como você ou sua empresa poderiam contribuir com a ComuniCALI?",
+    "required": true
+   },
+   {
+    "id": "interesse",
+    "help": "Queremos construir relações em que todos reconheçam valor. Conte quais benefícios, experiências ou oportunidades fariam sentido para você.",
+    "kind": "long_text",
+    "label": "O que tornaria essa parceria interessante para você?",
+    "required": false
+   },
+   {
+    "id": "condicao",
+    "help": "Disponibilidade, quantidade, valores, descontos, permutas ou condições especiais.",
+    "kind": "long_text",
+    "label": "Deseja propor alguma condição específica para a parceria?",
+    "required": false
+   },
+   {
+    "id": "vantagem_membros",
+    "help": "Ela aparece na vitrine de parceiros do espaço online dos Membros, com seu logo e contatos.",
+    "kind": "yes_no",
+    "label": "Você pode oferecer uma vantagem exclusiva para os Membros da ComuniCALI?",
+    "required": true
+   },
+   {
+    "id": "vantagem_detalhe",
+    "help": "Cupom de desconto, condição especial ou brinde. Se já tiver, inclua o código do cupom, a validade e como usar.",
+    "kind": "long_text",
+    "label": "Qual seria a vantagem?",
+    "required": false
+   },
+   {
+    "id": "atende_cwb",
+    "kind": "single_choice",
+    "label": "Você atende Curitiba e Região Metropolitana?",
+    "options": [
+     "Sim",
+     "Não",
+     "Remoto ou nacional"
+    ],
+    "required": false
+   },
+   {
+    "id": "disponibilidade",
+    "kind": "single_choice",
+    "label": "Disponibilidade para iniciar",
+    "options": [
+     "Imediata",
+     "Próximos 30 dias",
+     "Para futuras edições"
+    ],
+    "required": false
+   },
+   {
+    "id": "portfolio_link",
+    "help": "Site, Drive, Canva ou similar.",
+    "kind": "short_text",
+    "label": "Link do portfólio ou apresentação",
+    "required": false
+   },
+   {
+    "id": "portfolio_arquivo",
+    "kind": "file",
+    "label": "Ou envie seu portfólio",
+    "accept": "images_pdf",
+    "required": false
+   },
+   {
+    "id": "etapa4",
+    "help": "O cadastro não representa aprovação automática nem garante seleção, contratação, vendas, divulgação ou indicações. Não damos acesso a dados dos participantes e não compartilhamos listas para prospecção.",
+    "kind": "statement",
+    "label": "Etapa 4 de 4 · Alinhamento e consentimento"
+   },
+   {
+    "id": "mais",
+    "kind": "long_text",
+    "label": "Há mais alguma coisa que gostaria de contar?",
+    "required": false
+   },
+   {
+    "id": "origem",
+    "kind": "single_choice",
+    "label": "Como você chegou até aqui?",
+    "options": [
+     "ComuniCALI",
+     "Site da CALI",
+     "Convite"
+    ],
+    "required": false
+   },
+   {
+    "id": "consentimento",
+    "help": "Aviso de privacidade: https://calirh.com/privacidade.html",
+    "kind": "single_choice",
+    "label": "Autorizo a CALI RH a tratar meus dados de contato e os dados profissionais enviados para analisar esta proposta de parceria e entrar em contato sobre ela. Li o aviso de privacidade.",
+    "options": [
+     "Autorizo"
+    ],
+    "required": true
+   },
+   {
+    "id": "comunicacoes",
+    "kind": "single_choice",
+    "label": "Desejo receber comunicações sobre futuras oportunidades e encontros.",
+    "options": [
+     "Sim, quero receber"
+    ],
+    "required": false
+   }
+  ]
+ },
+ "quero-ser-membro": {
+  "title": "Quero fazer parte!",
+  "description": "**Uhull! Estamos muito felizes com o seu interesse em conhecer a nossa comunidade!**\n\nCadastre seu interesse e avisamos sobre os próximos encontros, online ou presenciais, em Curitiba e região.\n\n**Importante:** Na sua primeira vez, você participa como visitante ou convidado, okay? Dúvidas leia [nossas regras](https://comuni.calirh.com/regras) ou entre em contato conosco :)",
+  "success_text": "Recebemos seu pedido! A equipe vai ler com atenção e retornar pelo e-mail ou WhatsApp que você informou.",
+  "questions": [
+   {
+    "id": "nome",
+    "kind": "name",
+    "label": "Qual é o seu nome?",
+    "required": true
+   },
+   {
+    "id": "email",
+    "kind": "email",
+    "label": "Qual é o seu e-mail?",
+    "required": true
+   },
+   {
+    "id": "whatsapp",
+    "kind": "phone",
+    "label": "Qual é o seu WhatsApp?",
+    "required": true
+   },
+   {
+    "id": "cidade",
+    "kind": "short_text",
+    "label": "Em que cidade e estado você mora?",
+    "required": true
+   },
+   {
+    "id": "formato",
+    "kind": "multi_choice",
+    "label": "Como você prefere participar?",
+    "options": [
+     "Encontros online",
+     "Encontros presenciais em Curitiba e região"
+    ],
+    "required": true
+   },
+   {
+    "id": "atuacao",
+    "help": "Área, função ou o momento de carreira em que você está.",
+    "kind": "short_text",
+    "label": "O que você faz hoje?",
+    "required": true
+   },
+   {
+    "id": "motivo",
+    "kind": "long_text",
+    "label": "O que faz você querer participar da comunidade?",
+    "required": true
+   },
+   {
+    "id": "contribuicao",
+    "help": "Um assunto que domina, uma experiência, uma ideia de encontro. Pode deixar em branco.",
+    "kind": "long_text",
+    "label": "Tem algo que você gostaria de compartilhar com a comunidade?",
+    "required": false
+   },
+   {
+    "id": "origem",
+    "kind": "single_choice",
+    "label": "Como você conheceu a ComuniCALI?",
+    "options": [
+     "Grupo de WhatsApp",
+     "Instagram",
+     "LinkedIn",
+     "Indicação de alguém",
+     "Participei de um encontro",
+     "Outro"
+    ],
+    "required": false
+   },
+   {
+    "id": "aceite",
+    "help": "Regras: comuni.calirh.com/regras · Privacidade: comuni.calirh.com/privacidade",
+    "kind": "yes_no",
+    "label": "Você leu e concorda com as regras da comunidade e a política de privacidade?",
+    "required": true
+   }
+  ]
+ },
+ "continuar-com-a-comunidade": {
+  "title": "Continue com a gente!",
+  "description": "Obrigada por estar no primeiro encontro. Este formulário é separado da pesquisa de satisfação: aqui você se identifica, e nada se liga às respostas anônimas que você deu antes.\n\nVocê pode estar com dúvida sobre membro, visitante e convidado. A gente não imaginava que o encontro tomaria a proporção que tomou, nem que receberia o apoio que recebeu. Por isso algumas coisas mudaram desde o início da organização, e o seu crachá foi feito antes dessa mudança. Quem decidir seguir com a gente na comunidade vai receber a explicação completa de cada categoria.",
+  "success_text": "Recebemos o seu formulário! Obrigada por seguir com a gente. Em breve você recebe novidades da ComuniCALI.",
+  "questions": [
+   {
+    "id": "nome",
+    "kind": "short_text",
+    "label": "Nome",
+    "required": true
+   },
+   {
+    "id": "email",
+    "kind": "email",
+    "label": "E-mail da inscrição",
+    "required": true
+   },
+   {
+    "id": "tipo",
+    "kind": "single_choice",
+    "label": "Como participou",
+    "options": [
+     "Como convidado",
+     "Como visitante / membro"
+    ],
+    "required": true
+   },
+   {
+    "id": "convidou",
+    "kind": "short_text",
+    "label": "Quem convidou"
+   },
+   {
+    "id": "email_novo",
+    "kind": "email",
+    "label": "Outro e-mail para as novidades"
+   }
+  ]
+ },
+ "pesquisa-de-satisfacao": {
+  "title": "Que bom ter você no encontro!",
+  "description": "**Queremos ouvir você.**\n\n==Leva cerca de 3 minutos== e é **anônima**: nenhuma resposta fica ligada ao seu nome ou ao seu e-mail.\n\nSua opinião ajuda a decidir **o que mantemos** e **o que mudamos** nas próximas edições.",
+  "success_text": "Obrigada pela sua opinião!\n**Ela é anônima e já está com a gente.**\n*Quer saber dos próximos passos, dos próximos encontros e da comunidade? E como continuar participando?*\nClique no link abaixo.\n[Quero saber os próximos passos](/continuar)",
+  "questions": [
+   {
+    "id": "edicao",
+    "kind": "single_choice",
+    "label": "De qual encontro você participou?",
+    "options": [
+     "1ª Edição Coffee RH (14/11/2026)"
+    ],
+    "required": true
+   },
+   {
+    "id": "nps",
+    "kind": "scale",
+    "label": "De 0 a 10, o quanto você recomendaria a ComuniCALI para uma pessoa colega?",
+    "maxLabel": "Muito provável",
+    "minLabel": "Nada provável",
+    "required": true,
+    "scaleMax": 10,
+    "scaleMin": 0
+   },
+   {
+    "id": "organizacao",
+    "kind": "scale",
+    "label": "Como você avalia a organização e o acolhimento?",
+    "maxLabel": "Excelente",
+    "minLabel": "Pode melhorar",
+    "required": true,
+    "scaleMax": 5,
+    "scaleMin": 1
+   },
+   {
+    "id": "local",
+    "kind": "scale",
+    "label": "E o local e o ambiente?",
+    "maxLabel": "Excelente",
+    "minLabel": "Pode melhorar",
+    "required": true,
+    "scaleMax": 5,
+    "scaleMin": 1
+   },
+   {
+    "id": "dinamica",
+    "kind": "scale",
+    "label": "O que você achou da **dinâmica**?",
+    "maxLabel": "Excelente",
+    "minLabel": "Pode melhorar",
+    "required": true,
+    "scaleMax": 5,
+    "scaleMin": 1
+   },
+   {
+    "id": "conteudo",
+    "kind": "scale",
+    "label": "O que você achou do **conteúdo**?",
+    "maxLabel": "Excelente",
+    "minLabel": "Pode melhorar",
+    "required": true,
+    "scaleMax": 5,
+    "scaleMin": 1
+   },
+   {
+    "id": "debate",
+    "kind": "scale",
+    "label": "O que você achou do **debate**?",
+    "maxLabel": "Excelente",
+    "minLabel": "Pode melhorar",
+    "required": true,
+    "scaleMax": 5,
+    "scaleMin": 1
+   },
+   {
+    "id": "conexoes",
+    "kind": "scale",
+    "label": "E as conexões que você fez com outras pessoas?",
+    "maxLabel": "Excelente",
+    "minLabel": "Pode melhorar",
+    "required": true,
+    "scaleMax": 5,
+    "scaleMin": 1
+   },
+   {
+    "id": "marcou",
+    "kind": "long_text",
+    "label": "O que mais marcou você no encontro?",
+    "required": false
+   },
+   {
+    "id": "melhorar",
+    "kind": "long_text",
+    "label": "O que podemos melhorar na próxima edição?",
+    "required": false
+   },
+   {
+    "id": "voltar",
+    "kind": "single_choice",
+    "label": "Você participaria das próximas edições?",
+    "options": [
+     "Com certeza",
+     "Provavelmente",
+     "Ainda não sei",
+     "Não"
+    ],
+    "required": true
+   },
+   {
+    "id": "tema",
+    "kind": "short_text",
+    "label": "Tem algum tema que você gostaria de debater nos próximos encontros?",
+    "required": false
+   }
+  ]
+ }
+}

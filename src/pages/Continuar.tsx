@@ -42,7 +42,7 @@ export function Continuar() {
     return {
       title: 'Continue com a gente!', category: 'Pesquisa', tema: 'claro', submitLabel: 'Continuar',
       description: 'Oi de novo! **Obrigada pelo seu interesse em continuar com a gente.**\n\n==Este formulário é separado da pesquisa de satisfação.== Aqui você se identifica, e nada se liga às respostas anônimas.',
-      aviso: '**Você deve estar com muitas dúvidas, certo?**\nCalma: este formulário existe para ==esclarecer algumas delas== e entender em que momento você está.\n\nA gente não imaginava que o encontro tomaria a proporção que tomou, nem que receberia o apoio que recebeu. Por isso **algumas coisas mudaram** desde o início da organização, e muitas coisas foram feitas antes dessa mudança.\n\nQuem decidir seguir com a gente vai receber a **explicação completa de cada categoria**.\n\n**Vamos começar?**',
+      aviso: '**Vamos começar?** Informe o e-mail da sua inscrição e confirmamos a sua participação no encontro.',
       questions: [{ id: 'email', kind: 'email', label: 'Qual é o e-mail que você usou na inscrição?', required: true }],
       submit: async (respostas) => {
         const limpo = String(respostas.email || '').trim().toLowerCase();

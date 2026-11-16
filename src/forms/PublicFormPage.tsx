@@ -303,8 +303,8 @@ export function PublicFormPage({ preset, slugFixo }: { preset?: FormPreset; slug
     <header className="cf-top"><a href="/"><img src={claro ? '/brand/novo/comunicali-b-fundo-claro.svg' : '/brand/novo/comunicali-b-fundo-escuro.svg'} alt="ComuniCALI" /></a>{preview && <span className="cf-preview">Prévia · as respostas não são salvas</span>}</header>
     <main className="cf-stage">
       {phase === 'loading' && <div className="cf-screen cf-center"><span className="cf-spinner" aria-label="Carregando" /></div>}
-      {phase === 'missing' && <div className="cf-screen cf-center cf-enter"><small>ComuniCALI</small><h1>Formulário não encontrado</h1><p>Confira o link que você recebeu ou fale com a CALI RH.</p></div>}
-      {phase === 'closed' && form && <div className="cf-screen cf-center cf-enter"><small>ComuniCALI</small><h1>{form.title}</h1><p>Este formulário não está mais recebendo respostas. Obrigada pelo interesse.</p></div>}
+      {phase === 'missing' && <div className="cf-screen cf-center cf-enter"><h1>Formulário não encontrado</h1><p>Confira o link que você recebeu ou fale com a CALI RH.</p></div>}
+      {phase === 'closed' && form && <div className="cf-screen cf-center cf-enter"><h1>{form.title}</h1><p>Este formulário não está mais recebendo respostas. Obrigada pelo interesse.</p></div>}
       {phase === 'welcome' && form && <div className="cf-screen cf-enter">
         <h1>{form.title}</h1>
         {preset && form.description && <p className="cf-desc" dangerouslySetInnerHTML={{ __html: richTextHtml(form.description) }} />}

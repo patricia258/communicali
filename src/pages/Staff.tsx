@@ -66,16 +66,16 @@ export function chavePix(answers: Record<string, unknown>) {
 /** Monta o cadastro com os encontros abertos: com mais de um, a pessoa marca em quais vai trabalhar. */
 export const presetStaff = (eventos: string[]): FormPreset => ({
   title: 'Cadastro de STAFF',
-  description: `Olá! Que alegria ter você no time da ComuniCALI. Obrigada por fazer parte deste encontro.
+  description: `Olá! Que alegria ter você no nosso time. Obrigada por fazer parte deste encontro.
 
-Este cadastro é para o **STAFF**, as pessoas que fazem a organização acontecer com a gente. Você vai estar perto de quem chega e vai representar a ComuniCALI no dia, por isso é importante conhecer o que nos move: encontros humanos e acolhedores, onde **falar de pessoas pode mudar o mundo**.
+Este cadastro é para o **STAFF**, as pessoas que fazem a organização acontecer com a gente. Você vai estar perto de quem chega e vai representar a comunidade no dia, por isso é importante conhecer o que nos move: encontros humanos e acolhedores, onde **falar de pessoas pode mudar o mundo**.
 
 Seus dados ficam restritos à organização.`,
   submitLabel: 'Enviar cadastro',
   successText: 'Cadastro recebido! Obrigada por fazer parte do STAFF. A organização vai entrar em contato com os próximos passos.',
   questions: [
     // Começa pela primeira vez: quem já foi STAFF informa CPF e e-mail e recuperamos o cadastro anterior.
-    { id: 'primeira_vez', kind: 'yes_no', label: 'É a primeira vez que você faz parte do STAFF da ComuniCALI?', required: true },
+    { id: 'primeira_vez', kind: 'yes_no', label: 'É a primeira vez que você faz parte do STAFF?', required: true },
     { id: 'cpf', kind: 'short_text', label: 'Qual é o seu CPF?', mask: 'cpf', required: true },
     { id: 'email', kind: 'email', label: 'Qual é o seu e-mail?', help: 'Se você já foi STAFF, use o mesmo e-mail do último cadastro.', required: true },
     { id: 'reencontro', kind: 'statement', label: 'Que bom ter você de volta, {_primeiro}!', help: 'Encontramos o seu último cadastro, de **{_ultima}**. Chave Pix ({_pix_tipo}) com final **{_pix_final}**, no **{_banco}**.', showIf: { id: '_encontrado', in: ['Sim'] } },
