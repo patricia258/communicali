@@ -765,3 +765,4 @@ Acrescente entradas no topo.
 - Código no GitHub: patricia258/communicali (nada no Lovable).
 - Fora desta publicação: painel novo, custos e álbum real (trabalho da outra IA em home-nova). Passaporte segue trancado.
 - Rollback: deploy 9qsosbp9u.
+- Publicação 16/11 concluída: deploy ghkv6xals. A 1ª tentativa saiu sem as chaves públicas do Supabase (tela "Carregando…"), foi revertida em minutos. Agora VITE_SUPABASE_URL e VITE_SUPABASE_KEY existem no projeto Vercel (Production), então qualquer deploy já as leva. Em deploy de cópia limpa, não deixar .gitignore na pasta.
