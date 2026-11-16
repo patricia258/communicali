@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { ArrowUpRight } from 'lucide-react';
 import { COMMUNITY_URL, PARTNER_FORM_URL, formatDate, supabase } from '../lib';
 import { EDITION_FIELDS, longDate, signupHref, type EditionRow } from './Edicao';
 import { HnFooter } from '../components/HnFooter';
@@ -10,10 +11,10 @@ import '../home-programa.css';
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null };
 
 const FORMATOS = [
-  ['Presenciais', 'Em Curitiba e região, com conversa e troca de experiências.'],
-  ['Virtuais', 'Online, para quem está em qualquer lugar do Brasil.'],
-  ['Experiências', 'Vivências, visitas e palestras que ampliam o olhar.'],
-  ['Almoços e jantares', 'Conversas à mesa, em grupos menores.'],
+  ['Presenciais', 'Cafés e conversas olho no olho, em Curitiba e região.'],
+  ['Virtuais', 'Online, para quem está em qualquer lugar do Brasil. Tem lugar para todo mundo!'],
+  ['Experiências', 'Vivências, visitas e palestras que mudam a forma de enxergar.'],
+  ['Almoços e jantares', 'Papo bom à mesa, em grupos pequenos.'],
 ];
 
 const SELOS = [
@@ -25,21 +26,21 @@ const SELOS = [
 ];
 
 const PARCERIAS = [
-  ['Experiência', 'Vivências e momentos que marcam o encontro.'],
+  ['Experiência', 'Vivências e momentos que ficam na memória.'],
   ['Produção', 'Estrutura e cuidado para o encontro acontecer.'],
-  ['Conhecimento', 'Conteúdo e troca que ampliam o olhar.'],
+  ['Conhecimento', 'Conteúdo e troca que abrem a cabeça.'],
   ['Rede e comunidade', 'Conexões que continuam depois do encontro.'],
 ];
 
 const FAQ = [
-  ['Fazer parte da comunidade é gratuito?', 'Sim. Fazer parte da ComuniCALI é gratuito.'],
-  ['Todos os eventos são gratuitos?', 'Não, nem todos os eventos são gratuitos. Alguns serão, outros não. As informações de cada edição, inclusive o valor da participação, ficam sempre na página da edição.'],
-  ['Preciso ser de RH para participar?', 'Não. A base da comunidade é de profissionais de RH e administrativos, e líderes, empreendedores e especialistas de qualquer área são bem-vindos, do estágio à transição de carreira.'],
-  ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
-  ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
-  ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
-  ['Quantas vezes posso ir a um encontro sem fazer parte da comunidade?', 'Até 2 vezes, em encontros abertos e gratuitos. Só conta a visita em que você fez o check-in. Se alguém da comunidade convidou você, entra como Convidado. Se veio por interesse próprio, entra como Visitante, e as duas somam no mesmo contador. Depois da primeira visita você já pode pedir para fazer parte. Depois da segunda, para continuar nos encontros abertos e gratuitos, é preciso fazer parte.'],
-  ['Ir a um encontro me faz parte da comunidade?', 'Não automaticamente. Depois da primeira visita, você já pode pedir para fazer parte. O pedido passa pelo cadastro, pelo aceite das regras e pela análise da organização.'],
+  ['Fazer parte da comunidade é gratuito?', 'É sim, e continua sendo!'],
+  ['Todos os eventos são gratuitos?', 'Nem todos. Alguns são, outros não. O valor de cada edição fica sempre na página dela, para você se programar.'],
+  ['Preciso ser de RH para participar?', 'Não! A base da comunidade é de gente de RH e da área administrativa, mas líderes, empreendedores e especialistas de qualquer área são muito bem-vindos, do estágio à transição de carreira.'],
+  ['A comunidade é só de Curitiba?', 'Não. O grupo reúne gente do Brasil inteiro. Os encontros presenciais é que começam por Curitiba.'],
+  ['Posso divulgar vagas e meus serviços?', 'Pode! O grupo também existe para isso, com respeito às regras de participação.'],
+  ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva. Cada edição é divulgada lá, com data, local e link de inscrição.'],
+  ['Quantas vezes posso ir a um encontro sem fazer parte da comunidade?', 'Até 2 vezes, em encontros abertos e gratuitos. Só conta a visita em que você fez o check-in. Se alguém da comunidade chamou você, entra como Convidado. Se veio por vontade própria, entra como Visitante, e as duas somam no mesmo contador. Depois da primeira visita você já pode pedir para fazer parte. Depois da segunda, para continuar nos encontros abertos e gratuitos, é preciso fazer parte.'],
+  ['Ir a um encontro me faz parte da comunidade?', 'Não automaticamente. Depois da primeira visita você já pode pedir para fazer parte, e o pedido passa pelo cadastro, pelo aceite das regras e pela análise da organização.'],
 ];
 
 const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
@@ -47,8 +48,8 @@ const diaMes = (iso: string) => iso.slice(8, 10) + '.' + iso.slice(5, 7);
 
 const reduzido = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-/** "A comunidade": quatro círculos finos que se sobrepõem no meio, um por formato, na mesma posição dos quatro blocos. Não aumenta a altura da seção. */
-const CIRCULOS: Array<[number, number, string]> = [[148, 148, '#5A1E2D'], [252, 148, '#8DB1D1'], [148, 252, '#8DB1D1'], [252, 252, '#5A1E2D']];
+/** "A comunidade": quatro círculos finos que se sobrepõem no meio, um por formato, na mesma posição dos quatro blocos. São elementos HTML (animados só com transform e opacity, no compositor) e não mudam a altura da seção. */
+const CIRCULOS: Array<[number, number, string]> = [[12.5, 12.5, '#5A1E2D'], [38.5, 12.5, '#8DB1D1'], [12.5, 38.5, '#8DB1D1'], [38.5, 38.5, '#5A1E2D']];
 function Formatos() {
   const [foco, setFoco] = useState<number | null>(null);
   const [visto, setVisto] = useState(reduzido());
@@ -64,12 +65,10 @@ function Formatos() {
       <p className="hn-eyebrow">A COMUNIDADE</p>
       <h2>Quatro jeitos de se encontrar, <em>um só propósito: conectar pessoas.</em></h2>
       <div className={`hn-exp__orbitas${visto ? ' is-in' : ''}`} aria-hidden="true">
-        <svg viewBox="0 0 400 400" preserveAspectRatio="xMinYMid meet">
-          {CIRCULOS.map(([cx, cy, cor], i) => (
-            <circle key={i} cx={cx} cy={cy} r="98" className={`hn-exp__orbita hn-exp__orbita--${i + 1}${foco === i ? ' is-foco' : ''}`} style={{ stroke: cor, transitionDelay: `${i * 160}ms` }} />
-          ))}
-          <circle cx="200" cy="200" r="5" className="hn-exp__miolo" />
-        </svg>
+        <div className="hn-exp__quadro">
+          {CIRCULOS.map(([x, y, cor], i) => <span key={i} className={`hn-exp__orbita hn-exp__orbita--${i + 1}${foco === i ? ' is-foco' : ''}`} style={{ left: `${x}%`, top: `${y}%`, borderColor: cor, transitionDelay: `${i * 180}ms` }} />)}
+          <span className="hn-exp__miolo" />
+        </div>
       </div>
       <div className="hn-exp__grid">
         {FORMATOS.map(([titulo, texto], i) => <div key={titulo} className={foco === i ? 'is-foco' : ''} onMouseEnter={() => setFoco(i)} onMouseLeave={() => setFoco(null)}><h3>{titulo}</h3><p>{texto}</p></div>)}
@@ -207,8 +206,8 @@ function Manifesto() {
           <a className="hn-manifesto__in" href="https://www.linkedin.com/in/patriciaazumi/" target="_blank" rel="noopener noreferrer" aria-label="Patrícia Lima no LinkedIn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.5 8.5H3V21h3.5V8.5ZM4.75 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM21 13.6c0-3.3-1.8-5.4-4.6-5.4-1.5 0-2.7.7-3.4 1.8V8.5H9.7V21h3.5v-6.6c0-1.9.9-3 2.4-3 1.4 0 2 .9 2 2.8V21H21v-7.4Z" /></svg>
           </a>
+          <div className="hn-manifesto__legenda"><strong>Patrícia Lima</strong><span>Fundadora da CALI RH e idealizadora da ComuniCALI.</span></div>
         </div>
-        <figcaption><strong>Patrícia Lima</strong><span>Fundadora da CALI RH e idealizadora da ComuniCALI.</span></figcaption>
       </figure>
       <div className="hn-manifesto__texto">
         <p className="hn-eyebrow">A COMUNIDADE</p>
@@ -216,6 +215,8 @@ function Manifesto() {
         <p className="hn-manifesto__p">A ComuniCALI reúne quem se interessa por <Destaque>gente</Destaque>. Cada pessoa chega com a sua <Destaque>bagagem</Destaque>, e quando escutamos alguém, descobrimos <Destaque>caminhos</Destaque> que nunca percorreríamos sozinhos.</p>
         <hr />
         <p className="hn-manifesto__p hn-manifesto__p--forte">Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com <Destaque>fé e integridade</Destaque>, e damos <Destaque>toda honra a Deus</Destaque> por cada caminho que se cruza aqui.</p>
+        <hr />
+        <blockquote className="hn-manifesto__citacao"><p>Assim como tudo na minha vida, a ideia da ComuniCALI nasceu de uma oportunidade de fazer algo bom acontecer, juntar gente boa e falar de temas relevantes.</p></blockquote>
       </div>
     </section>
   );
@@ -234,7 +235,7 @@ export function Home() {
 
   // Aparece suavemente ao entrar na tela (uma vez só); sem isso a página continua visível.
   useEffect(() => {
-    const itens = Array.from(document.querySelectorAll<HTMLElement>('.hn-exp__grid > div, .hn-band > div, .hn-selos__lista li, .hn-item, .hn-entrar > div, .hn-idx, .hn-par__itens > div, .hn-faq details, .hn-selos h2, .hn-agenda h2, .hn-prev h2, .hn-par h2, .hn-manifesto__foto, .hn-manifesto__texto, .hn-emb__cab, .hn-emb__card'));
+    const itens = Array.from(document.querySelectorAll<HTMLElement>('.hn-exp__grid > div, .hn-prog h2, .hn-prog__passos li, .hn-band > div, .hn-selos__lista li, .hn-item, .hn-entrar > div, .hn-idx, .hn-par__itens > div, .hn-faq details, .hn-selos h2, .hn-agenda h2, .hn-prev h2, .hn-par h2, .hn-manifesto__foto, .hn-manifesto__texto, .hn-emb__cab, .hn-emb__card'));
     if (reduzido() || !('IntersectionObserver' in window)) { itens.forEach((el) => el.classList.add('is-in')); return; }
     itens.forEach((el) => { el.classList.add('hn-reveal'); const irmaos = el.parentElement ? Array.from(el.parentElement.children).indexOf(el) : 0; el.style.setProperty('--d', `${Math.min(irmaos, 5) * 90}ms`); });
     const obs = new IntersectionObserver((entradas) => entradas.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); obs.unobserve(e.target); } }), { threshold: 0.12 });
@@ -285,14 +286,14 @@ export function Home() {
       <section className="hn-band" aria-label="Passaporte, encontros e jornada">
         <div className="hn-band__passaporte">
           <h3>Seu passaporte</h3>
-          <p>Para quem faz parte da comunidade: carimbos, selos e milhas. Cada encontro vira uma parada na sua jornada.</p>
+          <p>Carimbos, selos e milhas de quem faz parte da comunidade. Cada encontro é uma parada na sua jornada!</p>
           <a className="hn-pill hn-pill--line" href="#selos">Conhecer</a>
         </div>
         <div className="hn-band__foto">
           <div className="hn-band__foto-img" aria-hidden="true" />
           <div className="hn-band__foto-txt">
             <h3>Encontros</h3>
-            <p>Presenciais, online, experiências e jantares. Veja o que vem aí e como foram os anteriores.</p>
+            <p>Presenciais, online, experiências e jantares. Veja o que vem por aí e relembre os anteriores!</p>
             <a className="hn-pill hn-pill--line" href="#agenda">Ver agenda</a>
           </div>
         </div>
@@ -305,7 +306,7 @@ export function Home() {
             <h3>Grupo da comunidade</h3>
             <strong className="hn-grupo__num"><Contador ate={300} /></strong>
             <p className="hn-grupo__lead">pessoas do Brasil inteiro, no grupo e nos encontros.</p>
-            <p className="hn-grupo__txt">É onde a conversa continua entre um encontro e outro: vagas, contatos, dúvidas e experiências.</p>
+            <p className="hn-grupo__txt">É onde o papo continua entre um encontro e outro: vagas, contatos, dúvidas e muita troca!</p>
             <a className="hn-pill hn-pill--white" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>
           </div>
         </div>
@@ -314,33 +315,32 @@ export function Home() {
       <Manifesto />
 
       <section className="hn-selos" id="selos">
-        <h2>Os selos contam o seu caminho.</h2>
-        <p>Convidado e Visitante são portas de entrada. Membro, Conector e Embaixador são o seu caminho dentro da comunidade.</p>
+        <div className="hn-selos__topo">
+          <h2>Os selos contam o seu caminho.</h2>
+          <p>Como convidado ou visitante, você dá o primeiro passo dentro da comunidade. Já membros, conectores e embaixadores vivem a evolução da sua jornada.</p>
+        </div>
         <ul className="hn-selos__lista">
-          {SELOS.map(([id, nome, frase]) => <li key={id}><img src={`/selos/novo/${id}.svg`} alt={`Selo ${nome}: ${frase.toLowerCase()}`} /><b>{nome}</b><small>{frase}</small></li>)}
+          {SELOS.map(([id, nome, frase]) => <li key={id}><img src={`/selos/novo/${id}.svg`} alt={`Selo ${nome}: ${frase.toLowerCase()}`} /><small>{frase}</small></li>)}
         </ul>
       </section>
 
-      <section className="hn-prog" id="programa" aria-label="Como funciona o programa">
-        <p className="hn-eyebrow">O PROGRAMA</p>
-        <h2>Cada encontro conta no seu caminho.</h2>
+      <section className="hn-prog" id="programa" aria-label="Sua jornada">
+        <h2>Sua jornada.</h2>
         <ol className="hn-prog__passos">
-          <li><b>1</b><h3>Visite</h3><p>Até 2 visitas abertas e gratuitas, como Visitante ou Convidado. Só conta a visita em que você fez o check-in.</p></li>
-          <li><b>2</b><h3>Faça parte</h3><p>Depois da primeira visita, peça para fazer parte da comunidade. É gratuito, e a organização analisa cada pedido.</p></li>
-          <li><b>3</b><h3>Acumule milhas</h3><p>As milhas começam na adesão. Presença validada vale 10, convidado que comparece vale 5, experiência ou conteúdo aprovado vale 15 e parceiro indicado que contribui vale 20.</p></li>
-          <li><b>4</b><h3>Evolua</h3><p>Conector e Embaixador reconhecem quem contribui. A evolução depende de milhas, presenças, contribuições, avaliação da organização e do seu aceite. Nunca é comprada.</p></li>
+          <li><div className="hn-prog__topo"><b>1</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Visite</h3><p>Venha até 2 vezes, como Visitante ou Convidado, em encontros abertos e gratuitos. Só conta a visita com check-in.</p></li>
+          <li><div className="hn-prog__topo"><b>2</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Faça parte</h3><p>Gostou? Depois da primeira visita, é só pedir para fazer parte da comunidade. É gratuito, e a gente analisa cada pedido com carinho.</p></li>
+          <li><div className="hn-prog__topo"><b>3</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Acumule milhas</h3><p>As milhas começam quando você entra. Presença vale 10, convidado que comparece vale 5, experiência ou conteúdo aprovado vale 15 e parceiro indicado que contribui vale 20.</p></li>
+          <li><div className="hn-prog__topo"><b>4</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Evolua</h3><p>Conectores e Embaixadores são quem mais contribui. A evolução vem de milhas, presenças, contribuições, avaliação da organização e do seu aceite. Nunca se compra.</p></li>
         </ol>
-        <p className="hn-prog__nota">Tudo isso fica no Meu passaporte, com carimbos, selos, missões e a Rede. As regras completas estão nos <a href="/termos">Termos de participação</a>.</p>
       </section>
 
       <section className="hn-agenda" id="agenda">
         <div className="hn-agenda__head">
           <h2>Próximos encontros.</h2>
-          <p>Inscrições e avisos saem primeiro no grupo da comunidade.</p>
+          <p>Pode chegar! As inscrições e os avisos saem primeiro no grupo da comunidade.</p>
         </div>
         <div className="hn-rows">
           {upcoming.length ? upcoming.map((e) => <Linha key={e.id} edition={e} encerrada={false} aberto={aberta === e.id} alternar={() => setAberta(aberta === e.id ? null : e.id)} />) : <LinhaEmBreve />}
-          {past.map((e) => <Linha key={e.id} edition={e} encerrada aberto={aberta === e.id} alternar={() => setAberta(aberta === e.id ? null : e.id)} />)}
         </div>
       </section>
 
@@ -349,27 +349,27 @@ export function Home() {
       <section className="hn-entrar" id="como-entrar" aria-label="Como entrar">
         <div className="hn-entrar__a">
           <span>ANTES DE FAZER PARTE</span><h3>Conheça a comunidade</h3>
-          <p>Você pode viver até 2 visitas abertas e gratuitas antes de fazer parte da comunidade.</p>
-          <ul><li>Visitante: você chega por interesse próprio</li><li>Convidado: alguém da comunidade convida você</li><li>As duas somam no mesmo contador</li><li>Só conta a visita com check-in</li><li>Valor de cada encontro informado na agenda</li></ul>
+          <p>Venha conhecer! Você tem até 2 visitas abertas e gratuitas antes de fazer parte da comunidade.</p>
+          <ul><li>Visitante: você chega por vontade própria</li><li>Convidado: alguém da comunidade chamou você</li><li>As duas visitas somam no mesmo contador</li><li>Só conta a visita com check-in</li><li>O valor de cada encontro está na agenda</li></ul>
           <a className="hn-pill" href={joinHref}>Registrar interesse</a>
         </div>
         <div className="hn-entrar__b">
           <span>DEPOIS DA VISITA</span><h3>Faça parte</h3>
-          <p>Depois da primeira visita, você já pode pedir para fazer parte da comunidade. É gratuito, e a organização analisa cada pedido.</p>
-          <ul><li>Meu passaporte: carimbos, selos e milhas</li><li>A Rede da comunidade</li><li>Convidar pessoas para os encontros</li><li>Sempre gratuito</li></ul>
+          <p>Gostou? Depois da primeira visita, é só pedir para fazer parte da comunidade. É gratuito, e a gente analisa cada pedido com carinho.</p>
+          <ul><li>Meu passaporte: carimbos, selos e milhas</li><li>A Rede da comunidade</li><li>Convidar gente para os encontros</li><li>Sempre gratuito</li></ul>
           <a className="hn-pill hn-pill--white" href="/meu-passaporte">Entrar na minha área</a>
         </div>
         <div className="hn-entrar__c">
           <span>CONVITE</span><h3>Por convite</h3>
-          <p>Alguém da comunidade convida você e você entra como Convidado. A visita conta nas suas 2 visitas.</p>
+          <p>Alguém da comunidade chama você e você chega como Convidado. Essa visita conta nas suas 2.</p>
           <ul><li>O convite não garante vaga</li><li>A vaga depende de inscrição e confirmação</li></ul>
           <a className="hn-pill hn-pill--white" href="#programa">Como funciona</a>
         </div>
       </section>
 
       <section className="hn-prev" id="edicoes">
-        <h2>Como foram os encontros.</h2>
-        <p>O resumo e as fotos de cada edição ficam aqui depois de cada encontro.</p>
+        <h2>Edições passadas.</h2>
+        <p>Aqui você encontra um resumo de como foram os nossos encontros, vê uma prévia das fotos e conhece um pouquinho de cada edição.</p>
         <div className="hn-prev__body">
           <div className="hn-prev__foto" role="img" aria-label="Pessoas reunidas em uma mesa de trabalho" />
           <div className="hn-prev__grid">
@@ -383,7 +383,7 @@ export function Home() {
       <section className="hn-par" id="parceiros">
         <div className="hn-par__texto">
           <h2>Apoie este encontro. Seja um parceiro.</h2>
-          <p>Nem toda contribuição é financeira: cada parceiro oferece o que faz bem, e a proposta é combinada individualmente.</p>
+          <p>Nem toda contribuição é financeira: cada parceiro oferece o que faz de melhor, e a gente combina tudo junto, um a um.</p>
           <a className="hn-pill" href={PARTNER_FORM_URL}>Quero ser parceiro</a>
         </div>
         <div className="hn-par__itens">
@@ -412,7 +412,7 @@ export function Home() {
       </section>
 
       <section className="hn-inv" aria-label="Convite">
-        <p>Primeira vez? Comece a sua jornada.</p>
+        <p>Primeira vez por aqui? Bora começar a sua jornada!</p>
         <a href={joinHref}>Registrar interesse</a>
       </section>
 

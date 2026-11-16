@@ -10,7 +10,7 @@ export function HnFooter() {
         </div>
         <div className="hn-foot__cols">
           <div><b>Comunidade</b><a href="/#comunidade">Quem somos</a><a href="/#selos">Selos</a><a href="/#agenda">Agenda</a><a href="/#parceiros">Parceiros</a></div>
-          <div><b>Minha área</b><a href="/meu-passaporte">Entrar com meu e-mail</a><a href="#programa">Como funciona o programa</a><a href="https://www.instagram.com/calirh_/" target="_blank" rel="noopener noreferrer"><Instagram size={16} /> Instagram</a><a href="mailto:comuni@calirh.com">comuni@calirh.com</a></div>
+          <div><b>Minha área</b><a href="/meu-passaporte">Entrar com meu e-mail</a><a href="#programa">Sua jornada</a><a href="https://www.instagram.com/calirh_/" target="_blank" rel="noopener noreferrer"><Instagram size={16} /> Instagram</a><a href="mailto:comuni@calirh.com">comuni@calirh.com</a></div>
         </div>
       </div>
       <div className="hn-foot__legal">
