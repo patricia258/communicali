@@ -211,12 +211,9 @@ function Manifesto() {
       </figure>
       <div className="hn-manifesto__texto">
         <p className="hn-eyebrow">A COMUNIDADE</p>
-        <h2>Caminhos que se cruzam e seguem juntos.</h2>
-        <p className="hn-manifesto__p">A ComuniCALI reúne quem se interessa por <Destaque>gente</Destaque>. Cada pessoa chega com a sua <Destaque>bagagem</Destaque>, e quando escutamos alguém, descobrimos <Destaque>caminhos</Destaque> que nunca percorreríamos sozinhos.</p>
-        <hr />
-        <p className="hn-manifesto__p hn-manifesto__p--forte">Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com <Destaque>fé e integridade</Destaque>, e damos <Destaque>toda honra a Deus</Destaque> por cada caminho que se cruza aqui.</p>
-        <hr />
-        <blockquote className="hn-manifesto__citacao"><p>Assim como tudo na minha vida, a ideia da ComuniCALI nasceu de uma oportunidade de fazer algo bom acontecer, juntar gente boa e falar de temas relevantes.</p></blockquote>
+        <h2>Gente que se encontra e segue junta.</h2>
+        <p className="hn-manifesto__p">A ComuniCALI reúne quem se interessa por <Destaque>gente</Destaque>. Cada pessoa chega com a sua <Destaque>bagagem</Destaque>, e quando escutamos alguém, descobrimos <Destaque>caminhos</Destaque> que nunca percorreríamos sozinhos. Acreditamos que nenhum encontro acontece por acaso. Servimos às pessoas com <Destaque>fé e integridade</Destaque>, e damos <Destaque>toda honra a Deus</Destaque> por cada caminho que se cruza aqui.</p>
+        <blockquote className="hn-manifesto__citacao"><p>“Assim como tudo na minha vida, a ideia da ComuniCALI nasceu de uma oportunidade de fazer algo bom acontecer, juntar gente boa e falar de temas relevantes.”</p><cite>Patrícia Lima</cite></blockquote>
       </div>
     </section>
   );
@@ -235,13 +232,23 @@ export function Home() {
 
   // Aparece suavemente ao entrar na tela (uma vez só); sem isso a página continua visível.
   useEffect(() => {
-    const itens = Array.from(document.querySelectorAll<HTMLElement>('.hn-exp__grid > div, .hn-prog h2, .hn-prog__passos li, .hn-band > div, .hn-selos__lista li, .hn-item, .hn-entrar > div, .hn-idx, .hn-par__itens > div, .hn-faq details, .hn-selos h2, .hn-agenda h2, .hn-prev h2, .hn-par h2, .hn-manifesto__foto, .hn-manifesto__texto, .hn-emb__cab, .hn-emb__card'));
+    const itens = Array.from(document.querySelectorAll<HTMLElement>('.hn-exp__grid > div, .hn-prog h2, .hn-prog__passos li, .hn-band > div, .hn-item, .hn-entrar > div, .hn-idx, .hn-par__itens > div, .hn-faq details, .hn-selos h2, .hn-agenda h2, .hn-prev h2, .hn-par h2, .hn-manifesto__foto, .hn-manifesto__texto, .hn-emb__cab, .hn-emb__card'));
     if (reduzido() || !('IntersectionObserver' in window)) { itens.forEach((el) => el.classList.add('is-in')); return; }
     itens.forEach((el) => { el.classList.add('hn-reveal'); const irmaos = el.parentElement ? Array.from(el.parentElement.children).indexOf(el) : 0; el.style.setProperty('--d', `${Math.min(irmaos, 5) * 90}ms`); });
     const obs = new IntersectionObserver((entradas) => entradas.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); obs.unobserve(e.target); } }), { threshold: 0.12 });
     itens.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
   }, [editions, partners]);
+
+  // Selos: o giro começa quando a fila está bem à vista, um selo depois do outro.
+  useEffect(() => {
+    const lista = document.querySelector<HTMLElement>('.hn-selos__lista');
+    if (!lista) return;
+    if (reduzido() || !('IntersectionObserver' in window)) { lista.classList.add('is-spin'); return; }
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { lista.classList.add('is-spin'); obs.disconnect(); } }, { threshold: 0.6 });
+    obs.observe(lista);
+    return () => obs.disconnect();
+  }, []);
 
   // Embaixadores: ainda não há fonte de dados com foto; a seção fica oculta até existir ao menos um.
   const embaixadores: Embaixador[] = [];
@@ -320,17 +327,17 @@ export function Home() {
           <p>Como convidado ou visitante, você dá o primeiro passo dentro da comunidade. Já membros, conectores e embaixadores vivem a evolução da sua jornada.</p>
         </div>
         <ul className="hn-selos__lista">
-          {SELOS.map(([id, nome, frase]) => <li key={id}><img src={`/selos/novo/${id}.svg`} alt={`Selo ${nome}: ${frase.toLowerCase()}`} /><small>{frase}</small></li>)}
+          {SELOS.map(([id, nome, frase], i) => <li key={id} style={{ ['--s' as string]: `${i * 220}ms` }}><img src={`/selos/novo/${id}.svg`} alt={`Selo ${nome}: ${frase.toLowerCase()}`} /><small>{frase}</small></li>)}
         </ul>
       </section>
 
       <section className="hn-prog" id="programa" aria-label="Sua jornada">
         <h2>Sua jornada.</h2>
         <ol className="hn-prog__passos">
-          <li><div className="hn-prog__topo"><b>1</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Visite</h3><p>Venha até 2 vezes, como Visitante ou Convidado, em encontros abertos e gratuitos. Só conta a visita com check-in.</p></li>
-          <li><div className="hn-prog__topo"><b>2</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Faça parte</h3><p>Gostou? Depois da primeira visita, é só pedir para fazer parte da comunidade. É gratuito, e a gente analisa cada pedido com carinho.</p></li>
-          <li><div className="hn-prog__topo"><b>3</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Acumule milhas</h3><p>As milhas começam quando você entra. Presença vale 10, convidado que comparece vale 5, experiência ou conteúdo aprovado vale 15 e parceiro indicado que contribui vale 20.</p></li>
-          <li><div className="hn-prog__topo"><b>4</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Evolua</h3><p>Conectores e Embaixadores são quem mais contribui. A evolução vem de milhas, presenças, contribuições, avaliação da organização e do seu aceite. Nunca se compra.</p></li>
+          <li><div className="hn-prog__topo"><b>1</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Visite</h3><p><strong>Venha até 2 vezes</strong> como Visitante ou Convidado, em encontros abertos e gratuitos. Só conta a visita com check-in.</p></li>
+          <li><div className="hn-prog__topo"><b>2</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Faça parte</h3><p>Gostou? Depois da primeira visita, é só solicitar para fazer parte da comunidade. <strong>É gratuito</strong>, e a gente vai analisar e entrar em contato.</p></li>
+          <li><div className="hn-prog__topo"><b>3</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Acumule milhas</h3><p>As milhas começam quando você entra, ou seja, como membro. Contam presença, convites e comparecimentos, experiências e conteúdos aprovados, parceiros indicados, entre outros.</p></li>
+          <li><div className="hn-prog__topo"><b>4</b><i className="hn-prog__seta" aria-hidden="true"><ArrowUpRight size={18} strokeWidth={1.8} /></i></div><h3>Evolua</h3><p>Conectores e Embaixadores são membros, profissionais que mais contribuem. A evolução vem de vários indicadores.</p></li>
         </ol>
       </section>
 

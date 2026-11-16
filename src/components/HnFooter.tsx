@@ -15,10 +15,8 @@ export function HnFooter() {
       </div>
       <div className="hn-foot__legal">
         <FooterLinks />
-        <p>© {new Date().getFullYear()} ComuniCALI, uma iniciativa da CALI RH. Todos os direitos reservados.</p>
+        <p>© {new Date().getFullYear()} ComuniCALI, uma iniciativa da CALI RH.</p>
         <p>AKAYKO AZUMI RH LTDA · CNPJ 56.660.675/0001-11 · <a href="mailto:comuni@calirh.com">comuni@calirh.com</a></p>
-        <p>Marca, logotipo, selos, carimbos, textos e materiais deste site pertencem à CALI RH e são protegidos pela Lei de Direitos Autorais (Lei nº 9.610/1998). A reprodução, total ou parcial, depende de autorização prévia e por escrito.</p>
-        <p>Falar de pessoas pode mudar o mundo. Toda honra a Deus!</p>
       </div>
     </footer>
   );
