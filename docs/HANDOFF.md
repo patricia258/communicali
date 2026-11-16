@@ -766,3 +766,9 @@ Acrescente entradas no topo.
 - Fora desta publicação: painel novo, custos e álbum real (trabalho da outra IA em home-nova). Passaporte segue trancado.
 - Rollback: deploy 9qsosbp9u.
 - Publicação 16/11 concluída: deploy ghkv6xals. A 1ª tentativa saiu sem as chaves públicas do Supabase (tela "Carregando…"), foi revertida em minutos. Agora VITE_SUPABASE_URL e VITE_SUPABASE_KEY existem no projeto Vercel (Production), então qualquer deploy já as leva. Em deploy de cópia limpa, não deixar .gitignore na pasta.
+
+### 16/11/2026 — Painel e site integrados (branch producao-integrada)
+- Código no ar: GitHub `patricia258/communicali`, branch `producao-integrada` (pasta `~/CALI/communicali-integrada`). Detalhes e regras de trabalho: `docs/ATUALIZACAO-CLAUDE-PARA-CODEX-2026-11-16.md`. Auditoria do painel: `docs/AUDITORIA-PAINEL-2026-11-16.md`.
+- Feito hoje: álbum ligado (abre em outra aba, acessos por e-mail com termo), fotos leves, recados com 12 avatares e aba Comentários por edição, resumo da edição com formatação, rodapé menor, foto da fundadora, tabelas com todas as colunas e cores, nível 1 e 2 da auditoria (textos, erros amigáveis, Início útil, lista de Edições, colunas de Pessoas), fotos e acessos do álbum dentro da aba Site e fotos da edição, listas suspensas nas listas longas.
+- Próximos (ordem): aprovação em lote (recados, pedidos, missões); menu lateral fixo no computador; controles e confirmações no padrão Apple; exportações; busca geral; registro de alterações; equipe do painel. Pendências de regra: janela de Membros por edição, lista de espera automática, milhas já lançadas, lembrete de pendências, selos novos, revisão jurídica final, medição do e-mail pós-evento.
+- Publicar sempre de cópia limpa (`git archive`, sem `.gitignore`), `vercel deploy --prod --skip-domain` e `vercel promote`. Rollback: o deploy anterior no painel da Vercel.
