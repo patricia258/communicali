@@ -10,8 +10,8 @@ import { PublicFormPage, type FormPreset } from '../forms/PublicFormPage';
 import { SiteFooter, Instagram } from '../components/SiteFooter';
 import { useSiteTexts } from './MemberFields';
 
-export type EditionRow = { id: string; slug: string; numero: number | null; titulo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; inscricoes_abertas: boolean; form_inscricao?: string | null };
-export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,resumo,fotos_url,inscricao_url,inscricoes_abertas,form_inscricao';
+export type EditionRow = { id: string; slug: string; numero: number | null; titulo: string; data_evento: string; horario: string; local: string; cidade: string; endereco: string | null; capa_url: string | null; resumo: string | null; fotos_url: string | null; inscricao_url: string | null; inscricoes_abertas: boolean; form_inscricao?: string | null ; valor_texto?: string | null};
+export const EDITION_FIELDS = 'id,slug,numero,titulo,data_evento,horario,local,cidade,endereco,capa_url,resumo,fotos_url,inscricao_url,inscricoes_abertas,form_inscricao,valor_texto';
 
 export const longDate = (iso: string) => new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${iso}T12:00:00Z`));
 // Um link só por edição: o formulário de inscrição dela. A página /inscricao fica para quem chega pelo convite de um membro.
@@ -176,7 +176,7 @@ export function EdicaoPage() {
                 <div><dt>Quando</dt><dd>{longDate(edition.data_evento)}, {edition.horario}</dd></div>
                 <div><dt>Onde</dt><dd><a className="hn-detail__local" href={mapa} target="_blank" rel="noopener noreferrer">{edition.local}, {edition.cidade}</a></dd></div>
                 {edition.endereco && <div><dt>Endereço</dt><dd><a className="hn-detail__local" href={mapa} target="_blank" rel="noopener noreferrer">{edition.endereco}</a></dd></div>}
-                <div><dt>Valor</dt><dd>{past ? 'Encerrada' : 'Informado com a edição'}</dd></div>
+                {(edition.valor_texto || !past) && <div><dt>Valor</dt><dd>{edition.valor_texto || 'Informado com a edição'}</dd></div>}
               </dl>
               <div className="hn-ed__texto">
                 <h2>{past ? 'Como foi' : 'Sobre este encontro'}</h2>
@@ -185,14 +185,14 @@ export function EdicaoPage() {
               </div>
             </section>
             {past && new URLSearchParams(window.location.search).has('moldura') && (
-              <GaleriaDoEncontro fotos={fotos} titulo={edition.titulo} acesso={<>
-                <h3>Álbum completo</h3>
-                <p>Para ver e baixar todas as fotos, informe o e-mail que você usou no check-in. Quem esteve no encontro entra direto, sem código.</p>
+              <GaleriaDoEncontro fotos={fotos} titulo={edition.titulo} rotulo={edition.numero ? `${edition.numero}ª Edição` : edition.titulo} acesso={<>
+                <h3>Você esteve nessa edição?</h3>
+                <p>Acesse o álbum completo e baixe os seus registros. Não deixe de marcar o nosso <a href="https://www.instagram.com/calirh_/" target="_blank" rel="noopener noreferrer">@calirh_</a>, hein!</p>
+                <p>Informe o e-mail que você usou no check-in e pronto.</p>
                 <form onSubmit={(event) => event.preventDefault()}>
                   <label>E-mail do check-in<input type="email" autoComplete="email" placeholder="seu@email.com" /></label>
                   <div><button className="hn-pill" type="submit">Ver o álbum</button></div>
                 </form>
-                <p className="gal__nota">Moldura para aprovação. A conferência do e-mail com a lista de check-in e o link do álbum são ligados pelo painel.</p>
               </>} />
             )}
             {past && !new URLSearchParams(window.location.search).has('moldura') && (

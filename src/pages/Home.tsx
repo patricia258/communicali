@@ -75,7 +75,7 @@ function Linha({ edition, encerrada, aberto, alternar }: { edition: EditionRow; 
       <div className={`hn-row${encerrada ? ' is-past' : ''}`}>
         <div className="hn-row__date">{diaMes(edition.data_evento)}<small>{edition.data_evento.slice(0, 4)}{encerrada ? ' · ENCERRADA' : ''}</small></div>
         <div className="hn-row__info"><h3>{edition.titulo}</h3><p>{edition.cidade} · {edition.horario}</p></div>
-        <div className="hn-row__value">{encerrada ? 'Encerrada' : 'A definir'}<small>{encerrada ? 'Resumo e fotos na edição' : 'Valor divulgado com a edição'}</small></div>
+        <div className="hn-row__value">{encerrada ? (edition.valor_texto || 'Encerrada') : 'A definir'}<small>{encerrada ? 'Resumo e fotos na edição' : 'Valor divulgado com a edição'}</small></div>
         <button type="button" className="hn-circ" aria-expanded={aberto} aria-controls={`det-${edition.slug}`} aria-label={`${aberto ? 'Fechar' : 'Ver'} detalhes de ${edition.titulo}`} onClick={alternar}><span className="hn-plus" aria-hidden="true" /></button>
       </div>
       <div className="hn-detail" id={`det-${edition.slug}`} role="region" aria-label={`Detalhes de ${edition.titulo}`}>
@@ -88,7 +88,7 @@ function Linha({ edition, encerrada, aberto, alternar }: { edition: EditionRow; 
               <div><dt>Quando</dt><dd>{longDate(edition.data_evento)}, {edition.horario}</dd></div>
               <div><dt>Onde</dt><dd><a className="hn-detail__local" href={MAPA(edition)} target="_blank" rel="noopener noreferrer">{edition.local}, {edition.cidade}</a></dd></div>
               {edition.endereco && <div><dt>Endereço</dt><dd><a className="hn-detail__local" href={MAPA(edition)} target="_blank" rel="noopener noreferrer">{edition.endereco}</a></dd></div>}
-              {!encerrada && <div><dt>Valor</dt><dd>A definir, divulgado com a edição</dd></div>}
+              {(!encerrada || edition.valor_texto) && <div><dt>Valor</dt><dd>{edition.valor_texto || 'A definir, divulgado com a edição'}</dd></div>}
             </dl>
             <div className="hn-detail__acoes">
               {encerrada

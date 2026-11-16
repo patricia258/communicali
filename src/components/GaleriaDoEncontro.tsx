@@ -6,13 +6,13 @@ import '../galeria-encontro.css';
 
 export type FotoPrevia = { id: string; url: string; legenda?: string | null };
 
-export function GaleriaDoEncontro({ fotos, titulo, acesso }: { fotos: FotoPrevia[]; titulo: string; acesso?: ReactNode }) {
+export function GaleriaDoEncontro({ fotos, titulo, rotulo, acesso }: { fotos: FotoPrevia[]; titulo: string; rotulo: string; acesso?: ReactNode }) {
   const quadros = Array.from({ length: 4 }, (_, i) => fotos[i] || null);
   return (
     <section className="hn-ed__bloco gal" id="fotos" aria-label="Fotos do encontro">
-      <p className="hn-eyebrow">REGISTROS DO ENCONTRO</p>
-      <h2>Fotos</h2>
-      <p className="hn-ed__lead">Alguns momentos de {titulo}. O álbum completo é para quem esteve no encontro.</p>
+      <p className="hn-eyebrow">FOTOS</p>
+      <h2>Registros do nosso encontro!</h2>
+      <p className="hn-ed__lead">Apenas alguns dos momentos da nossa {rotulo}!</p>
       <div className="gal__grade">
         {quadros.map((foto, i) => (
           <figure className={`gal__item gal__item--${i + 1}`} key={foto?.id || i}>
