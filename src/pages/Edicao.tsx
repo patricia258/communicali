@@ -1,4 +1,5 @@
 import { HnFooter } from '../components/HnFooter';
+import { GaleriaDoEncontro } from '../components/GaleriaDoEncontro';
 import { Compartilhar } from '../components/Compartilhar';
 import '../home-nova.css';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
@@ -183,7 +184,18 @@ export function EdicaoPage() {
                 {!past && (inscricao ? <a className="hn-pill" href={inscricao}>Garantir minha vaga</a> : <a className="hn-pill" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>)}
               </div>
             </section>
-            {past && (
+            {past && new URLSearchParams(window.location.search).has('moldura') && (
+              <GaleriaDoEncontro fotos={fotos} titulo={edition.titulo} acesso={<>
+                <h3>Álbum completo</h3>
+                <p>Para ver e baixar todas as fotos, informe o e-mail que você usou no check-in. Quem esteve no encontro entra direto, sem código.</p>
+                <form onSubmit={(event) => event.preventDefault()}>
+                  <label>E-mail do check-in<input type="email" autoComplete="email" placeholder="seu@email.com" /></label>
+                  <div><button className="hn-pill" type="submit">Ver o álbum</button></div>
+                </form>
+                <p className="gal__nota">Moldura para aprovação. A conferência do e-mail com a lista de check-in e o link do álbum são ligados pelo painel.</p>
+              </>} />
+            )}
+            {past && !new URLSearchParams(window.location.search).has('moldura') && (
               <section className="hn-ed__bloco">
                 <h2>Fotos do encontro</h2>
                 {fotos.length > 0 && <div className="hn-ed__galeria">{fotos.map((foto) => <img key={foto.id} src={foto.url} alt={foto.legenda || `Foto do encontro ${edition.titulo}`} loading="lazy" />)}</div>}
