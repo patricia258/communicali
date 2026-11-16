@@ -10,7 +10,7 @@ const INSTA = <a href="https://www.instagram.com/calirh_/" target="_blank" rel="
 const AVISO = 'O álbum é de uso exclusivo de quem participou deste encontro. A reprodução por terceiros não é autorizada.';
 
 /** Primeiro acesso: ciência do termo (abre em outra aba, como as políticas). A confirmação (e-mail, edição, data e hora) precisa ser guardada por quem liga o álbum. */
-function Termo({ email, aoAceitar, aoTrocar }: { email: string; aoAceitar: () => void; aoTrocar: () => void }) {
+function Termo({ email, aoAceitar, aoTrocar, ocupado, mensagem }: { email: string; aoAceitar: () => void; aoTrocar: () => void; ocupado?: boolean; mensagem?: string }) {
   const [ciente, setCiente] = useState(false);
   return (
     <>
@@ -18,16 +18,17 @@ function Termo({ email, aoAceitar, aoTrocar }: { email: string; aoAceitar: () =>
       <p className="gal__ok"><Check size={16} aria-hidden="true" /> {email || 'seu@email.com'}</p>
       <p>Conferimos o seu check-in. Só falta confirmar que você leu o termo de ciência do álbum.</p>
       <label className="gal__aceite"><input type="checkbox" checked={ciente} onChange={(event) => setCiente(event.target.checked)} /><span>Li e estou ciente do <a href="/termo-album" target="_blank" rel="noopener noreferrer">termo de ciência do álbum</a>.</span></label>
+      {mensagem && <p role="alert" className="gal__erro">{mensagem}</p>}
       <div className="gal__acoes">
-        <button className="hn-pill" type="button" disabled={!ciente} onClick={aoAceitar}><Download size={16} aria-hidden="true" /> Confirmar e abrir o álbum</button>
+        <button className="hn-pill" type="button" disabled={!ciente || ocupado} onClick={aoAceitar}><Download size={16} aria-hidden="true" /> {ocupado ? 'Abrindo…' : 'Confirmar e abrir o álbum'}</button>
         <button className="gal__link" type="button" onClick={aoTrocar}>Usar outro e-mail</button>
       </div>
     </>
   );
 }
 
-export function AlbumAcessoVisual({ estado, email, setEmail, aoEntrar, aoTrocar, aoAbrir, aoAceitar }: { estado: EstadoAlbum; email: string; setEmail: (valor: string) => void; aoEntrar: () => void; aoTrocar: () => void; aoAbrir: () => void; aoAceitar: () => void }) {
-  if (estado === 'termo') return <Termo email={email} aoAceitar={aoAceitar} aoTrocar={aoTrocar} />;
+export function AlbumAcessoVisual({ estado, email, setEmail, aoEntrar, aoTrocar, aoAbrir, aoAceitar, ocupado, mensagem }: { estado: EstadoAlbum; email: string; setEmail: (valor: string) => void; aoEntrar: () => void; aoTrocar: () => void; aoAbrir: () => void; aoAceitar: () => void; ocupado?: boolean; mensagem?: string }) {
+  if (estado === 'termo') return <Termo email={email} aoAceitar={aoAceitar} aoTrocar={aoTrocar} ocupado={ocupado} mensagem={mensagem} />;
   if (estado === 'confirmado' || estado === 'preparando') return (
     <>
       <h3>Check-in confirmado!</h3>
@@ -37,9 +38,10 @@ export function AlbumAcessoVisual({ estado, email, setEmail, aoEntrar, aoTrocar,
           <p>Que bom ter você com a gente! Abra o álbum para baixar os seus registros, e não deixe de marcar o nosso {INSTA}, hein!</p>
           <p className="gal__aviso"><LockKeyhole size={15} aria-hidden="true" /> {AVISO}</p>
           <div className="gal__acoes">
-            <button className="hn-pill" type="button" onClick={aoAbrir}><Download size={16} aria-hidden="true" /> Abrir o álbum e baixar as fotos</button>
+            <button className="hn-pill" type="button" disabled={ocupado} onClick={aoAbrir}><Download size={16} aria-hidden="true" /> {ocupado ? 'Abrindo…' : 'Abrir o álbum e baixar as fotos'}</button>
             <button className="gal__link" type="button" onClick={aoTrocar}>Usar outro e-mail</button>
           </div>
+          {mensagem && <p role="alert" className="gal__erro">{mensagem}</p>}
           <p className="gal__nota">Você já confirmou o termo de ciência. Registramos quem acessa o álbum, para cuidar da privacidade das fotos.</p>
         </>
       ) : (
@@ -59,7 +61,8 @@ export function AlbumAcessoVisual({ estado, email, setEmail, aoEntrar, aoTrocar,
       <form onSubmit={(event) => { event.preventDefault(); aoEntrar(); }}>
         <label>E-mail do check-in<input type="email" autoComplete="email" placeholder="seu@email.com" value={email} onChange={(event) => setEmail(event.target.value)} aria-invalid={estado === 'nao-encontrado'} /></label>
         {estado === 'nao-encontrado' && <p role="alert" className="gal__erro">Não encontramos esse e-mail no check-in. Confira se é o mesmo que você usou no dia do encontro. Se esteve com a gente e não conseguiu entrar, <a href={ZAP} target="_blank" rel="noopener noreferrer">fale com a organização</a>.</p>}
-        <div><button className="hn-pill" type="submit">Ver o álbum</button></div>
+        {mensagem && estado !== 'nao-encontrado' && <p role="alert" className="gal__erro">{mensagem}</p>}
+        <div><button className="hn-pill" type="submit" disabled={ocupado}>{ocupado ? 'Conferindo seu check-in…' : 'Ver o álbum'}</button></div>
       </form>
     </>
   );

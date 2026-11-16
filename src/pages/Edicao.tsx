@@ -1,6 +1,10 @@
 import { HnFooter } from '../components/HnFooter';
 import { GaleriaDoEncontro } from '../components/GaleriaDoEncontro';
 import { AlbumAcessoVisual, type EstadoAlbum } from '../components/AlbumAcessoVisual';
+import { AlbumDoEncontro } from '../components/AlbumDoEncontro';
+
+/** Trocar para true quando a migração do álbum, o painel e o backend (/api/edicao?acao=album_*) estiverem no ar. Antes disso, ?album=1 testa o fluxo real e ?moldura=1 mostra a demonstração visual. */
+const ALBUM_REAL = false;
 import { Compartilhar } from '../components/Compartilhar';
 import '../home-nova.css';
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
@@ -187,6 +191,9 @@ export function EdicaoPage() {
                 {!past && (inscricao ? <a className="hn-pill" href={inscricao}>Garantir minha vaga</a> : <a className="hn-pill" href={COMMUNITY_URL} target="_blank" rel="noopener noreferrer">Entrar no grupo</a>)}
               </div>
             </section>
+            {past && (ALBUM_REAL || new URLSearchParams(window.location.search).has('album')) && !new URLSearchParams(window.location.search).has('moldura') && (
+              <AlbumDoEncontro slug={edition.slug} titulo={edition.titulo} rotulo={edition.numero ? `${edition.numero}ª Edição` : edition.titulo} />
+            )}
             {past && new URLSearchParams(window.location.search).has('moldura') && (
               <GaleriaDoEncontro fotos={fotos} titulo={edition.titulo} rotulo={edition.numero ? `${edition.numero}ª Edição` : edition.titulo} completa={demoAlbum === 'confirmado'} acesso={<>
                 <AlbumAcessoVisual estado={demoAlbum} email={demoEmail} setEmail={setDemoEmail} aoEntrar={() => setDemoAlbum(demoEmail.toLowerCase().includes('erro') ? 'nao-encontrado' : 'termo')} aoTrocar={() => { setDemoAlbum('entrar'); setDemoEmail(''); }} aoAbrir={() => undefined} aoAceitar={() => setDemoAlbum('confirmado')} />
@@ -195,7 +202,7 @@ export function EdicaoPage() {
                 </div>
               </>} />
             )}
-            {past && !new URLSearchParams(window.location.search).has('moldura') && (
+            {past && !ALBUM_REAL && !new URLSearchParams(window.location.search).has('moldura') && !new URLSearchParams(window.location.search).has('album') && (
               <section className="hn-ed__bloco">
                 <h2>Fotos do encontro</h2>
                 {fotos.length > 0 && <div className="hn-ed__galeria">{fotos.map((foto) => <img key={foto.id} src={foto.url} alt={foto.legenda || `Foto do encontro ${edition.titulo}`} loading="lazy" />)}</div>}
