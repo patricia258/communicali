@@ -254,7 +254,7 @@ button.hn-pill{cursor:pointer;font-family:var(--display)}
 .hn-par__itens{grid-template-columns:repeat(4,1fr)!important;gap:30px!important}
 .hn-par__itens>div{flex-direction:column;gap:14px!important}
 .hn-logos{overflow:hidden;background:var(--ink);padding:26px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
-.hn-logos__track{display:flex;gap:28px;width:max-content;animation:hn-desliza 40s linear infinite}
+.hn-logos__track{display:flex;gap:28px;width:max-content;animation:hn-desliza var(--dur,40s) linear infinite}
 .hn-logos:hover .hn-logos__track,.hn-logos:focus-within .hn-logos__track{animation-play-state:paused}
 @keyframes hn-desliza{to{transform:translateX(-25%)}}
 .hn-logos__item{flex:none;display:flex;align-items:center;justify-content:center;width:210px;height:96px;border:1px dashed rgba(255,255,255,.4);border-radius:0 0 25px 0;opacity:.8;transition:opacity .3s,border-color .3s;text-decoration:none;color:#fff}

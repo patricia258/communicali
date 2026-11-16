@@ -398,7 +398,7 @@ export function Home() {
         </div>
         {partners.length > 0 && (
           <div className="hn-logos" aria-label="Quem apoia a ComuniCALI">
-            <div className="hn-logos__track">
+            <div className="hn-logos__track" style={{ ['--dur' as string]: `${Math.max(14, partners.length * 4.5)}s` }}>
               {[...partners, ...partners, ...partners, ...partners].map((p, i) => {
                 const oculto = i >= partners.length;
                 const conteudo = p.logo_url
