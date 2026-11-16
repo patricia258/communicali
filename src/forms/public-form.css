@@ -246,3 +246,6 @@
 .cali-form-page .cf-foto{display:block;width:min(460px,100%);aspect-ratio:16/9;object-fit:cover;border-radius:16px;margin:0 0 20px;box-shadow:0 10px 28px rgba(90,30,45,.22)}
 .cali-form-page.cf-claro .cf-anexo,.cf-claro .cf-anexo{background:#fff;border:2px solid #C6DAEA;color:#5A1E2D}
 .cali-form-page .cf-anexo img{width:110px;aspect-ratio:4/3;object-fit:cover}
+.cali-form-page.cf-claro .cf-anexo em,.cf-claro .cf-anexo em{color:#5A1E2D}
+.cali-form-page.cf-claro .cf-anexo small,.cf-claro .cf-anexo small{letter-spacing:normal;color:#1B0A10}
+.cali-form-page.cf-claro .cf-anexo img{box-shadow:0 0 0 1px #D9D2CB}
