@@ -68,6 +68,10 @@
 .hn-entrar>div .hn-pill:hover{transform:translateY(-3px)}
 
 @media (max-width:900px){
+  .hn-prog{padding:52px var(--gutter) 28px}
+  .hn-prog__passos{margin-top:30px;gap:22px}
+  .hn-selos{padding:52px var(--gutter) 44px}
+  .hn-idx{min-height:128px!important}
   .hn-exp__orbitas{display:none}
   .hn-selos__topo{grid-template-columns:1fr}
   .hn-selos__topo p{justify-self:start}
