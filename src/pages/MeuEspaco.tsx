@@ -1050,8 +1050,8 @@ export function MeuEspaco() {
   if (!espaco.membro) return (
     <Pagina>
       <img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
-      <h1>O passaporte é dos Membros</h1>
-      <p>Não encontramos um cadastro com este e-mail. Você pode conhecer a ComuniCALI em até 2 experiências abertas e gratuitas. Depois da primeira presença, já dá para pedir a adesão como Membro, que é gratuita.</p>
+      <h1>O passaporte é de quem faz parte da comunidade</h1>
+      <p>Não encontramos um cadastro com este e-mail. Você pode conhecer a ComuniCALI em até 2 visitas abertas e gratuitas. Depois da primeira visita, já dá para pedir a adesão como Membro, que é gratuita.</p>
       <a className="passe__botao" href="/#agenda">Ver os próximos encontros</a>
       <button type="button" className="passe__link" onClick={() => void supabase.auth.signOut()}>Sair</button>
     </Pagina>

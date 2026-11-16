@@ -20,7 +20,7 @@ export function Convidar() {
     const base = { title: 'Indicar um convidado', category: 'ComuniCALI', skipWelcome: true };
     if (step === 'email') return {
       ...base, submitLabel: 'Receber código',
-      questions: [{ id: 'email', kind: 'email', label: 'Qual é o seu e-mail de membro?', help: `${meta}\nA indicação não garante vaga. A organização confirma conforme a disponibilidade do encontro.`, required: true }],
+      questions: [{ id: 'email', kind: 'email', label: 'Qual é o seu e-mail cadastrado na ComuniCALI?', help: `${meta}\nA indicação não garante vaga. A organização confirma conforme a disponibilidade do encontro.`, required: true }],
       submit: async (answers) => {
         const clean = String(answers.email).trim().toLowerCase();
         const { error } = await supabase.auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } });
