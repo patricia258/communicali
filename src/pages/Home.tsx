@@ -40,9 +40,6 @@ const FAQ = [
   ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
   ['Quantas vezes posso ir a um encontro sem fazer parte da comunidade?', 'Até 2 vezes, em encontros abertos e gratuitos. Só conta a visita em que você fez o check-in. Se alguém da comunidade convidou você, entra como Convidado. Se veio por interesse próprio, entra como Visitante, e as duas somam no mesmo contador. Depois da primeira visita você já pode pedir para fazer parte. Depois da segunda, para continuar nos encontros abertos e gratuitos, é preciso fazer parte.'],
   ['Ir a um encontro me faz parte da comunidade?', 'Não automaticamente. Depois da primeira visita, você já pode pedir para fazer parte. O pedido passa pelo cadastro, pelo aceite das regras e pela análise da organização.'],
-  ['Quanto custa fazer parte da comunidade?', 'Nada. É gratuito e continua gratuito.'],
-  ['Como acompanho minha participação?', 'O Meu passaporte é de quem faz parte da comunidade. Depois que o seu pedido for aprovado, você entra com o e-mail cadastrado e acompanha carimbos, milhas, missões, indicações e fotos.'],
-  ['Como minha empresa pode ser parceira?', 'Envie sua proposta pelo formulário de parceiros. Cada parceria é conversada e combinada individualmente.'],
 ];
 
 const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
