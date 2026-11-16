@@ -5,6 +5,7 @@ import { HnFooter } from '../components/HnFooter';
 import { Abertura } from '../components/Abertura';
 import { Compartilhar } from '../components/Compartilhar';
 import '../home-nova.css';
+import '../home-programa.css';
 
 type Partner = { id: string; nome: string; logo_url: string | null; site_url: string | null };
 
@@ -16,11 +17,11 @@ const FORMATOS = [
 ];
 
 const SELOS = [
-  ['convidado', 'Convidado', 'Chegou a convite'],
-  ['visitante', 'Visitante', 'Chegando ao caminho'],
-  ['membro', 'Membro', 'Chegou e faz parte'],
-  ['conector', 'Conector', 'Faz as pontes'],
-  ['embaixador', 'Embaixador', 'Leva a comunidade longe'],
+  ['convidado', 'Convidado', 'Chega por convite de alguém da comunidade'],
+  ['visitante', 'Visitante', 'Chega por interesse próprio'],
+  ['membro', 'Membro', 'Faz parte da comunidade'],
+  ['conector', 'Conector', 'Faz as pontes entre as pessoas'],
+  ['embaixador', 'Embaixador', 'Leva a comunidade mais longe'],
 ];
 
 const PARCERIAS = [
@@ -37,7 +38,7 @@ const FAQ = [
   ['A comunidade é só de Curitiba?', 'Não. O grupo reúne pessoas do Brasil inteiro. Os encontros presenciais começam em Curitiba.'],
   ['Posso divulgar vagas e meus serviços?', 'Pode. O grupo também existe para isso, com respeito às regras de participação.'],
   ['Como participo de um encontro?', 'Entre no grupo da comunidade e se inscreva no encontro. Cada edição é divulgada no grupo, com data, local e link de inscrição.'],
-  ['Posso ir a um encontro antes de fazer parte?', 'Pode. Você vive até 2 visitas abertas e gratuitas antes de fazer parte da comunidade. Se alguém da comunidade convidou você, entra como Convidado. Se veio por interesse próprio, entra como Visitante. As duas somam no mesmo contador, e só conta a visita em que você fez o check-in.'],
+  ['Quantas vezes posso ir a um encontro sem fazer parte da comunidade?', 'Até 2 vezes, em encontros abertos e gratuitos. Só conta a visita em que você fez o check-in. Se alguém da comunidade convidou você, entra como Convidado. Se veio por interesse próprio, entra como Visitante, e as duas somam no mesmo contador. Depois da primeira visita você já pode pedir para fazer parte. Depois da segunda, para continuar nos encontros abertos e gratuitos, é preciso fazer parte.'],
   ['Ir a um encontro me faz parte da comunidade?', 'Não automaticamente. Depois da primeira visita, você já pode pedir para fazer parte. O pedido passa pelo cadastro, pelo aceite das regras e pela análise da organização.'],
   ['Quanto custa fazer parte da comunidade?', 'Nada. É gratuito e continua gratuito.'],
   ['Como acompanho minha participação?', 'O Meu passaporte é de quem faz parte da comunidade. Depois que o seu pedido for aprovado, você entra com o e-mail cadastrado e acompanha carimbos, milhas, missões, indicações e fotos.'],
@@ -90,7 +91,7 @@ function Linha({ edition, encerrada, aberto, alternar }: { edition: EditionRow; 
               <div><dt>Quando</dt><dd>{longDate(edition.data_evento)}, {edition.horario}</dd></div>
               <div><dt>Onde</dt><dd><a className="hn-detail__local" href={MAPA(edition)} target="_blank" rel="noopener noreferrer">{edition.local}, {edition.cidade}</a></dd></div>
               {edition.endereco && <div><dt>Endereço</dt><dd><a className="hn-detail__local" href={MAPA(edition)} target="_blank" rel="noopener noreferrer">{edition.endereco}</a></dd></div>}
-              <div><dt>Valor</dt><dd>{encerrada ? 'Encerrada' : 'A definir, divulgado com a edição'}</dd></div>
+              {!encerrada && <div><dt>Valor</dt><dd>A definir, divulgado com a edição</dd></div>}
             </dl>
             <div className="hn-detail__acoes">
               {encerrada
@@ -229,7 +230,7 @@ export function Home() {
             <a href="#comunidade">Comunidade</a>
             <a href="#agenda">Agenda</a>
             <a href="#parceiros">Parceiros</a>
-            <a className="hn-nav__membro" href="/meu-passaporte">Já sou membro</a>
+            <a className="hn-nav__membro" href="/meu-passaporte">Minha área</a>
             <a className="hn-pill" href={joinHref}>Registrar interesse</a>
           </div>
         </nav>
@@ -294,8 +295,20 @@ export function Home() {
         <h2>Os selos contam o seu caminho.</h2>
         <p>Convidado e Visitante são portas de entrada. Membro, Conector e Embaixador são o seu caminho dentro da comunidade.</p>
         <ul className="hn-selos__lista">
-          {SELOS.map(([id, nome, frase]) => <li key={id}><img src={`/selos/novo/${id}.svg`} alt={`Selo ${nome}: ${frase.toLowerCase()}`} /></li>)}
+          {SELOS.map(([id, nome, frase]) => <li key={id}><img src={`/selos/novo/${id}.svg`} alt={`Selo ${nome}: ${frase.toLowerCase()}`} /><b>{nome}</b><small>{frase}</small></li>)}
         </ul>
+      </section>
+
+      <section className="hn-prog" id="programa" aria-label="Como funciona o programa">
+        <p className="hn-eyebrow">O PROGRAMA</p>
+        <h2>Cada encontro conta no seu caminho.</h2>
+        <ol className="hn-prog__passos">
+          <li><b>1</b><h3>Visite</h3><p>Até 2 visitas abertas e gratuitas, como Visitante ou Convidado. Só conta a visita em que você fez o check-in.</p></li>
+          <li><b>2</b><h3>Faça parte</h3><p>Depois da primeira visita, peça para fazer parte da comunidade. É gratuito, e a organização analisa cada pedido.</p></li>
+          <li><b>3</b><h3>Acumule milhas</h3><p>As milhas começam na adesão. Presença validada vale 10, convidado que comparece vale 5, experiência ou conteúdo aprovado vale 15 e parceiro indicado que contribui vale 20.</p></li>
+          <li><b>4</b><h3>Evolua</h3><p>Conector e Embaixador reconhecem quem contribui. A evolução depende de milhas, presenças, contribuições, avaliação da organização e do seu aceite. Nunca é comprada.</p></li>
+        </ol>
+        <p className="hn-prog__nota">Tudo isso fica no Meu passaporte, com carimbos, selos, missões e a Rede. As regras completas estão nos <a href="/termos">Termos de participação</a>.</p>
       </section>
 
       <section className="hn-agenda" id="agenda">
@@ -315,20 +328,20 @@ export function Home() {
         <div className="hn-entrar__a">
           <span>ANTES DE FAZER PARTE</span><h3>Conheça a comunidade</h3>
           <p>Você pode viver até 2 visitas abertas e gratuitas antes de fazer parte da comunidade.</p>
-          <ul><li>Visitante: você chega por interesse próprio</li><li>Convidado: um Membro convida você</li><li>As duas somam no mesmo contador</li><li>Só conta a visita com check-in</li><li>Valor de cada encontro informado na agenda</li></ul>
-          <a className="hn-pill" href={joinHref}>Cadastrar meu interesse</a>
+          <ul><li>Visitante: você chega por interesse próprio</li><li>Convidado: alguém da comunidade convida você</li><li>As duas somam no mesmo contador</li><li>Só conta a visita com check-in</li><li>Valor de cada encontro informado na agenda</li></ul>
+          <a className="hn-pill" href={joinHref}>Registrar interesse</a>
         </div>
         <div className="hn-entrar__b">
           <span>DEPOIS DA VISITA</span><h3>Faça parte</h3>
           <p>Depois da primeira visita, você já pode pedir para fazer parte da comunidade. É gratuito, e a organização analisa cada pedido.</p>
           <ul><li>Meu passaporte: carimbos, selos e milhas</li><li>A Rede da comunidade</li><li>Convidar pessoas para os encontros</li><li>Sempre gratuito</li></ul>
-          <a className="hn-pill hn-pill--white" href={joinHref}>Quero fazer parte</a>
+          <a className="hn-pill hn-pill--white" href="/meu-passaporte">Entrar na minha área</a>
         </div>
         <div className="hn-entrar__c">
           <span>CONVITE</span><h3>Por convite</h3>
           <p>Alguém da comunidade convida você e você entra como Convidado. A visita conta nas suas 2 visitas.</p>
           <ul><li>O convite não garante vaga</li><li>A vaga depende de inscrição e confirmação</li></ul>
-          <a className="hn-pill hn-pill--white" href="/termos">Como funciona</a>
+          <a className="hn-pill hn-pill--white" href="#programa">Como funciona</a>
         </div>
       </section>
 
