@@ -7,6 +7,7 @@ import { Menu, X } from 'lucide-react';
 import { Link, Navigate, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { erroAmigavel } from '../lib/erros';
 import { AdminFormsPage } from '../forms/AdminFormsPage';
 import { PessoasDaEdicao } from './AdminPessoasEdicao';
 import { ComentariosPanel } from './AdminComentarios';
@@ -141,7 +142,7 @@ function EditionsPanel() {
   const [open, setOpen] = useState<Edition | null>(null);
   const [error, setError] = useState('');
   const [params, setParams] = useSearchParams();
-  const load = () => supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data, error: failure }) => { if (failure) setError(failure.message); else { const itens = (data || []) as Edition[]; setList(itens); const pedida = params.get('abrir'); if (pedida) setOpen((atual) => atual || itens.find((item) => item.slug === pedida) || null); } });
+  const load = () => supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data, error: failure }) => { if (failure) setError(erroAmigavel(failure)); else { const itens = (data || []) as Edition[]; setList(itens); const pedida = params.get('abrir'); if (pedida) setOpen((atual) => atual || itens.find((item) => item.slug === pedida) || null); } });
   const [contagens, setContagens] = useState<Record<string, Record<string, number>>>({});
   useEffect(() => {
     void Promise.all([supabase.from('registrations').select('edition_id,status'), supabase.from('checkins').select('edition_id')]).then(([inscricoes, presencas]) => {
@@ -159,7 +160,7 @@ function EditionsPanel() {
     const numero = Math.max(0, ...list.map((item) => item.numero || 0)) + 1;
     const titulo = `${numero}ª edição`;
     const { data, error: failure } = await supabase.from('editions').insert({ slug: slugify(`edicao-${numero}`), numero, titulo, selo: titulo, data_evento: date, horario: '9h às 12h', local: 'A definir', cidade: 'Curitiba', checkin_abre: `${date} 07:00-03`, checkin_fecha: `${date} 13:00-03`, publica: false }).select('*').single();
-    if (failure) setError(failure.message); else { await load(); const proximo = new URLSearchParams(params); proximo.set('abrir', data.slug); setParams(proximo); }
+    if (failure) setError(erroAmigavel(failure)); else { await load(); const proximo = new URLSearchParams(params); proximo.set('abrir', data.slug); setParams(proximo); }
   }
 
   const colunasEdicoes: Array<Coluna<Edition>> = [
@@ -177,7 +178,7 @@ function EditionsPanel() {
   if (open) return <EditionEditor key={open.id} edition={open} onBack={() => { setOpen(null); const proximo = new URLSearchParams(params); proximo.delete('abrir'); proximo.delete('secao'); setParams(proximo, { replace: true }); void supabase.from('editions').select('*').order('data_evento', { ascending: false }).then(({ data }) => { if (data) setList(data as Edition[]); }); }} />;
   return (
     <>
-      <div className="wf-head"><div><small>EDIÇÕES</small><h1>Encontros</h1><p>Abra uma edição para ajustar data e local, enviar capa e fotos, abrir os telões e ver quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void create()}>Nova edição</button></div></div>
+      <div className="wf-head"><div><small>OPERAÇÃO · EDIÇÕES</small><h1>Encontros</h1><p>Abra uma edição para ajustar data e local, enviar capa e fotos, abrir os telões e ver quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void create()}>Nova edição</button></div></div>
       {error && <p className="inline-notice">{error}</p>}
       <Tabela colunas={colunasEdicoes} colunasIniciais={['titulo', 'data', 'local', 'inscricoes']} linhas={list} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhuma edição cadastrada." filtros={[{ id: 'site', titulo: 'No site', valor: (item) => (item.publica ? 'No site' : 'Fora do site') }, { id: 'inscricoes', titulo: 'Inscrições', valor: (item) => (item.inscricoes_abertas ? 'Abertas' : 'Fechadas') }]} />
     </>
@@ -219,7 +220,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
     const { error } = await supabase.from('editions').update(clean).eq('id', id);
     setBusy(false);
     setNoteErro(Boolean(error));
-    setNote(error ? `Não foi possível salvar: ${error.message}` : `Alterações salvas em ${slug}.`);
+    setNote(error ? `Não foi possível salvar: ${erroAmigavel(error)}` : `Alterações salvas em ${slug}.`);
   }
 
   async function cover(file?: File) {
@@ -294,7 +295,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
     if (digitado === null) return;
     if (digitado.trim().toLowerCase() !== edition.titulo.trim().toLowerCase()) { setNote('O nome digitado não confere. Nada foi excluído.'); return; }
     const { error } = await supabase.rpc('communicali_excluir_edicao', { p_id: edition.id });
-    if (error) { setNote(`Não foi possível excluir: ${error.message}`); return; }
+    if (error) { setNote(`Não foi possível excluir: ${erroAmigavel(error)}`); return; }
     onBack();
   }
 
@@ -302,7 +303,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
     const email = window.prompt('E-mail do membro para registrar a presença:');
     if (!email || !window.confirm(`Registrar presença de ${email} em ${edition.titulo}? Soma 10 milhas se ainda não tiver presença.`)) return;
     const { error } = await supabase.rpc('admin_checkin_manual', { p_edition: edition.id, p_email: email });
-    setNote(error ? error.message : 'Presença registrada.');
+    setNote(error ? erroAmigavel(error) : 'Presença registrada.');
     await loadPeople();
   }
 
@@ -322,7 +323,7 @@ function EditionEditor({ edition, onBack }: { edition: Edition; onBack: () => vo
       {editor}
       <div className="adm-edicao">
       <button type="button" className="v2-forms-back" onClick={onBack}>Voltar para edições</button>
-      <div className="wf-head"><div><small>EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
+      <div className="wf-head"><div><small>OPERAÇÃO · EDIÇÃO</small><h1>{draft.titulo}</h1></div><div className="v2-head-actions"><button type="button" className="wf-secondary adm-perigo" disabled={busy} onClick={() => void excluirEdicao()}>Excluir edição</button><button type="button" className="wf-primary" disabled={busy} onClick={() => void save()}>{busy ? 'Salvando...' : 'Salvar alterações'}</button></div></div>
       {note && <p className={noteErro ? "v2-forms-error" : "v2-forms-ok"} role={noteErro ? "alert" : "status"}>{note}</p>}
       <dl className="adm-edicao-resumo" aria-label="Resumo da edição">
         <div><dt>Data e horário</dt><dd>{dataBr(draft.data_evento)}<small>{draft.horario}</small></dd></div>
@@ -428,7 +429,7 @@ function PartnersPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>PARCEIROS</small><h1>Logos na faixa do site</h1><p>Cada parceiro cadastrado aqui entra na faixa, com o logo convertido para branco e sem fundo, "Quem apoia a ComuniCALI". Sem parceiros, o site mostra os espaços "Sua marca aqui". As propostas recebidas ficam em Formulários, no formulário de parceiros.</p></div></div>
+      <div className="wf-head"><div><small>PROGRAMA · REDE E PARCEIROS</small><h1>Rede e parceiros</h1><p>Cada parceiro cadastrado aqui entra na faixa, com o logo convertido para branco e sem fundo, "Quem apoia a ComuniCALI". Sem parceiros, o site mostra os espaços "Sua marca aqui". As propostas recebidas ficam em Formulários, no formulário de parceiros.</p></div></div>
       {error && <p className="inline-notice">{error}</p>}
       <section className="v2-forms-card">
         <header><small>NOVO PARCEIRO</small><h2>Cadastre só parceiros confirmados</h2></header>

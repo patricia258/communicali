@@ -71,7 +71,7 @@ export default async function handler(req, res) {
 
   if (acao === 'teste_card') {
     // Teste só para endereços da própria organização.
-    const para = ['pclazumi@gmail.com', 'patricia@calirh.com', 'contato@calirh.com'].includes(String(req.body?.para || '')) ? req.body.para : email;
+    const para = email; // o teste vai sempre para quem está logada no painel
     const result = await enviar(para, montar('card', edition, { nome: 'Patrícia', email: para, cardEmail: 'contato@calirh.com' }));
     if (result.erro) return res.status(502).json({ error: result.erro });
     return res.status(200).json({ para, enviados: 1 });

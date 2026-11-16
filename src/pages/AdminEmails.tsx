@@ -1,6 +1,7 @@
 /* E-mails da edição: confirmação e lembrete automáticos, boas-vindas enviadas pelo painel. */
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { erroAmigavel } from '../lib/erros';
 import { Tabela, dataBr } from './AdminTabela';
 import { esc, imprimirFolhas } from './listaImpressa';
 
@@ -22,7 +23,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
-  const carregar = () => Promise.all([chamar({ acao: 'resumo', edicao: edition.id }).then(setResumo), chamar({ acao: 'acompanhar', edicao: edition.id }).then((result) => setLinhas(result.linhas))]).catch((error: Error) => setNote(error.message));
+  const carregar = () => Promise.all([chamar({ acao: 'resumo', edicao: edition.id }).then(setResumo), chamar({ acao: 'acompanhar', edicao: edition.id }).then((result) => setLinhas(result.linhas))]).catch((error: Error) => setNote(erroAmigavel(error)));
   useEffect(() => { void carregar(); }, [edition.id]);
 
   const faltamBoasVindas = resumo ? Math.max(resumo.acionados - resumo.convites, 0) : 0;
@@ -33,7 +34,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
   async function teste() {
     setBusy(true); setNote('');
     try { const result = await chamar({ acao: 'teste', edicao: edition.id, tipo: 'todos' }); setNote(`${result.enviados} e-mails de teste enviados para ${result.para}.`); }
-    catch (error) { setNote((error as Error).message); }
+    catch (error) { setNote(erroAmigavel(error)); }
     setBusy(false);
   }
 
@@ -50,7 +51,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
         if (!result.restantes) break;
       }
       setNote(`${enviados} e-mails enviados.`);
-    } catch (error) { setNote((error as Error).message); }
+    } catch (error) { setNote(erroAmigavel(error)); }
     await carregar();
     setBusy(false);
   }
@@ -65,7 +66,7 @@ export function EmailsCard({ edition, lembrete, onLembrete }: { edition: { id: s
       }
       await carregar();
       setNote('Entregas conferidas.');
-    } catch (error) { setNote((error as Error).message); }
+    } catch (error) { setNote(erroAmigavel(error)); }
     setBusy(false);
   }
 
@@ -150,13 +151,13 @@ export function CardEMimos({ edition }: { edition: { id: string; titulo: string;
   }
   async function teste() {
     setBusy(true); setNote('');
-    try { const result = await chamar({ acao: 'teste_card', edicao: edition.id, para: 'pclazumi@gmail.com' }); setNote(`Teste enviado para ${result.para}.`); } catch (error) { setNote((error as Error).message); }
+    try { const result = await chamar({ acao: 'teste_card', edicao: edition.id }); setNote(`Teste enviado para ${result.para}.`); } catch (error) { setNote(erroAmigavel(error)); }
     setBusy(false);
   }
   async function enviarFaltam() {
     if (!window.confirm(`Enviar o convite do card para ${faltam} ${faltam === 1 ? 'pessoa confirmada que ainda não recebeu' : 'pessoas confirmadas que ainda não receberam'}?`)) return;
     setBusy(true); setNote('');
-    try { const result = await chamar({ acao: 'convite', edicao: edition.id, tipo: 'card', publico: 'acionados' }); setNote(`${result.enviados} e-mails enviados.`); } catch (error) { setNote((error as Error).message); }
+    try { const result = await chamar({ acao: 'convite', edicao: edition.id, tipo: 'card', publico: 'acionados' }); setNote(`${result.enviados} e-mails enviados.`); } catch (error) { setNote(erroAmigavel(error)); }
     carregar(); setBusy(false);
   }
   // Lista para a recepção: quem postou, em ordem alfabética, com caixa para marcar a entrega no papel.

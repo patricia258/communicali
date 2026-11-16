@@ -81,13 +81,13 @@ function Adesoes() {
   const nomes: Record<string, string> = { solicitada: 'Solicitada', em_analise: 'Em análise', ajustes: 'Ajustes pedidos' };
   return (
     <>
-      <Cabecalho rotulo="APROVAÇÕES" titulo="Pedidos de adesão a Membro" texto="Quem pediu para ser Membro. Abra a ficha para aprovar, pedir ajustes ou não aprovar, sempre com motivo." />
+      <Cabecalho rotulo="OPERAÇÃO · APROVAÇÕES" titulo="Pedidos para fazer parte" texto="Quem pediu para fazer parte da comunidade. Abra a ficha para aprovar, pedir ajustes ou não aprovar, sempre com motivo." />
       <Tabela colunas={[
         { id: 'nome', titulo: 'Nome', valor: (item) => item.nome, render: (item) => <Link className="adm-nome" to={`/admin/pessoas?aba=membros&abrir=${item.id}`}>{item.nome}</Link> },
         { id: 'email', titulo: 'E-mail', valor: (item) => item.email },
         { id: 'situacao', titulo: 'Situação', valor: (item) => nomes[item.adesao_status] || item.adesao_status },
         { id: 'pedido', titulo: 'Pedido em', valor: (item) => item.adesao_solicitada_em || '', render: (item) => (item.adesao_solicitada_em ? dataBr(item.adesao_solicitada_em) : '-') },
-      ]} linhas={lista} chave={(item) => item.id} vazio="Nenhum pedido esperando decisão. O botão “Quero ser Membro” no app chega na parte 4 do plano." />
+      ]} linhas={lista} chave={(item) => item.id} vazio="Nenhum pedido esperando decisão." />
     </>
   );
 }
@@ -145,33 +145,25 @@ export function SitePage() {
 export function AppPage() { return <AdminAppGestao />; }
 
 const FALTA: Array<[string, Array<[string, string]>]> = [
-  ['Fluxo de entrada e adesão (parte 4)', [
-    ['Check-in sem acesso total', 'O check-in ainda cria a pessoa com acesso ao Meu Passaporte. Pela regra v23 deve registrar só Convidado ou Visitante.'],
-    ['Botão “Quero ser Membro” no app', 'Pedido, cadastro mínimo, aceites e status.'],
-    ['Bloqueio após 2 presenças', 'Automático na inscrição, usando o contador que já aparece na ficha.'],
+  ['Encontros', [
     ['Janela de Membros por edição', 'Início e fim, abertura geral, cota de convidados e prazo da lista de espera, configuráveis em cada edição.'],
     ['Lista de espera automática', 'Oferta de vaga com prazo e expiração.'],
-    ['Rede só para Membros aprovados', 'Adequar o acesso e o padrão do cadastro às regras publicadas, na parte 4.'],
-    ['Milhas só após a adesão', 'Decidir o que fazer com as milhas já lançadas dos visitantes da 1ª edição.'],
+  ]],
+  ['Programa', [
+    ['Milhas já lançadas', 'Decidir o que fazer com as milhas lançadas antes da regra de que milhas só contam depois que a pessoa faz parte.'],
+    ['Níveis e selos', 'Arte nova da Fundadora, das missões e dos carimbos das edições.'],
   ]],
   ['E-mails', [
-    ['Conferir os disparos do fluxo', 'Validar com Claude os gatilhos já automáticos e os que dependem de janelas e pendências.'],
-    ['Ativar modelos e histórico de e-mails', 'Telas prontas; migração e publicação coordenada pendentes.'],
     ['Lembrete de pendências', 'Foto, aceite e comunidade, automático.'],
-  ]],
-  ['Site', [
-    ['Home editável por seção', 'Texto, imagem e ordem pelo painel.'],
-    ['Álbuns dos encontros na versão oficial', 'Prévia pronta. Falta liberar o acesso real, validar os e-mails e configurar as permissões da pasta externa.'],
-    ['Revisão final dos textos v23', 'Textos já publicados. Falta a leitura final da administração e a revisão jurídica.'],
+    ['Medição do pós-evento', 'O e-mail com o material e a pesquisa não conta aberturas. Enviar os próximos pelo mesmo caminho dos outros.'],
   ]],
   ['Painel', [
     ['Equipe do painel', 'Acesso específico e limitado para uma parceira.'],
     ['Registro de alterações', 'Ver quem mudou o quê, hoje só no banco.'],
-    ['Conferência com conta real', 'Validar as telas com a sessão da organização e no celular, após a revisão visual local.'],
-    ['Aprovações com e-mail automático', 'Ao aprovar ou pedir ajustes, o e-mail correspondente sai sozinho.'],
+    ['Busca geral e exportações', 'Busca em todo o painel e exportar custos, e-mails, acessos ao álbum e recados.'],
   ]],
-  ['Programa', [
-    ['Níveis e selos', 'Arte nova da Fundadora, das missões e dos carimbos das edições.'],
+  ['Textos', [
+    ['Revisão jurídica final', 'Regras, termos e privacidade estão publicados. Falta a leitura final de uma pessoa da organização e a revisão jurídica.'],
   ]],
 ];
 
@@ -181,7 +173,7 @@ export function ConfigPage() {
     <Secoes atual={aba} onChange={mudar} abas={[['falta', 'O que falta construir'], ['testar', 'Testar como participante'], ['saiu', 'Quem saiu dos e-mails'], ['equipe', 'Equipe do painel']]}>
       {aba === 'falta' && (
         <>
-          <Cabecalho rotulo="CONFIGURAÇÕES" titulo="O que o painel ainda não faz" texto="A lista de tudo o que foi combinado e ainda não está pronto. Cada item sai daqui quando for entregue." />
+          <Cabecalho rotulo="SISTEMA" titulo="O que ainda está por fazer" texto="O que foi combinado e ainda não está pronto. Cada item sai daqui quando for entregue." />
           <div className="adm-falta">{FALTA.map(([grupo, itens]) => <section key={grupo}><h2>{grupo}</h2><ul>{itens.map(([nome, texto]) => <li key={nome}><strong>{nome}</strong><span>{texto}</span></li>)}</ul></section>)}</div>
         </>
       )}
@@ -300,7 +292,7 @@ export function CounterPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>CONTADOR</small><h1>Contador de membros</h1><p>Com o campo vazio, o site conta quem fez check-in em edições públicas. Com um número, mostra esse número. Em zero, o contador some.</p></div></div>
+      <div className="wf-head"><div><small>CONTEÚDO · SITE</small><h1>Contador de membros</h1><p>Com o campo vazio, o site conta quem fez check-in em edições públicas. Com um número, mostra esse número. Em zero, o contador some.</p></div></div>
       <section className="v2-forms-card">
         <div className="v2-forms-grid">
           <label><span>Número no site</span><input inputMode="numeric" value={value} onChange={(event) => { setValue(event.target.value); setNote(''); }} /></label>

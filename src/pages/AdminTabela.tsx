@@ -1,6 +1,6 @@
 /* Tabela do painel: ordena pelas colunas, filtra e busca. Contatos viram links com botão de copiar. */
 import { Columns3, MoreHorizontal, Search, SlidersHorizontal, X } from 'lucide-react';
-import { Fragment, useId, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 
 export type Coluna<T> = { id: string; titulo: string; valor: (linha: T) => string | number; render?: (linha: T) => ReactNode; longo?: boolean; /** Cabeçalho próprio (ex.: caixa de selecionar todos), sem ordenação. */ cabecalho?: ReactNode; estreita?: boolean };
 export type Filtro<T> = { id: string; titulo: string; valor: (linha: T) => string };
@@ -8,6 +8,9 @@ export type Filtro<T> = { id: string; titulo: string; valor: (linha: T) => strin
 /** `acoes` (imprimir, exportar...) ficam na mesma linha da busca e dos filtros, encostadas à direita. */
 export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio, acoes, colunasIniciais }: { colunas: Array<Coluna<T>>; linhas: T[]; chave: (linha: T) => string; filtros?: Array<Filtro<T>>; inicial?: { id: string; desc?: boolean }; vazio: string; acoes?: ReactNode; colunasIniciais?: string[] }) {
   const idTabela = useId();
+  // Nos primeiros instantes uma lista vazia ainda pode estar carregando: mostra esqueleto em vez de "nenhum registro".
+  const [aguardando, setAguardando] = useState(true);
+  useEffect(() => { const t = window.setTimeout(() => setAguardando(false), 1100); return () => window.clearTimeout(t); }, []);
   const [selecionadas, setSelecionadas] = useState(() => colunasIniciais || colunas.map((coluna) => coluna.id));
   const [abertas, setAbertas] = useState<Set<string>>(() => new Set());
   const exibidas = colunas.filter((coluna) => selecionadas.includes(coluna.id));
@@ -66,7 +69,7 @@ export function Tabela<T>({ colunas, linhas, chave, filtros = [], inicial, vazio
               </tr>
               {extras.length > 0 && <tr id={`${idTabela}-${id}`} className="adm-detalhes" hidden={!aberta}><td colSpan={exibidas.length + 1}><dl>{extras.map((coluna) => <div key={coluna.id}><dt>{coluna.titulo || 'Seleção'}</dt><dd>{conteudo(coluna, linha)}</dd></div>)}</dl></td></tr>}
             </Fragment>; })}
-            {!visiveis.length && <tr><td colSpan={exibidas.length + (extras.length ? 1 : 0)} className="adm-vazio">{vazio}</td></tr>}
+            {!visiveis.length && (aguardando && !linhas.length && !busca ? [0, 1, 2].map((n) => <tr key={`esq${n}`} className="adm-esqueleto" aria-hidden="true"><td colSpan={exibidas.length + (extras.length ? 1 : 0)}><span /></td></tr>) : <tr><td colSpan={exibidas.length + (extras.length ? 1 : 0)} className="adm-vazio">{vazio}</td></tr>)}
           </tbody>
         </table>
       </div>

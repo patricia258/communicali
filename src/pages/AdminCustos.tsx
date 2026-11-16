@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type ChangeEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Paperclip, Plus, Save, Download, X, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { erroAmigavel } from '../lib/erros';
 import { selecionarCustos, situacaoCusto, situacoesCusto, vencimentoLista, agendarCusto, brl, categoriaCusto, consolidarCustos, decimalInteiro, distribuirParcelas, entradaDecimal, resumoCusto, totalCusto, type CategoriaCusto, type Custo, type ParcelaCusto, type Recebedor } from '../lib/custos';
 import { dataBr } from './AdminTabela';
 
@@ -71,7 +72,7 @@ export function AdminCustos({ edicaoId }: { edicaoId?: string }) {
   if (aberto) return <EditorCusto key={aberto.id} base={aberto} eventos={eventos} cadastros={cadastros} voltar={() => { setAberto(null); recarregar(); }} salvo={recarregar} />;
   const documentoPendente = (c: Custo) => ['nf', 'recibo'].includes(c.documento) && !anexos.some((a) => a.cost_id === c.id && a.tipo === c.documento);
   return <>
-    <div className="wf-head"><div><small>CUSTOS DOS ENCONTROS</small><h1>Quanto cada encontro custa</h1><p>Registre serviços, materiais, despesas de parceria e pagamentos. Confira o que já foi pago e o que ainda falta.</p></div><button className="wf-primary" type="button" disabled={!pronto} onClick={() => setAberto(novoCusto(eventoId))}><Plus size={16} />Adicionar custo</button></div>
+    <div className="wf-head"><div><small>OPERAÇÃO · CUSTOS</small><h1>Quanto cada encontro custa</h1><p>Registre serviços, materiais, despesas de parceria e pagamentos. Confira o que já foi pago e o que ainda falta.</p></div><button className="wf-primary" type="button" disabled={!pronto} onClick={() => setAberto(novoCusto(eventoId))}><Plus size={16} />Adicionar custo</button></div>
     <div className="adm-custos-filtro">{!edicaoId && <label>Encontro<select value={eventoId} onChange={(e) => { const p = new URLSearchParams(params); if (e.target.value) p.set('evento', e.target.value); else p.delete('evento'); setParams(p); }}><option value="">Todos os encontros</option>{eventos.map((ev) => <option key={ev.id} value={ev.id}>{ev.titulo} · {dataBr(ev.data_evento)}</option>)}</select></label>}<button type="button" className="wf-secondary" onClick={recarregar}>Atualizar</button></div>
     <div className="adm-custos-totais" aria-label="Resumo dos custos">
       <div><span>Total informado{resumo?.pendentes ? ' (parcial)' : ''}</span><strong>{pronto && resumo ? brl(resumo.informado) : '—'}</strong><small>{resumo?.pendentes ? `${resumo.pendentes} custo(s) com valor a definir` : 'Valores conhecidos'}</small></div>
@@ -132,11 +133,11 @@ function EditorCusto({ base, eventos, cadastros, voltar, salvo }: { base: Custo;
       itens: valor !== null && draft.itens.length === 1 && draft.itens[0].unitario_centavos === null ? [{ ...draft.itens[0], descricao: origem.funcao || draft.itens[0].descricao, unitario_centavos: valor }] : draft.itens });
   }
   let totais: ReturnType<typeof resumoCusto> | null = null, erro = '';
-  try { totais = resumoCusto(draft, hoje()); } catch (e) { erro = e instanceof Error ? e.message : 'Confira os valores.'; }
+  try { totais = resumoCusto(draft, hoje()); } catch (e) { erro = e instanceof Error ? erroAmigavel(e) : 'Confira os valores.'; }
   async function salvar(alvo = draft, mensagem = 'Custo salvo.') {
     setAviso(''); if (!alvo.edition_id || !alvo.titulo.trim() || !alvo.recebedor.nome.trim()) { setAba('cadastro'); setAviso('Escolha o encontro e preencha o item e o nome do recebedor.'); return; }
     if (alvo.itens.some((i) => !i.descricao.trim())) { setAba('itens'); setAviso('Descreva todos os itens do custo.'); return; }
-    try { resumoCusto(alvo, hoje()); } catch (e) { setAba(alvo.itens.some(i=>!Number.isInteger(i.quantidade_mil)||i.quantidade_mil<=0||(i.unitario_centavos!==null&&(!Number.isInteger(i.unitario_centavos)||i.unitario_centavos<0)))?'itens':'pagamentos'); setAviso(e instanceof Error ? e.message : 'Confira os valores.'); return; }
+    try { resumoCusto(alvo, hoje()); } catch (e) { setAba(alvo.itens.some(i=>!Number.isInteger(i.quantidade_mil)||i.quantidade_mil<=0||(i.unitario_centavos!==null&&(!Number.isInteger(i.unitario_centavos)||i.unitario_centavos<0)))?'itens':'pagamentos'); setAviso(e instanceof Error ? erroAmigavel(e) : 'Confira os valores.'); return; }
     setBusy(true);
     try {
       const { version, updated_at: _updated, ...campos } = alvo;
@@ -144,7 +145,7 @@ function EditorCusto({ base, eventos, cadastros, voltar, salvo }: { base: Custo;
       const { data, error } = await query.select('*').single();
       if (error || !data) throw new Error('Não foi possível salvar. Se o item foi alterado em outra janela, reabra-o antes de editar.');
       setDraft(data as Custo); setAviso(mensagem); salvo();
-    } catch (e) { setAviso(e instanceof Error ? e.message : 'Não foi possível salvar.'); }
+    } catch (e) { setAviso(e instanceof Error ? erroAmigavel(e) : 'Não foi possível salvar.'); }
     finally { setBusy(false); }
   }
   async function anexar(event: ChangeEvent<HTMLInputElement>) {
@@ -170,7 +171,7 @@ function EditorCusto({ base, eventos, cadastros, voltar, salvo }: { base: Custo;
   function alterarParcela(id: string, novo: Partial<ParcelaCusto>) { set({ parcelas: draft.parcelas.map((p) => p.id === id ? { ...p, ...novo } : p) }); }
   return <>
     <button className="v2-forms-back" type="button" onClick={voltar}>Voltar para custos</button>
-    <div className="wf-head"><div><small>CUSTOS · {categoriaCusto[draft.categoria].toUpperCase()}</small><h1>{base.version ? base.titulo : 'Novo custo'}</h1><p>Valores, condições e documentos do que foi combinado para este encontro.</p></div><button className="wf-primary" type="button" disabled={busy} onClick={() => void salvar()}><Save size={15} />{busy ? 'Aguarde…' : 'Salvar custo'}</button></div>
+    <div className="wf-head"><div><small>OPERAÇÃO · CUSTOS · {categoriaCusto[draft.categoria].toUpperCase()}</small><h1>{base.version ? base.titulo : 'Novo custo'}</h1><p>Valores, condições e documentos do que foi combinado para este encontro.</p></div><button className="wf-primary" type="button" disabled={busy} onClick={() => void salvar()}><Save size={15} />{busy ? 'Aguarde…' : 'Salvar custo'}</button></div>
     <NavAbas nome="Seções do custo" itens={abasEditor} ativa={aba} mudar={setAba} prefixo={editorId} />
     <fieldset className="adm-custo-campos" disabled={busy}>
     <div className="adm-custo-painel" role="tabpanel" id={`${editorId}-cadastro-painel`} aria-labelledby={`${editorId}-cadastro`} hidden={aba!=='cadastro'}>

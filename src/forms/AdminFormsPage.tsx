@@ -111,7 +111,7 @@ export function AdminFormsPage() {
       onSaved={(saved) => setForms((current) => current.map((item) => item.id === saved.id ? saved : item))}
       onDeleted={() => { setForms((current) => current.filter((item) => item.id !== open.id)); go(null); }} />
     : <>
-      <div className="wf-head"><div><small>ÁREA ADMINISTRATIVA</small><h1>Formulários</h1><p>Inscrições, parceiros e pesquisas da comunidade: crie o formulário, envie por link ou QR Code e veja as respostas reunidas aqui.</p></div>
+      <div className="wf-head"><div><small>COMUNICAÇÃO · FORMULÁRIOS</small><h1>Formulários</h1><p>Inscrições, parceiros e pesquisas da comunidade: crie o formulário, envie por link ou QR Code e veja as respostas reunidas aqui.</p></div>
         <div className="v2-head-actions"><button className="wf-secondary" type="button" onClick={() => void load()} disabled={loading}><RefreshCw size={15} /> {loading ? 'Atualizando…' : 'Atualizar'}</button><button className="wf-primary" type="button" onClick={() => setCreating({ title: '', category: '', audience: 'cali', busy: false, error: '' })}><Plus size={15} /> Novo formulário</button></div></div>
       {error && <div className="inline-notice" role="alert">{error}</div>}
       <div className="wf-controls v2-forms-filter"><div className="wf-segments">{([['all', 'Todos'], ['trash', 'Lixeira']] as Array<['all' | FormAudience | 'trash', string]>).map(([key, label]) => <button type="button" key={key} className={audienceFilter === key ? 'on' : ''} onClick={() => setAudienceFilter(key)}>{label} <b>{key === 'all' ? gerais.length : key === 'trash' ? trash.length : gerais.filter((form) => form.audience === key).length}</b></button>)}</div></div>

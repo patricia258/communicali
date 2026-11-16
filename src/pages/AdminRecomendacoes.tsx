@@ -1,6 +1,7 @@
 /* Painel de validação: missões enviadas pelos membros e recomendações de lugares e parceiros. */
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { erroAmigavel } from '../lib/erros';
 import { chamar } from './AdminEmails';
 import { Categoria, Email, Rede, Tabela, Telefone, dataBr, type Coluna } from './AdminTabela';
 
@@ -30,7 +31,7 @@ export function RecommendationsPanel() {
     if (status === 'recusada' && !justificativa) return;
     if (status === 'concluida' && !window.confirm(`Aprovar a missão de ${item.members?.nome}?`)) return;
     const { error } = await supabase.from('member_missions').update({ status, justificativa, decidido_em: new Date().toISOString(), decidido_por: await usuario() }).eq('id', item.id);
-    setNote(error ? error.message : 'Missão atualizada.');
+    setNote(error ? erroAmigavel(error) : 'Missão atualizada.');
     load();
   }
 
@@ -40,7 +41,7 @@ export function RecommendationsPanel() {
     if (status === 'validada' && !window.confirm(`Validar ${item.nome}? Soma 10 milhas para ${item.members?.nome}.`)) return;
     const { error } = await supabase.from('recommendations').update({ status, justificativa, decidido_em: new Date().toISOString(), decidido_por: await usuario() }).eq('id', item.id);
     if (!error && status === 'validada') await supabase.from('point_events').insert({ member_id: item.member_id, acao: `recomendacao:${item.id}`, pontos: 10, motivo: item.nome });
-    setNote(error ? error.message : 'Recomendação atualizada.');
+    setNote(error ? erroAmigavel(error) : 'Recomendação atualizada.');
     load();
   }
 
@@ -74,7 +75,7 @@ export function RecommendationsPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Missões e recomendações</h1><p>Use o filtro Situação para ver as pendentes ou a auditoria de aprovadas e recusadas, com data, responsável e justificativa.</p></div></div>
+      <div className="wf-head"><div><small>PROGRAMA</small><h1>Missões e recomendações</h1><p>Use o filtro Situação para ver as pendentes ou a auditoria de aprovadas e recusadas, com data, responsável e justificativa.</p></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <section className="v2-forms-card">
         <header><small>MISSÕES</small><h2>{envios.filter((item) => item.status === 'enviada').length} para analisar</h2></header>
@@ -108,7 +109,7 @@ export function IndicacoesPanel() {
   ];
   return (
     <>
-      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Indicações</h1><p>Quem cada membro trouxe. A aprovação acontece na edição, e as 5 milhas entram depois do check-in da pessoa indicada.</p></div></div>
+      <div className="wf-head"><div><small>PROGRAMA</small><h1>Indicações</h1><p>Quem cada membro trouxe. A aprovação acontece na edição, e as 5 milhas entram depois do check-in da pessoa indicada.</p></div></div>
       <Tabela colunas={colunas} linhas={lista} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhuma indicação ainda." filtros={[{ id: 'situacao', titulo: 'Situação', valor: situacao }, { id: 'edicao', titulo: 'Edição', valor: (item) => item.editions?.titulo || '' }, { id: 'quem', titulo: 'Quem indicou', valor: (item) => item.members?.nome || '' }]} />
     </>
   );
@@ -126,7 +127,7 @@ export function ImpactosPanel() {
   ];
   return (
     <>
-      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Impacto da comunidade</h1><p>O que os membros contam que aconteceu por causa da ComuniCALI: conexões, entrevistas, empregos e parcerias.</p></div></div>
+      <div className="wf-head"><div><small>PROGRAMA</small><h1>Impacto da comunidade</h1><p>O que os membros contam que aconteceu por causa da ComuniCALI: conexões, entrevistas, empregos e parcerias.</p></div></div>
       <div className="adm-cards">{['Conheci pessoas', 'Consegui uma entrevista', 'Consegui um emprego', 'Fechei uma parceria'].map((tipo) => <div className="adm-card" key={tipo}><strong>{lista.filter((item) => item.tipo === tipo).length}</strong><span>{tipo}</span></div>)}</div>
       <Tabela colunas={colunas} linhas={lista} chave={(item) => item.id} inicial={{ id: 'data', desc: true }} vazio="Nenhum relato ainda." filtros={[{ id: 'tipo', titulo: 'O que aconteceu', valor: (item) => item.tipo }]} />
     </>
@@ -143,7 +144,7 @@ export function MatchesPanel() {
 
   async function decidir(item: Match, status: 'liberado' | 'recusado') {
     if (status === 'liberado' && !window.confirm(`Liberar a sugestão entre ${item.a?.nome} e ${item.b?.nome}? As duas pessoas recebem aviso e e-mail.`)) return;
-    try { await chamar({ acao: 'match', match: item.id, status }); setNote(status === 'liberado' ? 'Sugestão liberada.' : 'Sugestão descartada.'); } catch (error) { setNote((error as Error).message); }
+    try { await chamar({ acao: 'match', match: item.id, status }); setNote(status === 'liberado' ? 'Sugestão liberada.' : 'Sugestão descartada.'); } catch (error) { setNote(erroAmigavel(error)); }
     load();
   }
 
@@ -159,7 +160,7 @@ export function MatchesPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Matches</h1><p>Sugestões criadas pelo que cada pessoa busca e pelo que as outras fazem. Nada chega ao membro antes de você liberar.</p></div></div>
+      <div className="wf-head"><div><small>PROGRAMA</small><h1>Matches</h1><p>Sugestões criadas pelo que cada pessoa busca e pelo que as outras fazem. Nada chega ao membro antes de você liberar.</p></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <Tabela colunas={colunas} linhas={lista} chave={(item) => item.id} inicial={{ id: 'tipo' }} vazio="Nenhuma sugestão ainda." filtros={[{ id: 'tipo', titulo: 'Tipo', valor: (item) => (item.cali ? 'CALI' : 'Entre membros') }, { id: 'situacao', titulo: 'Situação', valor: (item) => ({ sugerido: 'Para analisar', liberado: 'Liberado', recusado: 'Descartado' } as Record<string, string>)[item.status] || item.status }]} />
     </>

@@ -147,7 +147,7 @@ export function GuestsPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>ÁREA ADMINISTRATIVA</small><h1>Convidados</h1><p>Indicações por encontro. A milha de quem indicou só entra depois do check-in do convidado.</p></div>
+      <div className="wf-head"><div><small>OPERAÇÃO · PESSOAS</small><h1>Convidados</h1><p>Indicações por encontro. A milha de quem indicou só entra depois do check-in do convidado.</p></div>
         <div className="v2-head-actions"><select aria-label="Encontro" value={current} onChange={(event) => setCurrent(event.target.value)}>{editions.map((item) => <option key={item.id} value={item.id}>{item.titulo}</option>)}</select></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <section className="v2-forms-card">

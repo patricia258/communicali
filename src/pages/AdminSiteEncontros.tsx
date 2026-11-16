@@ -34,7 +34,7 @@ export function AdminSiteEncontros() {
   const abrir = (slug?: string) => { const proximo = new URLSearchParams(params); if (slug) proximo.set('encontro', slug); else proximo.delete('encontro'); setParams(proximo); };
   if (encontro) return <EditorAlbum key={encontro.id} encontro={encontro} stats={statsProntos ? stats.find((item) => item.edition_id === encontro.id) || { edition_id: encontro.id, cliques: 0, pessoas: 0 } : undefined} atualizar={() => setRefresh((value) => value + 1)} voltar={() => abrir()} />;
   return <>
-    <div className="wf-head"><div><small>SITE</small><h1>Encontros e fotos</h1><p>Alimente a página de cada encontro com fotos e o link do álbum. O acesso ao álbum completo confere o e-mail informado na lista de check-in da edição, sem código.</p></div></div>
+    <div className="wf-head"><div><small>CONTEÚDO · SITE</small><h1>Encontros e fotos</h1><p>Alimente a página de cada encontro com fotos e o link do álbum. O acesso ao álbum completo confere o e-mail informado na lista de check-in da edição, sem código.</p></div></div>
     {erro && <p className="inline-notice" role="status">{erro}</p>}
     <Tabela colunas={[
       { id: 'titulo', titulo: 'Encontro', valor: (item: Encontro) => item.titulo, render: (item) => <button className="adm-nome" type="button" onClick={() => abrir(item.slug)}>{item.titulo}</button> },
@@ -178,7 +178,7 @@ function EditorAlbum({ encontro, stats, voltar, atualizar }: { encontro: Encontr
   return <>
     {editor}
     <button type="button" className="v2-forms-back" onClick={voltar}>Voltar para encontros</button>
-    <div className="wf-head"><div><small>SITE · ENCONTROS E FOTOS</small><h1>{encontro.titulo}</h1><p>{dataBr(encontro.data_evento)} · Escolha as prévias públicas e organize o álbum de quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" disabled={busy || !pronto} onClick={() => void salvar()}><Save size={15} />{busy ? 'Aguarde…' : 'Publicar fotos'}</button></div></div>
+    <div className="wf-head"><div><small>CONTEÚDO · SITE</small><h1>{encontro.titulo}</h1><p>{dataBr(encontro.data_evento)} · Escolha as prévias públicas e organize o álbum de quem fez check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" disabled={busy || !pronto} onClick={() => void salvar()}><Save size={15} />{busy ? 'Aguarde…' : 'Publicar fotos'}</button></div></div>
     <div className="adm-album-numeros"><div><strong>{stats?.cliques ?? '—'}</strong><span>Cliques em abrir álbum</span></div><div><strong>{stats?.pessoas ?? '—'}</strong><span>E-mails que abriram</span></div><div><strong>{fotos.length}</strong><span>Fotos na página</span></div></div>
     <button className="wf-secondary adm-album-atualizar" type="button" onClick={atualizar}>Atualizar contagem</button>
     <section className="v2-forms-card"><header><small>ÁLBUM DO ENCONTRO</small><h2>Fotos e link para baixar</h2></header>

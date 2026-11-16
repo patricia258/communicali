@@ -103,7 +103,7 @@ export function ProgramPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>PROGRAMA DE MEMBROS</small><h1>Como funciona</h1><p>As milhas entram sozinhas ou por lançamento em Membros. Mudar de categoria é decisão da organização: atingir a faixa não promove ninguém automaticamente.</p></div></div>
+      <div className="wf-head"><div><small>PROGRAMA</small><h1>Como funciona</h1><p>As milhas entram sozinhas ou por lançamento em Membros. Mudar de categoria é decisão da organização: atingir a faixa não promove ninguém automaticamente.</p></div></div>
       <section className="v2-forms-card">
         <header><small>MILHAS</small><h2>O que vale milha</h2></header>
         <div className="adm-list">

@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { erroAmigavel } from '../lib/erros';
 import { downloadXlsx } from '../forms/formExports';
 import { slugify } from '../forms/formModel';
 import { CATEGORIAS } from './Checkin';
@@ -66,7 +67,7 @@ function MemberEditor({ member: base, ficha, onBack, alternar, excluir }: { memb
     if (!motivo.trim()) { setNote('Descreva o motivo do lançamento.'); return; }
     if (!window.confirm(`Lançar +${valor} milhas para ${member.nome}?`)) return;
     const { error } = await supabase.from('point_events').insert({ member_id: member.id, acao: `${kind}:${crypto.randomUUID()}`, pontos: valor, motivo: motivo.trim() });
-    setNote(error ? `Não foi possível lançar: ${error.message}` : 'Pontos lançados.');
+    setNote(error ? `Não foi possível lançar: ${erroAmigavel(error)}` : 'Pontos lançados.');
     if (!error) { setMotivo(''); setLaunch(launch + 1); }
   }
 
@@ -74,7 +75,7 @@ function MemberEditor({ member: base, ficha, onBack, alternar, excluir }: { memb
     if ((status === 'ajustes' || status === 'nao_aprovada') && !motivoAdesao.trim()) { setNote('Escreva o motivo para esta decisão.'); return; }
     if (!window.confirm(`${{ em_analise: 'Marcar como em análise', aprovada: 'Aprovar a adesão de', ajustes: 'Pedir ajustes a', nao_aprovada: 'Não aprovar a adesão de' }[status]} ${member.nome}?`)) return;
     const { error } = await supabase.rpc('communicali_decidir_adesao', { p_member: member.id, p_status: status, p_motivo: motivoAdesao.trim() || null });
-    if (error) { setNote(`Não foi possível registrar: ${error.message}`); return; }
+    if (error) { setNote(`Não foi possível registrar: ${erroAmigavel(error)}`); return; }
     setAdesao({ status, motivo: motivoAdesao.trim() }); setMotivoAdesao(''); setNote('Decisão registrada.'); setLaunch((valor) => valor + 1);
   }
 
@@ -89,7 +90,7 @@ function MemberEditor({ member: base, ficha, onBack, alternar, excluir }: { memb
     const { nome, apelido, whatsapp, cidade_uf, empresa, cargo, linkedin, categoria, cracha_status } = draft;
     const delivered = cracha_status === 'entregue' && member.cracha_status !== 'entregue' ? { cracha_entregue_em: new Date().toISOString() } : {};
     const { error } = await supabase.from('members').update({ nome, apelido, whatsapp, cidade_uf, empresa, cargo, linkedin, categoria, cracha_status, updated_at: new Date().toISOString(), ...delivered }).eq('id', member.id);
-    setNote(error ? `Não foi possível salvar: ${error.message}` : 'Alterações salvas.');
+    setNote(error ? `Não foi possível salvar: ${erroAmigavel(error)}` : 'Alterações salvas.');
   }
 
   return (
@@ -235,7 +236,7 @@ export function MembersPanel() {
   ];
   return (
     <>
-      <div className="wf-head"><div><small>PESSOAS</small><h1>Membros e visitantes</h1><p>Veja o estágio e a adesão de cada pessoa. Abra o nome para consultar ou editar a ficha.</p></div><div className="v2-head-actions"><button type="button" className="wf-secondary" disabled={!visible.length} onClick={exportAll}>Exportar Excel</button></div></div>
+      <div className="wf-head"><div><small>OPERAÇÃO · PESSOAS</small><h1>Membros e visitantes</h1><p>Veja o estágio e a adesão de cada pessoa. Abra o nome para consultar ou editar a ficha.</p></div><div className="v2-head-actions"><button type="button" className="wf-secondary" disabled={!visible.length} onClick={exportAll}>Exportar Excel</button></div></div>
       <Tabela colunas={colunas} colunasIniciais={['nome', 'estagio', 'adesao', 'pre']} linhas={list} chave={(item) => item.id} vazio="Nenhum membro encontrado." filtros={[{ id: 'categoria', titulo: 'Categoria', valor: categoriaDe }, { id: 'adesao', titulo: 'Adesão', valor: (item) => (item.adesao_origem === 'legado' ? 'Membro anterior' : item.adesao_status ? ADESAO[item.adesao_status] : 'Sem pedido') }, { id: 'segmento', titulo: 'Segmento', valor: (item) => item.segmento || '' }, { id: 'regiao', titulo: 'Região', valor: (item) => item.regiao || '' }, { id: 'mercado', titulo: 'Mercado', valor: (item) => (item.aberto_trabalho ? 'Open to work' : item.recrutador ? 'Recruta' : '') }]} />
     </>
   );
@@ -246,7 +247,7 @@ function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
     if (!window.confirm(`Excluir a votação "${draft.titulo}" e todas as respostas? Esta ação não pode ser desfeita.`)) return;
     await supabase.from('poll_votes').delete().eq('poll_id', poll.id);
     const { error } = await supabase.from('polls').delete().eq('id', poll.id);
-    if (error) { setNote(`Não foi possível excluir: ${error.message}`); return; }
+    if (error) { setNote(`Não foi possível excluir: ${erroAmigavel(error)}`); return; }
     onBack();
   }
   const [draft, setDraft] = useState({ ...poll, pergunta_2: poll.pergunta_2 || '', opcoesTexto: poll.opcoes.join('\n') });
@@ -260,7 +261,7 @@ function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
     const next = { titulo: draft.titulo, pergunta: draft.pergunta, pergunta_2: draft.tipo === 'nota' && draft.pergunta_2.trim() ? draft.pergunta_2.trim() : null, tipo: draft.tipo, anonima: draft.anonima, opcoes: draft.opcoesTexto.split('\n').map((item) => item.trim()).filter(Boolean), status: draft.status, revelada: draft.revelada, ...extra };
     if (next.tipo === 'multipla' && next.opcoes.length < 2) { setNote('Cadastre ao menos duas opções.'); return; }
     const { error } = await supabase.from('polls').update(next).eq('id', poll.id);
-    if (error) { setNote(`Não foi possível salvar: ${error.message}`); return; }
+    if (error) { setNote(`Não foi possível salvar: ${erroAmigavel(error)}`); return; }
     setDraft({ ...draft, ...next, pergunta_2: next.pergunta_2 || '' }); setNote('Alterações salvas.');
   }
 
@@ -277,7 +278,7 @@ function PollEditor({ poll, onBack }: { poll: Poll; onBack: () => void }) {
   async function zerar() {
     if (!window.confirm(`Apagar as ${votes.length} ${votes.length === 1 ? 'resposta' : 'respostas'} desta votação? As perguntas continuam. Use para limpar os testes antes do encontro.`)) return;
     const { error } = await supabase.from('poll_votes').delete().eq('poll_id', poll.id);
-    setNote(error ? `Não foi possível apagar: ${error.message}` : 'Respostas apagadas. A votação está zerada.');
+    setNote(error ? `Não foi possível apagar: ${erroAmigavel(error)}` : 'Respostas apagadas. A votação está zerada.');
     void load();
   }
   return (
@@ -380,7 +381,7 @@ export function PollsPanel() {
   if (open) return <PollEditor key={open.id} poll={open} onBack={() => { setOpen(null); void load(); }} />;
   return (
     <>
-      <div className="wf-head"><div><small>VOTAÇÕES</small><h1>Perguntas para o telão</h1><p>Crie a pergunta, ative na hora da dinâmica e revele o resultado quando quiser. As respostas aparecem aqui e no telão em poucos segundos.</p></div>
+      <div className="wf-head"><div><small>OPERAÇÃO · EDIÇÕES</small><h1>Perguntas para o telão</h1><p>Crie a pergunta, ative na hora da dinâmica e revele o resultado quando quiser. As respostas aparecem aqui e no telão em poucos segundos.</p></div>
         <div className="v2-head-actions"><select aria-label="Encontro" value={edition} onChange={(event) => setEdition(event.target.value)}>{editions.map((item) => <option key={item.id} value={item.id}>{item.titulo}</option>)}</select><button type="button" className="wf-primary" disabled={!edition} onClick={() => void create()}>Nova votação</button></div></div>
       <div className="adm-list">{list.map((item) => <button type="button" className="adm-row" key={item.id} onClick={() => setOpen(item)}><strong>{item.titulo}</strong><span>{item.pergunta}</span><em>{{ rascunho: 'Rascunho', ativa: 'Recebendo respostas', encerrada: 'Encerrada' }[item.status]}</em></button>)}</div>
     </>
@@ -402,7 +403,7 @@ export function TextsPanel() {
 
   return (
     <>
-      <div className="wf-head"><div><small>TEXTOS</small><h1>Cadastro e textos</h1><p>Regras e política aparecem nas páginas públicas e nos aceites do cadastro e do check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void save()}>Salvar alterações</button></div></div>
+      <div className="wf-head"><div><small>CONTEÚDO · SITE</small><h1>Cadastro e textos</h1><p>Regras e política aparecem nas páginas públicas e nos aceites do cadastro e do check-in.</p></div><div className="v2-head-actions"><button type="button" className="wf-primary" onClick={() => void save()}>Salvar alterações</button></div></div>
       {note && <p className="v2-forms-ok" role="status">{note}</p>}
       <section className="v2-forms-card">
         <div className="v2-forms-grid">
