@@ -189,9 +189,9 @@ export function EdicaoPage() {
             </section>
             {past && new URLSearchParams(window.location.search).has('moldura') && (
               <GaleriaDoEncontro fotos={fotos} titulo={edition.titulo} rotulo={edition.numero ? `${edition.numero}ª Edição` : edition.titulo} completa={demoAlbum === 'confirmado'} acesso={<>
-                <AlbumAcessoVisual estado={demoAlbum} email={demoEmail} setEmail={setDemoEmail} aoEntrar={() => setDemoAlbum(demoEmail.toLowerCase().includes('erro') ? 'nao-encontrado' : 'confirmado')} aoTrocar={() => { setDemoAlbum('entrar'); setDemoEmail(''); }} aoAbrir={() => undefined} />
+                <AlbumAcessoVisual estado={demoAlbum} email={demoEmail} setEmail={setDemoEmail} aoEntrar={() => setDemoAlbum(demoEmail.toLowerCase().includes('erro') ? 'nao-encontrado' : 'termo')} aoTrocar={() => { setDemoAlbum('entrar'); setDemoEmail(''); }} aoAbrir={() => undefined} aoAceitar={() => setDemoAlbum('confirmado')} />
                 <div className="gal__demo">Ver como fica:
-                  {([['entrar', 'Antes de entrar'], ['confirmado', 'Check-in confirmado'], ['nao-encontrado', 'E-mail não encontrado'], ['preparando', 'Álbum em preparo']] as const).map(([id, nome]) => <button key={id} type="button" aria-pressed={demoAlbum === id} onClick={() => setDemoAlbum(id)}>{nome}</button>)}
+                  {([['entrar', 'Antes de entrar'], ['termo', 'Primeiro acesso: termo'], ['confirmado', 'Já aceitou: abrir o álbum'], ['nao-encontrado', 'E-mail não encontrado'], ['preparando', 'Álbum em preparo']] as const).map(([id, nome]) => <button key={id} type="button" aria-pressed={demoAlbum === id} onClick={() => setDemoAlbum(id)}>{nome}</button>)}
                 </div>
               </>} />
             )}
