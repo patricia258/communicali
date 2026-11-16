@@ -47,27 +47,45 @@ const diaMes = (iso: string) => iso.slice(8, 10) + '.' + iso.slice(5, 7);
 
 const reduzido = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-/** "A comunidade": a foto ao lado muda com o formato em destaque (passa o mouse ou espera), sem texto extra. */
-const FOTOS_FORMATO = ['/fotos/home/presencial.jpg', '/fotos/home/virtual.jpg', '/fotos/home/experiencia.jpg', '/fotos/home/jantar.jpg'];
+/** "A comunidade": uma rota tracejada na lateral, com quatro paradas que acendem conforme os formatos aparecem na tela. */
+const ROTA = 'M44 540 C44 430 250 470 214 330 S350 150 356 24';
 function Formatos() {
-  const [ativo, setAtivo] = useState(0);
-  const pausa = useRef(0);
+  const [alcance, setAlcance] = useState(reduzido() ? FORMATOS.length : 0);
+  const [foco, setFoco] = useState<number | null>(null);
+  const [pontos, setPontos] = useState<Array<{ x: number; y: number }>>([]);
+  const caminho = useRef<SVGPathElement>(null);
+  const itens = useRef<Array<HTMLDivElement | null>>([]);
   useEffect(() => {
-    if (reduzido()) return;
-    const id = window.setInterval(() => { if (Date.now() - pausa.current > 6000) setAtivo((i) => (i + 1) % FORMATOS.length); }, 4500);
-    return () => window.clearInterval(id);
+    const path = caminho.current;
+    if (!path) return;
+    const total = path.getTotalLength();
+    setPontos([0.1, 0.38, 0.66, 0.92].map((f) => { const ponto = path.getPointAtLength(total * f); return { x: ponto.x, y: ponto.y }; }));
   }, []);
-  const escolher = (i: number) => { pausa.current = Date.now(); setAtivo(i); };
+  useEffect(() => {
+    if (reduzido() || !('IntersectionObserver' in window)) { setAlcance(FORMATOS.length); return; }
+    const obs = new IntersectionObserver((entradas) => {
+      for (const entrada of entradas) if (entrada.isIntersecting) setAlcance((atual) => Math.max(atual, Number((entrada.target as HTMLElement).dataset.i) + 1));
+    }, { threshold: 0.55 });
+    itens.current.forEach((el) => el && obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
   return (
     <section className="hn-exp" id="comunidade">
       <p className="hn-eyebrow">A COMUNIDADE</p>
       <h2>Quatro jeitos de se encontrar, <em>um só propósito: conectar pessoas.</em></h2>
-      <figure className="hn-exp__foto" aria-hidden="true">
-        {FOTOS_FORMATO.map((url, i) => <img key={url} src={url} alt="" loading="lazy" className={i === ativo ? 'is-on' : ''} />)}
-        <figcaption><b>0{ativo + 1}</b>{FORMATOS[ativo][0]}</figcaption>
-      </figure>
+      <svg className="hn-exp__rota" viewBox="0 0 400 560" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <defs><mask id="hn-exp-mask"><path d={ROTA} stroke="#fff" strokeWidth="8" fill="none" pathLength="1" strokeDasharray="1" strokeDashoffset={1 - alcance / FORMATOS.length} className="hn-exp__mask" /></mask></defs>
+        <path ref={caminho} d={ROTA} className="hn-exp__base" fill="none" />
+        <g mask="url(#hn-exp-mask)"><path d={ROTA} className="hn-exp__ativa" fill="none" /></g>
+        {pontos.map((ponto, i) => (
+          <g key={i} className={`hn-exp__parada${i < alcance ? ' is-on' : ''}${foco === i ? ' is-foco' : ''}`} transform={`translate(${ponto.x} ${ponto.y})`}>
+            <circle r="15" /><text textAnchor="middle" dy="4">0{i + 1}</text>
+            <text className="hn-exp__nome" x="24" dy="4">{FORMATOS[i][0]}</text>
+          </g>
+        ))}
+      </svg>
       <div className="hn-exp__grid">
-        {FORMATOS.map(([titulo, texto], i) => <div key={titulo} className={i === ativo ? 'is-on' : ''} onMouseEnter={() => escolher(i)} onFocus={() => escolher(i)} tabIndex={0}><h3>{titulo}</h3><p>{texto}</p></div>)}
+        {FORMATOS.map(([titulo, texto], i) => <div key={titulo} data-i={i} ref={(el) => { itens.current[i] = el; }} className={i < alcance ? 'is-on' : ''} onMouseEnter={() => setFoco(i)} onMouseLeave={() => setFoco(null)}><h3>{titulo}</h3><p>{texto}</p></div>)}
       </div>
     </section>
   );
