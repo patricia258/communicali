@@ -1,0 +1,9 @@
+.ck{position:fixed;z-index:150;left:max(16px,2vw);right:max(16px,2vw);bottom:max(16px,env(safe-area-inset-bottom));max-width:620px;display:flex;align-items:center;gap:18px;padding:16px 18px 16px 20px;background:#fff;color:#1B0A10;border:1px solid #1B0A10;border-bottom:4px solid #5A1E2D;font:400 14px/21px Inter,system-ui,sans-serif;box-shadow:0 12px 32px rgba(27,10,16,.14);animation:ck-sobe .5s cubic-bezier(.22,1,.36,1) both}
+.ck p{margin:0;flex:1}
+.ck strong{font-family:'Funnel Display',Helvetica,Arial,sans-serif;font-weight:700}
+.ck a{color:#5A1E2D;text-underline-offset:3px}
+.ck button{flex:none;border:0;border-radius:999px;background:#1B0A10;color:#fff;font:700 14px 'Funnel Display',Helvetica,Arial,sans-serif;padding:11px 22px;cursor:pointer;transition:background .2s}
+.ck button:hover{background:#5A1E2D}
+@keyframes ck-sobe{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media (max-width:560px){.ck{flex-direction:column;align-items:stretch;gap:12px}.ck button{width:100%}}
+@media (prefers-reduced-motion:reduce){.ck{animation:none}}

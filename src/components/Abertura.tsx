@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { LOGO_NOVO_LETRAS, LOGO_NOVO_VIEWBOX } from './logoNovoLetras';
 
 /**
- * Abertura animada do lançamento (72 horas). Só aparece na home, no primeiro acesso, dentro da janela.
+ * Abertura animada do lançamento (48 horas). Só aparece na home, no primeiro acesso, dentro da janela.
  * A data de publicação fica aqui, num lugar só. Se for null, a abertura NÃO aparece para ninguém.
  * Para ver na prévia: acrescente ?abertura=1 ao endereço (não grava que já foi vista).
  */
-const LANCAMENTO: string | null = '2026-11-16T01:00:00-03:00';
-const JANELA_HORAS = 72;
+const LANCAMENTO: string | null = '2026-11-16T00:30:00-03:00';
+const JANELA_HORAS = 48;
 const CHAVE = 'cali_abertura_v1';
 
 const lembrou = () => { try { return !!localStorage.getItem(CHAVE); } catch { return false; } };

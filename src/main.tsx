@@ -33,6 +33,7 @@ import { ErrorBoundary, reportError } from './components/ErrorBoundary';
 import { PublicFormPage } from './forms/PublicFormPage';
 import { FooterLinks, SiteFooter } from './components/SiteFooter';
 import type { ReactNode } from 'react';
+import { CookieAviso } from './components/CookieAviso';
 import './identidade.css'; // por último: sobrepõe os estilos antigos das telas
 
 const Page = ({ children }: { children: ReactNode }) => <>{children}<SiteFooter /></>;
@@ -79,5 +80,6 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/admin/*" element={<Admin />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    <CookieAviso />
   </BrowserRouter></ErrorBoundary>,
 );
