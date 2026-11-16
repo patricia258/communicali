@@ -745,3 +745,4 @@ img.passe__carimbo{transform:rotate(-8deg)}
 .passe__aviso-texto p{margin:0;font:400 17px/1.55 Inter,system-ui,sans-serif;color:#1B0A10;max-width:46ch}
 .passe__aviso-acoes{display:grid;gap:18px;width:100%;max-width:360px;justify-items:start}
 .passe__aviso-acoes .passe__botao{width:100%}
+.passe__aviso-acoes a.passe__botao,.passe__aviso-acoes a.passe__botao:visited{background:#1B0A10;color:#fff!important;text-decoration:none}
