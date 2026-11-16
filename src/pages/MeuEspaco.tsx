@@ -165,14 +165,14 @@ function Entrar() {
         </div>
         <section className="passe__acesso">
           <img className="passe__logo" src="/brand/novo/comunicali-b-fundo-claro.svg" alt="ComuniCALI" />
-          <h1>Seu passaporte está <em>te esperando</em></h1>
-          <p>{enviado ? `Enviamos um código para ${email.trim()}. Ele chega em instantes.` : 'Carimbos, milhas, missões e conexões da comunidade em um só lugar.'}</p>
+          <h1>Entre na sua <em>área</em></h1>
+          <p>{enviado ? `Enviamos um código para ${email.trim()}. Ele chega em instantes.` : 'Acompanhe suas visitas, peça para fazer parte e, depois que entrar, veja carimbos, milhas e missões.'}</p>
           <form className="passe__form" onSubmit={(event) => void enviar(event)}>
             {enviado
               ? <label>Código recebido<input required inputMode="numeric" autoComplete="one-time-code" autoFocus value={codigo} onChange={(event) => setCodigo(event.target.value)} /></label>
               : <label>Seu e-mail<input required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>}
             {erro && <p className="passe__erro" role="alert">{erro}</p>}
-            <button className="passe__botao" type="submit" disabled={busy}>{busy ? 'Aguarde...' : enviado ? 'Abrir meu passaporte' : 'Receber meu código'}</button>
+            <button className="passe__botao" type="submit" disabled={busy}>{busy ? 'Aguarde...' : enviado ? 'Abrir minha área' : 'Receber meu código'}</button>
           </form>
           {enviado ? <button type="button" className="passe__link" onClick={() => { setEnviado(false); setCodigo(''); setErro(''); }}>Usar outro e-mail</button> : <p className="passe__aviso">Use o e-mail do seu check-in. Ainda não foi a um encontro? <a href="/#proximo">Veja o próximo</a>.</p>}
           <a className="passe__admin-link" href="/admin">Área administrativa</a>
