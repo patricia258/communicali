@@ -50,8 +50,10 @@ export function criarAlbumHandler({ db = banco, signPhotos = async (paths) => {
         const photos = await json(await db(`edition_album_photos?edition_id=eq.${encodeURIComponent(presence.edition_id)}&select=id,storage_path,legenda&order=ordem,created_at`));
         const signed = photos.length ? await signPhotos(photos.map((photo) => photo.storage_path)) : [];
         if (signed.some((photo) => photo.error || !photo.signedUrl)) throw new Error('foto');
+        // Quem já confirmou o termo (em qualquer aparelho) não precisa confirmar de novo.
+        const confirmados = await json(await db(`edition_album_clicks?edition_id=eq.${encodeURIComponent(presence.edition_id)}&member_id=eq.${encodeURIComponent(presence.member_id)}&ciente_em=not.is.null&select=request_id&limit=1`));
         await registrar();
-        return res.status(200).json({ fotos: photos.map((photo, i) => ({ id: photo.id, legenda: photo.legenda, url: signed[i].signedUrl })), album_disponivel: links.length > 0, links: links.map((item) => ({ id: item.id, rotulo: item.rotulo })) });
+        return res.status(200).json({ fotos: photos.map((photo, i) => ({ id: photo.id, legenda: photo.legenda, url: signed[i].signedUrl })), ciente: confirmados.length > 0, album_disponivel: links.length > 0, links: links.map((item) => ({ id: item.id, rotulo: item.rotulo })) });
       }
       const url = escolhido?.url;
       if (!albumUrlValida(url)) return res.status(404).json({ error: 'O álbum completo ainda não está disponível.' });

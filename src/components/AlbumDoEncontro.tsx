@@ -38,10 +38,10 @@ export function AlbumDoEncontro({ slug, titulo, rotulo }: { slug: string; titulo
     setOcupado(true); setMensagem('');
     tentativa.current = crypto.randomUUID();
     try {
-      const dados = await api<{ fotos: FotoPrevia[]; album_disponivel: boolean; links?: LinkAlbum[] }>('album_fotos', { slug, email: limpo(), request_id: tentativa.current });
+      const dados = await api<{ fotos: FotoPrevia[]; album_disponivel: boolean; ciente?: boolean; links?: LinkAlbum[] }>('album_fotos', { slug, email: limpo(), request_id: tentativa.current });
       setFotos(dados.fotos || []); setLinks(dados.links && dados.links.length ? dados.links : [{ id: 'fotos', rotulo: 'Acesse aqui as suas fotos' }]);
       if (!dados.album_disponivel) setEstado('preparando');
-      else setEstado(lerCiencia(slug) ? 'confirmado' : 'termo');
+      else { if (dados.ciente) guardarCiencia(slug); setEstado(dados.ciente || lerCiencia(slug) ? 'confirmado' : 'termo'); }
     } catch (erro) {
       const texto = erro instanceof Error ? erro.message : '';
       if (/N[ãa]o encontramos/i.test(texto)) setEstado('nao-encontrado');
