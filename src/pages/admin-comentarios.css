@@ -25,3 +25,5 @@
 .alb-links__conta{letter-spacing:normal!important;text-transform:none!important;font-size:13px}
 .alb-links>.wf-secondary{justify-self:start}
 .alb-links__acoes .wf-secondary{min-width:40px;padding:0 10px}
+.alb-links__salvar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.alb-links__salvar small{font-size:13px;color:#8A3A1C}
